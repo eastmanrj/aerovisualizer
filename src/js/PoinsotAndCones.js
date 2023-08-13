@@ -1,45 +1,51 @@
 import * as THREE from '../../node_modules/three/build/three.module.js';
 import SpecialEllipsoidGeometry from './ellipsoid.js';
 
+/**
+ PoinsotAndCones is a class that encapsulates the computation of 
+ THREE.js objects representing the body cones, space cones, and Poinsot's 
+ construction including the inertia ellipse, the invariable plane, the 
+ polhode, and the herpolhode for use with rigid body rotational dynamics.
+**/
+
 const twoPi = 2 * Math.PI;
 const oneOverSqrt2 = Math.sqrt(0.5);
+const poinsotScale = 10;
 
 class PoinsotAndCones {
   constructor(scene) {
     this._quat = new THREE.Quaternion();
-    this._simulationTime = 0;
-
+    this.simulationTime = 0;
+    //_h value is just a placeholder.  Its value is changed
+    //with receiveNonEphemeralData
     this._h = 0.0025;
     this._omega = new THREE.Vector3(0, 0, 0);
     this._H = new THREE.Vector3(0, 0, 0);
     this._inertiaMatrix = new THREE.Matrix3();
-    this._isAxisymmetric = false;
-    this._axisOfSymmetry = 0;
     this._torqueIsOn = false;
     this._spaceConeDisplacement = 0;
     this._bodyConeDisplacement = 0;
     this._origin = new THREE.Vector3(0,0,0);
     this._conesOrigin = new THREE.Vector3(0,0,0);
     this._poinsotOrigin = new THREE.Vector3(0,0,0);
-    this._flipQuat = new THREE.Quaternion();
-    this._flipQuat.setFromAxisAngle(new THREE.Vector3(1,0,0),0);
-    this._poinsotScale = new THREE.Vector3();
-    this._poinsotScale.set(10, 10, 10);
-    this._unitScale = new THREE.Vector3();
-    this._unitScale.set(1, 1, 1);
-    this._sqrt2TOverH = 0;
-    this._needsRefresh = true;
     this._offsetConesOrigin = false;
     this._offsetPoinsotOrigin = false;
+    this._flipQuat = new THREE.Quaternion();
+    this._flipQuat.setFromAxisAngle(new THREE.Vector3(1,0,0),0);
     this._flip180quat = new THREE.Quaternion();
     this._flip180quat.setFromAxisAngle(new THREE.Vector3(0,0,1),Math.PI);
     this._turn90quat = new THREE.Quaternion(); 
     this._turn90quat.setFromAxisAngle(new THREE.Vector3(1,0,0),Math.PI/2);
+    this._poinsotScale = new THREE.Vector3(poinsotScale,poinsotScale,poinsotScale);
+    this._unitScale = new THREE.Vector3(1,1,1);
+    this._sqrt2TOverH = 0;
+    this.needsRefresh = true;
+    // _coneSize value is just a placeholder.  Use setConeSize to change it
     this._coneSize = 5;
     this._xUnitVector = new THREE.Vector3(1, 0, 0);
     this._yUnitVector = new THREE.Vector3(0, 1, 0);
     this._zUnitVector = new THREE.Vector3(0, 0, 1);
-    this._zeroVector = new THREE.Vector3();
+    this._zeroVector = new THREE.Vector3(0,0,0);
     this._q0 = new THREE.Quaternion();
     this._q1 = new THREE.Quaternion();
     this._q2 = new THREE.Quaternion();
@@ -49,6 +55,9 @@ class PoinsotAndCones {
     this._bodyFrameXQuat = new THREE.Quaternion();
     this._bodyFrameYQuat = new THREE.Quaternion();
     this._bodyFrameZQuat = new THREE.Quaternion();
+    this._bodyFrameXQuat.set(0, 0, oneOverSqrt2, oneOverSqrt2);
+    this._bodyFrameYQuat.set(0, 0, 0, 1);
+    this._bodyFrameZQuat.set(oneOverSqrt2, 0, 0, oneOverSqrt2);
     this._hQuat = new THREE.Quaternion();
     this._invariablePlaneDisplacement = 0;
     this._showCones = false;
@@ -59,64 +68,73 @@ class PoinsotAndCones {
     this._axisOfSymmetry = 0;//1=x, 2=y, 3=z
     this._bodyHalfConeAngle = 0;
     this._spaceHalfConeAngle = 0;
-    
     this._conesOpacity = 0;
     this._poinsotOpacity = 0;
-    this._hodeDrawingElapsedTime = 0;//set to zero when changing mass props or rates
+    this._hodeCreationElapsedTime = 0;//set to zero when changing mass props or rate
     this._oldHodeTime = 0;
-    this._polhodeComputationPeriod = 25;//set to precession period for axisymmetric cases
+    //computation periods are the amount of time given to compute the polhode and
+    //herpolhode curves in seconds.  Their values are very arbitrary.  For 
+    //axisymmetric cases, their values are set to the precession period.
+    this._polhodeComputationPeriod = 25;
     this._herpolhodeComputationPeriod = 25;
     this._hodeUpdateCounter = 0;
+    //hodeSkip helps control the number of points that are used to generate the
+    //polehode and herpolhode curves.  Without it, a much larger amount of 
+    //memory and computation would be needed.
     this._hodeSkip = 10;
     this._polhode = [];
     this._herpolhode = [];
     this._polhodeMesh = null;
     this._herpolhodeMesh = null;
-
     this._bodyConeColor = 0xffa500;//0xffd580;//light orange, 0xffa500;//orange
     this._spaceConeColor = 0xff0000;//0xff5555;//light red
     this._ellipsoidColor = 0x0000ff;//0x5555ff;//light blue
     this._planeColor = 0x00ff00;//0x55ff55;//light green
-    
     this._inertiaEllipsoidMesh = null;
     this._invariablePlaneMesh = null;
     this._scene = scene;
-    this._constructionComplete = false;
+    //constructionComplete is an admittedly kludgy way of ensuring that the
+    //code in here does not execute until asynchronous code from other classes
+    //has completed execution
+    this.constructionComplete = false;
 
     this.construct();
-
-    this._bodyFrameXQuat.set(0, 0, oneOverSqrt2, oneOverSqrt2);
-    this._bodyFrameYQuat.set(0, 0, 0, 1);
-    this._bodyFrameZQuat.set(oneOverSqrt2, 0, 0, oneOverSqrt2);
   }
 
   receiveEphemeralData(quat, simulationTime){
     this._quat = quat;
-    this._simulationTime = simulationTime;
+    this.simulationTime = simulationTime;
   }
 
-  receiveNonEphemeralData(h, om, H, im, torqOn, isAxisym, aos, origin, orient){
+  receiveNonEphemeralData(h, om, H, im, torqueOn, isAxisym, aos, origin, orient){
     this._h = h;
     this._omega = om;
     this._H = H;
     this._inertiaMatrix = im;
-    this._torqueIsOn = torqOn;
+    this._torqueIsOn = torqueOn;
     this._isAxisymmetric = isAxisym;
     this._axisOfSymmetry = aos;
     this._origin = origin;
     this.setOrientation(orient);
   }
 
+  /**
+   refresh is called whenever the orientation of cones or Poinsot objects
+   change relative to the inertial frame.  It does NOT need to be called
+   when the camera changes its position or lookat point.  This function
+   does not generate the cones and Poinsot objects 
+   (see _constructCones and _constructEllipsoidAndPlane).
+  **/
   refresh(){
-    if (!this._constructionComplete){
+    if (!this.constructionComplete){
       return;
     }
 
-    if (this._needsRefresh === false){
+    if (this.needsRefresh === false){
       return;
     }
 
-    this._needsRefresh = false;
+    this.needsRefresh = false;
 
     if (!(this._torqueIsOn)){
       this._q0.multiplyQuaternions(this._flipQuat,this._quat);
@@ -193,32 +211,29 @@ class PoinsotAndCones {
   }
 
   construct(){
-    // just get omega from the sdo
-    //set this._isAxisymmetric here
-    this._needsRefresh = true;
-    this._constructInertiaEllipsoidAndInvariablePlane();
+    this.needsRefresh = true;
+    this._constructEllipsoidAndPlane();
     this._v1.copy(this._omega);
     this._v1.applyMatrix3(this._inertiaMatrix);
     const T0 = 0.5*this._v1.dot(this._omega);
     const hMag = this._H.length();
     this._sqrt2TOverH = Math.sqrt(2*T0)/hMag;
-    this._invariablePlaneDisplacement = 10*this._sqrt2TOverH;
-    this._constructSpaceAndBodyCones();
-    this._computeHodeParameters();
-    this._initializeHodes();
+    this._invariablePlaneDisplacement = poinsotScale*this._sqrt2TOverH;
+    this._constructCones();
+    this.initializePolhodeAndHerpolhode();
   }
 
   showCones(show){
-    if (this._bodyConeMesh == null || this._spaceConeMesh == null){
-      return;
-    }
-
     if (this._showCones === show){
       return;
     }
 
     this._showCones = show;
-    this._needsRefresh = true;
+    this.needsRefresh = true;
+
+    if (this._bodyConeMesh == null || this._spaceConeMesh == null){
+      return;
+    }
 
     if (show){
       this._scene.add(this._bodyConeMesh);
@@ -244,9 +259,9 @@ class PoinsotAndCones {
       return;
     }
 
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     const scene = this._scene;
-    this._hodeDrawingElapsedTime = 0;
+    this._hodeCreationElapsedTime = 0;
 
     if (show){
       scene.add(this._inertiaEllipsoidMesh);
@@ -258,12 +273,12 @@ class PoinsotAndCones {
       scene.remove(this._invariablePlaneMesh);
       this._inertiaEllipsoidMesh.visible = false;
       this._invariablePlaneMesh.visible = false;
-      this._initializeHodes();
+      this.initializePolhodeAndHerpolhode();
     }
   }
 
   setOpacity(thing, opacity){  
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     
     switch (thing){
       case 'cones':
@@ -313,7 +328,7 @@ class PoinsotAndCones {
   }
 
   setColor(thing, color){
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     const theColor = this._colorForName(color);
     
     switch (thing){
@@ -348,7 +363,7 @@ class PoinsotAndCones {
     }
   }
 
-  setOffsetBooleans(conesOffset, poinsotOffset){
+  setOffsets(conesOffset, poinsotOffset){
     this._offsetConesOrigin = conesOffset;
     this._offsetPoinsotOrigin = poinsotOffset;
   }
@@ -390,7 +405,7 @@ class PoinsotAndCones {
   }
 
   setOrigin(thing, offsetTheOrigin){
-    this._needsRefresh = true;
+    this.needsRefresh = true;
 
     switch (thing){
       case 'cones':
@@ -400,12 +415,12 @@ class PoinsotAndCones {
       case 'poinsot':
         this._offsetPoinsotOrigin = offsetTheOrigin;
         this._poinsotOrigin.copy(this._offsetPoinsotOrigin ? this._origin : this._zeroVector);
-        this._initializeHodes();
+        this.initializePolhodeAndHerpolhode();
         break;
     }
   }
 
-  _constructSpaceAndBodyCones(){
+  _constructCones(){
     if (!(this._isAxisymmetric)){
       if (this._bodyConeMesh != null){
         this._bodyConeMesh.visible = false;
@@ -423,6 +438,23 @@ class PoinsotAndCones {
     const notRotating = this._omega.lengthSq() === 0;
 
     if (notRotating){
+      if (this._bodyConeMesh != null){
+        if (this._showCones){
+          this._scene.remove(this._bodyConeMesh);
+        }
+
+        this._bodyConeMesh = null;
+      }
+  
+      if (this._spaceConeMesh != null){
+        // using != null instead of !== null catches "undefined" as well
+        if (this._showCones){
+          this._scene.remove(this._spaceConeMesh);
+        }
+
+        this._spaceConeMesh = null;
+      }
+
       return;
     }
 
@@ -454,7 +486,7 @@ class PoinsotAndCones {
 
     this._bodyHalfConeAngle = theta1;
     this._spaceHalfConeAngle = theta2;
-    this._needsRefresh = true;
+    this.needsRefresh = true;
 
     if (this._bodyConeMesh != null){
       if (this._showCones){
@@ -523,11 +555,11 @@ class PoinsotAndCones {
 
   setConeSize(coneSize){
     this._coneSize = Number(coneSize);
-    this._constructSpaceAndBodyCones();
+    this._constructCones();
     this.refresh();
   }
-
-  _constructInertiaEllipsoidAndInvariablePlane(){
+  
+  _constructEllipsoidAndPlane(){
     const notRotating = this._omega.lengthSq() === 0;
 
     if (notRotating){
@@ -539,7 +571,7 @@ class PoinsotAndCones {
       this._scene.remove(this._invariablePlaneMesh);
       this._inertiaEllipsoidMesh = null;
       this._invariablePlaneMesh = null;
-      this._initializeHodes();
+      this.initializePolhodeAndHerpolhode();
     }
 
     if (!(this._showPoinsot)){
@@ -593,11 +625,10 @@ class PoinsotAndCones {
       this._scene.add(this._invariablePlaneMesh);
     }
 
-    this._computeHodeParameters();
-    this._initializeHodes();
+    this.initializePolhodeAndHerpolhode();
   }
 
-  _computeHodeParameters(){
+  initializePolhodeAndHerpolhode(){
     if (this._isAxisymmetric === true){
       const hMag = this._H.length();
       let phidot = 0;
@@ -618,13 +649,11 @@ class PoinsotAndCones {
       this._polhodeComputationPeriod = twoPi / phidot + this._herpolhodeComputationPeriod;
       this._hodeSkip = Math.floor(this._polhodeComputationPeriod / this._h / 500);
     }else{
-      this._polhodeComputationPeriod = 25;// 25 seconds is arbitrary, use another method
-      this._herpolhodeComputationPeriod = 25;// 25 seconds is arbitrary, use another method
+      this._polhodeComputationPeriod = 25;//better to create default value constant
+      this._herpolhodeComputationPeriod = 25;
       this._hodeSkip = Math.floor(this._polhodeComputationPeriod / this._h / 500);
     }
-  }
 
-  _initializeHodes(){
     if (this._polhodeMesh != null){
       this._scene.remove(this._polhodeMesh);
       this._polhodeMesh = null;
@@ -638,25 +667,25 @@ class PoinsotAndCones {
     this._polhode.length = 0;
     this._herpolhode.length = 0;
     this._hodeUpdateCounter = 0;
-    this._hodeDrawingElapsedTime = this._h;
-    this._oldHodeTime = this._simulationTime;
+    this._hodeCreationElapsedTime = this._h;
+    this._oldHodeTime = this.simulationTime;
     this.refresh();
   }
 
-  computeHodeCurvePoint(){
+  doPolhodeHerpolhodeComputations(){
     if (!(this._showPoinsot) || this._torqueIsOn){
       return;
     }
 
-    if (this._hodeDrawingElapsedTime === 0){
-      this._initializeHodes();
+    if (this._hodeCreationElapsedTime === 0){
+      this.initializePolhodeAndHerpolhode();
       return;
     }
 
     let shorterPeriod = this._polhodeComputationPeriod < this._herpolhodeComputationPeriod ? this._polhodeComputationPeriod : this._herpolhodeComputationPeriod;
     let longerPeriod = this._polhodeComputationPeriod >= this._herpolhodeComputationPeriod ? this._polhodeComputationPeriod : this._herpolhodeComputationPeriod;
 
-    if (this._hodeDrawingElapsedTime < longerPeriod){
+    if (this._hodeCreationElapsedTime < longerPeriod){
       if (this._hodeUpdateCounter % this._hodeSkip === 0){
         let om = new THREE.Vector3();
         om.copy(this._omega);
@@ -681,7 +710,7 @@ class PoinsotAndCones {
           // added because the length was once made to be very large
           // for reasons that are not yet understood and whose conditions
           // have not been duplicated
-          if (this._hodeDrawingElapsedTime <= shorterPeriod){
+          if (this._hodeCreationElapsedTime <= shorterPeriod){
             this._polhode.push(om2);
             this._herpolhode.push(om);
           }else{
@@ -695,8 +724,8 @@ class PoinsotAndCones {
       }
 
       this._hodeUpdateCounter += 1;
-      this._hodeDrawingElapsedTime += this._simulationTime - this._oldHodeTime;
-      this._oldHodeTime = this._simulationTime;
+      this._hodeCreationElapsedTime += this.simulationTime - this._oldHodeTime;
+      this._oldHodeTime = this.simulationTime;
     }else{
       // construct the polhode and herpolhode
       if (this._herpolhodeMesh == null){

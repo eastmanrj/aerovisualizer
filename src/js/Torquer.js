@@ -11,10 +11,8 @@ class Torquer {
     // not a Matrix3 is because the THREE function makeRotationFromQuaternion
     // exists only for Matrix4. We are sometimes forced to convert that to a
     // 3x3 matrix using the THREE function setFromMatrix4.
-    this._vel = new THREE.Vector3();
     this._h = 0.0025;
     this._torque = new THREE.Vector3(0, 0, 0);
-
     this._torqueOption = 1;
     // 1 = no torque
     // 2 = space frame torque
@@ -22,6 +20,9 @@ class Torquer {
     // 4 = acs stabilization
     // 5 = gravity gradient torque
     // 6 = torque on a top
+    //_constantTorque is set by the user either through the setConstantTorque or
+    //the setTorque function.  It is required for torque options 2 and 3 which
+    //both maintain the torque at a specified value in the frame of choice
     this._constantTorque = new THREE.Vector3(0, 0, 0);
     this._axesOrientation = 'Y Up';
     this._mass = 1;
@@ -48,16 +49,15 @@ class Torquer {
   }
 
   sendTorqueData(){
-    return [this._torque, this._torqueOption, this._omega, this._quat, this._dcm, this._vel, this._h, this._T];
+    return [this._torque, this._torqueOption, this._omega, this._quat, this._dcm, this._h, this._T];
   }
 
-  receiveTorqueData(torque, torqueOption, omega, quat, dcm, vel, h, T){
+  receiveTorqueData(torque, torqueOption, omega, quat, dcm, h, T){
     this._torque = torque;
     this._torqueOption = torqueOption;
     this._omega = omega;
     this._quat = quat;
     this._dcm = dcm;
-    this._vel = vel;
     this._h = h;
     this._T = T;
   }

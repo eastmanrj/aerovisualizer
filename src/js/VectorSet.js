@@ -2,6 +2,13 @@ import * as THREE from '../../node_modules/three/build/three.module.js';
 import {FontLoader} from './FontLoader.js';
 import {TextGeometry} from './TextGeometry.js';
 
+/**
+ VectorSetObject is a class that encapsulates the computation and drawing of vectors
+ associated with the SixDOFObject class.  These vectors are the 3 body
+ frame vectors, the 3 space frame vectors, the angular velocity and momentum
+ vectors, and the torque vector.  It also handles the labels for the vectors.
+**/
+
 const oneOverSqrt2 = Math.sqrt(0.5);
 
 class VectorSetObject {
@@ -12,7 +19,7 @@ class VectorSetObject {
     this._torque = new THREE.Vector3(0,0,0);
     this._camera = camera;
     this._scene = scene;
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     this._scale = new THREE.Vector3();
     this._unitScale = new THREE.Vector3();
     this._unitScale.set(1, 1, 1);
@@ -291,15 +298,15 @@ class VectorSetObject {
   }
 
   refresh(){
-    if (!this._constructionComplete){
+    if (!this.constructionComplete){
       return;
     }
     
-    if (this._needsRefresh === false){
+    if (this.needsRefresh === false){
       return;
     }
 
-    this._needsRefresh = false;
+    this.needsRefresh = false;
     this._qn.setFromRotationMatrix(this._camera.matrixWorld);
     this._q0.multiplyQuaternions(this._flipQuat,this._quat);
 
@@ -341,12 +348,11 @@ class VectorSetObject {
     this.drawVector(6);
     this.drawVector(7);
     this.drawVector(8);
-
-    this.drawVector(9); // this cannot go after drawVector(8) for some reason
+    this.drawVector(9);
   }
 
   setOpacity(thing, opacity){  
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     
     switch (thing){
       case 'bodyFrame':
@@ -431,7 +437,7 @@ class VectorSetObject {
   }
 
   setColor(thing, color){
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     const theColor = this._colorForName(color);
     
     switch (thing){
@@ -711,7 +717,7 @@ class VectorSetObject {
         }
       }
 
-      this._constructionComplete = true;
+      this.constructionComplete = true;
     });
   }
 
@@ -840,7 +846,7 @@ class VectorSetObject {
       scene.add(this._torqueVectorArrowheadMesh);
     }
 
-    this._needsRefresh;
+    this.needsRefresh;
     this.refresh();
   }
 
@@ -853,7 +859,7 @@ class VectorSetObject {
       return;
     }
 
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     const scene = this._scene;
     this._showBodyFrame = show;
     
@@ -885,7 +891,7 @@ class VectorSetObject {
       return;
     }
 
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     const scene = this._scene;
     this._showSpaceFrame = show;
 
@@ -917,7 +923,7 @@ class VectorSetObject {
       return;
     }
 
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     const scene = this._scene;
     this._showOmega = show;
     
@@ -937,7 +943,7 @@ class VectorSetObject {
       return;
     }
 
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     const scene = this._scene;
     this._showAngularMomentum = show;
     
@@ -957,7 +963,7 @@ class VectorSetObject {
       return;
     }
 
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     const scene = this._scene;
     this._showTorque = show;
     
@@ -972,7 +978,7 @@ class VectorSetObject {
     }    
   }
 
-  setOffsetBooleans(bodyFrameOffset, spaceFrameOffset,
+  setOffsets(bodyFrameOffset, spaceFrameOffset,
     omegaOffset, hOffset, torqueOffset){
     this._offsetBodyFrameOrigin = bodyFrameOffset;
     this._offsetSpaceFrameOrigin = spaceFrameOffset;
@@ -1021,7 +1027,7 @@ class VectorSetObject {
   }
 
   setOrigin(thing, offsetTheOrigin){
-    this._needsRefresh = true;
+    this.needsRefresh = true;
 
     switch (thing){
       case 'bodyFrame':

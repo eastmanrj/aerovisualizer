@@ -57,6 +57,8 @@ p, span, select {
 .p-normal {
   display: block;
   text-align:left;
+  font-family: inherit;
+  font-weight:100;
   font-size: 1.7rem;
   margin-bottom: 1rem;
 }
@@ -70,7 +72,7 @@ label {
   padding: 0.8rem;
   padding-right: 2.5rem;
   background: #000;
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 300;
   cursor: pointer;
   color: white;
@@ -178,7 +180,7 @@ label {
   justify-self: center;
 }
 
-.grid-item input{
+.grid-item{
   margin: 1rem;
   height: auto;
 }
@@ -231,8 +233,8 @@ input[type="range"] {
    appearance: none;
    background: transparent;
    cursor: pointer;
-   margin-top: 1rem;
-   margin-bottom: 1rem;
+   margin-top: 1.4rem;
+   margin-bottom: 1.4rem;
 }
 
 /* Removes default focus */
@@ -356,7 +358,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
   }
 
   .elements{
-    padding-top: 5%;
+    padding-top: 2%;
   }
 }
 
@@ -398,6 +400,10 @@ input[type="range"]:focus::-webkit-slider-thumb {
   .p-normal {
     font-size: 0.65rem;
     margin-bottom: 0.5rem;
+  }
+
+  .elements{
+    padding-top: 1%;
   }
 }
 

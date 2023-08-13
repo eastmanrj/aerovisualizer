@@ -3,7 +3,7 @@ import SixDOFObject from './SixDOFObject.js';
 import VectorSetObject from './VectorSet.js';
 import PoinsotAndCones from './PoinsotAndCones.js';
 import {OrbitControls} from './OrbitControls.js';
-import { LinearToneMapping } from 'three';
+
 // import {GLTFLoader} from './GLTFLoader.js';
 // import {initAudio, playSound} from './audio.js';
 
@@ -18,75 +18,9 @@ let scene, camera, renderer;
 let background = null;
 let jupiter = null;
 let sun = null;
-
-// let airplaneObject;
-
-// function foo() {
-
-//   // Instantiate a loader
-//   const loader = new GLTFLoader();
-
-//   // Optional: Provide a DRACOLoader instance to decode compressed mesh data
-//   // const dracoLoader = new DRACOLoader();
-//   // dracoLoader.setDecoderPath( '/examples/jsm/libs/draco/' );
-//   // loader.setDRACOLoader( dracoLoader );
-
-//   // Load a glTF resource
-//   loader.load(
-// 	// resource URL
-// 	'models/uploads_files_4140769_plane.glb',
-// 	// called when the resource is loaded
-// 	function (gltf){
-
-// 		scene.add(gltf.scene);
-
-// 		gltf.animations; // Array<THREE.AnimationClip>
-// 		gltf.scene; // THREE.Group
-// 		gltf.scenes; // Array<THREE.Group>
-// 		gltf.cameras; // Array<THREE.Camera>
-// 		gltf.asset; // Object
-// 	},
-// 	// called while loading is progressing
-// 	function (xhr) {
-// 		cl((xhr.loaded / xhr.total * 100) + '% loaded');
-// 	},
-// 	// called when loading has errors
-// 	function (error){
-// 		cl( 'An error happened' );
-// 	}
-// );
-
-
-
-
-  // function loadModel() {
-  //   object.traverse(function(child){
-  //     // if (child.isMesh) child.material.map = texture;
-  //   });
-
-  //   // object.position.y = - 95;
-  //   scene.add(airplaneObject);
-  // }
-
-  // const manager = new THREE.LoadingManager(loadModel);
-
-  // function onProgress(xhr){
-  //   if (xhr.lengthComputable){
-  //   	const percentComplete = xhr.loaded / xhr.total * 100;
-  //   	cl('model ' + Math.round(percentComplete, 2) + '% downloaded');
-  //   }
-  // }
-
-  // function onError() {}
-
-  // const loader = new GLTFLoader(manager);
-  // loader.load('models/uploads_files_4140769_plane.glb', function (obj){
-  //   airplaneObject = obj;
-  // }, onProgress, onError);
-// }
-
 const cameraRadius = 25;
 let nominalCameraPos = new THREE.Vector3(-cameraRadius, 0, 0);
+let cpx, cpy, cpz; // camera position
 const centerOfRotation = [0, 0, 0];
 let clock = null;
 let sdo = null; //"six degree of freedom object" (we mostly care about rotational)
@@ -94,56 +28,73 @@ let vso = null; //"vector set object" (handles all of the vectors)
 let pac = null; //"Poinsot and cones" (handles the Poinsot ellipsoid and plane,
                 //polode and herpolhode, and the space and body cones)
 let orbitControls = null;
-let cpx, cpy, cpz; // camera position
 let playing = false;
 const piOver180 = Math.PI / 180;
-const masses = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
-const muOverR3Choices = [0.000001451422, 0.0001451422, 0.01451422, 0.0725711, 0.1451422, 0.2902844, 0.725711, 1.451422];
+
+const muOverR3Choices = [0.000001451422, 0.0001451422, 0.01451422, 0.0725711, 0.1451422,
+ 0.2902844, 0.725711, 1.451422];
 const muOverR3ChoiceDisplay = ['LEO', '100 X LEO', '10K X LEO', '50K X LEO',
  '100K X LEO', '200K X LEO', '500K X LEO', '1M X LEO'];
 let muOverR3 = muOverR3Choices[5];
 
 const defaultMass = 1;
+const masses = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
 const defaultDimX = 4;
 const defaultDimY = 4;
 const defaultDimZ = 7;
+
 const defaultAttitudeOption = 1;//1=Euler angles, 2=quaternion
 const defaultEuler1 = -10;
 const defaultEuler2 = -20;
 const defaultEuler3 = -30;
-const defaultEulerOrder = 'ZYX';
-const defaultOmegaMagnitude = 10;
-const defaultMaxOmega = 720;//degrees/sec
-const defaultOmHihat = 0;
-const defaultOmHjhat = 100;
-const defaultOmHkhat = 100;
+
+const defaultOmegaMagnitude = 3;
+const defaultOmHihat = 0;//slider position
+const defaultOmHjhat = 100;//slider position
+const defaultOmHkhat = 100;//slider position
 const defaultOmegaOrH = 'omega';
+
 const defaultTorqueOption = 1;//No Torque
+let previousTorqueOption = -1;
+const defaultTorqueMag = 4;
+const defaultTorqueIhat = 100;
+const defaultTorqueJhat = 0;
+const defaultTorqueKhat = 0;
+const defaultTorqueACSDZ = 0.5;
+const defaultTorqueACSTorque = 0.1;
+const defaultTorqueGG = 5;
+const defaultTorqueTopR = 1;
+const defaultTorqueTopGrav = 1;
 
-const defaultOrientation = 'Z Down';
+const defaultObjectAppearance = 'axis-labels';
+const defaultObjectMassProperties =  'select-an-object';
 const defaultEnvironment = 'atmosphere';
-const defaultShowObject = true;
-const defaultShowBodyFrame = true;
-const defaultShowBodyXVector = true;
-const defaultShowBodyYVector = true;
-const defaultShowBodyZVector = true;
-const defaultShowSpaceFrame = true;
-const defaultShowAngularVelocity = true;
-const defaultShowAngularMomentum = true;
-const defaultShowTorque = true;
-const defaultShowCones = false;
-const defaultShowPoinsot = false;
+const defaultMaxOmega = 720;//degrees/sec
+const defaultVectorSize = 6;
 
-const defaultObjectTransparency = 0;
+const defaultObjectTransparency = 0;//0=completely opaque, 100=completely transparent
 const defaultBodyFrameTransparency = 0;
+const defaultShowBodyXVector = true;//x vector of body frame
+const defaultShowBodyYVector = true;//y vector of body frame
+const defaultShowBodyZVector = true;//z vector of body frame
 const defaultSpaceFrameTransparency = 0;
 const defaultOmegaTransparency = 0;
 const defaultHTransparency = 0;
 const defaultTorqueTransparency = 0;
 const defaultConesTransparency = 50;
 const defaultPoinsotTransparency = 100;
-// 95 is arbirary, close enough to being completely invisible
+// 95 maxTransparency is arbirary and considered close enough to being completely 
+// invisible, this allows for a little slop when using the slider controls
 const maxTransparency = 95;
+
+const defaultObjectOffset = false;
+const defaultBodyFrameOffset = false;
+const defaultSpaceFrameOffset = true;
+const defaultOmegaOffset = false;
+const defaultHOffset = false;
+const defaultTorqueOffset = false;
+const defaultConesOffset = false;
+const defaultPoinsotOffset = false;
 
 const defaultBodyFrameColor = 'yellow';
 const defaultSpaceFrameColor = 'blue';
@@ -155,28 +106,11 @@ const defaultSpaceConeColor = 'red';
 const defaultEllipsoidColor = 'blue';
 const defaultPlaneColor = 'green';
 
-const defaultObjectOffset = false;
-const defaultBodyFrameOffset = false;
-const defaultSpaceFrameOffset = true;
-const defaultOmegaOffset = false;
-const defaultHOffset = false;
-const defaultTorqueOffset = false;
-const defaultConesOffset = false;
-const defaultPoinsotOffset = false;
+const defaultOrientation = 'Z Down';
+const defaultEulerOrder = 'ZYX';
 
-const defaultObjectMassProperties =  'select-an-object';
-const defaultObjectAppearance = 'axis-labels';
-const defaultVectorSize = 6;
-const defaultTorqueMag = 4;
-const defaultTorqueIhat = 1;
-const defaultTorqueJhat = 0;
-const defaultTorqueKhat = 0;
-const defaultTorqueACSDZ = 0.5;
-const defaultTorqueACSTorque = 0.1;
-const defaultTorqueGG = 5;
-const defaultTorqueTopR = 1;
-const defaultTorqueTopGrav = 1;
-
+//aerovisualizerData is modified and saved to local storage when preferences are 
+//changed and is retrieved from local storage at startup
 let aerovisualizerData = [
   {name:'mass', value:defaultMass},
   {name:'length', value:defaultDimX},
@@ -186,35 +120,45 @@ let aerovisualizerData = [
   {name:'eulerAngle1', value:defaultEuler1},
   {name:'eulerAngle2', value:defaultEuler2},
   {name:'eulerAngle3', value:defaultEuler3},
-  {name:'eulerOrder', value:defaultEulerOrder},
   {name:'omegaMagnitude', value:defaultOmegaMagnitude},
-  {name:'maxOmega', value:defaultMaxOmega},
   {name:'omHihat', value:defaultOmHihat},
   {name:'omHjhat', value:defaultOmHjhat},
   {name:'omHkhat', value:defaultOmHkhat},
   {name:'omegaOrH', value:defaultOmegaOrH},
   {name:'torqueOption', value:defaultTorqueOption},
-  {name:'axesOrientation', value:defaultOrientation},
+  {name:'torqueMag', value:defaultTorqueMag},
+  {name:'torqueIhat', value:defaultTorqueIhat},
+  {name:'torqueJhat', value:defaultTorqueJhat},
+  {name:'torqueKhat', value:defaultTorqueKhat},
+  {name:'torqueACSDZ', value:defaultTorqueACSDZ},
+  {name:'torqueACSTorque', value:defaultTorqueACSTorque},
+  {name:'torqueGG', value:defaultTorqueGG},
+  {name:'torqueTopR', value:defaultTorqueTopR},
+  {name:'torqueTopGrav', value:defaultTorqueTopGrav},
+  {name:'objectAppearance', value:defaultObjectAppearance},
+  {name:'objectMassProperties', value:defaultObjectMassProperties},
   {name:'environment', value:defaultEnvironment},
-  {name:'showObject', value:defaultShowObject},
-  {name:'showBodyFrame', value:defaultShowBodyFrame},
+  {name:'maxOmega', value:defaultMaxOmega},
+  {name:'vectorSize', value:defaultVectorSize},
+  {name:'objectTransparency', value:defaultObjectTransparency},
+  {name:'bodyFrameTransparency', value:defaultBodyFrameTransparency},
   {name:'showBodyXVector', value:defaultShowBodyXVector},
   {name:'showBodyYVector', value:defaultShowBodyYVector},
   {name:'showBodyZVector', value:defaultShowBodyZVector},
-  {name:'showSpaceFrame', value:defaultShowSpaceFrame},
-  {name:'showAngularVelocity', value:defaultShowAngularVelocity},
-  {name:'showAngularMomentum', value:defaultShowAngularMomentum},
-  {name:'showTorque', value:defaultShowTorque},
-  {name:'showCones', value:defaultShowCones},
-  {name:'showPoinsot', value:defaultShowPoinsot},
-  {name:'objectTransparency', value:defaultObjectTransparency},
-  {name:'bodyFrameTransparency', value:defaultBodyFrameTransparency},
   {name:'spaceFrameTransparency', value:defaultSpaceFrameTransparency},
   {name:'omegaTransparency', value:defaultOmegaTransparency},
   {name:'hTransparency', value:defaultHTransparency},
   {name:'torqueTransparency', value:Number(defaultTorqueTransparency)},
   {name:'conesTransparency', value:Number(defaultConesTransparency)},
   {name:'poinsotTransparency', value:Number(defaultPoinsotTransparency)},
+  {name:'objectOffset', value:defaultObjectOffset},
+  {name:'bodyFrameOffset', value:defaultBodyFrameOffset},
+  {name:'spaceFrameOffset', value:defaultSpaceFrameOffset},
+  {name:'omegaOffset', value:defaultOmegaOffset},
+  {name:'hOffset', value:defaultHOffset},
+  {name:'torqueOffset', value:defaultTorqueOffset},
+  {name:'conesOffset', value:defaultConesOffset},
+  {name:'poinsotOffset', value:defaultPoinsotOffset},
   {name:'bodyFrameColor', value:defaultBodyFrameColor},
   {name:'spaceFrameColor', value:defaultSpaceFrameColor},
   {name:'omegaColor', value:defaultOmegaColor},
@@ -224,80 +168,33 @@ let aerovisualizerData = [
   {name:'spaceConeColor', value:defaultSpaceConeColor},
   {name:'ellipsoidColor', value:defaultEllipsoidColor},
   {name:'planeColor', value:defaultPlaneColor},
-  {name:'objectOffset', value:defaultObjectOffset},
-  {name:'bodyFrameOffset', value:defaultBodyFrameOffset},
-  {name:'spaceFrameOffset', value:defaultSpaceFrameOffset},
-  {name:'omegaOffset', value:defaultOmegaOffset},
-  {name:'hOffset', value:defaultHOffset},
-  {name:'torqueOffset', value:defaultTorqueOffset},
-  {name:'conesOffset', value:defaultConesOffset},
-  {name:'poinsotOffset', value:defaultPoinsotOffset},
-  {name:'objectMassProperties', value:defaultObjectMassProperties},
-  {name:'objectAppearance', value:defaultObjectAppearance},
-  {name:'vectorSize', value:defaultVectorSize},
-  {name:'torqueMag', value:defaultTorqueMag},
-  {name:'torqueIhat', value:defaultTorqueIhat},
-  {name:'torqueJhat', value:defaultTorqueJhat},
-  {name:'torqueKhat', value:defaultTorqueKhat},
-  {name:'torqueACSDZ', value:defaultTorqueACSDZ},
-  {name:'torqueACSTorque', value:defaultTorqueACSTorque},
-  {name:'torqueGG', value:defaultTorqueGG},
-  {name:'torqueTopR', value:defaultTorqueTopR},
-  {name:'torqueTopGrav', value:defaultTorqueTopGrav}
+  {name:'axesOrientation', value:defaultOrientation},
+  {name:'eulerOrder', value:defaultEulerOrder}
 ];
 
+//preferences are declared and defined here and set to their default values.
+//They are later set to their local storage values
 let mass = defaultMass;
 let dimX = defaultDimX;
 let dimY = defaultDimY;
 let dimZ = defaultDimZ;
-let attitudeOption = defaultAttitudeOption;
+
 let euler1 = defaultEuler1;
 let euler2 = defaultEuler2;
 let euler3 = defaultEuler3;
-let eulerOrder = defaultEulerOrder;
+// quaternion is set from Euler angles
 let quatW = 0;
 let quatX = 0;
 let quatY = 0;
 let quatZ = 0;
+
 let omegaMag = defaultOmegaMagnitude;
-let maxOmega = defaultMaxOmega;
 let omHihat = defaultOmHihat;
 let omHjhat = defaultOmHjhat;
 let omHkhat = defaultOmHkhat;
 let omegaOrH = defaultOmegaOrH;
+
 let torqueOption = defaultTorqueOption;
-let environment = defaultEnvironment;
-let showBodyXVector = defaultShowBodyXVector;
-let showBodyYVector = defaultShowBodyYVector;
-let showBodyZVector = defaultShowBodyZVector;
-let objectTransparency = defaultObjectTransparency;
-let bodyFrameTransparency = defaultBodyFrameTransparency;
-let spaceFrameTransparency = defaultSpaceFrameTransparency;
-let omegaTransparency = defaultOmegaTransparency;
-let hTransparency = defaultHTransparency;
-let torqueTransparency = defaultTorqueTransparency;
-let conesTransparency = defaultConesTransparency;
-let poinsotTransparency = defaultPoinsotTransparency;
-let bodyFrameColor = defaultBodyFrameColor;
-let spaceFrameColor = defaultSpaceFrameColor;
-let omegaColor = defaultOmegaColor;
-let hColor = defaultHColor;
-let torqueColor = defaultTorqueColor;
-let bodyConeColor = defaultBodyConeColor;
-let spaceConeColor = defaultSpaceConeColor;
-let ellipsoidColor = defaultEllipsoidColor;
-let planeColor = defaultPlaneColor;
-let objectOffset = defaultObjectOffset;
-let bodyFrameOffset = defaultBodyFrameOffset;
-let spaceFrameOffset = defaultSpaceFrameOffset;
-let omegaOffset = defaultOmegaOffset;
-let hOffset = defaultHOffset;
-let torqueOffset = defaultTorqueOffset;
-let conesOffset = defaultConesOffset;
-let poinsotOffset = defaultPoinsotOffset;
-let objectMassProperties = defaultObjectMassProperties;
-let objectAppearance = defaultObjectAppearance;
-let vectorSize = defaultVectorSize;
 let torqueMag = defaultTorqueMag;
 let torqueIhat = defaultTorqueIhat;
 let torqueJhat = defaultTorqueJhat;
@@ -308,6 +205,46 @@ let torqueGG = defaultTorqueGG;
 let torqueTopR = defaultTorqueTopR;
 let torqueTopGrav = defaultTorqueTopGrav;
 
+let objectAppearance = defaultObjectAppearance;
+let objectMassProperties = defaultObjectMassProperties;
+let environment = defaultEnvironment;
+let maxOmega = defaultMaxOmega;
+let vectorSize = defaultVectorSize;
+
+let objectTransparency = defaultObjectTransparency;
+let bodyFrameTransparency = defaultBodyFrameTransparency;
+let showBodyXVector = defaultShowBodyXVector;
+let showBodyYVector = defaultShowBodyYVector;
+let showBodyZVector = defaultShowBodyZVector;
+let spaceFrameTransparency = defaultSpaceFrameTransparency;
+let omegaTransparency = defaultOmegaTransparency;
+let hTransparency = defaultHTransparency;
+let torqueTransparency = defaultTorqueTransparency;
+let conesTransparency = defaultConesTransparency;
+let poinsotTransparency = defaultPoinsotTransparency;
+
+let objectOffset = defaultObjectOffset;
+let bodyFrameOffset = defaultBodyFrameOffset;
+let spaceFrameOffset = defaultSpaceFrameOffset;
+let omegaOffset = defaultOmegaOffset;
+let hOffset = defaultHOffset;
+let torqueOffset = defaultTorqueOffset;
+let conesOffset = defaultConesOffset;
+let poinsotOffset = defaultPoinsotOffset;
+
+let bodyFrameColor = defaultBodyFrameColor;
+let spaceFrameColor = defaultSpaceFrameColor;
+let omegaColor = defaultOmegaColor;
+let hColor = defaultHColor;
+let torqueColor = defaultTorqueColor;
+let bodyConeColor = defaultBodyConeColor;
+let spaceConeColor = defaultSpaceConeColor;
+let ellipsoidColor = defaultEllipsoidColor;
+let planeColor = defaultPlaneColor;
+
+let attitudeOption = defaultAttitudeOption;
+let eulerOrder = defaultEulerOrder;
+
 const sixDOFworld = document.getElementById('sixDOF-world');
 const playPauseButton = document.getElementById('play-pause-btn');
 const resetButton = document.getElementById('reset-btn');
@@ -315,40 +252,12 @@ const resetButton = document.getElementById('reset-btn');
 const numericalButton = document.getElementById('numerical-btn');
 const infoButton = document.getElementById("info-btn");
 const infoReturnButton = document.getElementById('info-return-btn');
-
-const attitudeButton = document.getElementById('attitude-btn');
 const massPropButton = document.getElementById('mass-prop-btn');
+const attitudeButton = document.getElementById('attitude-btn');
 const rotationRateButton = document.getElementById('rotation-btn');
 const torqueButton = document.getElementById('torque-btn');
 const preferencesButton = document.getElementById('preferences-btn');
 
-const attitudeOptionButton1 = document.getElementById('attitude-input-btn1');
-const attitudeOptionButton2 = document.getElementById('attitude-input-btn2');
-const zeroEuler1Button = document.getElementById("zero-euler1-btn");
-const zeroEuler2Button = document.getElementById("zero-euler2-btn");
-const zeroEuler3Button = document.getElementById("zero-euler3-btn");
-const euler1Slider = document.getElementById("euler1-slider");
-const euler2Slider = document.getElementById("euler2-slider");
-const euler3Slider = document.getElementById("euler3-slider");
-const euler1Display = document.getElementById("euler1-display");
-const euler2Display = document.getElementById("euler2-display");
-const euler3Display = document.getElementById("euler3-display");
-const zeroQuaternionAngleButton = document.getElementById("zero-quat-angle-btn");
-const zeroQuaternionIhatButton = document.getElementById("zero-quatX-btn");
-const zeroQuaternionJhatButton = document.getElementById("zero-quatY-btn");
-const zeroQuaternionKhatButton = document.getElementById("zero-quatZ-btn");
-const quaternianAngleDisplay = document.getElementById("quat-angle-display");
-const quaternianAngleSlider = document.getElementById("quat-angle");
-const quaternianIhatDisplay = document.getElementById("quat-ihat-display");
-const quaternianIhatSlider = document.getElementById("quat-ihat-slider");
-const quaternianJhatDisplay = document.getElementById("quat-jhat-display");
-const quaternianJhatSlider = document.getElementById("quat-jhat-slider");
-const quaternianKhatDisplay = document.getElementById("quat-khat-display");
-const quaternianKhatSlider = document.getElementById("quat-khat-slider");
-const quatWDisplay = document.getElementById("quatW-display");
-const quatXDisplay = document.getElementById("quatX-display");
-const quatYDisplay = document.getElementById("quatY-display");
-const quatZDisplay = document.getElementById("quatZ-display");
 const massSlider = document.getElementById("mass-slider");
 const dimXSlider = document.getElementById("dimX-slider");
 const dimYSlider = document.getElementById("dimY-slider");
@@ -360,9 +269,38 @@ const dimZDisplay = document.getElementById("dimZ-display");
 const ixxNumber = document.getElementById("ixx-number");
 const iyyNumber = document.getElementById("iyy-number");
 const izzNumber = document.getElementById("izz-number");
-const zeroOmegaIhatButton = document.getElementById("zero-omegax-btn");
-const zeroOmegaJhatButton = document.getElementById("zero-omegay-btn");
-const zeroOmegaKhatButton = document.getElementById("zero-omegaz-btn");
+
+const attitudeOptionButton1 = document.getElementById('attitude-input-btn1');
+const attitudeOptionButton2 = document.getElementById('attitude-input-btn2');
+const euler1Slider = document.getElementById("euler1-slider");
+const euler2Slider = document.getElementById("euler2-slider");
+const euler3Slider = document.getElementById("euler3-slider");
+const euler1Display = document.getElementById("euler1-display");
+const euler2Display = document.getElementById("euler2-display");
+const euler3Display = document.getElementById("euler3-display");
+const zeroEuler1Button = document.getElementById("zero-euler1-btn");
+const zeroEuler2Button = document.getElementById("zero-euler2-btn");
+const zeroEuler3Button = document.getElementById("zero-euler3-btn");
+const quaternianAngleSlider = document.getElementById("quat-angle");
+const quaternianIhatSlider = document.getElementById("quat-ihat-slider");
+const quaternianJhatSlider = document.getElementById("quat-jhat-slider");
+const quaternianKhatSlider = document.getElementById("quat-khat-slider");
+const quaternianAngleDisplay = document.getElementById("quat-angle-display");
+const quaternianIhatDisplay = document.getElementById("quat-ihat-display");
+const quaternianJhatDisplay = document.getElementById("quat-jhat-display");
+const quaternianKhatDisplay = document.getElementById("quat-khat-display");
+const zeroQuaternionAngleButton = document.getElementById("zero-quat-angle-btn");
+const zeroQuaternionIhatButton = document.getElementById("zero-quatX-btn");
+const zeroQuaternionJhatButton = document.getElementById("zero-quatY-btn");
+const zeroQuaternionKhatButton = document.getElementById("zero-quatZ-btn");
+const quatWDisplay = document.getElementById("quatW-display");
+const quatXDisplay = document.getElementById("quatX-display");
+const quatYDisplay = document.getElementById("quatY-display");
+const quatZDisplay = document.getElementById("quatZ-display");
+
+const omegaOrHRadios = document.querySelectorAll('input[name="omega-or-H-radio"]');
+const omegaOrHOmegaRadio = document.getElementById("omega-or-H-omega");
+const omegaOrHHRadio = document.getElementById("omega-or-H-H");
 const omegaMagnitudeSlider = document.getElementById("omegaMag");
 const omegaIhatSlider = document.getElementById("omegaIhat");
 const omegaJhatSlider = document.getElementById("omegaJhat");
@@ -372,25 +310,26 @@ const hMagnitudeDisplay = document.getElementById("hMag-display");
 const omegaIhatDisplay = document.getElementById("omega-ihat-display");
 const omegaJhatDisplay = document.getElementById("omega-jhat-display");
 const omegaKhatDisplay = document.getElementById("omega-khat-display");
+const zeroOmegaIhatButton = document.getElementById("zero-omegax-btn");
+const zeroOmegaJhatButton = document.getElementById("zero-omegay-btn");
+const zeroOmegaKhatButton = document.getElementById("zero-omegaz-btn");
 const omegaPDisplay = document.getElementById("omegaP-display");
 const omegaQDisplay = document.getElementById("omegaQ-display");
 const omegaRDisplay = document.getElementById("omegaR-display");
-const torqueOptionButton = document.getElementById("torque-option-btn");
-const zeroTorqueXButton = document.getElementById("zero-torqueIhat-btn");
-const zeroTorqueYButton = document.getElementById("zero-torqueJhat-btn");
-const zeroTorqueZButton = document.getElementById("zero-torqueKhat-btn");
-const torqueOptionDisplay = document.getElementById("torque-option");
 
+const torqueOptionMenu = document.getElementById("torque-option-menu");
 const torqueMagnitudeSlider = document.getElementById("torqueMag");
 const torqueIhatSlider = document.getElementById("torqueIhat");
 const torqueJhatSlider = document.getElementById("torqueJhat");
 const torqueKhatSlider = document.getElementById("torqueKhat");
+const zeroTorqueXButton = document.getElementById("zero-torqueIhat-btn");
+const zeroTorqueYButton = document.getElementById("zero-torqueJhat-btn");
+const zeroTorqueZButton = document.getElementById("zero-torqueKhat-btn");
 const acsDeadZoneSlider = document.getElementById("acs-omega-dead-zone-slider");
 const acsTorqueMagnitudeSlider = document.getElementById("acs-torque-magnitude-slider");
 const torqueMuOverR3Slider = document.getElementById("torque-muOverR3");
 const torqueTopRDistanceSlider = document.getElementById("torque-top-rdistance");
 const torqueTopGravitySlider = document.getElementById("torque-top-gravity");
-
 const torqueMagnitudeDisplay = document.getElementById("torqueMag-display");
 const torqueIhatDisplay = document.getElementById("torqueIhat-display");
 const torqueJhatDisplay = document.getElementById("torqueJhat-display");
@@ -401,30 +340,30 @@ const torqueMuOverR3Display = document.getElementById("torque-muOverR3-display")
 const torqueTopRDistanceDisplay = document.getElementById("torque-top-rdistance-display");
 const torqueTopGravityDisplay = document.getElementById("torque-top-gravity-display");
 
-const numericalGeneralButton = document.getElementById("numerical-general-btn");
-let numericalDisplayIsGeneral = true;
-const presetMassPropertiesMenu = document.getElementById("preset-mass-properties-menu");
 const defaultButton = document.getElementById('default-btn');
 const defaultDoResetButton = document.getElementById('default-do-reset-btn');
-const axisOrientationButton = document.getElementById('axis-orientation-btn');
-const eulerAngleOrderButton = document.getElementById('euler-angle-order-btn');
-const objectButton = document.getElementById('object-btn');
-const bodyFrameButton = document.getElementById('body-frame-btn');
-const spaceFrameButton = document.getElementById('space-frame-btn');
-const omegaButton = document.getElementById('omega-btn');
-const hButton = document.getElementById('h-btn');
-const torquePrefsButton = document.getElementById('torque-prefs-btn');
-const conesButton = document.getElementById('cones-btn');
-const poinsotButton = document.getElementById('poinsot-btn');
-const generalButton = document.getElementById('general-btn');
+const generalPrefButton = document.getElementById('general-btn');
+const objectPrefButton = document.getElementById('object-btn');
+const bodyFramePrefButton = document.getElementById('body-frame-btn');
+const spaceFramePrefButton = document.getElementById('space-frame-btn');
+const omegaPrefButton = document.getElementById('omega-btn');
+const hPrefButton = document.getElementById('h-btn');
+const torquePrefButton = document.getElementById('torque-prefs-btn');
+const axisOrientationPrefButton = document.getElementById('axis-orientation-btn');
+const eulerAngleOrderPrefButton = document.getElementById('euler-angle-order-btn');
+const conesPrefButton = document.getElementById('cones-btn');
+const poinsotPrefButton = document.getElementById('poinsot-btn');
 const prefsReturnButton = document.getElementById('prefs-return-btn');
 
-const numericalElementsGeneral = document.getElementById('numerical-elements-general');
-const infoElements = document.getElementById('info-elements');
 const infoMenu = document.getElementById('info-menu');
 const infoText = document.getElementById('info-text');
+
+const presetMassPropertiesMenu = document.getElementById("preset-mass-properties-menu");
+const numericalElements = document.getElementById('numerical-elements-general');
+const infoElements = document.getElementById('info-elements');
 const attitudeEulerElements = document.getElementById('attitude-euler-elements');
 const attitudeQuaternionElements = document.getElementById('attitude-quaternion-elements');
+const generalElements = document.getElementById('general-elements');
 const massPropElements = document.getElementById('mass-prop-elements');
 const rotationElements = document.getElementById('rotation-elements');
 const torqueFrameElements = document.getElementById('torque-frame-elements');
@@ -443,37 +382,14 @@ const hElements = document.getElementById('h-elements');
 const torqueElements = document.getElementById('torque-elements');
 const conesElements = document.getElementById('cones-elements');
 const poinsotElements = document.getElementById('poinsot-elements');
-const generalElements = document.getElementById('general-elements');
 
 const objectAppearanceChoiceMenu = document.getElementById("object-appearance-choice-menu");
-const objectTransparencySlider = document.getElementById("transparency-block");
-const objectTransparencyDisplay = document.getElementById("transparency-block-display");
 const maxOmegaSlider = document.getElementById("max-omega");
 const maxOmegaDisplay = document.getElementById("max-omega-display");
 const vectorSizeSlider = document.getElementById("vector-size");
-const bodyFrameTransparencySlider = document.getElementById("transparency-body-frame");
-const bodyFrameTransparencyDisplay = document.getElementById("transparency-body-frame-display");
-const spaceFrameTransparencySlider = document.getElementById("transparency-space-frame");
-const spaceFrameTransparencyDisplay = document.getElementById("transparency-space-frame-display");
-const omegaTransparencySlider = document.getElementById("transparency-omega");
-const omegaTransparencyDisplay = document.getElementById("transparency-omega-display");
-const hTransparencySlider = document.getElementById("transparency-h");
-const hTransparencyDisplay = document.getElementById("transparency-h-display");
-const torqueTransparencySlider = document.getElementById("transparency-torque");
-const torqueTransparencyDisplay = document.getElementById("transparency-torque-display");
-const conesTransparencySlider = document.getElementById("transparency-cones");
-const conesTransparencyDisplay = document.getElementById("transparency-cones-display");
-const poinsotTransparencySlider = document.getElementById("transparency-poinsot");
-const poinsotTransparencyDisplay = document.getElementById("transparency-poinsot-display");
-
-const objectOffsetCheckbox = document.getElementById("offset-object");
-const bodyFrameOffsetCheckbox = document.getElementById("offset-body-frame");
-const spaceFrameOffsetCheckbox = document.getElementById("offset-space-frame");
-const omegaOffsetCheckbox = document.getElementById("offset-omega");
-const hOffsetCheckbox = document.getElementById("offset-h");
-const torqueOffsetCheckbox = document.getElementById("offset-torque");
-const conesOffsetCheckbox = document.getElementById("offset-cones");
-const poinsotOffsetCheckbox = document.getElementById("offset-poinsot");
+const orientationRadios = document.querySelectorAll('input[name="orientation-radio"]');
+const eulerOrderRadios = document.querySelectorAll('input[name="euler-order-radio"]');
+const environmentRadios = document.querySelectorAll('input[name="environment-radio"]');
 
 const ixxDisplay = document.getElementById("ixx-display");
 const iyyDisplay = document.getElementById("iyy-display");
@@ -501,15 +417,35 @@ const quatXNumber = document.getElementById("quatX-number");
 const quatYNumber = document.getElementById("quatY-number");
 const quatZNumber = document.getElementById("quatZ-number");
 const kineticEnergy = document.getElementById("kinetic-energy-number");
+
+const objectTransparencySlider = document.getElementById("transparency-block");
+const objectTransparencyDisplay = document.getElementById("transparency-block-display");
+const bodyFrameTransparencySlider = document.getElementById("transparency-body-frame");
+const bodyFrameTransparencyDisplay = document.getElementById("transparency-body-frame-display");
 const showBodyXVectorCheckbox = document.getElementById("body-x");
 const showBodyYVectorCheckbox = document.getElementById("body-y");
 const showBodyZVectorCheckbox = document.getElementById("body-z");
-const orientationRadios = document.querySelectorAll('input[name="orientation-radio"]');
-const eulerOrderRadios = document.querySelectorAll('input[name="euler-order-radio"]');
-const omegaOrHRadios = document.querySelectorAll('input[name="omega-or-H-radio"]');
-const omegaOrHOmegaRadio = document.getElementById("omega-or-H-omega");
-const omegaOrHHRadio = document.getElementById("omega-or-H-H");
-const environmentRadios = document.querySelectorAll('input[name="environment-radio"]');
+const spaceFrameTransparencySlider = document.getElementById("transparency-space-frame");
+const spaceFrameTransparencyDisplay = document.getElementById("transparency-space-frame-display");
+const omegaTransparencySlider = document.getElementById("transparency-omega");
+const omegaTransparencyDisplay = document.getElementById("transparency-omega-display");
+const hTransparencySlider = document.getElementById("transparency-h");
+const hTransparencyDisplay = document.getElementById("transparency-h-display");
+const torqueTransparencySlider = document.getElementById("transparency-torque");
+const torqueTransparencyDisplay = document.getElementById("transparency-torque-display");
+const conesTransparencySlider = document.getElementById("transparency-cones");
+const conesTransparencyDisplay = document.getElementById("transparency-cones-display");
+const poinsotTransparencySlider = document.getElementById("transparency-poinsot");
+const poinsotTransparencyDisplay = document.getElementById("transparency-poinsot-display");
+
+const objectOffsetCheckbox = document.getElementById("offset-object");
+const bodyFrameOffsetCheckbox = document.getElementById("offset-body-frame");
+const spaceFrameOffsetCheckbox = document.getElementById("offset-space-frame");
+const omegaOffsetCheckbox = document.getElementById("offset-omega");
+const hOffsetCheckbox = document.getElementById("offset-h");
+const torqueOffsetCheckbox = document.getElementById("offset-torque");
+const conesOffsetCheckbox = document.getElementById("offset-cones");
+const poinsotOffsetCheckbox = document.getElementById("offset-poinsot");
 
 const bodyFrameColorMenu = document.getElementById("body-frame-color-menu");
 const spaceFrameColorMenu = document.getElementById("space-frame-color-menu");
@@ -521,196 +457,6 @@ const spaceConeColorMenu = document.getElementById("space-cone-color-menu");
 const ellipsoidColorMenu = document.getElementById("inertia-ellipsoid-color-menu");
 const planeColorMenu = document.getElementById("invariable-plane-color-menu");
 
-objectAppearanceChoiceMenu.addEventListener('change', () => {
-  objectAppearance = objectAppearanceChoiceMenu.value;
-  sdo.constructBlock(objectAppearance);
-  replaceAerovisualizerData('objectAppearance',objectAppearance);
-  saveToLocalStorage();
-});
-
-const setMassProperties = function(option){
-  objectMassProperties = option;
-  replaceAerovisualizerData('objectMassProperties',objectMassProperties);
-
-  if (option === 'select-an-object'){
-    replaceAerovisualizerData('mass',mass);
-    replaceAerovisualizerData('length',dimX);
-    replaceAerovisualizerData('width',dimY);
-    replaceAerovisualizerData('height',dimZ);
-    sdo.setDimensionsAndInertiaProperties(mass, dimX, dimY, dimZ);
-  }else{
-    sdo.setPresetMassProperties(option);
-  }
-
-  displayMomentsOfInertia();
-  //moments of inertia are not displayed correctly for other than
-  //the first case, need to fix this
-  displayNumerical(true);
-
-  if (torqueOption === 1){
-    pac.showPoinsot(poinsotTransparency < maxTransparency);
-
-    if (dimX === dimY || dimX === dimZ || dimY === dimZ){
-      pac.showCones(conesTransparency < maxTransparency);
-    }
-  }
-
-  resetAttitudeAndRates();
-  saveToLocalStorage();
-  sdo._needsRefresh = true;
-}
-
-presetMassPropertiesMenu.addEventListener('change', () => {
-  setMassProperties(presetMassPropertiesMenu.value);
-});
-
-bodyFrameColorMenu.addEventListener('change', () => {
-  bodyFrameColor = bodyFrameColorMenu.value;
-  setBodyFrameColor(bodyFrameColor, true);
-  saveToLocalStorage();
-});
-
-spaceFrameColorMenu.addEventListener('change', () => {
-  spaceFrameColor = spaceFrameColorMenu.value;
-  setSpaceFrameColor(spaceFrameColor, true);
-  saveToLocalStorage();
-});
-
-omegaColorMenu.addEventListener('change', () => {
-  omegaColor = omegaColorMenu.value;
-  setOmegaColor(omegaColor, true);
-  saveToLocalStorage();
-});
-
-hColorMenu.addEventListener('change', () => {
-  hColor = hColorMenu.value;
-  setHColor(hColor, true);
-  saveToLocalStorage();
-});
-
-torqueColorMenu.addEventListener('change', () => {
-  torqueColor = torqueColorMenu.value;
-  setTorqueColor(torqueColor, true);
-  saveToLocalStorage();
-});
-
-bodyConeColorMenu.addEventListener('change', () => {
-  bodyConeColor = bodyConeColorMenu.value;
-  setBodyConeColor(bodyConeColor, true);
-  saveToLocalStorage();
-});
-
-spaceConeColorMenu.addEventListener('change', () => {
-  spaceConeColor = spaceConeColorMenu.value;
-  setSpaceConeColor(spaceConeColor, true);
-  saveToLocalStorage();
-});
-
-ellipsoidColorMenu.addEventListener('change', () => {
-  ellipsoidColor = ellipsoidColorMenu.value;
-  setEllipsoidColor(ellipsoidColor, true);
-  saveToLocalStorage();
-});
-
-planeColorMenu.addEventListener('change', () => {
-  planeColor = planeColorMenu.value;
-  setPlaneColor(planeColor, true);
-  saveToLocalStorage();
-});
-
-const setBodyFrameColor = function(color, save=false){
-  vso.setColor('bodyFrame', color);
-
-  if (save){
-    replaceAerovisualizerData('bodyFrameColor',color);
-  }
-}
-
-const setSpaceFrameColor = function(color, save=false){
-  vso.setColor('spaceFrame', color);
-
-  if (save){
-    replaceAerovisualizerData('spaceFrameColor',color);
-  }
-}
-
-const setOmegaColor = function(color, save=false){
-  vso.setColor('omega', color);
-
-  if (save){
-    replaceAerovisualizerData('omegaColor',color);
-  }
-}
-
-const setHColor = function(color, save=false){
-  vso.setColor('h', color);
-
-  if (save){
-    replaceAerovisualizerData('hColor',color);
-  }
-}
-
-const setTorqueColor = function(color, save=false){
-  vso.setColor('torque', color);
-
-  if (save){
-    replaceAerovisualizerData('torqueColor',color);
-  }
-}
-
-const setBodyConeColor = function(color, save=false){
-  // sdo.setColor('bodyCone', color);
-  pac.setColor('bodyCone', color);
-
-  if (save){
-    replaceAerovisualizerData('bodyConeColor',color);
-  }
-}
-
-const setSpaceConeColor = function(color, save=false){
-  // sdo.setColor('spaceCone', color);
-  pac.setColor('spaceCone', color);
-
-  if (save){
-    replaceAerovisualizerData('spaceConeColor',color);
-  }
-}
-
-const setEllipsoidColor = function(color, save=false){
-  // sdo.setColor('ellipsoid', color);
-  pac.setColor('ellipsoid', color);
-
-  if (save){
-    replaceAerovisualizerData('ellipsoidColor',color);
-  }
-}
-
-const setPlaneColor = function(color, save=false){
-  // sdo.setColor('plane', color);
-  pac.setColor('plane', color);
-
-  if (save){
-    replaceAerovisualizerData('planeColor',color);
-  }
-}
-
-const doWindowResizeOrOrientationChange = function(){
-  camera.aspect = 1;
-  camera.updateProjectionMatrix();
-  renderer.setSize(sixDOFworld.clientWidth, sixDOFworld.clientHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.clear();
-  renderer.render(scene, camera);
-}
-
-window.addEventListener('resize', () => {
-  doWindowResizeOrOrientationChange();
-});
-
-window.addEventListener("orientationchange", () => {
-  doWindowResizeOrOrientationChange();
-});
-
 const replaceAerovisualizerData = function(name, value){
   aerovisualizerData.forEach(o => {
     if (o.name === name){
@@ -718,114 +464,254 @@ const replaceAerovisualizerData = function(name, value){
     }});
 }
 
-const displayEulerAngles = function(){
-  euler1Display.innerHTML = +euler1Slider.value;
-  euler2Display.innerHTML = +euler2Slider.value;
-  euler3Display.innerHTML = +euler3Slider.value;
-  displayNumerical(true);
+const saveToLocalStorage = function(){
+  localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
 }
 
-const displayOmegaValues = function(){
-  let omx = omegaIhatSlider.value;
-  let omy = omegaJhatSlider.value;
-  let omz = omegaKhatSlider.value;
-  let omm = Number(omegaMagnitudeSlider.value)/10;
-  const rss = Math.sqrt(omx*omx + omy*omy + omz*omz);
+const getFromLocalStorage = function(){
+  const data = JSON.parse(localStorage.getItem('aerovisualizerData'));
+  return data;
+}
 
-  if (rss === 0){
-    omegaIhatDisplay.innerHTML = "?";
-    omegaJhatDisplay.innerHTML = "?";
-    omegaKhatDisplay.innerHTML = "?";
-    omegaPDisplay.innerHTML = "?";
-    omegaQDisplay.innerHTML = "?";
-    omegaRDisplay.innerHTML = "?";
-    return;
+const haltPlay = function(){
+  if (playing){
+    playing = false;
+    playPauseButton.innerHTML = `<i class="material-icons">play_arrow</i>`;
+    sdo.realTime = 0;
+    sdo.simulationTime = 0;
+    clock.getDelta();
+  }
+}
+
+const handleMainButtons = function(button){
+  numericalButton.disabled = false;
+  massPropButton.disabled = false;
+  attitudeButton.disabled = false;
+  rotationRateButton.disabled = false;
+  torqueButton.disabled = false;
+  numericalElements.style.display = 'none';
+  massPropElements.style.display = 'none';
+  attitudeEulerElements.style.display = 'none';
+  attitudeQuaternionElements.style.display = 'none';
+  rotationElements.style.display = 'none';
+  torqueFrameElements.style.display = 'none';
+  acsElements.style.display = 'none';
+  torqueGGElements.style.display = 'none';
+  torqueTopElements.style.display = 'none';
+  torqueOptionElements.style.display = 'none';
+
+  switch (button){
+    case 'numerical':
+      numericalElements.style.display = 'grid';
+      numericalButton.disabled = true;
+      displayNumerical();
+      break;
+    case 'attitude':
+      if (attitudeOption === 1){
+        attitudeEulerElements.style.display = 'grid';
+      }else{
+        attitudeQuaternionElements.style.display = 'grid';
+        setQuatSlidersToQuat();
+        sdo.refresh();
+        vso.refresh();
+        pac.refresh();
+      }
+      attitudeButton.disabled = true;
+      break;
+    case 'massProp':
+      massPropButton.disabled = true;
+
+      if (objectMassProperties === 'select-an-object'){
+        massPropElements.style.display = 'grid';
+      }else{
+        massPropElements.style.display = 'none';
+      }
+      break;
+    case 'rates':
+      rotationElements.style.display = 'grid';
+      rotationRateButton.disabled = true;
+      displayOmegaValues();
+      break;
+    case 'torque':
+      torqueOptionElements.style.display = 'grid';
+      torqueButton.disabled = true;
+      handleTorqueOptionMenu();
+      break;
+    case 'none':
+      break;
+  }
+}
+
+const handleAllRadioButtons = function(){
+  for (let radio of eulerOrderRadios) {
+    if (radio.checked) {
+      sdo.setEulerOrder(radio.value);
+      replaceAerovisualizerData('eulerOrder',radio.value);
+    }
   }
 
-  omx = Number(omx/rss).toFixed(2).toString();
-  omy = Number(omy/rss).toFixed(2).toString();
-  omz = Number(omz/rss).toFixed(2).toString();
-  omegaMagnitudeDisplay.innerHTML = Number(omm).toFixed(2).toString();
-  hMagnitudeDisplay.innerHTML = Number(sdo.getAngularMomentumMagnitude()).toFixed(2).toString();
-  // the slider goes from 0 to 100, but the displayed
-  // value should go from 0 to 10
-  omegaIhatDisplay.innerHTML = omx;
-  omegaJhatDisplay.innerHTML = omy;
-  omegaKhatDisplay.innerHTML = omz;
-  omegaPDisplay.innerHTML = Number(omx*omm).toFixed(2).toString();
-  omegaQDisplay.innerHTML = Number(omy*omm).toFixed(2).toString();
-  omegaRDisplay.innerHTML = Number(omz*omm).toFixed(2).toString();
-}
-
-const constructPaC = function(){
-  pac.receiveEphemeralData(...sdo.sendPaCEphemeralData());
-  pac.receiveNonEphemeralData(...sdo.sendPaCNonEphemeralData());
-  pac.construct();
-}
-
-const resetAttitudeAndRates = function(includeRates = true){
-  sdo.setEulerAngles(euler1,euler2,euler3);
-  vso.receiveVectorData(...sdo.sendVectorData());
-
-  if (includeRates){
-    sdo.setOmega(omegaOrH,omegaMag,omHihat,omHjhat,omHkhat);
-    constructPaC();
+  for (let radio of orientationRadios) {
+    if (radio.checked) {
+      sdo.setOrientation(radio.value);
+      vso.setOrientation(radio.value);
+      pac.setOrientation(radio.value);
+      replaceAerovisualizerData('axesOrientation',radio.value);
+    }
   }
 
-  sdo.reset();
-  syncQuatToObject();
+  setEnvironment(environment, true);
+  setOmegaOrHChoice(omegaOrH, true);
+}
+
+numericalButton.addEventListener('click', () => {
+  handleMainButtons('numerical');
+});
+
+massPropButton.addEventListener('click', () => {
+  handleMainButtons('massProp');
+});
+
+attitudeButton.addEventListener('click', () => {
+  handleMainButtons('attitude');
+});
+
+rotationRateButton.addEventListener('click', () => {
+  handleMainButtons('rates');
+});
+
+torqueButton.addEventListener('click', () => {
+  handleMainButtons('torque');
+});
+
+preferencesButton.addEventListener('click', () => {
+  haltPlay();
+  toggleShowPrefs();
+});
+
+const toggleShowPrefs = function(){
+  if (sixDOFworld.style.display === 'none'){
+    sixDOFworld.style.display = 'block';
+    numericalButton.style.display = 'block';
+    attitudeButton.style.display = 'block';
+    massPropButton.style.display = 'block';
+    rotationRateButton.style.display = 'block';
+    torqueButton.style.display = 'block';
+    preferencesButton.style.display = 'block';
+    playPauseButton.style.display = 'block';
+    resetButton.style.display = 'block';
+
+    defaultButton.style.display = 'none';
+    axisOrientationPrefButton.style.display = 'none';
+    eulerAngleOrderPrefButton.style.display = 'none';
+    objectPrefButton.style.display = 'none';
+    bodyFramePrefButton.style.display = 'none';
+    spaceFramePrefButton.style.display = 'none';
+    omegaPrefButton.style.display = 'none';
+    hPrefButton.style.display = 'none';
+    torquePrefButton.style.display = 'none';
+    conesPrefButton.style.display = 'none';
+    poinsotPrefButton.style.display = 'none';
+    generalPrefButton.style.display = 'none';
+    prefsReturnButton.style.display = 'none';
+    handleAllRadioButtons();
+    handlePreferencesButtons('none');
+    doWindowResizeOrOrientationChange();
+    handleMainButtons('numerical');
+  }else{
+    sixDOFworld.style.display = 'none';
+    numericalButton.style.display = 'none';
+    attitudeButton.style.display = 'none';
+    massPropButton.style.display = 'none';
+    rotationRateButton.style.display = 'none';
+    torqueButton.style.display = 'none';
+    preferencesButton.style.display = 'none';
+    playPauseButton.style.display = 'none';
+    resetButton.style.display = 'none';
+
+    defaultButton.style.display = 'block';
+    axisOrientationPrefButton.style.display = 'block';
+    eulerAngleOrderPrefButton.style.display = 'block';
+    objectPrefButton.style.display = 'block';
+    bodyFramePrefButton.style.display = 'block';
+    spaceFramePrefButton.style.display = 'block';
+    omegaPrefButton.style.display = 'block';
+    hPrefButton.style.display = 'block';
+    torquePrefButton.style.display = 'block';
+    conesPrefButton.style.display = 'block';
+    poinsotPrefButton.style.display = 'block';
+    generalPrefButton.style.display = 'block';
+    prefsReturnButton.style.display = 'block';
+    handleMainButtons('none');
+  }
+}
+
+const handleTorqueOptionMenu = function(){
+  switch (torqueOption){
+    case 1:
+      handleTorqueSlidersOnpointerup(0);
+      break;
+    case 2:
+      torqueFrameElements.style.display = 'grid';
+
+      if (torqueOption != previousTorqueOption){
+        handleTorqueSlidersOnpointerup(1);
+      }
+      break;
+    case 3:
+      torqueFrameElements.style.display = 'grid';
+
+      if (torqueOption != previousTorqueOption){
+        handleTorqueSlidersOnpointerup(1);
+      }
+      break;
+    case 4:
+      acsElements.style.display = 'grid';
+
+      if (torqueOption != previousTorqueOption){
+        handleTorqueSlidersOnpointerup(2);
+      }
+      break;
+    case 5:
+      torqueGGElements.style.display = 'grid';
+
+      if (torqueOption != previousTorqueOption){
+        torqueMuOverR3Slider.value = muOverR3Choices.indexOf(muOverR3);
+        torqueMuOverR3Display.innerHTML = muOverR3ChoiceDisplay[+torqueMuOverR3Slider.value];
+        sdo.set3MuOverR3(3*muOverR3);
+        handleTorqueSlidersOnpointerup(3);
+      }
+      break;
+    case 6:
+      torqueTopElements.style.display = 'grid';
+
+      if (torqueOption != previousTorqueOption){
+        sdo.setTopRDistance(torqueTopR);
+        sdo.setTopGravity(torqueTopGrav);
+        torqueTopRDistanceDisplay.innerHTML = torqueTopR;
+        torqueTopGravityDisplay.innerHTML = torqueTopGrav;
+        handleTorqueSlidersOnpointerup(4);
+      }
+      break;
+  }
 
   if (torqueOption === 1){
     pac.showCones(conesTransparency < maxTransparency);
     pac.showPoinsot(poinsotTransparency < maxTransparency);
+    pac.initializePolhodeAndHerpolhode();
+  }else{
+    pac.showCones(false);
+    pac.showPoinsot(false);
   }
 
-  sdo._needsRefresh = true;
-  vso._needsRefresh = true;
-  pac._needsRefresh = true;
-
+  sdo.needsRefresh = true;
+  vso.needsRefresh = true;
+  pac.needsRefresh = true;
+  sdo.reset();
   sdo.refresh();
   vso.refresh();
   pac.refresh();
-  displayEulerAngles();
-  displayNumerical(true);
-  haltPlay();
-}
-
-const displayMomentsOfInertia = function(){
-  let ixx = 0;
-  let iyy = 0;
-  let izz = 0;
-
-  if (objectMassProperties === 'select-an-object'){
-    // allow one dimension to be zero but not two or more,
-    // this is not necessary if we check before the function
-    // but might be good for safety
-    const p1 = dimX === 0;
-    const p2 = dimY === 0;
-    const p3 = dimZ === 0;
-    
-    if ((p1 && p2) || (p1 && p3) || (p2 && p3)){
-      ixx = 0;
-      iyy = 0;
-      izz = 0;
-    }else{
-      ixx = Math.round((dimY*dimY + dimZ*dimZ)*mass/12*100)/100;
-      iyy = Math.round((dimX*dimX + dimZ*dimZ)*mass/12*100)/100;
-      izz = Math.round((dimX*dimX + dimY*dimY)*mass/12*100)/100;
-    }
-  }else{
-    // preset mass properties can have products of inertia, but we
-    // choose not to display them
-    [ixx, iyy, izz] = sdo.getMomentsOfInertia();
-  }
-
-  ixxNumber.innerHTML = ixx;
-  iyyNumber.innerHTML = iyy;
-  izzNumber.innerHTML = izz;
-  ixxDisplay.innerHTML = ixx;
-  iyyDisplay.innerHTML = iyy;
-  izzDisplay.innerHTML = izz;
+  displayNumerical();
+  previousTorqueOption = torqueOption;
 }
 
 const handleMassPropsSliders = function(){
@@ -838,6 +724,22 @@ const handleMassPropsSliders = function(){
   //times here as the slider is being moved. use onpointerup instead of oninput
 }
 
+const doMassPropOnPointerUp = function(){
+  displayNumerical(true);
+
+  if (objectMassProperties !== 'select-an-object'){
+    presetMassPropertiesMenu.value = 'select-an-object';
+    objectMassProperties = 'select-an-object';
+    replaceAerovisualizerData('objectMassProperties',objectMassProperties);
+    replaceAerovisualizerData('mass',mass);
+    replaceAerovisualizerData('length',dimX);
+    replaceAerovisualizerData('width',dimY);
+    replaceAerovisualizerData('height',dimZ);
+  }
+
+  saveToLocalStorage();
+}
+
 massSlider.oninput = function(){
   mass = masses[+massSlider.value];
   massDisplay.innerHTML = mass;
@@ -847,6 +749,8 @@ massSlider.oninput = function(){
 dimXSlider.oninput = function(){
   const temp = +dimXSlider.value;
 
+  // ensure that there are never two dimensions that are both
+  // zero.  This comment also applies to dimYSlider and dimZSlider
   if ((temp === 0 && dimY === 0) || (temp === 0 && dimZ === 0) ){
     dimXSlider.value = 1;
     return;
@@ -881,22 +785,6 @@ dimZSlider.oninput = function(){
   dimZ = temp;
   dimZDisplay.innerHTML = dimZ;
   handleMassPropsSliders();
-}
-
-const doMassPropOnPointerUp = function(){
-  displayNumerical(true);
-
-  if (objectMassProperties !== 'select-an-object'){
-    presetMassPropertiesMenu.value = 'select-an-object';
-    objectMassProperties = 'select-an-object';
-    replaceAerovisualizerData('objectMassProperties',objectMassProperties);
-    replaceAerovisualizerData('mass',mass);
-    replaceAerovisualizerData('length',dimX);
-    replaceAerovisualizerData('width',dimY);
-    replaceAerovisualizerData('height',dimZ);
-  }
-
-  saveToLocalStorage();
 }
 
 massSlider.onpointerup = function(){
@@ -977,14 +865,39 @@ const syncEulerAnglesToObject = function(){
   euler3 = e3;
 }
 
-torqueOptionButton.addEventListener('click', () => {
-  torqueOption++;
-  torqueOption = torqueOption > 6 ? 1 : torqueOption;
-  replaceAerovisualizerData('torqueOption',torqueOption);
-  saveToLocalStorage();
-  handleMainButtons('torque');
-  resetAttitudeAndRates();
-});
+const resetAttitudeAndRates = function(includeRates = true){
+  sdo.setEulerAngles(euler1,euler2,euler3);
+  vso.receiveVectorData(...sdo.sendVectorData());
+
+  if (includeRates){
+    if (torqueOption === 1){
+      pac.showCones(conesTransparency < maxTransparency);
+      pac.showPoinsot(poinsotTransparency < maxTransparency);
+    }else{
+      pac.showCones(false);
+      pac.showPoinsot(false);
+    }
+
+    sdo.setOmega(omegaOrH,omegaMag,omHihat,omHjhat,omHkhat);
+    pac.receiveEphemeralData(...sdo.sendPaCEphemeralData());
+    pac.receiveNonEphemeralData(...sdo.sendPaCNonEphemeralData());
+    pac.construct();
+  }
+
+  sdo.reset();
+  syncQuatToObject();
+
+  sdo.needsRefresh = true;
+  vso.needsRefresh = true;
+  pac.needsRefresh = true;
+
+  sdo.refresh();
+  vso.refresh();
+  pac.refresh();
+  displayEulerAngles();
+  displayNumerical(true);
+  haltPlay();
+}
 
 attitudeOptionButton1.addEventListener('click', () => {
   setQuatSlidersToQuat();
@@ -1022,8 +935,8 @@ const handleEulerOnInput = function(){
   syncQuatToObject();
   displayEulerAngles();
   haltPlay();
-  vso._needsRefresh = true;
-  pac._needsRefresh = true;
+  vso.needsRefresh = true;
+  pac.needsRefresh = true;
 }
 
 euler1Slider.oninput = function(){
@@ -1146,8 +1059,8 @@ const handleQuatOnInput = function(){
   sdo.setEulerAnglesFromQuaternion(quatW, quatX, quatY, quatZ);
   syncEulerAnglesToObject();
   haltPlay();
-  vso._needsRefresh = true;
-  pac._needsRefresh = true;
+  vso.needsRefresh = true;
+  pac.needsRefresh = true;
 }
 
 quaternianAngleSlider.oninput = function(){
@@ -1166,40 +1079,29 @@ quaternianKhatSlider.oninput = function(){
   handleQuatOnInput();
 }
 
-quaternianAngleSlider.onpointerup = function(){
+const handleQuatOnPointerUp = function(){
   resetAttitudeAndRates(false);
   sdo.syncDCMtoQuat();
   replaceAerovisualizerData('eulerAngle1',euler1);
   replaceAerovisualizerData('eulerAngle2',euler2);
   replaceAerovisualizerData('eulerAngle3',euler3);
   saveToLocalStorage();
+}
+
+quaternianAngleSlider.onpointerup = function(){
+  handleQuatOnPointerUp();
 }
 
 quaternianIhatSlider.onpointerup = function(){
-  resetAttitudeAndRates(false);
-  sdo.syncDCMtoQuat();
-  replaceAerovisualizerData('eulerAngle1',euler1);
-  replaceAerovisualizerData('eulerAngle2',euler2);
-  replaceAerovisualizerData('eulerAngle3',euler3);
-  saveToLocalStorage();
+  handleQuatOnPointerUp();
 }
 
 quaternianJhatSlider.onpointerup = function(){
-  resetAttitudeAndRates(false);
-  sdo.syncDCMtoQuat();
-  replaceAerovisualizerData('eulerAngle1',euler1);
-  replaceAerovisualizerData('eulerAngle2',euler2);
-  replaceAerovisualizerData('eulerAngle3',euler3);
-  saveToLocalStorage();
+  handleQuatOnPointerUp();
 }
 
 quaternianKhatSlider.onpointerup = function(){
-  resetAttitudeAndRates(false);
-  sdo.syncDCMtoQuat();
-  replaceAerovisualizerData('eulerAngle1',euler1);
-  replaceAerovisualizerData('eulerAngle2',euler2);
-  replaceAerovisualizerData('eulerAngle3',euler3);
-  saveToLocalStorage();
+  handleQuatOnPointerUp();
 }
 
 zeroQuaternionAngleButton.addEventListener('click', () => {
@@ -1242,13 +1144,46 @@ zeroQuaternionKhatButton.addEventListener('click', () => {
   saveToLocalStorage();
 });
 
-const haltPlay = function(){
-  if (playing){
-    playing = false;
-    playPauseButton.innerHTML = `<i class="material-icons">play_arrow</i>`;
-    sdo._realTime = 0;
-    sdo._simulationTime = 0;
-    clock.getDelta();
+const handleOmegaSliderOnpointerup = function(){
+  // slider goes from 0 to 100, we want 10 to be the
+  // upper limit, so we divide by 10 here
+  omegaMag = omegaMagnitudeSlider.value/10;
+  omHihat = omegaIhatSlider.value;
+  omHjhat = omegaJhatSlider.value;
+  omHkhat = omegaKhatSlider.value;
+  
+  resetAttitudeAndRates();
+  vso.needsRefresh = true;
+  displayOmegaValues();
+}
+
+omegaOrHOmegaRadio.addEventListener('click', () => {
+  omegaOrH = 'omega';
+  handleOmegaSliderOnpointerup();
+  replaceAerovisualizerData('omegaOrH',omegaOrH);
+  saveToLocalStorage();
+});
+
+omegaOrHHRadio.addEventListener('click', () => {
+  omegaOrH = 'H';
+  handleOmegaSliderOnpointerup();
+  replaceAerovisualizerData('omegaOrH',omegaOrH);
+  saveToLocalStorage();
+});
+
+const setOmegaOrHChoice = function(omOrH, getFromRadios=false){
+  for (let radio of omegaOrHRadios) {
+    if (getFromRadios){
+      if (radio.checked){
+        replaceAerovisualizerData('omegaOrH',radio.value);
+      }
+    }else{
+      radio.checked = radio.value === omOrH;
+    }
+
+    if (radio.checked){
+      omegaOrH = radio.value;
+    }
   }
 }
 
@@ -1270,19 +1205,6 @@ omegaJhatSlider.oninput = function(){
 omegaKhatSlider.oninput = function(){
   displayOmegaValues();
   haltPlay();
-}
-
-const handleOmegaSliderOnpointerup = function(){
-  omegaMag = omegaMagnitudeSlider.value/10;
-  // slider goes from 0 to 100, we want 10 to be the
-  // upper limit, so we divide by 10 here
-  omHihat = omegaIhatSlider.value;
-  omHjhat = omegaJhatSlider.value;
-  omHkhat = omegaKhatSlider.value;
-  
-  resetAttitudeAndRates();
-  vso._needsRefresh = true;
-  displayOmegaValues();
 }
 
 omegaMagnitudeSlider.onpointerup = function(){
@@ -1336,27 +1258,35 @@ zeroOmegaKhatButton.addEventListener('click', () => {
   saveToLocalStorage();
 });
 
-const displayTorqueValues = function(){
-  let taux = torqueIhatSlider.value;
-  let tauy = torqueJhatSlider.value;
-  let tauz = torqueKhatSlider.value;
-  // the slider goes from 0 to 50, but the value should go from 0 to 10
-  let taumag = torqueMagnitudeSlider.value/5;
-  const rss = Math.sqrt(taux*taux + tauy*tauy + tauz*tauz);
+torqueOptionMenu.addEventListener('change', () => {
+  const choice = torqueOptionMenu.value;
 
-  if (rss === 0){
-    torqueIhatDisplay.innerHTML = "?";
-    torqueJhatDisplay.innerHTML = "?";
-    torqueKhatDisplay.innerHTML = "?";
-    return;
+  switch (choice){
+    case 'no-torque':
+      torqueOption = 1;
+      break;
+    case 'space-frame':
+      torqueOption = 2;
+      break;
+    case 'body-frame':
+      torqueOption = 3;
+      break;
+    case 'ACS-stabilization':
+      torqueOption = 4;
+      break;
+    case 'gravity-gradient':
+      torqueOption = 5;
+      break;
+    case 'top':
+      torqueOption = 6;
+      break;
   }
 
-  torqueMagnitudeDisplay.innerHTML = taumag;
-  torqueIhatDisplay.innerHTML = Number(taux/rss).toFixed(2).toString();
-  torqueJhatDisplay.innerHTML = Number(tauy/rss).toFixed(2).toString();
-  torqueKhatDisplay.innerHTML = Number(tauz/rss).toFixed(2).toString();
-  displayNumerical(true);
-}
+  replaceAerovisualizerData('torqueOption',torqueOption);
+  saveToLocalStorage();
+  handleMainButtons('torque');
+  resetAttitudeAndRates();
+});
 
 torqueMagnitudeSlider.oninput = function(){
   displayTorqueValues();
@@ -1417,9 +1347,9 @@ torqueTopGravitySlider.oninput = function(){
 }
 
 const handleTorqueSlidersOnpointerup = function(option){
-  torqueMag = torqueMagnitudeSlider.value/5;
-  // slider goes from 0 to 50, we want 10 to be the
+  // slider goes from 0 to 50, but we want 10 to be the
   // upper limit, so we divide by 5 here
+  torqueMag = torqueMagnitudeSlider.value/5;
   torqueIhat = torqueIhatSlider.value;
   torqueJhat = torqueJhatSlider.value;
   torqueKhat = torqueKhatSlider.value;
@@ -1452,7 +1382,7 @@ const handleTorqueSlidersOnpointerup = function(option){
 
   sdo.setTorque(torqueOption, torqueMag, torqueIhat, torqueJhat, torqueKhat);
   vso.receiveVectorData(...sdo.sendVectorData());
-  vso._needsRefresh = true;
+  vso.needsRefresh = true;
   saveToLocalStorage();
   resetAttitudeAndRates();
   haltPlay();
@@ -1510,6 +1440,261 @@ torqueTopGravitySlider.onpointerup = function(){
   handleTorqueSlidersOnpointerup(4);
 }
 
+const displayMomentsOfInertia = function(){
+  let ixx = 0;
+  let iyy = 0;
+  let izz = 0;
+
+  if (objectMassProperties === 'select-an-object'){
+    // allow one dimension to be zero but not two or more,
+    // this is not necessary if we check before the function
+    // but might be good for safety
+    const p1 = dimX === 0;
+    const p2 = dimY === 0;
+    const p3 = dimZ === 0;
+    
+    if ((p1 && p2) || (p1 && p3) || (p2 && p3)){
+      ixx = 0;
+      iyy = 0;
+      izz = 0;
+    }else{
+      ixx = Math.round((dimY*dimY + dimZ*dimZ)*mass/12*100)/100;
+      iyy = Math.round((dimX*dimX + dimZ*dimZ)*mass/12*100)/100;
+      izz = Math.round((dimX*dimX + dimY*dimY)*mass/12*100)/100;
+    }
+  }else{
+    [ixx, iyy, izz] = sdo.getMomentsOfInertia();
+  }
+
+  ixxNumber.innerHTML = ixx;
+  iyyNumber.innerHTML = iyy;
+  izzNumber.innerHTML = izz;
+  ixxDisplay.innerHTML = ixx;
+  iyyDisplay.innerHTML = iyy;
+  izzDisplay.innerHTML = izz;
+}
+
+const displayEulerAngles = function(){
+  euler1Display.innerHTML = +euler1Slider.value;
+  euler2Display.innerHTML = +euler2Slider.value;
+  euler3Display.innerHTML = +euler3Slider.value;
+  displayNumerical(true);
+}
+
+const displayOmegaValues = function(){
+  let omx = omegaIhatSlider.value;
+  let omy = omegaJhatSlider.value;
+  let omz = omegaKhatSlider.value;
+  let omm = Number(omegaMagnitudeSlider.value)/10;
+  const rss = Math.sqrt(omx*omx + omy*omy + omz*omz);
+
+  if (rss === 0){
+    omegaIhatDisplay.innerHTML = "?";
+    omegaJhatDisplay.innerHTML = "?";
+    omegaKhatDisplay.innerHTML = "?";
+    omegaPDisplay.innerHTML = "?";
+    omegaQDisplay.innerHTML = "?";
+    omegaRDisplay.innerHTML = "?";
+    return;
+  }
+
+  omx = Number(omx/rss).toFixed(2).toString();
+  omy = Number(omy/rss).toFixed(2).toString();
+  omz = Number(omz/rss).toFixed(2).toString();
+  omegaMagnitudeDisplay.innerHTML = Number(omm).toFixed(2).toString();
+  hMagnitudeDisplay.innerHTML = Number(sdo.getAngularMomentumMagnitude()).toFixed(2).toString();
+  // the slider goes from 0 to 100, but the displayed
+  // value should go from 0 to 10
+  omegaIhatDisplay.innerHTML = omx;
+  omegaJhatDisplay.innerHTML = omy;
+  omegaKhatDisplay.innerHTML = omz;
+  omegaPDisplay.innerHTML = Number(omx*omm).toFixed(2).toString();
+  omegaQDisplay.innerHTML = Number(omy*omm).toFixed(2).toString();
+  omegaRDisplay.innerHTML = Number(omz*omm).toFixed(2).toString();
+}
+
+const displayTorqueValues = function(){
+  let taux = torqueIhatSlider.value;
+  let tauy = torqueJhatSlider.value;
+  let tauz = torqueKhatSlider.value;
+  // the slider goes from 0 to 50, but the value should go from 0 to 10
+  let taumag = torqueMagnitudeSlider.value/5;
+  const rss = Math.sqrt(taux*taux + tauy*tauy + tauz*tauz);
+
+  if (rss === 0){
+    torqueIhatDisplay.innerHTML = "?";
+    torqueJhatDisplay.innerHTML = "?";
+    torqueKhatDisplay.innerHTML = "?";
+    return;
+  }
+
+  torqueMagnitudeDisplay.innerHTML = taumag;
+  torqueIhatDisplay.innerHTML = Number(taux/rss).toFixed(2).toString();
+  torqueJhatDisplay.innerHTML = Number(tauy/rss).toFixed(2).toString();
+  torqueKhatDisplay.innerHTML = Number(tauz/rss).toFixed(2).toString();
+  displayNumerical(true);
+}
+
+const displayNumerical = function(display = false){
+  if ((display || numericalElements.style.display === 'grid') && sdo != null){
+    const omegaX = Number(sdo._omega.x).toFixed(3).toString();
+    const omegaY = Number(sdo._omega.y).toFixed(3).toString();
+    const omegaZ = Number(sdo._omega.z).toFixed(3).toString();
+    const hX = Number(sdo._Hinertial.x).toFixed(2).toString();
+    const hY = Number(sdo._Hinertial.y).toFixed(2).toString();
+    const hZ = Number(sdo._Hinertial.z).toFixed(2).toString();
+    const tauL = Number(sdo._torque.x).toFixed(3).toString();
+    const tauM = Number(sdo._torque.y).toFixed(3).toString();
+    const tauN = Number(sdo._torque.z).toFixed(3).toString();
+    const dcm11 = Number(sdo._dcm.elements[0]).toFixed(3).toString();
+    const dcm12 = Number(sdo._dcm.elements[4]).toFixed(3).toString();
+    const dcm13 = Number(sdo._dcm.elements[8]).toFixed(3).toString();
+    const dcm21 = Number(sdo._dcm.elements[1]).toFixed(3).toString();
+    const dcm22 = Number(sdo._dcm.elements[5]).toFixed(3).toString();
+    const dcm23 = Number(sdo._dcm.elements[9]).toFixed(3).toString();
+    const dcm31 = Number(sdo._dcm.elements[2]).toFixed(3).toString();
+    const dcm32 = Number(sdo._dcm.elements[6]).toFixed(3).toString();
+    const dcm33 = Number(sdo._dcm.elements[10]).toFixed(3).toString();
+    let [qw, qx, qy, qz] = sdo.getQuaternionElements();
+    qw = Number(qw).toFixed(4).toString();
+    qx = Number(qx).toFixed(4).toString();
+    qy = Number(qy).toFixed(4).toString();
+    qz = Number(qz).toFixed(4).toString();
+
+    omegaPNumber.innerHTML = omegaX.charAt(0) === '-' ? omegaX : ` ${omegaX}`;
+    omegaQNumber.innerHTML = omegaY.charAt(0) === '-' ? omegaY : ` ${omegaY}`;
+    omegaRNumber.innerHTML = omegaZ.charAt(0) === '-' ? omegaZ : ` ${omegaZ}`;
+    hXNumber.innerHTML = hX.charAt(0) === '-' ? hX : ` ${hX}`;
+    hYNumber.innerHTML = hY.charAt(0) === '-' ? hY : ` ${hY}`;
+    hZNumber.innerHTML = hZ.charAt(0) === '-' ? hZ : ` ${hZ}`;
+    tauLNumber.innerHTML = tauL.charAt(0) === '-' ? tauL : ` ${tauL}`;
+    tauMNumber.innerHTML = tauM.charAt(0) === '-' ? tauM : ` ${tauM}`;
+    tauNNumber.innerHTML = tauN.charAt(0) === '-' ? tauN : ` ${tauN}`;
+    dcm11Number.innerText = dcm11.charAt(0) === '-' ? dcm11 : ` ${dcm11}`;
+    dcm12Number.innerText = dcm12.charAt(0) === '-' ? dcm12 : ` ${dcm12}`;
+    dcm13Number.innerText = dcm13.charAt(0) === '-' ? dcm13 : ` ${dcm13}`;
+    dcm21Number.innerText = dcm21.charAt(0) === '-' ? dcm21 : ` ${dcm21}`;
+    dcm22Number.innerText = dcm22.charAt(0) === '-' ? dcm22 : ` ${dcm22}`;
+    dcm23Number.innerText = dcm23.charAt(0) === '-' ? dcm23 : ` ${dcm23}`;
+    dcm31Number.innerText = dcm31.charAt(0) === '-' ? dcm31 : ` ${dcm31}`;
+    dcm32Number.innerText = dcm32.charAt(0) === '-' ? dcm32 : ` ${dcm32}`;
+    dcm33Number.innerText = dcm33.charAt(0) === '-' ? dcm33 : ` ${dcm33}`;
+    quatWNumber.innerHTML = qw.charAt(0) === '-' ? qw : ` ${qw}`;
+    quatXNumber.innerHTML = qx.charAt(0) === '-' ? qx : ` ${qx}`;
+    quatYNumber.innerHTML = qy.charAt(0) === '-' ? qy : ` ${qy}`;
+    quatZNumber.innerHTML = qz.charAt(0) === '-' ? qz : ` ${qz}`;
+
+    const ke = sdo.getKineticEnergy();
+    kineticEnergy.innerHTML = Number(ke).toFixed(2).toString();
+  }
+}
+
+objectAppearanceChoiceMenu.addEventListener('change', () => {
+  objectAppearance = objectAppearanceChoiceMenu.value;
+  sdo.constructBlock(objectAppearance);
+
+  if (objectAppearance === 'axis-labels'){
+    handleMassPropsSliders();
+  }else if (objectAppearance === 'cessna-172'){
+    dimX = 9;
+    dimY = 7;
+    dimZ = 4;
+    dimXDisplay.innerHTML = dimX;
+    dimYDisplay.innerHTML = dimY;
+    dimZDisplay.innerHTML = dimZ;
+    dimXSlider.value = dimX;
+    dimYSlider.value = dimY;
+    dimZSlider.value = dimZ;
+  }else if (objectAppearance === 'new-horizons'){
+    dimX = 9;
+    dimY = 4;
+    dimZ = 6;
+    dimXDisplay.innerHTML = dimX;
+    dimYDisplay.innerHTML = dimY;
+    dimZDisplay.innerHTML = dimZ;
+    dimXSlider.value = dimX;
+    dimYSlider.value = dimY;
+    dimZSlider.value = dimZ;
+  }
+
+  replaceAerovisualizerData('objectAppearance',objectAppearance);
+  replaceAerovisualizerData('dimX',dimX);
+  replaceAerovisualizerData('dimY',dimY);
+  replaceAerovisualizerData('dimZ',dimZ);
+  saveToLocalStorage();
+});
+
+const setMassProperties = function(option){
+  objectMassProperties = option;
+  replaceAerovisualizerData('objectMassProperties',objectMassProperties);
+
+  if (option === 'select-an-object'){
+    replaceAerovisualizerData('mass',mass);
+    replaceAerovisualizerData('length',dimX);
+    replaceAerovisualizerData('width',dimY);
+    replaceAerovisualizerData('height',dimZ);
+    sdo.setDimensionsAndInertiaProperties(mass, dimX, dimY, dimZ);
+  }else{
+    sdo.setPresetMassProperties(option);
+  }
+
+  displayMomentsOfInertia();
+  //look into this!  check if this is still true!!!!!
+  //moments of inertia are not displayed correctly for other than
+  //the first case, need to fix this
+  displayNumerical(true);
+
+  if (torqueOption === 1){
+    pac.showPoinsot(poinsotTransparency < maxTransparency);
+
+    if (dimX === dimY || dimX === dimZ || dimY === dimZ){
+      pac.showCones(conesTransparency < maxTransparency);
+    }
+  }
+
+  resetAttitudeAndRates();
+  saveToLocalStorage();
+  sdo.needsRefresh = true;
+}
+
+presetMassPropertiesMenu.addEventListener('change', () => {
+  setMassProperties(presetMassPropertiesMenu.value);
+});
+
+const setEnvironment = function(env, getFromRadios=false){
+  for (let radio of environmentRadios) {
+    if (getFromRadios){
+      if (radio.checked){
+        replaceAerovisualizerData('environment',radio.value);
+        saveToLocalStorage();
+      }
+    }else{
+      radio.checked = radio.value === env;
+    }
+
+    if (radio.checked){
+      loadBackground(radio.value);
+    }
+  }
+}
+
+maxOmegaSlider.oninput = function(){
+  maxOmegaDisplay.innerText = maxOmegaSlider.value;
+}
+
+maxOmegaSlider.onpointerup = function(){
+  maxOmega = Number(this.value);
+  replaceAerovisualizerData('maxOmega',maxOmega);
+  saveToLocalStorage();
+}
+
+vectorSizeSlider.onpointerup = function(){
+  vso.setVectorSize(this.value);
+  pac.setConeSize(this.value);
+  replaceAerovisualizerData('vectorSize',this.value);
+  saveToLocalStorage();
+}
+
 const setTransparency = function(thing, transparency){
   const opacity = (100 - transparency)/100;
   sdo.setOpacity(thing, opacity);
@@ -1553,8 +1738,12 @@ objectTransparencySlider.onpointerup = function(){
   setTransparency('object',this.value);
   replaceAerovisualizerData('objectTransparency',this.value);
   sdo.showObject(this.value < maxTransparency);
-  replaceAerovisualizerData('showObject',this.value < maxTransparency);
   saveToLocalStorage();
+}
+
+bodyFrameTransparencySlider.oninput = function(){
+  bodyFrameTransparencyDisplay.innerText = bodyFrameTransparencySlider.value;
+  setTransparency('bodyFrame',this.value);
 }
 
 bodyFrameTransparencySlider.onpointerup = function(){
@@ -1564,20 +1753,39 @@ bodyFrameTransparencySlider.onpointerup = function(){
   saveToLocalStorage();
 }
 
-bodyFrameTransparencySlider.oninput = function(){
-  bodyFrameTransparencyDisplay.innerText = bodyFrameTransparencySlider.value;
-  setTransparency('bodyFrame',this.value);
+const showBodyVector = function(){
+  vso.showBodyAxis(showBodyXVectorCheckbox.checked, showBodyYVectorCheckbox.checked, showBodyZVectorCheckbox.checked);
+  renderer.clear();
+  renderer.render(scene, camera);
+}
+
+showBodyXVectorCheckbox.addEventListener('change', () => {
+  showBodyVector();
+  replaceAerovisualizerData('showBodyXVector',showBodyXVectorCheckbox.checked);
+  saveToLocalStorage();
+});
+
+showBodyYVectorCheckbox.addEventListener('change', () => {
+  showBodyVector();
+  replaceAerovisualizerData('showBodyYVector',showBodyYVectorCheckbox.checked);
+  saveToLocalStorage();
+});
+
+showBodyZVectorCheckbox.addEventListener('change', () => {
+  showBodyVector();
+  replaceAerovisualizerData('showBodyZVector',showBodyZVectorCheckbox.checked);
+  saveToLocalStorage();
+});
+
+spaceFrameTransparencySlider.oninput = function(){
+  spaceFrameTransparencyDisplay.innerText = spaceFrameTransparencySlider.value;
+  setTransparency('spaceFrame',this.value);
 }
 
 spaceFrameTransparencySlider.onpointerup = function(){
   replaceAerovisualizerData('spaceFrameTransparency',this.value);
   vso.showSpaceFrame(this.value < maxTransparency);
   saveToLocalStorage();
-}
-
-spaceFrameTransparencySlider.oninput = function(){
-  spaceFrameTransparencyDisplay.innerText = spaceFrameTransparencySlider.value;
-  setTransparency('spaceFrame',this.value);
 }
 
 omegaTransparencySlider.oninput = function(){
@@ -1592,6 +1800,11 @@ omegaTransparencySlider.onpointerup = function(){
   saveToLocalStorage();
 }
 
+hTransparencySlider.oninput = function(){
+  hTransparencyDisplay.innerText = hTransparencySlider.value;
+  setTransparency('h',this.value);
+}
+
 hTransparencySlider.onpointerup = function(){
   setTransparency('h',this.value);
   replaceAerovisualizerData('hTransparency',this.value);
@@ -1599,9 +1812,9 @@ hTransparencySlider.onpointerup = function(){
   saveToLocalStorage();
 }
 
-hTransparencySlider.oninput = function(){
-  hTransparencyDisplay.innerText = hTransparencySlider.value;
-  setTransparency('h',this.value);
+torqueTransparencySlider.oninput = function(){
+  torqueTransparencyDisplay.innerText = torqueTransparencySlider.value;
+  setTransparency('torque',this.value);
 }
 
 torqueTransparencySlider.onpointerup = function(){
@@ -1611,9 +1824,10 @@ torqueTransparencySlider.onpointerup = function(){
   saveToLocalStorage();
 }
 
-torqueTransparencySlider.oninput = function(){
-  torqueTransparencyDisplay.innerText = torqueTransparencySlider.value;
-  setTransparency('torque',this.value);
+conesTransparencySlider.oninput = function(){
+  conesTransparency = Number(this.value);
+  conesTransparencyDisplay.innerText = this.value;
+  setTransparency('cones',this.value);
 }
 
 conesTransparencySlider.onpointerup = function(){
@@ -1627,9 +1841,9 @@ conesTransparencySlider.onpointerup = function(){
   saveToLocalStorage();
 }
 
-conesTransparencySlider.oninput = function(){
-  conesTransparencyDisplay.innerText = conesTransparencySlider.value;
-  setTransparency('cones',this.value);
+poinsotTransparencySlider.oninput = function(){
+  poinsotTransparency = Number(this.value);
+  poinsotTransparencyDisplay.innerText = this.value;
 }
 
 poinsotTransparencySlider.onpointerup = function(){
@@ -1637,75 +1851,6 @@ poinsotTransparencySlider.onpointerup = function(){
   replaceAerovisualizerData('poinsotTransparency',this.value);
   pac.showPoinsot(this.value < maxTransparency);
   saveToLocalStorage();
-}
-
-poinsotTransparencySlider.oninput = function(){
-  poinsotTransparencyDisplay.innerText = poinsotTransparencySlider.value;
-  setTransparency('poinsot',this.value);
-}
-
-const setEnvironment = function(env, getFromRadios=false){
-  for (let radio of environmentRadios) {
-    if (getFromRadios){
-      if (radio.checked){
-        replaceAerovisualizerData('environment',radio.value);
-        saveToLocalStorage();
-      }
-    }else{
-      radio.checked = radio.value === env;
-    }
-
-    if (radio.checked){
-      loadBackground(radio.value);
-    }
-  }
-}
-
-maxOmegaSlider.oninput = function(){
-  maxOmegaDisplay.innerText = maxOmegaSlider.value;
-}
-
-maxOmegaSlider.onpointerup = function(){
-  maxOmega = Number(this.value);
-  replaceAerovisualizerData('maxOmega',maxOmega);
-  saveToLocalStorage();
-}
-
-vectorSizeSlider.onpointerup = function(){
-  vso.setVectorSize(this.value);
-  pac.setConeSize(this.value);
-  replaceAerovisualizerData('vectorSize',this.value);
-  saveToLocalStorage();
-}
-
-omegaOrHOmegaRadio.addEventListener('click', () => {
-  omegaOrH = 'omega';
-  handleOmegaSliderOnpointerup();
-  replaceAerovisualizerData('omegaOrH',omegaOrH);
-  saveToLocalStorage();
-});
-
-omegaOrHHRadio.addEventListener('click', () => {
-  omegaOrH = 'H';
-  handleOmegaSliderOnpointerup();
-  replaceAerovisualizerData('omegaOrH',omegaOrH);
-  saveToLocalStorage();
-});
-
-const setOmegaOrHChoice = function(omOrH, getFromRadios=false){
-  for (let radio of omegaOrHRadios) {
-    if (getFromRadios){
-      if (radio.checked){
-        replaceAerovisualizerData('omegaOrH',radio.value);
-      }
-    }else{
-      radio.checked = radio.value === omOrH;
-    }
-
-    if (radio.checked){
-      omegaOrH = radio.value;
-    }
-  }
 }
 
 objectOffsetCheckbox.addEventListener('change', () => {
@@ -1764,288 +1909,157 @@ poinsotOffsetCheckbox.addEventListener('change', () => {
   pac.refresh();
 });
 
-const doPlayPause = function(){
-  playing = playing ? false : true;
-  playPauseButton.innerHTML = playing ? `<i class="material-icons">pause</i>` : `<i class="material-icons">play_arrow</i>`;
-  sdo._realTime = 0;
-  sdo._simulationTime = 0;
-  clock.getDelta();
+const setBodyFrameColor = function(color, save=false){
+  vso.setColor('bodyFrame', color);
+
+  if (save){
+    replaceAerovisualizerData('bodyFrameColor',color);
+  }
 }
 
-playPauseButton.addEventListener('click', () => {
-  doPlayPause();
-});
+const setSpaceFrameColor = function(color, save=false){
+  vso.setColor('spaceFrame', color);
 
-resetButton.addEventListener('click', () => {
-  displayMaxOmega(false);
-  // debugger;
-  resetAttitudeAndRates();
-});
-
-const showBodyVector = function(){
-  vso.showBodyAxis(showBodyXVectorCheckbox.checked, showBodyYVectorCheckbox.checked, showBodyZVectorCheckbox.checked);
-  renderer.clear();
-  renderer.render(scene, camera);
+  if (save){
+    replaceAerovisualizerData('spaceFrameColor',color);
+  }
 }
 
-showBodyXVectorCheckbox.addEventListener('change', () => {
-  showBodyVector();
-  replaceAerovisualizerData('showBodyXVector',showBodyXVectorCheckbox.checked);
+const setOmegaColor = function(color, save=false){
+  vso.setColor('omega', color);
+
+  if (save){
+    replaceAerovisualizerData('omegaColor',color);
+  }
+}
+
+const setHColor = function(color, save=false){
+  vso.setColor('h', color);
+
+  if (save){
+    replaceAerovisualizerData('hColor',color);
+  }
+}
+
+const setTorqueColor = function(color, save=false){
+  vso.setColor('torque', color);
+
+  if (save){
+    replaceAerovisualizerData('torqueColor',color);
+  }
+}
+
+const setBodyConeColor = function(color, save=false){
+  pac.setColor('bodyCone', color);
+
+  if (save){
+    replaceAerovisualizerData('bodyConeColor',color);
+  }
+}
+
+const setSpaceConeColor = function(color, save=false){
+  pac.setColor('spaceCone', color);
+
+  if (save){
+    replaceAerovisualizerData('spaceConeColor',color);
+  }
+}
+
+const setEllipsoidColor = function(color, save=false){
+  pac.setColor('ellipsoid', color);
+
+  if (save){
+    replaceAerovisualizerData('ellipsoidColor',color);
+  }
+}
+
+const setPlaneColor = function(color, save=false){
+  pac.setColor('plane', color);
+
+  if (save){
+    replaceAerovisualizerData('planeColor',color);
+  }
+}
+
+bodyFrameColorMenu.addEventListener('change', () => {
+  bodyFrameColor = bodyFrameColorMenu.value;
+  setBodyFrameColor(bodyFrameColor, true);
   saveToLocalStorage();
 });
 
-showBodyYVectorCheckbox.addEventListener('change', () => {
-  showBodyVector();
-  replaceAerovisualizerData('showBodyYVector',showBodyYVectorCheckbox.checked);
+spaceFrameColorMenu.addEventListener('change', () => {
+  spaceFrameColor = spaceFrameColorMenu.value;
+  setSpaceFrameColor(spaceFrameColor, true);
   saveToLocalStorage();
 });
 
-showBodyZVectorCheckbox.addEventListener('change', () => {
-  showBodyVector();
-  replaceAerovisualizerData('showBodyZVector',showBodyZVectorCheckbox.checked);
+omegaColorMenu.addEventListener('change', () => {
+  omegaColor = omegaColorMenu.value;
+  setOmegaColor(omegaColor, true);
   saveToLocalStorage();
 });
 
-const handleAllRadioButtons = function(){
-  for (let radio of eulerOrderRadios) {
-    if (radio.checked) {
-      sdo.setEulerOrder(radio.value);
-      replaceAerovisualizerData('eulerOrder',radio.value);
-    }
-  }
-
-  for (let radio of orientationRadios) {
-    if (radio.checked) {
-      sdo.setOrientation(radio.value);
-      vso.setOrientation(radio.value);
-      pac.setOrientation(radio.value);
-      replaceAerovisualizerData('axesOrientation',radio.value);
-    }
-  }
-
-  setEnvironment(environment, true);
-  setOmegaOrHChoice(omegaOrH, true);
-}
-
-const displayNumerical = function(display = false){
-  if ((display || numericalElementsGeneral.style.display === 'grid') && sdo != null){
-    if (numericalDisplayIsGeneral){
-      const omegaX = Number(sdo._omega.x).toFixed(3).toString();
-      const omegaY = Number(sdo._omega.y).toFixed(3).toString();
-      const omegaZ = Number(sdo._omega.z).toFixed(3).toString();
-      const hX = Number(sdo._Hinertial.x).toFixed(2).toString();
-      const hY = Number(sdo._Hinertial.y).toFixed(2).toString();
-      const hZ = Number(sdo._Hinertial.z).toFixed(2).toString();
-      const tauL = Number(sdo._torque.x).toFixed(3).toString();
-      const tauM = Number(sdo._torque.y).toFixed(3).toString();
-      const tauN = Number(sdo._torque.z).toFixed(3).toString();
-      const dcm11 = Number(sdo._dcm.elements[0]).toFixed(3).toString();
-      const dcm12 = Number(sdo._dcm.elements[4]).toFixed(3).toString();
-      const dcm13 = Number(sdo._dcm.elements[8]).toFixed(3).toString();
-      const dcm21 = Number(sdo._dcm.elements[1]).toFixed(3).toString();
-      const dcm22 = Number(sdo._dcm.elements[5]).toFixed(3).toString();
-      const dcm23 = Number(sdo._dcm.elements[9]).toFixed(3).toString();
-      const dcm31 = Number(sdo._dcm.elements[2]).toFixed(3).toString();
-      const dcm32 = Number(sdo._dcm.elements[6]).toFixed(3).toString();
-      const dcm33 = Number(sdo._dcm.elements[10]).toFixed(3).toString();
-      let [qw, qx, qy, qz] = sdo.getQuaternionElements();
-      qw = Number(qw).toFixed(4).toString();
-      qx = Number(qx).toFixed(4).toString();
-      qy = Number(qy).toFixed(4).toString();
-      qz = Number(qz).toFixed(4).toString();
-
-      omegaPNumber.innerHTML = omegaX.charAt(0) === '-' ? omegaX : ` ${omegaX}`;
-      omegaQNumber.innerHTML = omegaY.charAt(0) === '-' ? omegaY : ` ${omegaY}`;
-      omegaRNumber.innerHTML = omegaZ.charAt(0) === '-' ? omegaZ : ` ${omegaZ}`;
-      hXNumber.innerHTML = hX.charAt(0) === '-' ? hX : ` ${hX}`;
-      hYNumber.innerHTML = hY.charAt(0) === '-' ? hY : ` ${hY}`;
-      hZNumber.innerHTML = hZ.charAt(0) === '-' ? hZ : ` ${hZ}`;
-      tauLNumber.innerHTML = tauL.charAt(0) === '-' ? tauL : ` ${tauL}`;
-      tauMNumber.innerHTML = tauM.charAt(0) === '-' ? tauM : ` ${tauM}`;
-      tauNNumber.innerHTML = tauN.charAt(0) === '-' ? tauN : ` ${tauN}`;
-      dcm11Number.innerText = dcm11.charAt(0) === '-' ? dcm11 : ` ${dcm11}`;
-      dcm12Number.innerText = dcm12.charAt(0) === '-' ? dcm12 : ` ${dcm12}`;
-      dcm13Number.innerText = dcm13.charAt(0) === '-' ? dcm13 : ` ${dcm13}`;
-      dcm21Number.innerText = dcm21.charAt(0) === '-' ? dcm21 : ` ${dcm21}`;
-      dcm22Number.innerText = dcm22.charAt(0) === '-' ? dcm22 : ` ${dcm22}`;
-      dcm23Number.innerText = dcm23.charAt(0) === '-' ? dcm23 : ` ${dcm23}`;
-      dcm31Number.innerText = dcm31.charAt(0) === '-' ? dcm31 : ` ${dcm31}`;
-      dcm32Number.innerText = dcm32.charAt(0) === '-' ? dcm32 : ` ${dcm32}`;
-      dcm33Number.innerText = dcm33.charAt(0) === '-' ? dcm33 : ` ${dcm33}`;
-      quatWNumber.innerHTML = qw.charAt(0) === '-' ? qw : ` ${qw}`;
-      quatXNumber.innerHTML = qx.charAt(0) === '-' ? qx : ` ${qx}`;
-      quatYNumber.innerHTML = qy.charAt(0) === '-' ? qy : ` ${qy}`;
-      quatZNumber.innerHTML = qz.charAt(0) === '-' ? qz : ` ${qz}`;
-
-      const ke = sdo.getKineticEnergy();
-      kineticEnergy.innerHTML = Number(ke).toFixed(2).toString();
-    }
-  }
-}
-
-const handleTorqueOptionButton = function(){
-  switch (torqueOption){
-    case 1:
-      torqueOptionDisplay.innerHTML = 'No Torque';
-      handleTorqueSlidersOnpointerup(0);
-      break;
-    case 2:
-      torqueOptionDisplay.innerHTML = 'Space Frame';
-      torqueFrameElements.style.display = 'grid';
-      handleTorqueSlidersOnpointerup(1);
-      break;
-    case 3:
-      torqueOptionDisplay.innerHTML = 'Body Frame';
-      torqueFrameElements.style.display = 'grid';
-      handleTorqueSlidersOnpointerup(1);
-      break;
-    case 4:
-      torqueOptionDisplay.innerHTML = 'ACS Stabilization';
-      acsElements.style.display = 'grid';
-      handleTorqueSlidersOnpointerup(2);
-      break;
-    case 5:
-      torqueOptionDisplay.innerHTML = 'Gravity Gradient';
-      torqueGGElements.style.display = 'grid';
-      torqueMuOverR3Slider.value = muOverR3Choices.indexOf(muOverR3);
-      torqueMuOverR3Display.innerHTML = muOverR3ChoiceDisplay[+torqueMuOverR3Slider.value];
-      sdo.set3MuOverR3(3*muOverR3);
-      handleTorqueSlidersOnpointerup(3);
-      break;
-    case 6:
-      torqueTopElements.style.display = 'grid';
-      torqueOptionDisplay.innerHTML = 'Top';
-      sdo.setTopRDistance(torqueTopR);
-      sdo.setTopGravity(torqueTopGrav);
-      torqueTopRDistanceDisplay.innerHTML = torqueTopR;
-      torqueTopGravityDisplay.innerHTML = torqueTopGrav;
-      handleTorqueSlidersOnpointerup(4);
-      break;
-  }
-
-  pac.showCones(false);
-  pac.showPoinsot(false);
-
-  if (torqueOption === 1){
-    pac.showCones(conesTransparency < maxTransparency);
-    pac.showPoinsot(poinsotTransparency < maxTransparency);
-  }
-
-  sdo._needsRefresh = true;
-  vso._needsRefresh = true;
-  pac._needsRefresh = true;
-  sdo.reset();
-  sdo.refresh();
-  vso.refresh();
-  pac.refresh();
-  displayNumerical();
-}
-
-const handleMainButtons = function(button){
-  numericalButton.disabled = false;
-  attitudeButton.disabled = false;
-  massPropButton.disabled = false;
-  rotationRateButton.disabled = false;
-  torqueButton.disabled = false;
-  numericalElementsGeneral.style.display = 'none';
-  attitudeEulerElements.style.display = 'none';
-  attitudeQuaternionElements.style.display = 'none';
-  massPropElements.style.display = 'none';
-  rotationElements.style.display = 'none';
-  torqueFrameElements.style.display = 'none';
-  acsElements.style.display = 'none';
-  torqueGGElements.style.display = 'none';
-  torqueTopElements.style.display = 'none';
-  torqueOptionElements.style.display = 'none';
-
-  switch (button){
-    case 'numerical':
-      numericalElementsGeneral.style.display = 'grid';
-      numericalButton.disabled = true;
-      displayNumerical();
-      break;
-    case 'attitude':
-      if (attitudeOption === 1){
-        attitudeEulerElements.style.display = 'grid';
-      }else{
-        attitudeQuaternionElements.style.display = 'grid';
-        setQuatSlidersToQuat();
-        sdo.refresh();
-        vso.refresh();
-        pac.refresh();
-      }
-      attitudeButton.disabled = true;
-      break;
-    case 'massProp':
-      massPropElements.style.display = 'grid';
-      massPropButton.disabled = true;
-      break;
-    case 'rates':
-      rotationElements.style.display = 'grid';
-      rotationRateButton.disabled = true;
-      displayOmegaValues();
-      break;
-    case 'torque':
-      torqueOptionElements.style.display = 'grid';
-      torqueButton.disabled = true;
-      handleTorqueOptionButton();
-      break;
-    case 'none':
-      break;
-  }
-}
-
-numericalButton.addEventListener('click', () => {
-  handleMainButtons('numerical');
+hColorMenu.addEventListener('change', () => {
+  hColor = hColorMenu.value;
+  setHColor(hColor, true);
+  saveToLocalStorage();
 });
 
-attitudeButton.addEventListener('click', () => {
-  handleMainButtons('attitude');
+torqueColorMenu.addEventListener('change', () => {
+  torqueColor = torqueColorMenu.value;
+  setTorqueColor(torqueColor, true);
+  saveToLocalStorage();
 });
 
-massPropButton.addEventListener('click', () => {
-  handleMainButtons('massProp');
+bodyConeColorMenu.addEventListener('change', () => {
+  bodyConeColor = bodyConeColorMenu.value;
+  setBodyConeColor(bodyConeColor, true);
+  saveToLocalStorage();
 });
 
-rotationRateButton.addEventListener('click', () => {
-  handleMainButtons('rates');
+spaceConeColorMenu.addEventListener('change', () => {
+  spaceConeColor = spaceConeColorMenu.value;
+  setSpaceConeColor(spaceConeColor, true);
+  saveToLocalStorage();
 });
 
-torqueButton.addEventListener('click', () => {
-  handleMainButtons('torque');
+ellipsoidColorMenu.addEventListener('change', () => {
+  ellipsoidColor = ellipsoidColorMenu.value;
+  setEllipsoidColor(ellipsoidColor, true);
+  saveToLocalStorage();
 });
 
-preferencesButton.addEventListener('click', () => {
-  haltPlay();
-  toggleShowPrefs();
+planeColorMenu.addEventListener('change', () => {
+  planeColor = planeColorMenu.value;
+  setPlaneColor(planeColor, true);
+  saveToLocalStorage();
 });
 
 const toggleShowInfo = function(){
   if (sixDOFworld.style.display === 'none'){
     sixDOFworld.style.display = 'block';
     numericalButton.style.display = 'block';
-    attitudeButton.style.display = 'block';
     massPropButton.style.display = 'block';
+    attitudeButton.style.display = 'block';
     rotationRateButton.style.display = 'block';
     torqueButton.style.display = 'block';
     preferencesButton.style.display = 'block';
     playPauseButton.style.display = 'block';
     resetButton.style.display = 'block';
-
     infoElements.style.display = 'none';
     doWindowResizeOrOrientationChange();
+    handleTorqueOptionMenu();
     handleMainButtons('numerical');
   }else{
     sixDOFworld.style.display = 'none';
     numericalButton.style.display = 'none';
-    attitudeButton.style.display = 'none';
     massPropButton.style.display = 'none';
+    attitudeButton.style.display = 'none';
     rotationRateButton.style.display = 'none';
     torqueButton.style.display = 'none';
     preferencesButton.style.display = 'none';
     playPauseButton.style.display = 'none';
     resetButton.style.display = 'none';
-
     infoElements.style.display = 'block';
     handleMainButtons('none');
   }
@@ -2063,199 +2077,273 @@ infoReturnButton.addEventListener('click', () => {
 const handleInfoMenuChoice = function(choice){
   switch (choice){
     case 'info-intro': //Introduction
-      infoText.innerHTML = `<p class="p-normal">Aerovisualizer is a web application
-      for use by students and teachers of aerospace engineering.  Its
-      purpose is to help students learn about rigid body rotational dynamics and 
-      topics related to it by using 3D animation.  It is assumed that students have taken 
-      or are currently taking a course in this subject.</p>
+      infoText.innerHTML = `<p class="p-normal">The purpose ofAerovisualizer 
+      is to help students of aerospace engineering learn concepts related to rigid body 
+      rotational dynamics using 3D animation.  It is assumed that the students have taken 
+      or are currently taking a course covering this subject.</p>
 
       <p class="p-normal">Specific topics include moments of inertia, Euler angles,
       quaternions, angular velocity, angular momentum, space and body cones, 
-      Poinsot's contruction including polhodes and herpolhodes, and the effect of 
-      torque on rotational motion. Specific torques include attitude control system 
+      Poinsot's contruction (including polhodes and herpolhodes), and the effect of 
+      torque on motion. Types of torques include attitude control system 
       stabilization, gravity gradient, and the torque on a spinning top.</p>`;
       break;
-    case 'info-how-to-use': //How to use Aerovisualizer
-      infoText.innerHTML = `<ul class="p-normal">
-      <li>Click the button labeled "mass".  Use the slider controls to 
-      set the mass and the three moments of inertia of the rigid body.</li>
-      <li>Click the button labeled "&psi;&nbsp;&theta;&nbsp;&phi;" 
-      to set the initial orientation (attitude) of the rigid body.</li>
-      <li>Click the button labeled "&omega;&nbsp;/&nbsp;H" 
-      to set the initial angular velocity or angular momentum of the 
-      rigid body.</li>
-      <li>Click the button labeled "&tau;" to set the the type of torque 
-      (if any) that you want to apply and also specific parameters of 
-      that torque.</li>
-      <li>Click the play button to run the simulation.  Click 
-      the reset button to return the rigid body to its initial state.</li>
-      </ul>`;
+
+    case 'info-how-to-use': //how to use aerovisualizer
+      infoText.innerHTML = `
+      <p class="p-normal">1) Click <em>mass</em>. Set the mass and the three moments of inertia 
+      of the rigid body.</p>
+      <p class="p-normal">2) Click <em>&#120537;&nbsp;&#120541;&nbsp;&#120543;</em>.  Set the initial 
+      orientation (attitude).</p>
+      <p class="p-normal">3) Click <em>&#120538;&nbsp;/&nbsp;H</em>. Set the initial angular velocity 
+      or angular momentum.</p>
+      <p class="p-normal">4) Click &#120533;. Set the the type of torque (if any) that you want 
+      to apply and also the various associated parameters.</p>
+      <p class="p-normal">5) Click the <em>play</em> button to run the simulation.  Click the 
+      <em>reset</em> button to return the rigid body to its initial state.</p>`;
       break;
-    case 'info-mass-prop': //Mass Properties
-      infoText.innerHTML = `<p class="p-normal">"Mass Properties" is a 
+      case 'info-numerical': //numerical display
+      infoText.innerHTML = `<p class="p-normal">Click <em>1 2 3</em>.  A numerical display 
+      appears containing the the current state of the object consisting of the 
+      following: the moments of inertia, the angular velocity &omega; (body frame), 
+      the angular momentum H (space frame), the applied external torque &tau; 
+      (body frame), the direction cosine matrix (DCM) going from the body frame to 
+      the inertial (space) frame, the corresponding quaternion, and the kinetic 
+      energy of rotation.</p>`;
+      break;
+    case 'info-mass-prop': //mass properties
+      infoText.innerHTML = `<p class="p-normal"><em>Mass Properties</em> is a 
       term that refers to the mass, moments of inertia, and products of 
       inertia of a physical object. A body-fixed vector basis can always 
       be chosen such that the products of inertia are zero, which 
-      Aerovisualizer does.</p>
+      Aerovisualizer does.  The moments of inertia are then referred to as 
+      the principal moments of inertia.</p>
 
       <p class="p-normal">Every object has a companion object shaped like 
       a brick that has the exact same mass properties.  For simplicity, 
       Aerovisualizer displays only brick shaped objects.</p>
     
-      <p class="p-normal">Click the button labeled "mass".  Use the slider 
+      <p class="p-normal">Click <em>mass</em>.  Use the slider 
       controls to set the mass and the 3 dimensions of the brick 
       representing the rigid body.  The 3 moments of inertia are displayed
       as Ixx, Iyy, and Izz for the x, y, and z body axes, respectively.</p>`;
       break;
-    case 'info-attitude': //Euler Angles & Quaternions
-      infoText.innerHTML = `<p class="p-normal">The two most common ways 
-      of specifying orientation are 1) Euler angles, and 2) quaternions.  
-      Click the button labeled "&psi;&nbsp;&theta;&nbsp;&phi;".  Another 
-      button appears letting you toggle between Euler angles and quaternions.</p>
 
-      <p class="p-normal">Euler Angles - By default, Aervisualizer uses the "ZYX" 
+    case 'info-attitude': //Euler angles & quaternions
+      infoText.innerHTML = `<p class="p-normal">The two most common ways 
+      to specify orientation are 1) Euler angles, and 2) quaternions.  
+      Click <em>&psi;&nbsp;&theta;&nbsp;&phi;</em>.  Use the button that appears 
+      to toggle between Euler angles and quaternions.</p>
+
+      <p class="p-normal"><em>Euler Angles</em>: By default, Aervisualizer uses the "ZYX" 
       sequence of Euler rotations, where the first rotation is yaw (&psi;), the 
       second is pitch (&theta;), and the third is roll (&phi;).  Use the slider 
-      controls to set these values (degrees).  Buttons are supplied to set the 
-      sliders back to zero.  Tait-Bryan rotation sequences are a subset of the 
-      Euler angle sequences.  Choose from 6 intrinsic Tait-Bryan sequences (see 
-      "preferences/Euler angle order").
+      controls to set these values in degrees.  Use the buttons to set the 
+      values to zero.  Tait-Bryan rotation sequences are a subset of the 
+      set of the Euler angle sequences.  Choose from 6 intrinsic Tait-Bryan sequences 
+      (see "preferences/Euler angle order").
 
-      <p class="p-normal">Quaternions - Use the slider controls to set the 
-      rotation angle (degrees) as well as the components of the unit 
-      vector &lambda; about which the rotation of the object is made.  Buttons 
-      are again supplied to set the sliders back to zero.  The components of the 
+      <p class="p-normal"><em>Quaternions</em>: Use the slider controls to set the 
+      rotation angle of the object in degrees as well as the components of the unit 
+      vector &lambda; about which the rotation is made.  Use the 
+      buttons to set the values to zero.  The components of the 
       quaternion are displayed as w, x, y, and z.</p>`;
       break;
-    case 'info-angular-rates': //Angular Velocity & Momentum
-      infoText.innerHTML = `<p class="p-normal">You can specify the initial 
-      angular velocity (&omega;) or the angular momentum (H) of the object.  
-      Click the button labeled "&omega;&nbsp;/&nbsp;H".</p>
 
-      <p class="p-normal">Use the radio buttons to select either &omega; or H.  
-      Use the slider controls to set the magnitude and the 3 components (body 
-      frame) of the unit vector in the direction of the chosen vector.  
-      Buttons are again supplied to set the sliders back to zero.</p>
+    case 'info-angular-rates': //angular velocity & momentum
+      infoText.innerHTML = `<p class="p-normal">Click <em>&omega;&nbsp;/&nbsp;H</em>.  
+      Use the radio buttons to select either &omega; (angular velocity) or H 
+      (angular momentum).</p>
+      
+      <p class="p-normal">Use the slider controls to set the magnitude of 
+      &omega; or H and the 3 body-frame components of the unit vector in the 
+      direction of the chosen vector.  Use the buttons to set the values to zero.</p>
     
       <p class="p-normal">Angular velocity is specified in radians/second.  
-      Angular momentum is in the units of your choice (see "What Are the 
-      Units?").  The x, y, and z body-frame components of &omega; are 
-      displayed as P, Q, and R, respectively.</p>`;
+      Angular momentum is in the units of your choice (see <em>units</em>).  The x, y, and 
+      z components of &omega; are displayed as P, Q, and R, respectively.</p>`;
       break;
-    case 'info-torque-general': //Torque - general
-      infoText.innerHTML = `<p class="p-normal">Click the button labeled "&tau;".  
-      Another button appears to let you choose from the torque options listed 
-      below:</p>
+
+      case 'info-cones': //space and body cones
+      infoText.innerHTML = `<p class="p-normal">Rigid bodies for which 2 of 
+      the 3 principal moments of inertia at the center of mass are equal are 
+      said to be axially symmetric whether its mass distribution is symmetrical 
+      or not.  When no torque is applied, such bodies exhibit a characteristic 
+      behavior when rotating.</p>
       
-      <ul class="p-normal">
-      <li>No Torque</li>
-      <li>Space Frame</li>
-      <li>Body Frame</li>
-      <li>ACS Stabilization</li>
-      <li>Gravity Gradient</li>
-      <li>Top</li>
-      </ul>`;
+      <p class="p-normal">For these rigid bodies, &omega; traces a cone about 
+      the H vector.  This cone is referred to as the <em>space cone</em> and remains 
+      inertially fixed. The &omega; vector also traces a cone about the axis of 
+      symmetry.  This cone is fixed in the body frame and is referred to as the 
+      <em>body cone</em>.</p>
+    
+      <p class="p-normal">Long thin objects undergo direct precession, and the 
+      body cone rolls without slipping on the outside of the space cone.  Flat 
+      objects undergo retrograde precession, and the inside surface of the body 
+      cone rolls without slipping on the outside surface of the space cone.</p>
+
+      <p class="p-normal">The following conditions must be met for the cones to 
+      appear: 1) Two of the three moments of inertia must be equal, 2) &omega; 
+      must not be zero, 3) the <em>no torque</em> option must be selected, and 4) the 
+      cones must be made non-transparent in the preferences.</p>`;
       break;
-    case 'info-torque-space-body': //Torque - Space and Body Frames
+
+      case 'info-poinsot': //Poinsot's construction
+      infoText.innerHTML = `<p class="p-normal">A method of analyzing the free 
+      motion of a rigid body was developed by <em>Louis Poinsot</em> in 1834.  In the 
+      Poinsot method, the rotational inertia characteristics can be expressed 
+      by an <em>ellipsoid of inertia</em>.</p>
+    
+      <p class="p-normal">Also, the angular momentum can be represented by a 
+      plane called the <em>invariable plane</em> which is perpendicular to 
+      the H vector.  Under torque-free motion, the ellipsoid touches the 
+      plane at a point on a line along the &omega; vector.  Curves called the 
+      <em>polhode</em> and the <em>herpolhode</em> can be constructed from the touch 
+      points.  Aerovisualizer generates these curves internally and then displays 
+      them when complete.</p>
+
+      <p class="p-normal">The following conditions must be met for the Poinsto's 
+      construction to appear: 1) &omega; must not be zero, 2) the <em>no torque</em> 
+      option must be selected, and 3) the Poinsot construction must be made 
+      non-transparent in the preferences.</p>`;
+      break;
+
+    case 'info-torque-general': //torque - general
+      infoText.innerHTML = `<p class="p-normal">Click <em>&tau;</em>.  Use the menu that 
+      appears to choose from the following torque options:</p>
+      
+      <p class="p-normal">no torque, space frame, body frame, ACS stabilization, 
+      gravity gradient, and spinning top.</p>`;
+      break;
+
+    case 'info-torque-no-torque': //torque - no torque
+      infoText.innerHTML = `<p class="p-normal">Choose <em>no torque</em>. Set the 
+      initial attitude and &omega;/H.  Click the play button.</p>
+      
+      <p class="p-normal"><em>Note</em>: Space cones, body cones, and Poinsot's 
+      construction are only valid with this option.
+      </p>`;
+      break;
+
+    case 'info-torque-space-body': //torque - space and body frames
       infoText.innerHTML = `<p class="p-normal"> 
-      Choose either the "Space Frame" (inertial frame) or "Body Frame" torque 
-      option.  Use the slider controls to set the magnitude and the 3 component 
-      of the unit vector in the direction of the constant torque vector.  The 
-      vector is specified in the frame of choice.  Buttons are again supplied 
-      to set the sliders back to zero.</p>
+      Choose the <em>space frame</em> (inertial) torque or <em>body frame</em> torque.  
+      Set the magnitude of the constant torque vector and the 3 component of the unit 
+      vector in that direction.  Use the buttons to set the values to zero.</p>
 
       <p class="p-normal">Click the play button to observe the effect of the 
       torque.  The angular rate increases until you click pause or 
-      reset or until &omega; reaches the maximum (see "preferences/general").</p>`;
+      reset or until &omega; reaches the maximum allowed (see <em>preferences/general</em>).</p>`;
       break;
-    case 'info-torque-acs': //Torque - ACS Stabilization
+
+    case 'info-torque-acs': //torque - ACS stabilization
       infoText.innerHTML = `<p class="p-normal">The attitude control system 
-      (ACS) Stabilization torque option implements a basic logical 
+      (ACS) stabilization torque option implements a basic logical 
       algorithm for reducing the rotational rate of the object.  If the 
-      absolute value of a component of the &omega; vector is greater than 
-      "&omega; dead zone", an external torque equal to "ACS torque" is applied 
+      absolute value of a component of &omega; is greater than 
+      <em>&omega; dead zone</em>, a torque equal to <em>torque</em> is applied 
       to reduce the rate in that direction.  ACS thrusters and flames are not 
-      currently rendered, and are thus left to the imagination.</p>
+      rendered and are left to the imagination.</p>
 
       <p class="p-normal">  
-      Choose the "ACS Stabilization" torque option.  Use the slider controls to 
-      set the values of the "&omega; dead zone" and the "ACS torque".  Click the 
-      play button to observe the effect of the torque.  
-      "&omega; dead zone" is specified in degrees/second, while P, Q, and R are 
-      displayed as radians/second.  "ACS torque" is in unspecified units (see 
-      "What Are the Units?").</p>`;
+      Choose the <em>ACS stabilization</em> torque.  Use the slider controls to 
+      set the values of <em>&omega; dead zone</em> (deg/sec) and <em>torque</em>.  
+      Set the initial attitude and &omega;/H.  Click the <em>play</em> button to 
+      observe the effect of the torque.`;
       break;
-    case 'info-torque-gg': //Torque - Gravity Gradient
-      infoText.innerHTML = `<p class="p-normal">The Gravity Gradient torque 
+
+    case 'info-torque-gg': //torque - gravity gradient
+      infoText.innerHTML = `<p class="p-normal">The gravity gradient torque 
       results from the difference in the pull of gravity along the gravitational 
-      field gradient from one end of the rotating body to the other.  It is 
-      most pronounced for long thin objects whose long direction is at a 45&deg; 
-      angle to the local vertical.</p>
+      potential field gradient from one end of the rotating body to the other.  
+      It is most pronounced for long thin objects whose long direction is at a 
+      45&deg; angle to the local vertical.</p>
 
       <p class="p-normal">This torque is proportional to &mu;&nbsp;/&nbsp;R&sup3;, 
       where &mu; is the gravitational constant of the planet, and R is the 
       distance to the center of the planet.  Because the gravity gradient effect is 
       very small for earth-orbiting objects, Aerovisualizer lets you exagerate 
       this effect up to 1 million times that of low earth orbit.  The gravity 
-      gradient torque is also a function of the orbital period, but this is ignored.</p>
+      gradient torque is also a function of the orbital period, but this effect is 
+      ignored.</p>
 
-      <p class="p-normal">Choose the "Gravity Gradient" torque option.  Use the 
-      slider control to set the value of the torque magnification.  Click the play 
-      button to observe the effect of the torque.`
+      <p class="p-normal">Choose the <em>gravity gradient</em> torque.  Use the 
+      slider control to set the value of the torque magnification.  Set the initial 
+      attitude and &omega;/H.  Click the play button to observe the effect of 
+      the torque.`
       break;
-    case 'info-torque-top': //Torque - Spinning Top
-      infoText.innerHTML = `<p class="p-normal">The Spinning Top torque is the 
-      torque generated by the normal force from a table top acting at the point 
-      of a spinning top.  The torque is equal to r&KHcy;f, where r is a vector from 
-      the center of mass to the point where the top meets the table, and f equals 
-      mg.</p>
 
-      <p class="p-normal">Aerovisualizer does not currently render a top shape nor 
+    case 'info-torque-top': //torque - spinning top
+      infoText.innerHTML = `<p class="p-normal">The spinning top torque is the 
+      torque generated by the normal force from a table top acting at a point 
+      on a spinning top.  The torque is equal to r&KHcy;f, where r is a vector from 
+      the center of mass of the top to the point where it meets the table, and f 
+      equals mg.</p>
+
+      <p class="p-normal">Aerovisualizer does not render a top shape nor 
       a table, so these are left to the imagination.</p>
     
-      <p class="p-normal">Choose the "Top" torque option.  Use the "r" slider 
-      control to set the length and sign of the r vector.  The direction is along 
-      the x body axis.  Use the "g" slider control to set the magnitude of the 
-      gravity vector.  The direction is downward along the local vertical.</p>
+      <p class="p-normal">Choose the <em>spinning top</em> torque.  Use the <em>r</em> slider 
+      control to set the length and sign of the r vector.  Its direction is along 
+      the x body axis.  Use the <em>g</em> slider control to set the magnitude of the 
+      gravity vector.  Its direction is downward along the local vertical.</p>
 
-      <p class="p-normal">Click the button labeled "&omega;&nbsp;/&nbsp;H".  Set 
-      the &omega; vector to be mostly in the x body axis direction.  Click the 
-      play button to observe the effect of the torque.</p>`;
+      <p class="p-normal">Set &omega; to be mostly in the x body axis direction.  
+      Click the play button to observe the effect of the torque.</p>`;
       break;
-    case 'info-prefs-main': //Preferences
-      infoText.innerHTML = `<p class="p-normal">Click the button labeled "pref".  
-      Buttons appear labeled as below:</p>
-      
-      <ul class="p-normal">
-      <li>default, axis orientation, Euler angle order</li>
-      <li>object, body frame, space frame</li>
-      <li>angular velocity vector, angular momentum vector</li>
-      <li>torque vector, space and body cones</li>
-      <li>Poinsot's construction, general</li>
-      </ul>`;
+    
+    case 'info-prefs-main': //preferences
+      infoText.innerHTML = `<p class="p-normal">Click <em>pref</em>.  Buttons appear 
+      labeled as below:</p>
+      <p class="p-normal">default, general, object, body frame, space frame, angular 
+      velocity vector, angular momentum vector,
+      torque vector, axis orientation, Euler angle order, space and body cones,
+      Poinsot's construction.</p>`;
       break;
-      // make things lower case
-    case 'info-prefs-trans-offset-color': //Preferences - Transparency, Offset, Color
-      infoText.innerHTML = `<p class="p-normal">Transparency - Use the slider controls 
-      to set the transparency (visibility) of the following: the object, the body and 
-      space frames, the angular velocity and angular momentum vectors, the torque 
-      vector, the space and body cones, and Poinsot's construction.
 
-      <p class="p-normal">Offset - Check "offset" to make the items listed above 
+    case 'info-prefs-default': //preferences
+      infoText.innerHTML = `<p class="p-normal">Click the button to set the 
+      preferences to their default values.</p>`;
+      break;
+
+    case 'info-prefs-general': //preferences - general
+      infoText.innerHTML = `<p class="p-normal"><em>object &ldquo;skin&rdquo;</em> - Use the menu to set the image rendered on the 
+      object.  Choose Cessna 172, the New Horizons space probe, or axis labels. 
+      The object retains the brick shape.</p>
+      <p class="p-normal"><em>mass properties</em> - Use the menu to set the mass properties to those of 
+      the Cessna 172 or the New Horizons space probe (metric units).</p>
+      <p class="p-normal"><em>environment</em> - Use the radio buttons to set the environment to 
+      be either a stormy atmosphere or outer space above Jupiter.</p>
+      <p class="p-normal"><em>maximum rotation rate</em> - Use the slider control to set the maximum rotation 
+      rate (&omega;) that the object can attain.  The range is from 100 deg/sec to 
+      1000 deg/sec.  The default is 720 deg/sec.</p>
+      <p class="p-normal"><em>vector size</em> - Use the slider control to set how large all of the vectors 
+      appear (body frame, space frame, &omega; vector, H vector, &tau; vector).  This also affects 
+      the size of the space and body cones.</p>`;
+      break;
+
+    case 'info-prefs-trans-offset-color': //preferences - transparency, offset, color
+      infoText.innerHTML = `<p class="p-normal">Use the slider controls 
+      to set the <em>transparency</em> (visibility) of the brick object, the body and space frames, 
+      the &omega; vector, the H vector, the &tau; vector, the space and body cones, and 
+      Poinsot's construction.  Slide them all the way to the right to remove them from 
+      the scene.</p>
+
+      <p class="p-normal">Check <em>offset</em> to make the items listed above 
       appear off center.</p>
     
-      <p class="p-normal">Color - Choose the color of the items listed above 
-      (not including the object).</p>`;
+      <p class="p-normal">Use the menu to choose the <em>color</em> of items (excluding the 
+      object).</p>`;
       break;
     
-    case 'info-prefs-axis-orientation': //Preferences - Axis Orientation
-      infoText.innerHTML = `<p class="p-normal">Use the radio buttons to choose 
-      the orientation of the space frame (inertial frame).  The z axis points 
+    case 'info-prefs-axis-orientation': //preferences - axis orientation
+      infoText.innerHTML = `<p class="p-normal">Use the radio buttons to set 
+      the orientation of the space (inertial) frame.  The z axis points 
       down by the north-east-down (NED) convention and by default.</p>`;
       break;
     
-    case 'info-prefs-euler-angle-order': //Preferences - Euler Angle Order
-      infoText.innerHTML = `<p class="p-normal">Use the radio buttons to choose 
+    case 'info-prefs-euler-angle-order': //preferences - Euler angle order
+      infoText.innerHTML = `<p class="p-normal">Use the radio buttons to set 
       the sequence of Euler rotations to be used when designating Euler angles.</p>
 
       <p class="p-normal">Choose from 6 intrinsic Tait-Bryan rotation sequences.  
@@ -2265,35 +2353,15 @@ const handleInfoMenuChoice = function(choice){
       X&Prime; axis.</p>`;
       break;
     
-    case 'info-prefs-general': //Preferences - general
-      infoText.innerHTML = `<p class="p-normal">Choose to modify any of the following 
-      general preferences:</p>
-      <ul class="p-normal">
-      <li>object &ldquo;skin&rdquo; - Use the menu to set the image rendered on the 
-      object.  Choose Cessna 172, the New Horizons space probe, or axis labels. 
-      The object retains the brick shape.</li>
-      <li>mass properties - Use the menu to set the mass properties to be those of 
-      the Cessna 172 or the New Horizons space probe if desired (metric units).</li>
-      <li>environment - Use the radio buttons to set the location of the object to 
-      be either in a stormy atmosphere or in space above Jupiter.</li>
-      <li>maximum rotation rate - Use the slider control to set the maximum rotation 
-      rate (&omega;) that the object can attain.  The range is from 100 deg/sec to 
-      1000 deg/sec.  The default is 720 deg/sec.</li>
-      <li>vector size - Use the slider control to set how large the vectors 
-      appear.  This also affects the size of space and body cones.</li>
-      </ul>`;
-      break;
-    
-    case 'info-what-are-units': //what are the units?
-      infoText.innerHTML = `<p class="p-normal">You may be asking yourself, 
-      "What are the units of length and mass?  Are they metric units?  
-      English units?  The answer is that it does not matter.  They can be
-      whatever you want them to be.  For example, you can choose length to 
-      be in meters and mass to be in kilograms.  If so, then torque would 
-      be in Newton-meters, angular momentum would be in kg meters squared per second, and moments of inertia are in kg meters squared.  If you choose length to be in feet and mass 
-      to be in slugs, then torque would be in pound-feet, xxxxx.</p>
+    case 'info-units': //units
+      infoText.innerHTML = `<p class="p-normal">So what are the units of 
+      length and mass?  The answer is that it does not matter.  It is up to you.  
+      If you choose meters for length and kilograms for mass, then torque 
+      is in Newton-meters, angular momentum is in kg m&sup2; per second, and 
+      the moments of inertia are in kg m&sup2.  The English unit of length is the 
+      foot, and the unit of mass is the slug.</p>
       
-      <p class="p-normal">Time is in seconds.  You are stuck with that.  Sorry.</p>`;
+      <p class="p-normal">The unit of time is the second.</p>`;
       break;
   }
 }
@@ -2305,79 +2373,79 @@ infoMenu.addEventListener('change', () => {
 
 const handlePreferencesButtons = function(button){
   defaultButton.disabled = false;
-  axisOrientationButton.disabled = false;
-  eulerAngleOrderButton.disabled = false;
-  objectButton.disabled = false;
-  bodyFrameButton.disabled = false;
-  spaceFrameButton.disabled = false;
-  omegaButton.disabled = false;
-  hButton.disabled = false;
-  torquePrefsButton.disabled = false;
-  conesButton.disabled = false;
-  poinsotButton.disabled = false;
-  generalButton.disabled = false;
+  objectPrefButton.disabled = false;
+  bodyFramePrefButton.disabled = false;
+  spaceFramePrefButton.disabled = false;
+  omegaPrefButton.disabled = false;
+  hPrefButton.disabled = false;
+  torquePrefButton.disabled = false;
+  conesPrefButton.disabled = false;
+  axisOrientationPrefButton.disabled = false;
+  eulerAngleOrderPrefButton.disabled = false;
+  poinsotPrefButton.disabled = false;
+  generalPrefButton.disabled = false;
   
   defaultElements.style.display = 'none';
-  axisOrientationElements.style.display = 'none';
-  eulerAngleOrderElements.style.display = 'none';
+  generalElements.style.display = 'none';
   objectElements.style.display = 'none';
   bodyFrameElements.style.display = 'none';
   spaceFrameElements.style.display = 'none';
   omegaElements.style.display = 'none';
   hElements.style.display = 'none';
   torqueElements.style.display = 'none';
+  axisOrientationElements.style.display = 'none';
+  eulerAngleOrderElements.style.display = 'none';
   conesElements.style.display = 'none';
   poinsotElements.style.display = 'none';
-  generalElements.style.display = 'none';
 
   switch (button){
     case 'default':
       defaultElements.style.display = 'grid';
       defaultButton.disabled = true;
       break;
-    case 'axisOrientation':
-      axisOrientationElements.style.display = 'grid';
-      axisOrientationButton.disabled = true;
-      break;
-    case 'eulerAngleOrder':
-      eulerAngleOrderElements.style.display = 'grid';
-      eulerAngleOrderButton.disabled = true;
+    case 'general':
+      generalElements.style.display = 'grid';
+      generalPrefButton.disabled = true;
       break;
     case 'object':
       objectElements.style.display = 'grid';
-      objectButton.disabled = true;
+      objectPrefButton.disabled = true;
       break;
     case 'bodyFrame':
       bodyFrameElements.style.display = 'grid';
-      bodyFrameButton.disabled = true;
+      bodyFramePrefButton.disabled = true;
       break;
     case 'spaceFrame':
       spaceFrameElements.style.display = 'grid';
-      spaceFrameButton.disabled = true;
+      spaceFramePrefButton.disabled = true;
       break;
     case 'omega':
       omegaElements.style.display = 'grid';
-      omegaButton.disabled = true;
+      omegaPrefButton.disabled = true;
       break;
     case 'h':
       hElements.style.display = 'grid';
-      hButton.disabled = true;
+      hPrefButton.disabled = true;
       break;
     case 'torque':
       torqueElements.style.display = 'grid';
-      torquePrefsButton.disabled = true;
+      torquePrefButton.disabled = true;
+      break;
+    case 'axisOrientation':
+      axisOrientationElements.style.display = 'grid';
+      axisOrientationPrefButton.disabled = true;
+      break;
+    case 'eulerAngleOrder':
+      eulerAngleOrderElements.style.display = 'grid';
+      eulerAngleOrderPrefButton.disabled = true;
       break;
     case 'cones':
       conesElements.style.display = 'grid';
-      conesButton.disabled = true;
+      conesPrefButton.disabled = true;
       break;
     case 'poinsot':
       poinsotElements.style.display = 'grid';
-      poinsotButton.disabled = true;
-      break;
-    case 'general':
-      generalElements.style.display = 'grid';
-      generalButton.disabled = true;
+      poinsotPrefButton.disabled = true;
       break;
     case 'none':
       break;
@@ -2393,47 +2461,47 @@ defaultDoResetButton.addEventListener('click', () => {
   location.reload();
 });
 
-axisOrientationButton.addEventListener('click', () => {
+axisOrientationPrefButton.addEventListener('click', () => {
   handlePreferencesButtons('axisOrientation');
 });
 
-eulerAngleOrderButton.addEventListener('click', () => {
+eulerAngleOrderPrefButton.addEventListener('click', () => {
   handlePreferencesButtons('eulerAngleOrder');
 });
 
-objectButton.addEventListener('click', () => {
+objectPrefButton.addEventListener('click', () => {
   handlePreferencesButtons('object');
 });
 
-bodyFrameButton.addEventListener('click', () => {
+bodyFramePrefButton.addEventListener('click', () => {
   handlePreferencesButtons('bodyFrame');
 });
 
-spaceFrameButton.addEventListener('click', () => {
+spaceFramePrefButton.addEventListener('click', () => {
   handlePreferencesButtons('spaceFrame');
 });
 
-omegaButton.addEventListener('click', () => {
+omegaPrefButton.addEventListener('click', () => {
   handlePreferencesButtons('omega');
 });
 
-hButton.addEventListener('click', () => {
+hPrefButton.addEventListener('click', () => {
   handlePreferencesButtons('h');
 });
 
-torquePrefsButton.addEventListener('click', () => {
+torquePrefButton.addEventListener('click', () => {
   handlePreferencesButtons('torque');
 });
 
-conesButton.addEventListener('click', () => {
+conesPrefButton.addEventListener('click', () => {
   handlePreferencesButtons('cones');
 });
 
-poinsotButton.addEventListener('click', () => {
+poinsotPrefButton.addEventListener('click', () => {
   handlePreferencesButtons('poinsot');
 });
 
-generalButton.addEventListener('click', () => {
+generalPrefButton.addEventListener('click', () => {
   handlePreferencesButtons('general');
 });
 
@@ -2441,64 +2509,54 @@ prefsReturnButton.addEventListener('click', () => {
   toggleShowPrefs();
 });
 
-const saveToLocalStorage = function(){
-  localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
+const doWindowResizeOrOrientationChange = function(){
+  camera.aspect = 1;
+  camera.updateProjectionMatrix();
+  renderer.setSize(sixDOFworld.clientWidth, sixDOFworld.clientHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.clear();
+  renderer.render(scene, camera);
 }
 
-const toggleShowPrefs = function(){
-  if (sixDOFworld.style.display === 'none'){
-    sixDOFworld.style.display = 'block';
-    numericalButton.style.display = 'block';
-    attitudeButton.style.display = 'block';
-    massPropButton.style.display = 'block';
-    rotationRateButton.style.display = 'block';
-    torqueButton.style.display = 'block';
-    preferencesButton.style.display = 'block';
-    playPauseButton.style.display = 'block';
-    resetButton.style.display = 'block';
+window.addEventListener('resize', () => {
+  doWindowResizeOrOrientationChange();
+});
 
-    defaultButton.style.display = 'none';
-    axisOrientationButton.style.display = 'none';
-    eulerAngleOrderButton.style.display = 'none';
-    objectButton.style.display = 'none';
-    bodyFrameButton.style.display = 'none';
-    spaceFrameButton.style.display = 'none';
-    omegaButton.style.display = 'none';
-    hButton.style.display = 'none';
-    torquePrefsButton.style.display = 'none';
-    conesButton.style.display = 'none';
-    poinsotButton.style.display = 'none';
-    generalButton.style.display = 'none';
-    prefsReturnButton.style.display = 'none';
-    handleAllRadioButtons();
-    handlePreferencesButtons('none');
-    doWindowResizeOrOrientationChange();
-    handleMainButtons('numerical');
+window.addEventListener("orientationchange", () => {
+  doWindowResizeOrOrientationChange();
+});
+
+const displayMaxOmega = function(trueOrFalse){
+  if (trueOrFalse === false){
+    numericalButton.innerHTML = '1&nbsp;2&nbsp;3';
+    massPropButton.innerHTML = 'mass';
+    attitudeButton.innerHTML = '&psi;&nbsp;&theta;&nbsp;&phi;';
+    rotationRateButton.innerHTML = '&omega;&nbsp;/&nbsp;H';
+    torqueButton.innerHTML = '&tau;';
+    preferencesButton.innerHTML = 'pref';
+    numericalButton.style.backgroundColor = 'rgb(125,125,255)';
+    massPropButton.style.backgroundColor = 'rgb(125,125,255)';
+    attitudeButton.style.backgroundColor = 'rgb(125,125,255)';
+    rotationRateButton.style.backgroundColor = 'rgb(125,125,255)';
+    torqueButton.style.backgroundColor = 'rgb(125,125,255)';
+    preferencesButton.style.backgroundColor = 'rgb(125,125,255)';
+    resetButton.style.backgroundColor = 'rgb(125,125,255)';
+    playPauseButton.style.backgroundColor = 'rgb(125,125,255)';
   }else{
-    sixDOFworld.style.display = 'none';
-    numericalButton.style.display = 'none';
-    attitudeButton.style.display = 'none';
-    massPropButton.style.display = 'none';
-    rotationRateButton.style.display = 'none';
-    torqueButton.style.display = 'none';
-    preferencesButton.style.display = 'none';
-    playPauseButton.style.display = 'none';
-    resetButton.style.display = 'none';
-
-    defaultButton.style.display = 'block';
-    axisOrientationButton.style.display = 'block';
-    eulerAngleOrderButton.style.display = 'block';
-    objectButton.style.display = 'block';
-    bodyFrameButton.style.display = 'block';
-    spaceFrameButton.style.display = 'block';
-    omegaButton.style.display = 'block';
-    hButton.style.display = 'block';
-    torquePrefsButton.style.display = 'block';
-    conesButton.style.display = 'block';
-    poinsotButton.style.display = 'block';
-    generalButton.style.display = 'block';
-    prefsReturnButton.style.display = 'block';
-    handleMainButtons('none');
+    numericalButton.innerHTML = 'max';
+    massPropButton.innerHTML = '&omega;';
+    attitudeButton.innerHTML = 'max';
+    rotationRateButton.innerHTML = '&omega;';
+    torqueButton.innerHTML = 'max';
+    preferencesButton.innerHTML = '&omega;';
+    numericalButton.style.backgroundColor = 'red';
+    massPropButton.style.backgroundColor = 'red';
+    attitudeButton.style.backgroundColor = 'red';
+    rotationRateButton.style.backgroundColor = 'red';
+    torqueButton.style.backgroundColor = 'red';
+    preferencesButton.style.backgroundColor = 'red';
+    resetButton.style.backgroundColor = 'red';
+    playPauseButton.style.backgroundColor = 'red';
   }
 }
 
@@ -2611,12 +2669,6 @@ const initTHREE = function() {
   // orbitControls.enableDamping;
   orbitControls.enableZoom = false;
 };
-
-const getFromLocalStorage = function(){
-  // localStorage.clear(); //uncomment temorarily to change aerovisualizerData format
-  const data = JSON.parse(localStorage.getItem('aerovisualizerData'));
-  return data;
-}
 
 const createAndInitialize = function(data, camera){
   let axesOrientation = defaultOrientation;
@@ -2841,13 +2893,34 @@ const createAndInitialize = function(data, camera){
   torqueTransparencySlider.value = torqueTransparency;
   conesTransparencySlider.value = conesTransparency;
   poinsotTransparencySlider.value = poinsotTransparency;
+
+  switch (torqueOption){
+    case 1:
+      torqueOptionMenu.value = 'no-torque';
+      break;
+    case 2:
+      torqueOptionMenu.value = 'space-frame';
+      break;
+    case 3:
+      torqueOptionMenu.value = 'body-frame';
+      break;
+    case 4:
+      torqueOptionMenu.value = 'ACS-stabilization';
+      break;
+    case 5:
+      torqueOptionMenu.value = 'gravity-gradient';
+      break;
+    case 6:
+      torqueOptionMenu.value = 'top';
+      break;
+  }
+
   torqueMagnitudeSlider.value = torqueMag*5;
   torqueIhatSlider.value = torqueIhat;
   torqueJhatSlider.value = torqueJhat;
   torqueKhatSlider.value = torqueKhat;
   acsDeadZoneSlider.value = torqueACSDZ*10;
   acsTorqueMagnitudeSlider.value = torqueACSTorque*100;
-
   torqueTopRDistanceSlider.value = torqueTopR;
   torqueTopGravitySlider.value = torqueTopGrav;
   torqueMagnitudeDisplay.innerHTML = torqueMag;
@@ -2899,9 +2972,9 @@ const createAndInitialize = function(data, camera){
   ellipsoidColorMenu.value = ellipsoidColor;
   planeColorMenu.value = planeColor;
 
-  sdo.setOffsetBooleans(objectOffset);
-  vso.setOffsetBooleans(bodyFrameOffset, spaceFrameOffset, omegaOffset, hOffset, torqueOffset);
-  pac.setOffsetBooleans(conesOffset, poinsotOffset);
+  sdo.setOffset(objectOffset);
+  vso.setOffsets(bodyFrameOffset, spaceFrameOffset, omegaOffset, hOffset, torqueOffset);
+  pac.setOffsets(conesOffset, poinsotOffset);
   sdo.setOrientation(axesOrientation);
   vso.setOrientation(axesOrientation);
   pac.setOrientation(axesOrientation);
@@ -2911,13 +2984,18 @@ const createAndInitialize = function(data, camera){
 }
 
 const completeInitialization = function(continueAnimation = true) {
-  if (continueAnimation && !(vso._constructionComplete)) {
+  // the reason for this is that the VectorSet.js file contains
+  // the function _constructLabels() which contains a FontLoader 
+  // object called loader that creates code that runs asynchronously.
+  // once vso.constructionComplete is true, we can finish
+  // our initialization
+  if (continueAnimation && !(vso.constructionComplete)) {
     requestAnimationFrame(completeInitialization);
   }
   
-  if (vso._constructionComplete){
-    sdo._constructionComplete = true;
-    pac._constructionComplete = true;
+  if (vso.constructionComplete){
+    sdo.constructionComplete = true;
+    pac.constructionComplete = true;
     handleMainButtons('numerical');
     handlePreferencesButtons('none');
     
@@ -2940,17 +3018,17 @@ const completeInitialization = function(continueAnimation = true) {
     setTransparency('cones',conesTransparency);
     setTransparency('poinsot',poinsotTransparency);
     defaultButton.style.display = 'none';
-    axisOrientationButton.style.display = 'none';
-    eulerAngleOrderButton.style.display = 'none';
-    objectButton.style.display = 'none';
-    bodyFrameButton.style.display = 'none';
-    spaceFrameButton.style.display = 'none';
-    omegaButton.style.display = 'none';
-    hButton.style.display = 'none';
-    torquePrefsButton.style.display = 'none';
-    conesButton.style.display = 'none';
-    poinsotButton.style.display = 'none';
-    generalButton.style.display = 'none';
+    axisOrientationPrefButton.style.display = 'none';
+    eulerAngleOrderPrefButton.style.display = 'none';
+    objectPrefButton.style.display = 'none';
+    bodyFramePrefButton.style.display = 'none';
+    spaceFramePrefButton.style.display = 'none';
+    omegaPrefButton.style.display = 'none';
+    hPrefButton.style.display = 'none';
+    torquePrefButton.style.display = 'none';
+    conesPrefButton.style.display = 'none';
+    poinsotPrefButton.style.display = 'none';
+    generalPrefButton.style.display = 'none';
     prefsReturnButton.style.display = 'none';
     infoElements.style.display = 'none';
     infoMenu.value = 'info-intro';
@@ -2988,45 +3066,31 @@ const completeInitialization = function(continueAnimation = true) {
     sdo.setTorque(torqueOption, torqueMag, torqueIhat, torqueJhat, torqueKhat);
     displayNumerical(true);
     vso.setVectorSize(vectorSize);
-    vso._needsRefresh = true;
+    vso.needsRefresh = true;
     pac.setConeSize(vectorSize);
     vectorSizeSlider.value = Number(vectorSize);
   }
 };
 
-const displayMaxOmega = function(trueOrFalse){
-  if (trueOrFalse === false){
-    numericalButton.innerHTML = '1&nbsp;2&nbsp;3';
-    massPropButton.innerHTML = 'mass';
-    attitudeButton.innerHTML = '&psi;&nbsp;&theta;&nbsp;&phi;';
-    rotationRateButton.innerHTML = '&omega;&nbsp;/&nbsp;H';
-    torqueButton.innerHTML = '&tau;';
-    preferencesButton.innerHTML = 'pref';
-    numericalButton.style.backgroundColor = 'rgb(125,125,255)';
-    attitudeButton.style.backgroundColor = 'rgb(125,125,255)';
-    massPropButton.style.backgroundColor = 'rgb(125,125,255)';
-    rotationRateButton.style.backgroundColor = 'rgb(125,125,255)';
-    torqueButton.style.backgroundColor = 'rgb(125,125,255)';
-    preferencesButton.style.backgroundColor = 'rgb(125,125,255)';
-    resetButton.style.backgroundColor = 'rgb(125,125,255)';
-    playPauseButton.style.backgroundColor = 'rgb(125,125,255)';
-  }else{
-    numericalButton.innerHTML = 'max';
-    massPropButton.innerHTML = '&omega;';
-    attitudeButton.innerHTML = 'max';
-    rotationRateButton.innerHTML = '&omega;';
-    torqueButton.innerHTML = 'max';
-    preferencesButton.innerHTML = '&omega;';
-    numericalButton.style.backgroundColor = 'red';
-    attitudeButton.style.backgroundColor = 'red';
-    massPropButton.style.backgroundColor = 'red';
-    rotationRateButton.style.backgroundColor = 'red';
-    torqueButton.style.backgroundColor = 'red';
-    preferencesButton.style.backgroundColor = 'red';
-    resetButton.style.backgroundColor = 'red';
-    playPauseButton.style.backgroundColor = 'red';
-  }
+const doPlayPause = function(){
+  playing = playing ? false : true;
+  playPauseButton.innerHTML = playing ? `<i class="material-icons">pause</i>` : `<i class="material-icons">play_arrow</i>`;
+  sdo.realTime = 0;
+  sdo.simulationTime = 0;
+  clock.getDelta();
 }
+
+playPauseButton.addEventListener('click', () => {
+  doPlayPause();
+});
+
+resetButton.addEventListener('click', () => {
+  displayMaxOmega(false);
+  resetAttitudeAndRates();
+  sdo.tickDynamic();
+  sdo.needsRefresh = true;
+  sdo.refresh();
+});
 
 const animate = function(continueAnimation = true) {
   if (continueAnimation) {
@@ -3039,8 +3103,8 @@ const animate = function(continueAnimation = true) {
     cpx = camera.position.x;
     cpy = camera.position.y;
     cpz = camera.position.z;
-    vso._needsRefresh = true;
-    pac._needsRefresh = true;
+    vso.needsRefresh = true;
+    pac.needsRefresh = true;
   } 
 
   renderer.clear();
@@ -3049,10 +3113,17 @@ const animate = function(continueAnimation = true) {
   if (playing){
     const dt = clock.getDelta();// dt for 60 fps is 0.01666
     sdo.simulate(dt);
-    pac.receiveEphemeralData(...sdo.sendPaCEphemeralData());
-    pac.computeHodeCurvePoint();
-    vso._needsRefresh = true;
-    pac._needsRefresh = true;
+
+    if (torqueOption === 1){// no torque
+      if (poinsotTransparency < maxTransparency){
+        pac.receiveEphemeralData(...sdo.sendPaCEphemeralData());
+        pac.doPolhodeHerpolhodeComputations();
+      }
+
+      pac.needsRefresh = true;
+    }
+
+    vso.needsRefresh = true;
 
     if (sdo.getOmegaMagnitude() > maxOmega){
       displayMaxOmega(true);

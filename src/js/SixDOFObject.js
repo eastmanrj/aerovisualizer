@@ -1,6 +1,14 @@
 import * as THREE from '../../node_modules/three/build/three.module.js';
 import Torquer from './Torquer.js';
 
+/**
+ SixDOFObject is a class that encapsulates the computation of the 
+ rotational dynamics of a brick-shaped THREE.js object representing
+ a rigid body.  Although the term six DOF stands for 6 degrees of
+ freedom, only the 3 rotational degrees of freedom are handled
+ at this time.
+**/
+
 const piOver180 = Math.PI / 180;
 
 // Vehicle Mass Properties (kg, m) - mass Ixx Iyy Izz Ixz
@@ -11,28 +19,22 @@ const vehicleMassProperties =
 [401,161.38,402.12,316,0]
 // //Boeing 747 on approach, gear up, flaps 20 deg
 // [255841,19388193,43792911,61418541,-3023473],
-// //Boeing 747 clean aircraft 1
+// //Boeing 747 clean aircraft
 // [288774,24947045,44877565,67112975,-3742057],
-// //Boeing 747 clean aircraft 2
-// [288774,24675882,44877565,67384138,1315143],
-// //Boeing 747 clean aircraft 3
-// [288774,24675882,44877565,67384138,-2115076],
-// //Boeing 747 clean aircraft 4
-// [288774,24675882,44877565,67384138,-474536],
 // //F-104 Starfighter
 // [7393.5653,4880.9436,79993.2429,81349.0605,0]
 ];
 
 class SixDOFObject {
   constructor(mass, length, width, height, scene, camera, blockImageOption, massPropOption) {
-    this._h = 0.0025;// simulation time step, based on an analysis, _h could
+    this._h = 0.0025;// simulation time step. Based on an analysis, _h could
     // be set to as low as 0.0000372 for the Mac Mini with the number of ticks
     // within a 60 fps screen refresh equal to about 448.  _maxTicksPerFrame
     // should be set to well below that.  set _h to well above its limit
     this._maxTicksPerFrame = 10;
     // _h times _maxTicksPerFrame should be be greater than 0.016667
-    this._simulationTime = 0;
-    this._realTime = 0;
+    this.simulationTime = 0;
+    this.realTime = 0;
     this._torquer = new Torquer();
     this._torque = new THREE.Vector3(0, 0, 0);
     this._omega = new THREE.Vector3(0, 0, 0);
@@ -45,7 +47,6 @@ class SixDOFObject {
     // exists only for Matrix4. We are sometimes forced to convert that to a
     // 3x3 matrix using the THREE function setFromMatrix4.
     this._pos = new THREE.Vector3(0, 0, 0);
-    this._vel = new THREE.Vector3(0, 0, 0);
     this._torqueOption = 1;
     // 1 = no torque
     // 2 = space frame torque
@@ -69,11 +70,10 @@ class SixDOFObject {
     // nor extrinsic
     this._inertiaMatrix = new THREE.Matrix3();
     this._scale = new THREE.Vector3();
-    this._unitScale = new THREE.Vector3();
-    this._unitScale.set(1, 1, 1);
+    this._unitScale = new THREE.Vector3(1,1,1);
     this._T = 0;
     this._T0 = 0;
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     this._showObject = true;
     this._blockMesh = null;
     this._origin = new THREE.Vector3(0,0,0);
@@ -101,10 +101,12 @@ class SixDOFObject {
     this._isAxisymmetric = false;
     this._axisOfSymmetry = 0;//1=x, 2=y, 3=z
     this._itemOpacity = 0;
-    this._constructionComplete = false;
+    //constructionComplete is an admittedly kludgy way of ensuring that the
+    //code in here does not execute until asynchronous code from other classes
+    //has completed execution
+    this.constructionComplete = false;
     this._camera = camera;
     this._scene = scene;
-    // this._uvw = new THREE.Vector3();
 
     if (massPropOption === 'select-an-object'){
       this.setDimensionsAndInertiaProperties(mass, length, width, height);;
@@ -122,7 +124,7 @@ class SixDOFObject {
   }
 
   sendPaCEphemeralData(){
-    return [this._quat, this._simulationTime];
+    return [this._quat, this.simulationTime];
   }
 
   sendPaCNonEphemeralData(){
@@ -132,16 +134,15 @@ class SixDOFObject {
   }
 
   sendTorqueData(){
-    return [this._torque, this._torqueOption, this._omega, this._quat, this._dcm, this._vel, this._h, this._T];
+    return [this._torque, this._torqueOption, this._omega, this._quat, this._dcm, this._h, this._T];
   }
 
-  receiveTorqueData(torque, torqueOption, omega, quat, dcm, vel, h, T){
+  receiveTorqueData(torque, torqueOption, omega, quat, dcm, h, T){
     this._torque = torque;
     this._torqueOption = torqueOption;
     this._omega = omega;
     this._quat = quat;
     this._dcm = dcm;
-    this._vel = vel;
     this._h = h;
     this._T = T;
   }
@@ -180,7 +181,7 @@ class SixDOFObject {
     this._torquer.doTorque();
     this.receiveTorqueData(...this._torquer.sendTorqueData());
     this.reset();
-    this._needsRefresh = true;
+    this.needsRefresh = true;
   }
 
   setPresetMassProperties(option){
@@ -200,12 +201,11 @@ class SixDOFObject {
     const [mass, ixx, iyy, izz, ixz] = vehicleMassProperties[i];
     this._mass = mass;
     this._inertiaMatrix.set(ixx, 0, -ixz, 0, iyy, 0, -ixz, 0, izz);
-    // the torquer needs to know
-    // the moments of inertia for the gravity gradient option
-    this._torquer.setMass(mass);// mass necessary?
+    // the moments of inertia are required for the gravity gradient option
+    this._torquer.setMass(mass);// is mass necessary?
     this._torquer.setInertiaMatrix(ixx, iyy, izz, ixz);
     this._determineIfAxisymmetric();//it isn't but call this to set variables
-    this._needsRefresh = true;
+    this.needsRefresh = true;
   }
 
   tick() {
@@ -238,15 +238,11 @@ class SixDOFObject {
       this._dcm.makeRotationFromQuaternion(this._quat);
     }
 
-    // this._pos.x += this._vel.x * h;
-    // this._pos.y += this._vel.y * h;
-    // this._pos.z += this._vel.z * h;
-
     this._H.copy(this._omega);
     this._H.applyMatrix3(this._inertiaMatrix);
     this._Hinertial.copy(this._H);
     this._Hinertial.applyQuaternion(this._quat);
-    this._needsRefresh = true;
+    this.needsRefresh = true;
   }
 
   tickDynamic(){
@@ -370,32 +366,38 @@ class SixDOFObject {
   simulate(dt){
     let safetyCounter = 0;
     const maxTicks = this._maxTicksPerFrame;
-    this._realTime += dt;
+    this.realTime += dt;
     
-    while (this._simulationTime < this._realTime && safetyCounter < maxTicks){
+    while (this.simulationTime < this.realTime && safetyCounter < maxTicks){
       this.tickDynamic();
-      this._simulationTime += this._h;
+      this.simulationTime += this._h;
       safetyCounter++;
     }
   }
 
+  /**
+   refresh should be called whenever the orientation of the block changes 
+   relative to the inertial frame or when the camera changes its position 
+   or lookat point.  This function does not generate the block object 
+   (see constructBlock).
+  **/
   refresh(){
-    if (!this._constructionComplete){
+    if (!this.constructionComplete){
       return;
     }
     
-    if (this._needsRefresh === false){
+    if (this.needsRefresh === false){
       return;
     }
 
-    this._needsRefresh = false;
+    this.needsRefresh = false;
     this._qn.setFromRotationMatrix(this._camera.matrixWorld);
     this._q0.multiplyQuaternions(this._flipQuat,this._quat);
     this._blockMesh.matrix.compose(this._itemOrigin, this._q0, this._scale);
   }
 
   setDimensionsAndInertiaProperties(mass, length, width, height){
-    this._needsRefresh = true;
+    this.needsRefresh = true;
 
     // allow one dimension to be zero but not two or more
     const p1 = length === 0;
@@ -421,12 +423,12 @@ class SixDOFObject {
   }
 
   setOmega(omegaOrH, omegaMagnitude, x, y, z){
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     const xyz = new THREE.Vector3(x, y, z);
     xyz.normalize();
 
     if (omegaOrH === 'H'){
-      // inverse of inertia matrix, it assumes the products of inertia are zero
+      // inverse of inertia matrix, the products of inertia MUST be zero
       let Iinv = new THREE.Matrix3();
       Iinv.elements[0] = 1/(this._inertiaMatrix.elements[0]);
       Iinv.elements[4] = 1/(this._inertiaMatrix.elements[4]);
@@ -472,7 +474,7 @@ class SixDOFObject {
 
   setOpacity(thing, opacity){  
     if (thing === 'object'){
-      this._needsRefresh = true;
+      this.needsRefresh = true;
       this._itemOpacity = opacity;
       this._blockMesh.material.opacity = opacity;
     }
@@ -572,16 +574,12 @@ class SixDOFObject {
         break;
       case 'cessna-172':
         texture = tl.load('./img/cessna172.jpg');
+        this._scale.set(9*0.5, 7*0.5, 4*0.5);
         break;
       case 'new-horizons':
         texture = tl.load('./img/newHorizons.jpg');
+        this._scale.set(9*0.5, 4*0.5, 6*0.5);
         break;
-      // case 'boeing-767':
-      //   texture = tl.load('./img/img/cessna172.jpg');
-      //   break;
-      // case 'lockheed-f-104':
-      //   texture = tl.load('./img/img/cessna172.jpg');
-      //   break;
     }
 
     const material = new THREE.MeshPhongMaterial({
@@ -601,16 +599,12 @@ class SixDOFObject {
       this._scene.add(this._blockMesh);
     }
 
-    this._needsRefresh = true;
+    this.needsRefresh = true;
   }
 
   setPos(x, y, z) {
     this._itemOrigin.set(x, y, z);
     this._blockMesh.position.set(x, y, z);
-  }
-
-  setVel(vx, vy, vz) {
-    this._vel.set(vx, vy, vz);
   }
 
   _setQuaternionFromEulerAngles(){
@@ -620,7 +614,7 @@ class SixDOFObject {
   setEulerAngles(angle1, angle2, angle3){
     // angles are entered in degrees
     // set to between -180 and 180 for angles 1 and 3
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     angle1 = angle1 > 180 ? angle1 - 180 : angle1;
     angle3 = angle3 > 180 ? angle3 - 180 : angle3;
     const eo = this._eulerOrderTriplet[this._eulerOrder];
@@ -631,11 +625,11 @@ class SixDOFObject {
 
   setEulerOrder(order){
     this._eulerOrder = order;
-    this._setQuaternionFromEulerAngles();
+    this._setQuaternionFromEulerAngles();//probably not necessary
   }
 
   setEulerAnglesFromQuaternion(qw, qx, qy, qz){
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     this._q0.set(qx, qy, qz, qw);
     this._q0.normalize();
     this._euler.setFromQuaternion(this._q0, this._eulerOrder);
@@ -652,14 +646,6 @@ class SixDOFObject {
 
   set pos(value) {
     this._pos = value;
-  }
-
-  get vel() {
-    return this._vel;
-  }
-
-  set vel(value) {
-    this._vel = value;
   }
 
   set mass(value) {
@@ -741,7 +727,7 @@ class SixDOFObject {
       return;
     }
 
-    this._needsRefresh = true;
+    this.needsRefresh = true;
     this._showObject = show;
 
     if (show){
@@ -751,7 +737,7 @@ class SixDOFObject {
     }
   }
 
-  setOffsetBooleans(itemOffset){
+  setOffset(itemOffset){
     this._offsetItemOrigin = itemOffset;
   }
 
@@ -793,16 +779,12 @@ class SixDOFObject {
   }
 
   setOrigin(thing, offsetTheOrigin){
-    this._needsRefresh = true;
+    this.needsRefresh = true;
 
     if (thing === 'object'){
       this._offsetItemOrigin = offsetTheOrigin;
       this._itemOrigin.copy(this._offsetItemOrigin ? this._origin : this._zeroVector);
     }
-  }
-
-  set isAxisymmetric(value){
-    this._isAxisymmetric = value;
   }
 }
 

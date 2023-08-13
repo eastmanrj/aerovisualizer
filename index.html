@@ -38,17 +38,17 @@
           <button id="preferences-btn" class="btn no-uppercase">pref</button>
 
           <button id="default-btn" class="btn">default</button>
-          <button id="axis-orientation-btn" class="btn">axis orientation</button>
-          <button id="euler-angle-order-btn" class="btn">Euler angle order</button>
+          <button id="general-btn" class="btn">general</button>
           <button id="object-btn" class="btn">object</button>
           <button id="body-frame-btn" class="btn">body frame</button>
           <button id="space-frame-btn" class="btn">space frame</button>
           <button id="omega-btn" class="btn">angular velocity vector</button>
           <button id="h-btn" class="btn">angular momentum vector</button>
           <button id="torque-prefs-btn" class="btn">torque vector</button>
+          <button id="axis-orientation-btn" class="btn">axis orientation</button>
+          <button id="euler-angle-order-btn" class="btn">Euler angle order</button>
           <button id="cones-btn" class="btn">space and body cones</button>
           <button id="poinsot-btn" class="btn">Poinsot's construction</button>
-          <button id="general-btn" class="btn">general</button>
           <button id="prefs-return-btn" class="btn"><i class="material-icons">arrow_back</i></button>
         </div>
         <div class="elements" id="default-elements">
@@ -112,20 +112,25 @@
           <select id="info-menu" class="menu" name="info-menu">
             <option value="info-intro">introduction</option>
             <option value="info-how-to-use">how to use aerovisualizer</option>
+            <option value="info-numerical">numerical display</option>
             <option value="info-mass-prop">mass properties</option>
             <option value="info-attitude">Euler angles & quaternions</option>
             <option value="info-angular-rates">angular velocity & momentum</option>
+            <option value="info-cones">space and body cones</option>
+            <option value="info-poinsot">Poinsot's construction</option>
             <option value="info-torque-general">torque - general</option>
+            <option value="info-torque-no-torque">torque - no torque</option>
             <option value="info-torque-space-body">torque - space and body frames</option>
             <option value="info-torque-acs">torque - ACS stabilization</option>
             <option value="info-torque-gg">torque - gravity gradient</option>
             <option value="info-torque-top">torque - spinning top</option>
             <option value="info-prefs-main">preferences</option>
+            <option value="info-prefs-default">default</option>
+            <option value="info-prefs-general">preferences - general</option>
             <option value="info-prefs-trans-offset-color">preferences - transparency, offset, color</option>
             <option value="info-prefs-axis-orientation">preferences - axis orientation</option>
             <option value="info-prefs-euler-angle-order">preferences - Euler angle order</option>
-            <option value="info-prefs-general">preferences - general</option>
-            <option value="info-what-are-units">what are the units?</option>
+            <option value="info-units">units</option>
           </select>
           <p class="center-grid-item">&nbsp;</p>
           <p id="info-text" class="p-normal">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Maiores, alias rerum quis reiciendis voluptas, autem harum sint vel eos ex neque odit est incidunt ratione tempore quam dolore cum quos laborum numquam! Amet est nisi vel omnis, doloribus obcaecati soluta nesciunt, rerum unde doloremque sunt! Officiis nobis eum officia sit?</p>
@@ -133,33 +138,31 @@
           <button id="info-return-btn" class="btn center-grid-item"><i class="material-icons">arrow_back</i></button>
         </div>
         <div class="elements" id="general-elements">
-          <label class="right-grid-item">object &ldquo;skin&rdquo;:</label>
-          <select id="object-appearance-choice-menu" class="menu span2" name="object-appearance-choice-menu">
-            <option value="axis-labels">axis labels</option>
-            <option value="cessna-172">Cessna 172</option>
-            <option value="new-horizons">New Horizons</option>
+          <select id="object-appearance-choice-menu" class="menu span3" name="object-appearance-choice-menu">
+            <option value="axis-labels">object &ldquo;skin&rdquo;: axis labels</option>
+            <option value="cessna-172">object &ldquo;skin&rdquo;: Cessna 172</option>
+            <option value="new-horizons">object &ldquo;skin&rdquo;: New Horizons</option>
           </select>
-          <label class="right-grid-item">mass prop:</label>
-          <select id="preset-mass-properties-menu" class="menu span2" name="preset-mass-properties-menu">
-            <option value="select-an-object">user</option>
-            <option value="cessna-172">Cessna 172</option>
-            <option value="new-horizons">New Horizons</option>
+          <select id="preset-mass-properties-menu" class="menu span3" name="preset-mass-properties-menu">
+            <option value="select-an-object">inertia matrix: user</option>
+            <option value="cessna-172">inertia matrix: Cessna 172</option>
+            <option value="new-horizons">inertia matrix: New Horizons</option>
           </select>
-          <p class="center-grid-item span3">Cessna dimensions (x:9 y:7 z:4)</p>
-          <p class="center-grid-item span3">New Horizons dimensions (x:9 y:4 z:6)</p>
-          <p class="grid-item">environment:</p>
+          <!-- Cessna dimensions (x:9 y:7 z:4)
+          New Horizons dimensions (x:9 y:4 z:6) -->
+          <p class="center-grid-item span3">environment:</p>
           <div class="grid-item">
             <input type="radio" id="environment-atmosphere" name="environment-radio" value="atmosphere">
             <label for="environment-atmosphere">atmosphere</label>
           </div>
-          <div class="grid-item">
+          <div class="grid-item span2">
             <input type="radio" id="environment-space" name="environment-radio" value="space">
             <label for="environment-space">space</label>
           </div>
-          <p class="center-grid-item span3">maximum rotation rate (deg/sec): <span id="max-omega-display">0</span></p>
-          <input class="slider span3" type="range" min="100" max="1000" value="0" id="max-omega">
-          <p class="center-grid-item span3">vector size: </p>
-          <input class="slider span3" type="range" min="2" max="10" value="5" id="vector-size">
+          <p class="center-grid-item">max &vert;&omega;&vert; (&deg;/sec): <span id="max-omega-display">0</span></p>
+          <input class="slider span2" type="range" min="100" max="1000" value="0" id="max-omega">
+          <p class="center-grid-item">vector size: </p>
+          <input class="slider span2" type="range" min="2" max="10" value="5" id="vector-size">
         </div>
         <div class="elements" id="object-elements">
           <p class="center-grid-item">transparency:&nbsp;<span id="transparency-block-display">0</span></p>
@@ -333,7 +336,7 @@
         <div class="elements-group">
           <div class="elements numerical" id="numerical-elements-general">
             <p class="span6 center-grid-item">Aerovisualizer v1.0 beta</p>
-            <button id="info-btn" class="btn span2 center-grid-item">?</button>
+            <button id="info-btn" class="btn span2 center-grid-item">&nbsp;?&nbsp;</button>
             <p class="span2 top-border">moi</p><p class="span2 top-border left-border">&omega;</p>
             <p class="span2 top-border left-border">H</p><p class="span2 top-border left-border">&tau;</p>
             <p>Ixx</p><pre><span id="ixx-number"></span></pre>
@@ -418,8 +421,14 @@
             <p class="span3 top-margin">P: <span id="omegaP-display">0</span> Q: <span id="omegaQ-display">0</span> R: <span id="omegaR-display">0</span></p>
           </div>
           <div class="elements" id="torque-option-elements">
-            <span id="torque-option" class="center-grid-item">No Torque</span>
-            <button id="torque-option-btn" class="btn span2">Torque</button>
+            <select id="torque-option-menu" class="menu span3" name="torque-option-menu">
+              <option value="no-torque">no torque</option>
+              <option value="space-frame">space frame torque</option>
+              <option value="body-frame">body frame torque</option>
+              <option value="ACS-stabilization">ACS stabilization torque</option>
+              <option value="gravity-gradient">gravity gradient torque</option>
+              <option value="top">spinning top torque</option>
+            </select>
           </div>
           <div class="elements" id="torque-frame-elements">
             <p class="center-grid-item">&vert;&tau;&vert;: <span id="torqueMag-display">0</span></p>
@@ -438,7 +447,7 @@
             <p>&omega;&nbsp;dead zone: <span id="acs-omega-dead-zone">0</span></p>
             <input class="slider span2" type="range" min="1" max="100" value="10" id="acs-omega-dead-zone-slider">
             <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
-            <p>ACS Torque: <span id="acs-torque-magnitude">0</span></p>
+            <p>Torque: <span id="acs-torque-magnitude">0</span></p>
             <input class="slider span2" type="range" min="0" max="100" value="10" id="acs-torque-magnitude-slider">
           </div>
           <div class="elements" id="torque-gg-elements">

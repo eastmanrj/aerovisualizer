@@ -2077,51 +2077,51 @@ infoReturnButton.addEventListener('click', () => {
 const handleInfoMenuChoice = function(choice){
   switch (choice){
     case 'info-intro': //Introduction
-      infoText.innerHTML = `<p class="p-normal">The purpose ofAerovisualizer 
-      is to help students of aerospace engineering learn concepts related to rigid body 
-      rotational dynamics using 3D animation.  It is assumed that the students have taken 
-      or are currently taking a course covering this subject.</p>
-
-      <p class="p-normal">Specific topics include moments of inertia, Euler angles,
-      quaternions, angular velocity, angular momentum, space and body cones, 
-      Poinsot's contruction (including polhodes and herpolhodes), and the effect of 
-      torque on motion. Types of torques include attitude control system 
-      stabilization, gravity gradient, and the torque on a spinning top.</p>`;
+      infoText.innerHTML = `<p class="p-normal">The purpose of Aerovisualizer is to 
+      assist in teaching or reinforcing concepts in aerospace engineering by presenting 
+      them in interesting and engaging ways.  Subjects are displayed as 2D and 3D 
+      animations to complement the dry equations found in textbooks and online.  Controls
+      are also provided to manipulate the displays.</p>
+      
+      <p class="p-normal">Aerovisualizer version 1 focuses only on the orientation and rotational dynamics of 
+      rigid bodies.  Topics include Euler angles, quaternions, direction cosines, angular 
+      velocity and momentum and torque (ACS engines, gravity gradient, spinning top).  Also 
+      included are space and body cones and Poinsot's construction.  It is assumed that  
+      the user has taken or is currently taking a course in this subject.</p>`;
       break;
 
     case 'info-how-to-use': //how to use aerovisualizer
       infoText.innerHTML = `
-      <p class="p-normal">1) Click <em>mass</em>. Set the mass and the three moments of inertia 
+      <p class="p-normal">1) Click <em>mass</em> to set the mass and the three moments of inertia 
       of the rigid body.</p>
-      <p class="p-normal">2) Click <em>&#120537;&nbsp;&#120541;&nbsp;&#120543;</em>.  Set the initial 
+      <p class="p-normal">2) Click <em>&psi;&nbsp;&theta;&nbsp;&phi;</em> to set the initial 
       orientation (attitude).</p>
-      <p class="p-normal">3) Click <em>&#120538;&nbsp;/&nbsp;H</em>. Set the initial angular velocity 
+      <p class="p-normal">3) Click <em>&omega;&nbsp;/&nbsp;H</em> to set the initial angular velocity 
       or angular momentum.</p>
-      <p class="p-normal">4) Click &#120533;. Set the the type of torque (if any) that you want 
-      to apply and also the various associated parameters.</p>
+      <p class="p-normal">4) Click <em>&tau</em> to set the the type of torque (if any) that you want 
+      to apply.</p>
       <p class="p-normal">5) Click the <em>play</em> button to run the simulation.  Click the 
       <em>reset</em> button to return the rigid body to its initial state.</p>`;
       break;
       case 'info-numerical': //numerical display
-      infoText.innerHTML = `<p class="p-normal">Click <em>1 2 3</em>.  A numerical display 
-      appears containing the the current state of the object consisting of the 
-      following: the moments of inertia, the angular velocity &omega; (body frame), 
-      the angular momentum H (space frame), the applied external torque &tau; 
-      (body frame), the direction cosine matrix (DCM) going from the body frame to 
-      the inertial (space) frame, the corresponding quaternion, and the kinetic 
-      energy of rotation.</p>`;
+      infoText.innerHTML = `<p class="p-normal">Click <em>1 2 3</em> to show a numerical  
+      display containing the current state of the object. It consists of the 
+      following: the moments of inertia, the angular velocity (&omega;, body frame), 
+      the angular momentum (H, space frame), the applied external torque (&tau;, 
+      (body frame), the direction cosine matrix (DCM, (body to space frame), the quaternion, 
+      and the kinetic energy of rotation.</p>`;
       break;
     case 'info-mass-prop': //mass properties
       infoText.innerHTML = `<p class="p-normal"><em>Mass Properties</em> is a 
       term that refers to the mass, moments of inertia, and products of 
       inertia of a physical object. A body-fixed vector basis can always 
       be chosen such that the products of inertia are zero, which 
-      Aerovisualizer does.  The moments of inertia are then referred to as 
-      the principal moments of inertia.</p>
+      Aerovisualizer does.  In this case, the moments of inertia are 
+      referred to as the principal moments of inertia.</p>
 
       <p class="p-normal">Every object has a companion object shaped like 
-      a brick that has the exact same mass properties.  For simplicity, 
-      Aerovisualizer displays only brick shaped objects.</p>
+      a brick that has the exact same mass properties as the object itself.  
+      For simplicity, Aerovisualizer displays only brick shaped objects.</p>
     
       <p class="p-normal">Click <em>mass</em>.  Use the slider 
       controls to set the mass and the 3 dimensions of the brick 
@@ -2132,50 +2132,49 @@ const handleInfoMenuChoice = function(choice){
     case 'info-attitude': //Euler angles & quaternions
       infoText.innerHTML = `<p class="p-normal">The two most common ways 
       to specify orientation are 1) Euler angles, and 2) quaternions.  
-      Click <em>&psi;&nbsp;&theta;&nbsp;&phi;</em>.  Use the button that appears 
+      Click <em>&psi;&nbsp;&theta;&nbsp;&phi;</em>, and use the button that appears 
       to toggle between Euler angles and quaternions.</p>
 
       <p class="p-normal"><em>Euler Angles</em>: By default, Aervisualizer uses the "ZYX" 
-      sequence of Euler rotations, where the first rotation is yaw (&psi;), the 
-      second is pitch (&theta;), and the third is roll (&phi;).  Use the slider 
-      controls to set these values in degrees.  Use the buttons to set the 
-      values to zero.  Tait-Bryan rotation sequences are a subset of the 
-      set of the Euler angle sequences.  Choose from 6 intrinsic Tait-Bryan sequences 
-      (see "preferences/Euler angle order").
+      sequence of Euler rotations, where the first rotation is &psi; (yaw), the 
+      second is &theta; (pitch), and the third is &phi; (roll).  Use the sliders to set 
+      these values in degrees.  Use the buttons to set the values to zero.  Tait-Bryan 
+      rotation sequences are a subset of the set of the Euler angle sequences.  Choose 
+      from 6 intrinsic Tait-Bryan sequences (see <em>preferences/Euler angle order</em>).
 
-      <p class="p-normal"><em>Quaternions</em>: Use the slider controls to set the 
-      rotation angle of the object in degrees as well as the components of the unit 
-      vector &lambda; about which the rotation is made.  Use the 
-      buttons to set the values to zero.  The components of the 
-      quaternion are displayed as w, x, y, and z.</p>`;
+      <p class="p-normal"><em>Quaternions</em>: Use the sliders to set the 
+      rotation angle of the object in degrees and also the components of the unit 
+      vector &lambda; about which the rotation is made.  Use the buttons to set 
+      the values to zero.  The components of the quaternion are displayed as 
+      w, x, y, and z.</p>`;
       break;
 
     case 'info-angular-rates': //angular velocity & momentum
-      infoText.innerHTML = `<p class="p-normal">Click <em>&omega;&nbsp;/&nbsp;H</em>.  
-      Use the radio buttons to select either &omega; (angular velocity) or H 
+      infoText.innerHTML = `<p class="p-normal">Click <em>&omega;&nbsp;/&nbsp;H</em>  
+      and use the radio buttons to select either &omega; (angular velocity) or H 
       (angular momentum).</p>
       
-      <p class="p-normal">Use the slider controls to set the magnitude of 
-      &omega; or H and the 3 body-frame components of the unit vector in the 
-      direction of the chosen vector.  Use the buttons to set the values to zero.</p>
+      <p class="p-normal">Use the sliders to set the magnitude of &omega; or 
+      H and the 3 components of a unit vector in the direction of the chosen 
+      vector (body-frame).  Use the buttons to set the values to zero.</p>
     
       <p class="p-normal">Angular velocity is specified in radians/second.  
-      Angular momentum is in the units of your choice (see <em>units</em>).  The x, y, and 
-      z components of &omega; are displayed as P, Q, and R, respectively.</p>`;
+      Angular momentum is in the units of your choice (see <em>units</em>).  
+      The x, y, and z components of &omega; are displayed as P, Q, and R, 
+      respectively.</p>`;
       break;
 
       case 'info-cones': //space and body cones
       infoText.innerHTML = `<p class="p-normal">Rigid bodies for which 2 of 
       the 3 principal moments of inertia at the center of mass are equal are 
-      said to be axially symmetric whether its mass distribution is symmetrical 
-      or not.  When no torque is applied, such bodies exhibit a characteristic 
-      behavior when rotating.</p>
+      said to be axially symmetric whether or not the mass distribution is 
+      symmetrical.  Such bodies exhibit a characteristic behavior while 
+      rotating without torque.</p>
       
       <p class="p-normal">For these rigid bodies, &omega; traces a cone about 
       the H vector.  This cone is referred to as the <em>space cone</em> and remains 
-      inertially fixed. The &omega; vector also traces a cone about the axis of 
-      symmetry.  This cone is fixed in the body frame and is referred to as the 
-      <em>body cone</em>.</p>
+      inertially fixed. The &omega; vector also traces a body-fixed cone called the 
+      <em>body cone</em> about the axis of symmetry.</p>
     
       <p class="p-normal">Long thin objects undergo direct precession, and the 
       body cone rolls without slipping on the outside of the space cone.  Flat 
@@ -2184,33 +2183,33 @@ const handleInfoMenuChoice = function(choice){
 
       <p class="p-normal">The following conditions must be met for the cones to 
       appear: 1) Two of the three moments of inertia must be equal, 2) &omega; 
-      must not be zero, 3) the <em>no torque</em> option must be selected, and 4) the 
-      cones must be made non-transparent in the preferences.</p>`;
+      must not be zero, 3) &omega; and H cannot be colinear, 4) the <em>no torque</em> 
+      option must be selected, and 5) the cones must be set non-transparent in the 
+      preferences.</p>`;
       break;
 
       case 'info-poinsot': //Poinsot's construction
       infoText.innerHTML = `<p class="p-normal">A method of analyzing the free 
       motion of a rigid body was developed by <em>Louis Poinsot</em> in 1834.  In the 
       Poinsot method, the rotational inertia characteristics can be expressed 
-      by an <em>ellipsoid of inertia</em>.</p>
+      with an <em>ellipsoid of inertia</em>.</p>
     
-      <p class="p-normal">Also, the angular momentum can be represented by a 
-      plane called the <em>invariable plane</em> which is perpendicular to 
-      the H vector.  Under torque-free motion, the ellipsoid touches the 
-      plane at a point on a line along the &omega; vector.  Curves called the 
-      <em>polhode</em> and the <em>herpolhode</em> can be constructed from the touch 
-      points.  Aerovisualizer generates these curves internally and then displays 
-      them when complete.</p>
+      <p class="p-normal">The angular momentum can be represented by a plane called
+      the <em>invariable plane</em> which is perpendicular to the H vector.  Under 
+      torque-free motion, the ellipsoid touches the plane at a point on a line along 
+      the &omega; vector.  Curves called the <em>polhode</em> and the <em>herpolhode</em> 
+      can be constructed from the osculation points.  Aerovisualizer generates these 
+      curves for a short period of time and then displays them when complete.</p>
 
-      <p class="p-normal">The following conditions must be met for the Poinsto's 
+      <p class="p-normal">The following conditions must be met for the Poinsot's 
       construction to appear: 1) &omega; must not be zero, 2) the <em>no torque</em> 
-      option must be selected, and 3) the Poinsot construction must be made 
+      option must be selected, and 3) the Poinsot construction must be set 
       non-transparent in the preferences.</p>`;
       break;
 
     case 'info-torque-general': //torque - general
-      infoText.innerHTML = `<p class="p-normal">Click <em>&tau;</em>.  Use the menu that 
-      appears to choose from the following torque options:</p>
+      infoText.innerHTML = `<p class="p-normal">Click <em>&tau;</em> and use the menu 
+      that appears to choose from the following torque options:</p>
       
       <p class="p-normal">no torque, space frame, body frame, ACS stabilization, 
       gravity gradient, and spinning top.</p>`;
@@ -2218,22 +2217,23 @@ const handleInfoMenuChoice = function(choice){
 
     case 'info-torque-no-torque': //torque - no torque
       infoText.innerHTML = `<p class="p-normal">Choose <em>no torque</em>. Set the 
-      initial attitude and &omega;/H.  Click the play button.</p>
+      initial attitude and rotation rate.  Click the <em>play</em> button.</p>
       
-      <p class="p-normal"><em>Note</em>: Space cones, body cones, and Poinsot's 
-      construction are only valid with this option.
+      <p class="p-normal"><em>Note</em>: Space and body cones and Poinsot's 
+      construction are only appear when using this option.
       </p>`;
       break;
 
     case 'info-torque-space-body': //torque - space and body frames
       infoText.innerHTML = `<p class="p-normal"> 
-      Choose the <em>space frame</em> (inertial) torque or <em>body frame</em> torque.  
-      Set the magnitude of the constant torque vector and the 3 component of the unit 
+      Choose the <em>space frame</em> torque or <em>body frame</em> torque option.  
+      Set the magnitude of the constant torque vector and the 3 component of a unit 
       vector in that direction.  Use the buttons to set the values to zero.</p>
 
-      <p class="p-normal">Click the play button to observe the effect of the 
-      torque.  The angular rate increases until you click pause or 
-      reset or until &omega; reaches the maximum allowed (see <em>preferences/general</em>).</p>`;
+      <p class="p-normal">Click the <em>play</em> button to observe the effect of the 
+      torque.  The angular rate increases until you click <em>pause</em> or 
+      <em>reset</em> or until &omega; reaches the maximum allowed (see 
+      <em>preferences/general</em>).</p>`;
       break;
 
     case 'info-torque-acs': //torque - ACS stabilization
@@ -2246,7 +2246,7 @@ const handleInfoMenuChoice = function(choice){
       rendered and are left to the imagination.</p>
 
       <p class="p-normal">  
-      Choose the <em>ACS stabilization</em> torque.  Use the slider controls to 
+      Choose the <em>ACS stabilization</em> torque and use the sliders to 
       set the values of <em>&omega; dead zone</em> (deg/sec) and <em>torque</em>.  
       Set the initial attitude and &omega;/H.  Click the <em>play</em> button to 
       observe the effect of the torque.`;
@@ -2255,7 +2255,7 @@ const handleInfoMenuChoice = function(choice){
     case 'info-torque-gg': //torque - gravity gradient
       infoText.innerHTML = `<p class="p-normal">The gravity gradient torque 
       results from the difference in the pull of gravity along the gravitational 
-      potential field gradient from one end of the rotating body to the other.  
+      potential field gradient going from one end of the rotating body to the other.  
       It is most pronounced for long thin objects whose long direction is at a 
       45&deg; angle to the local vertical.</p>
 
@@ -2263,33 +2263,33 @@ const handleInfoMenuChoice = function(choice){
       where &mu; is the gravitational constant of the planet, and R is the 
       distance to the center of the planet.  Because the gravity gradient effect is 
       very small for earth-orbiting objects, Aerovisualizer lets you exagerate 
-      this effect up to 1 million times that of low earth orbit.  The gravity 
+      this effect up to 1 million times the value for low earth orbit.  The gravity 
       gradient torque is also a function of the orbital period, but this effect is 
       ignored.</p>
 
-      <p class="p-normal">Choose the <em>gravity gradient</em> torque.  Use the 
-      slider control to set the value of the torque magnification.  Set the initial 
-      attitude and &omega;/H.  Click the play button to observe the effect of 
-      the torque.`
+      <p class="p-normal">Choose the <em>gravity gradient</em> torque and use the 
+      slider to set the value of the torque magnification.  Set the initial 
+      attitude (45&deg; for example) and rotation rate (zero is usually best).  
+      Click the <em>play</em> button to observe the effect of the torque.`
       break;
 
     case 'info-torque-top': //torque - spinning top
       infoText.innerHTML = `<p class="p-normal">The spinning top torque is the 
-      torque generated by the normal force from a table top acting at a point 
-      on a spinning top.  The torque is equal to r&KHcy;f, where r is a vector from 
+      torque generated by the normal force from a table top acting at the point 
+      of a spinning top.  The torque is equal to r&KHcy;f, where r is a vector from 
       the center of mass of the top to the point where it meets the table, and f 
       equals mg.</p>
 
-      <p class="p-normal">Aerovisualizer does not render a top shape nor 
+      <p class="p-normal">Aerovisualizer does not render either a top shape nor 
       a table, so these are left to the imagination.</p>
     
       <p class="p-normal">Choose the <em>spinning top</em> torque.  Use the <em>r</em> slider 
-      control to set the length and sign of the r vector.  Its direction is along 
-      the x body axis.  Use the <em>g</em> slider control to set the magnitude of the 
+      to set the length and sign of the r vector.  Its direction is along 
+      the x body axis.  Use the <em>g</em> slider to set the magnitude of the 
       gravity vector.  Its direction is downward along the local vertical.</p>
 
       <p class="p-normal">Set &omega; to be mostly in the x body axis direction.  
-      Click the play button to observe the effect of the torque.</p>`;
+      Click the <em>play</em> button to observe the effect of the torque.</p>`;
       break;
     
     case 'info-prefs-main': //preferences
@@ -2297,43 +2297,41 @@ const handleInfoMenuChoice = function(choice){
       labeled as below:</p>
       <p class="p-normal">default, general, object, body frame, space frame, angular 
       velocity vector, angular momentum vector,
-      torque vector, axis orientation, Euler angle order, space and body cones,
+      torque vector, axis orientation, Euler angle order, space and body cones, and
       Poinsot's construction.</p>`;
       break;
 
-    case 'info-prefs-default': //preferences
+    case 'info-prefs-default': //preferences - default
       infoText.innerHTML = `<p class="p-normal">Click the button to set the 
       preferences to their default values.</p>`;
       break;
 
     case 'info-prefs-general': //preferences - general
-      infoText.innerHTML = `<p class="p-normal"><em>object &ldquo;skin&rdquo;</em> - Use the menu to set the image rendered on the 
+      infoText.innerHTML = `<p class="p-normal"><em>object &ldquo;skin&rdquo;</em> - Use the menu 
+      to set the image being rendered for the 
       object.  Choose Cessna 172, the New Horizons space probe, or axis labels. 
       The object retains the brick shape.</p>
       <p class="p-normal"><em>mass properties</em> - Use the menu to set the mass properties to those of 
-      the Cessna 172 or the New Horizons space probe (metric units).</p>
+      the Cessna 172 or the New Horizons space probe (metric units) if desired.</p>
       <p class="p-normal"><em>environment</em> - Use the radio buttons to set the environment to 
       be either a stormy atmosphere or outer space above Jupiter.</p>
-      <p class="p-normal"><em>maximum rotation rate</em> - Use the slider control to set the maximum rotation 
-      rate (&omega;) that the object can attain.  The range is from 100 deg/sec to 
-      1000 deg/sec.  The default is 720 deg/sec.</p>
-      <p class="p-normal"><em>vector size</em> - Use the slider control to set how large all of the vectors 
-      appear (body frame, space frame, &omega; vector, H vector, &tau; vector).  This also affects 
+      <p class="p-normal"><em>maximum rotation rate</em> - Use the slider to set the maximum rotation 
+      rate (&vert;&omega;&vert;) that the object can attain.  The range is from 100 &deg;/sec to 
+      1000 &deg;/sec.  The default is 720 &deg;/sec.</p>
+      <p class="p-normal"><em>vector size</em> - Use the slider to set how large all of the vectors 
+      appear (body frame, space frame, &omega;, H, &tau;).  This also affects 
       the size of the space and body cones.</p>`;
       break;
 
     case 'info-prefs-trans-offset-color': //preferences - transparency, offset, color
-      infoText.innerHTML = `<p class="p-normal">Use the slider controls 
-      to set the <em>transparency</em> (visibility) of the brick object, the body and space frames, 
-      the &omega; vector, the H vector, the &tau; vector, the space and body cones, and 
-      Poinsot's construction.  Slide them all the way to the right to remove them from 
-      the scene.</p>
+      infoText.innerHTML = `<p class="p-normal">Use the sliders to set the <em>transparency</em> 
+      (visibility) of the brick object, the vectors and vector frames, the space and body cones, 
+      and Poinsot's construction.  Slide it completely to the right to remove an item from the scene.</p>
 
-      <p class="p-normal">Check <em>offset</em> to make the items listed above 
-      appear off center.</p>
+      <p class="p-normal">Check <em>offset</em> to make the items listed above appear off center.</p>
     
-      <p class="p-normal">Use the menu to choose the <em>color</em> of items (excluding the 
-      object).</p>`;
+      <p class="p-normal">Use the menu to choose the <em>color</em> of the items listed above 
+      (excluding the brick object).</p>`;
       break;
     
     case 'info-prefs-axis-orientation': //preferences - axis orientation
@@ -2348,18 +2346,19 @@ const handleInfoMenuChoice = function(choice){
 
       <p class="p-normal">Choose from 6 intrinsic Tait-Bryan rotation sequences.  
       By default, Aerovisualizer uses the "ZYX" sequence, where the first rotation 
-      is yaw (&psi;) about the Z axis, the second is pitch (&theta;) about the 
-      rotated Y&prime; axis, and the third is roll (&phi;) about the twice-rotated 
+      is &psi; (yaw) about the Z axis, the second is &theta; (pitch) about the 
+      rotated Y&prime; axis, and the third is &phi; (roll) about the twice-rotated 
       X&Prime; axis.</p>`;
       break;
     
     case 'info-units': //units
-      infoText.innerHTML = `<p class="p-normal">So what are the units of 
-      length and mass?  The answer is that it does not matter.  It is up to you.  
-      If you choose meters for length and kilograms for mass, then torque 
-      is in Newton-meters, angular momentum is in kg m&sup2; per second, and 
-      the moments of inertia are in kg m&sup2.  The English unit of length is the 
-      foot, and the unit of mass is the slug.</p>
+      infoText.innerHTML = `<p class="p-normal">You might ask, "What are the units of 
+      length and mass"?  The answer is that it does not matter.  It is up to you.</p>
+
+      <p class="p-normal">If you choose the meter for length and the kilogram for mass, then 
+      torque is expressed as kg m&sup2;/s&sup2; (Newton-meters), angular momentum is in 
+      kg m&sup2;/s, and the moment of inertia is in kg m&sup2;.  The English unit of length is the 
+      foot, and the unit of mass is the slug if you prefer.</p>
       
       <p class="p-normal">The unit of time is the second.</p>`;
       break;

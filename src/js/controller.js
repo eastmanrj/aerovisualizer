@@ -358,7 +358,6 @@ const prefsReturnButton = document.getElementById('prefs-return-btn');
 const infoMenu = document.getElementById('info-menu');
 const infoText = document.getElementById('info-text');
 
-const presetMassPropertiesMenu = document.getElementById("preset-mass-properties-menu");
 const numericalElements = document.getElementById('numerical-elements-general');
 const infoElements = document.getElementById('info-elements');
 const attitudeEulerElements = document.getElementById('attitude-euler-elements');
@@ -382,14 +381,6 @@ const hElements = document.getElementById('h-elements');
 const torqueElements = document.getElementById('torque-elements');
 const conesElements = document.getElementById('cones-elements');
 const poinsotElements = document.getElementById('poinsot-elements');
-
-const objectAppearanceChoiceMenu = document.getElementById("object-appearance-choice-menu");
-const maxOmegaSlider = document.getElementById("max-omega");
-const maxOmegaDisplay = document.getElementById("max-omega-display");
-const vectorSizeSlider = document.getElementById("vector-size");
-const orientationRadios = document.querySelectorAll('input[name="orientation-radio"]');
-const eulerOrderRadios = document.querySelectorAll('input[name="euler-order-radio"]');
-const environmentRadios = document.querySelectorAll('input[name="environment-radio"]');
 
 const ixxDisplay = document.getElementById("ixx-display");
 const iyyDisplay = document.getElementById("iyy-display");
@@ -417,6 +408,13 @@ const quatXNumber = document.getElementById("quatX-number");
 const quatYNumber = document.getElementById("quatY-number");
 const quatZNumber = document.getElementById("quatZ-number");
 const kineticEnergy = document.getElementById("kinetic-energy-number");
+
+const objectAppearanceChoiceMenu = document.getElementById("object-appearance-choice-menu");
+const presetMassPropertiesMenu = document.getElementById("preset-mass-properties-menu");
+const environmentRadios = document.querySelectorAll('input[name="environment-radio"]');
+const maxOmegaSlider = document.getElementById("max-omega");
+const maxOmegaDisplay = document.getElementById("max-omega-display");
+const vectorSizeSlider = document.getElementById("vector-size");
 
 const objectTransparencySlider = document.getElementById("transparency-block");
 const objectTransparencyDisplay = document.getElementById("transparency-block-display");
@@ -456,6 +454,9 @@ const bodyConeColorMenu = document.getElementById("body-cone-color-menu");
 const spaceConeColorMenu = document.getElementById("space-cone-color-menu");
 const ellipsoidColorMenu = document.getElementById("inertia-ellipsoid-color-menu");
 const planeColorMenu = document.getElementById("invariable-plane-color-menu");
+
+const orientationRadios = document.querySelectorAll('input[name="orientation-radio"]');
+const eulerOrderRadios = document.querySelectorAll('input[name="euler-order-radio"]');
 
 const replaceAerovisualizerData = function(name, value){
   aerovisualizerData.forEach(o => {
@@ -2098,18 +2099,20 @@ const handleInfoMenuChoice = function(choice){
       orientation (attitude).</p>
       <p class="p-normal">3) Click <em>&omega;&nbsp;/&nbsp;H</em> to set the initial angular velocity 
       or angular momentum.</p>
-      <p class="p-normal">4) Click <em>&tau</em> to set the the type of torque (if any) that you want 
+      <p class="p-normal">4) Click <em>&tau;</em> to set the the type of torque (if any) that you want 
       to apply.</p>
       <p class="p-normal">5) Click the <em>play</em> button to run the simulation.  Click the 
       <em>reset</em> button to return the rigid body to its initial state.</p>`;
       break;
       case 'info-numerical': //numerical display
       infoText.innerHTML = `<p class="p-normal">Click <em>1 2 3</em> to show a numerical  
-      display containing the current state of the object. It consists of the 
-      following: the moments of inertia, the angular velocity (&omega;, body frame), 
+      display of the current state of the object. It consists of the 
+      following:</p>
+      
+      <p class="p-normal">the moments of inertia, the angular velocity (&omega;, body frame), 
       the angular momentum (H, space frame), the applied external torque (&tau;, 
-      (body frame), the direction cosine matrix (DCM, (body to space frame), the quaternion, 
-      and the kinetic energy of rotation.</p>`;
+      body frame), the direction cosine matrix (DCM, body to space frame), the quaternion, 
+      and the kinetic energy of rotation (T).</p>`;
       break;
     case 'info-mass-prop': //mass properties
       infoText.innerHTML = `<p class="p-normal"><em>Mass Properties</em> is a 

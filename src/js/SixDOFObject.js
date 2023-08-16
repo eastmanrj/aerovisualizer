@@ -134,16 +134,15 @@ class SixDOFObject {
   }
 
   sendTorqueData(){
-    return [this._torque, this._torqueOption, this._omega, this._quat, this._dcm, this._h, this._T];
+    return [this._torque, this._torqueOption, this._omega, this._quat, this._dcm, this._T];
   }
 
-  receiveTorqueData(torque, torqueOption, omega, quat, dcm, h, T){
+  receiveTorqueData(torque, torqueOption, omega, quat, dcm, T){
     this._torque = torque;
     this._torqueOption = torqueOption;
     this._omega = omega;
     this._quat = quat;
     this._dcm = dcm;
-    this._h = h;
     this._T = T;
   }
 
@@ -157,7 +156,7 @@ class SixDOFObject {
     this._v0.applyMatrix3(this._inertiaMatrix);
     this._T = 0.5*this._v0.dot(this._omega);
     this._torquer.receiveTorqueData(...this.sendTorqueData());
-    this._torquer.reset();
+    this._torquer.refreshGG();
   }
 
   nullTorque(){
@@ -202,7 +201,7 @@ class SixDOFObject {
     this._mass = mass;
     this._inertiaMatrix.set(ixx, 0, -ixz, 0, iyy, 0, -ixz, 0, izz);
     // the moments of inertia are required for the gravity gradient option
-    this._torquer.setMass(mass);// is mass necessary?
+    this._torquer.setMass(mass);// required for the spinning top torque (mg)
     this._torquer.setInertiaMatrix(ixx, iyy, izz, ixz);
     this._determineIfAxisymmetric();//it isn't but call this to set variables
     this.needsRefresh = true;
@@ -577,6 +576,8 @@ class SixDOFObject {
         this._scale.set(9*0.5, 7*0.5, 4*0.5);
         break;
       case 'new-horizons':
+        // free images for the New Horizons spacecraft were obtained from
+        // https://www.planetary.org/space-images/simulated-new-horizons-spacecraft
         texture = tl.load('./img/newHorizons.jpg');
         this._scale.set(9*0.5, 4*0.5, 6*0.5);
         break;
@@ -609,6 +610,8 @@ class SixDOFObject {
 
   _setQuaternionFromEulerAngles(){
     this._quat.setFromEuler(this._euler);
+    this._torquer.receiveTorqueData(...this.sendTorqueData());
+    this._torquer.refreshGG();
   }
 
   setEulerAngles(angle1, angle2, angle3){

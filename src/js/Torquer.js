@@ -1,18 +1,15 @@
 import * as THREE from '../../node_modules/three/build/three.module.js';
 
+/**
+ Torquer is a class that encapsulates the torquing of an instance 
+ of the SixDOFObject class.  It should only be included in the file
+ SixDOFObject.js.
+**/
+
 const piOver180 = Math.PI / 180;
 
 class Torquer {
   constructor() {
-    this._omega = new THREE.Vector3(0, 0, 0);
-    this._quat = new THREE.Quaternion();
-    this._dcm = new THREE.Matrix4();
-    // the reason that _dcm (direction cosine matrix) is a Matrix4 and
-    // not a Matrix3 is because the THREE function makeRotationFromQuaternion
-    // exists only for Matrix4. We are sometimes forced to convert that to a
-    // 3x3 matrix using the THREE function setFromMatrix4.
-    this._h = 0.0025;
-    this._torque = new THREE.Vector3(0, 0, 0);
     this._torqueOption = 1;
     // 1 = no torque
     // 2 = space frame torque
@@ -20,20 +17,44 @@ class Torquer {
     // 4 = acs stabilization
     // 5 = gravity gradient torque
     // 6 = torque on a top
-    //_constantTorque is set by the user either through the setConstantTorque or
-    //the setTorque function.  It is required for torque options 2 and 3 which
-    //both maintain the torque at a specified value in the frame of choice
+    this._torque = new THREE.Vector3(0, 0, 0);
+
+    // space frame and body frame torque variables
     this._constantTorque = new THREE.Vector3(0, 0, 0);
-    this._axesOrientation = 'Y Up';
-    this._mass = 1;
+    //_constantTorque is set by the user either through the setConstantTorque or
+    //the setTorque function.
+
+    // ACS torque variables
+    this._acsDeadzoneOmega = 0;
+    this._acsTorque = 0;
+
+    // gravity gradient torque variables
+    this._dcm = new THREE.Matrix4();
+    // the reason that _dcm (direction cosine matrix) is a Matrix4 and
+    // not a Matrix3 is because the THREE function makeRotationFromQuaternion
+    // exists only for Matrix4. We are sometimes forced to convert that to a
+    // 3x3 matrix using the THREE function setFromMatrix4.
     this._inertiaMatrix = new THREE.Matrix3();
     this._T = 0;
     this._3muOverR3 = 1;
     this._totalGGEnergy0 = 0;
     this._ggCorrection = 1;
+
+    // spinning top torque variables
     this._topRDistance = 1;
+    this._mass = 1;
     this._topGravity = 1;
 
+    // ACS and gravity gradient torque variables
+    this._omega = new THREE.Vector3(0, 0, 0);
+
+    // space frame, gravity gradient, and spinning top torque variables
+    this._quat = new THREE.Quaternion();
+
+    // gravity gradient and spinning top torque variables
+    this._axesOrientation = 'Z Down';
+
+    // miscellaneous utility variables
     this._nullVector = new THREE.Vector3(0, 0, 0);
     this._xUnitVector = new THREE.Vector3(1, 0, 0);
     this._yUnitVector = new THREE.Vector3(0, 1, 0);
@@ -44,84 +65,29 @@ class Torquer {
     this._v2 = new THREE.Vector3();
     this._mat0 = new THREE.Matrix3();
     this._mat1 = new THREE.Matrix3();
-    this._acsDeadzoneOmega = 0;
-    this._acsTorque = 0;
   }
 
   sendTorqueData(){
-    return [this._torque, this._torqueOption, this._omega, this._quat, this._dcm, this._h, this._T];
+    return [this._torque, this._torqueOption, this._omega, this._quat, this._dcm, this._T];
   }
 
-  receiveTorqueData(torque, torqueOption, omega, quat, dcm, h, T){
+  receiveTorqueData(torque, torqueOption, omega, quat, dcm, T){
     this._torque = torque;
     this._torqueOption = torqueOption;
     this._omega = omega;
     this._quat = quat;
     this._dcm = dcm;
-    this._h = h;
     this._T = T;
-  }
-
-  reset(){
-    this._dcm.makeRotationFromQuaternion(this._quat);
-    this._v0.copy(this._omega);
-    this._v0.applyMatrix3(this._inertiaMatrix);
-    this._T = 0.5*this._v0.dot(this._omega);
-    this._totalGGEnergy0 = this._T + this.computeGravityGradientPotential();
-    this._ggCorrection = 1;
   }
 
   setTorqueOption(value){
     this._torqueOption = value;
   }
 
-  setConstantTorque(tauX, tauY, tauZ){
-    this._constantTorque.set(tauX, tauY, tauZ);
-  }
-
   setAxesOrientation(xyz){
     this._axesOrientation = xyz;
   }
-
-  setInertiaMatrix(ixx, iyy, izz, ixz = 0){
-    this._inertiaMatrix.set(ixx, 0, -ixz, 0, iyy, 0, -ixz, 0, izz);
-    this.reset();
-  }
-
-  setMass(value){
-    this._mass = Number(value);
-  }
-
-  set3MuOverR3(value){
-    this._3muOverR3 = Number(value);
-    this.reset();
-  }
-
-  setTopRDistance(value){
-    this._topRDistance = Number(value);
-  }
-
-  setTopGravity(value){
-    this._topGravity = Number(value);
-  }
-
-  setTorque(torqueOption, torqueMagnitude, x, y, z){
-    if (torqueOption === 2 || torqueOption === 3){ // body or space frame torque
-      const xyz = new THREE.Vector3(x, y, z);
-      xyz.normalize();
-      xyz.multiplyScalar(torqueMagnitude);
-      this._torque.copy(xyz);
-      this._constantTorque.copy(this._torque);
-    }
-    
-    this._torqueOption = torqueOption;
-    this.doTorque();
-  }
-
-  nullTorque(){
-    this._torque.copy(this._nullVector);
-  }
-
+  
   doTorque(){
     switch (this._torqueOption){
       case 1:
@@ -130,7 +96,7 @@ class Torquer {
         break;
       case 2:
         // 2 = space frame torque
-        // _constantTorque is expressed in the space frame when using this option
+        // _constantTorque is expressed in the space frame here
         // so we need to rotate it into the body frame
         this._torque.copy(this._constantTorque);
         this._q0.copy(this._quat);
@@ -146,14 +112,12 @@ class Torquer {
         // an ACS (attitude control system) is imagined to exist on
         // the object.  The ACS consists of thrusters that impart
         // a force couple about each of the body axes.  If the
-        // magnitude of the component of omega in one direction (P, Q,
-        // or R) is larger than the "dead zone" value, then a torque is
+        // magnitude of a component of omega (P, Q, or R) in one direction 
+        // is larger than the "dead zone" value, then a torque is
         // applied to reduce the magnitude of that component.  The final
-        // orientation is of no concern.  A real controller would have
+        // orientation is not considered.  A real controller would probably have
         // to compute omega based on Euler angle rates or quaternion rates,
-        // or it might not compute omega at all.  It would also employ a
-        // much more sophisticated algorithm that could steer the vehicle
-        // to a desired attitude
+        // or it might not compute omega at all.
         const acsdz = this._acsDeadzoneOmega;
         const torqueMag = this._acsTorque;
         this._torque.x = 0;
@@ -179,10 +143,7 @@ class Torquer {
         }
         break;
       case 5:
-        //https://www.planetary.org/space-images/simulated-new-horizons-spacecraft
-        // if using the new horizons art, give credit to the people on this link above
         // 5 = gravity gradient torque
-
         // the gravity gradient torque equals
         // (3mu/R^3)e1 cross Ig dot e1, where e1 is a unit vector from
         // the planet to the cm of the object, Ig is the inertia dyadic
@@ -191,10 +152,9 @@ class Torquer {
         // 1983 McGraw Hill, p. 235).  The dot product of a dyadic with a
         // vector is another vector.
         
-        // *** This program does NOT model orbital motion!  It is assumed   ***
-        // *** that the object remains at the same static position above    ***
-        // *** the planet by whatever means.  Centrifugal acceleration and  ***
-        // *** change in the inertial direction of gravity are not modeled. ***
+        // *** This program does NOT model orbital motion effects on the    ***
+        // *** gravity gradient!  It is assumed that the object remains at  ***
+        // *** the same static position above the planet by whatever means. ***
 
         // mu (GM) for earth is 3.986004418E+14 m^3/s^2 according to Wikipedia.
         // R for a body in low earth orbit is about 6500000 meters.
@@ -212,7 +172,7 @@ class Torquer {
 
         // gravity gradient torque = [e1.y * e1.z * (izz - iyy)
         //                            e1.z * e1.x * (ixx - izz)             
-        //                            e1.x * e1.y * (iyy - ixx)]
+        //                            e1.x * e1.y * (iyy - ixx)] * 3mu/R^3
 
         // We want e in body coordinates, so we just use the direction
         // cosine matrix elements.
@@ -240,7 +200,7 @@ class Torquer {
         }
 
         const elements = this._inertiaMatrix.elements;
-        // _intertiaMatrix is a 4x4 matrix for reasons explained elsewhere
+        // _intertiaMatrix is a 4x4 matrix for reasons explained earlier
         const ixx = elements[0];
         const iyy = elements[4];
         const izz = elements[8];
@@ -253,12 +213,13 @@ class Torquer {
         // adjust the angular velocity such that the total energy remains
         // constant.  This reduces the possiblility that energy can increase
         // or decrease due to numerical errors.  _totalGGEnergy0 is set
-        // in the reset() function.
+        // in the refreshGG() function.
         const totalGGEnergy = this._T + this.computeGravityGradientPotential();
         let correction = this._totalGGEnergy0/totalGGEnergy;
         
         // the correction has a possibility of into entering an
-        // unstable situation and this logic below prevents that
+        // unstable situation and the logic below helps prevent this
+        // THIS CORRECTION DOES NOT ALWAYS WORK
         if (!(correction > 1 && this._ggCorrection < 1)){
           this._ggCorrection = correction;
           this._omega.x *= correction;
@@ -267,8 +228,7 @@ class Torquer {
         }
         break;
       case 6:
-        // 6 = torque on a top
-        
+        // 6 = torque on a spinning top
         // this option computes the torque that would occur if a
         // force were applied along the x body vector a distance of
         // "_topRDistance" from the center of mass with the force direction
@@ -314,11 +274,71 @@ class Torquer {
         this._v1.multiplyScalar(this._mass);
         this._q0.copy(this._quat);
         this._q0.invert(); // _quat is body to space, but want space to body
-        this._v1.applyQuaternion(this._q0);// bring _v1 into body frame
-          // _v1 is now the f in rXf
+        this._v1.applyQuaternion(this._q0);// bring _v1 into the body frame
+        // _v1 is now the f in rXf
         this._torque.cross(this._v1);// torque is rXf
         break;
     }
+  }
+
+  /**
+   space frame and body frame torque functions
+  **/
+
+  setTorque(torqueOption, torqueMagnitude, x, y, z){
+    if (torqueOption === 2 || torqueOption === 3){ // body or space frame torque
+      const xyz = new THREE.Vector3(x, y, z);
+      xyz.normalize();
+      xyz.multiplyScalar(torqueMagnitude);
+      this._torque.copy(xyz);
+      this._constantTorque.copy(this._torque);
+    }
+    
+    this._torqueOption = torqueOption;
+    this.doTorque();
+  }
+
+  setConstantTorque(tauX, tauY, tauZ){
+    this._constantTorque.set(tauX, tauY, tauZ);
+  }
+
+  nullTorque(){
+    this._torque.copy(this._nullVector);
+  }
+
+  /**
+   ACS torque functions
+  **/
+
+  setACSDeadzoneOmega(dzo){
+    this._acsDeadzoneOmega = Number(dzo);
+  }
+
+  setACSTorque(torqueMag){
+    this._acsTorque = Number(torqueMag);
+  }
+
+  /**
+  gravity gradient torque functions
+  **/
+
+  setInertiaMatrix(ixx, iyy, izz, ixz = 0){
+    this._inertiaMatrix.set(ixx, 0, -ixz, 0, iyy, 0, -ixz, 0, izz);
+    this.refreshGG();
+  }
+  
+  set3MuOverR3(value){
+    this._3muOverR3 = Number(value);
+    this.refreshGG();
+  }
+  
+  refreshGG(){
+    this._dcm.makeRotationFromQuaternion(this._quat);
+    this._v0.copy(this._omega);
+    this._v0.applyMatrix3(this._inertiaMatrix);
+    this._T = 0.5*this._v0.dot(this._omega);
+    this._totalGGEnergy0 = this._T + this.computeGravityGradientPotential();
+    this._ggCorrection = 1;
   }
 
   computeGravityGradientPotential(){
@@ -328,7 +348,7 @@ class Torquer {
     // C is an arbitrary constant.  I11 is the moment of inertia about
     // a vector from the planet to the body.  For them it was the X moment
     // of inertia, but we choose X, Y or Z.  V is basically the potential
-    // energy stored in the body due to the fact that it is not rotated into
+    // energy stored in the body due to the fact that its attitude is not in
     // the lowest energy state for the gravity gradient.
     // We simplify the equation to just V = _3muOverR3 / 6 * (tr(I) - 3*I11)
 
@@ -340,7 +360,7 @@ class Torquer {
     this._mat0.multiply(this._inertiaMatrix);
     this._mat0.multiply(this._mat1);
     // _mat0 is now an inertia matrix expressed in a basis with the
-    // first vector in the up/down direction
+    // first vector being in the up/down direction
     let i11;
 
     switch (this._axesOrientation){
@@ -361,12 +381,20 @@ class Torquer {
     return -(this._3muOverR3/6*(trace - 3*i11));
   }
 
-  setACSDeadzoneOmega(dzo){
-    this._acsDeadzoneOmega = Number(dzo);
+  /**
+   spinning top torque functions
+   **/
+
+  setTopRDistance(value){
+    this._topRDistance = Number(value);
+  }
+  
+  setMass(value){
+    this._mass = Number(value);
   }
 
-  setACSTorque(torqueMag){
-    this._acsTorque = Number(torqueMag);
+  setTopGravity(value){
+    this._topGravity = Number(value);
   }
 }
 

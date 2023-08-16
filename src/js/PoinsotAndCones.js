@@ -4,8 +4,8 @@ import SpecialEllipsoidGeometry from './ellipsoid.js';
 /**
  PoinsotAndCones is a class that encapsulates the computation of 
  THREE.js objects representing the body cones, space cones, and Poinsot's 
- construction including the inertia ellipse, the invariable plane, the 
- polhode, and the herpolhode for use with rigid body rotational dynamics.
+ construction, including the inertia ellipse, the invariable plane, the 
+ polhode, and the herpolhode for use with the SixDOFObject class.
 **/
 
 const twoPi = 2 * Math.PI;
@@ -16,9 +16,8 @@ class PoinsotAndCones {
   constructor(scene) {
     this._quat = new THREE.Quaternion();
     this.simulationTime = 0;
-    //_h value is just a placeholder.  Its value is changed
-    //with receiveNonEphemeralData
     this._h = 0.0025;
+    //_h is changed in the receiveNonEphemeralData function
     this._omega = new THREE.Vector3(0, 0, 0);
     this._H = new THREE.Vector3(0, 0, 0);
     this._inertiaMatrix = new THREE.Matrix3();
@@ -40,8 +39,8 @@ class PoinsotAndCones {
     this._unitScale = new THREE.Vector3(1,1,1);
     this._sqrt2TOverH = 0;
     this.needsRefresh = true;
-    // _coneSize value is just a placeholder.  Use setConeSize to change it
     this._coneSize = 5;
+    // _coneSize can be changed with setConeSize
     this._xUnitVector = new THREE.Vector3(1, 0, 0);
     this._yUnitVector = new THREE.Vector3(0, 1, 0);
     this._zUnitVector = new THREE.Vector3(0, 0, 1);
@@ -73,29 +72,38 @@ class PoinsotAndCones {
     this._hodeCreationElapsedTime = 0;//set to zero when changing mass props or rate
     this._oldHodeTime = 0;
     //computation periods are the amount of time given to compute the polhode and
-    //herpolhode curves in seconds.  Their values are very arbitrary.  For 
+    //herpolhode curves in seconds.  Their values are arbitrary.  For 
     //axisymmetric cases, their values are set to the precession period.
+    //The polhode is a closed curve, but it is possible for it to be rendered as
+    //an open curve.  Also, if the rotation rate is high, it may be over drawn,
+    //and small computational errors can give the impression that it is not a
+    //single closed curve.
     this._polhodeComputationPeriod = 25;
     this._herpolhodeComputationPeriod = 25;
     this._hodeUpdateCounter = 0;
-    //hodeSkip helps control the number of points that are used to generate the
-    //polehode and herpolhode curves.  Without it, a much larger amount of 
-    //memory and computation would be needed.
     this._hodeSkip = 10;
+    //_hodeSkip and _hodeUpdateCounter work together to help control the number
+    //of points that are used to generate the polehode and herpolhode curves.  
+    //Without them, a much larger amount of memory and computation would be needed.
+
+    //NOTE: If the rotation rate is high, the polhode and herpolhode curves
+    //      can be rendered not smoothe, when in fact they should be smoothe.  A
+    //      solution might be to set _hodeSkip more smartly in the future.  Until 
+    //      then, either be aware of this, or reduce the rotation rate.
     this._polhode = [];
     this._herpolhode = [];
     this._polhodeMesh = null;
     this._herpolhodeMesh = null;
-    this._bodyConeColor = 0xffa500;//0xffd580;//light orange, 0xffa500;//orange
+    this._bodyConeColor = 0xffa500;//0xffd580;//light orange
     this._spaceConeColor = 0xff0000;//0xff5555;//light red
     this._ellipsoidColor = 0x0000ff;//0x5555ff;//light blue
     this._planeColor = 0x00ff00;//0x55ff55;//light green
     this._inertiaEllipsoidMesh = null;
     this._invariablePlaneMesh = null;
     this._scene = scene;
-    //constructionComplete is an admittedly kludgy way of ensuring that the
-    //code in here does not execute until asynchronous code from other classes
-    //has completed execution
+    //constructionComplete is an admittedly kludgy way of ensuring that some
+    //code in this class does not execute until asynchronous code from other classes
+    //(such as Vectors) has completed execution.
     this.constructionComplete = false;
 
     this.construct();
@@ -120,11 +128,11 @@ class PoinsotAndCones {
 
   /**
    refresh is called whenever the orientation of cones or Poinsot objects
-   change relative to the inertial frame.  It does NOT need to be called
-   when the camera changes its position or lookat point.  This function
-   does not generate the cones and Poinsot objects 
-   (see _constructCones and _constructEllipsoidAndPlane).
+   change relative to the inertial frame or when the camera changes its 
+   position or lookat point.  This function does not generate the cones and 
+   Poinsot objects (see _constructCones and _constructEllipsoidAndPlane).
   **/
+
   refresh(){
     if (!this.constructionComplete){
       return;
@@ -317,10 +325,10 @@ class PoinsotAndCones {
         theColor = 0xffff00;//0xffff55;//light yellow
         break;
       case 'purple':
-        theColor = 0x800080;//0xcbc3e3;//light purple, 0x800080;//purple
+        theColor = 0x800080;//0xcbc3e3;//light purple
         break;
       case 'orange':
-        theColor = 0xffa500; //0xffd580;//light orange, 0xffa500;//orange
+        theColor = 0xffa500; //0xffd580;//light orange
         break;
     }
 
@@ -478,7 +486,9 @@ class PoinsotAndCones {
     const theta1 = Math.acos(dot1);
     const theta2 = Math.acos(dot2);
 
-    const otherReasons = ((theta1 === this._bodyHalfConeAngle && theta2 === this._spaceHalfConeAngle) || dot1 === 0 || dot1 === 1 || dot2 === 0 || dot2 === 1);
+    const otherReasons = ((theta1 === this._bodyHalfConeAngle && 
+      theta2 === this._spaceHalfConeAngle) || 
+      dot1 === 0 || dot1 === 1 || dot2 === 0 || dot2 === 1);
     
     if (otherReasons){
       return;

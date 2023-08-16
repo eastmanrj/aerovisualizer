@@ -1,6 +1,6 @@
 import * as THREE from '../../node_modules/three/build/three.module.js';
 import SixDOFObject from './SixDOFObject.js';
-import VectorSetObject from './VectorSet.js';
+import Vectors from './Vectors.js';
 import PoinsotAndCones from './PoinsotAndCones.js';
 import {OrbitControls} from './OrbitControls.js';
 
@@ -23,8 +23,8 @@ let nominalCameraPos = new THREE.Vector3(-cameraRadius, 0, 0);
 let cpx, cpy, cpz; // camera position
 const centerOfRotation = [0, 0, 0];
 let clock = null;
-let sdo = null; //"six degree of freedom object" (we mostly care about rotational)
-let vso = null; //"vector set object" (handles all of the vectors)
+let sdo = null; //"six degree of freedom object" (currently only handles rotational)
+let vo = null; //"vectors object" (handles all of the vectors)
 let pac = null; //"Poinsot and cones" (handles the Poinsot ellipsoid and plane,
                 //polode and herpolhode, and the space and body cones)
 let orbitControls = null;
@@ -514,7 +514,7 @@ const handleMainButtons = function(button){
         attitudeQuaternionElements.style.display = 'grid';
         setQuatSlidersToQuat();
         sdo.refresh();
-        vso.refresh();
+        vo.refresh();
         pac.refresh();
       }
       attitudeButton.disabled = true;
@@ -554,7 +554,7 @@ const handleAllRadioButtons = function(){
   for (let radio of orientationRadios) {
     if (radio.checked) {
       sdo.setOrientation(radio.value);
-      vso.setOrientation(radio.value);
+      vo.setOrientation(radio.value);
       pac.setOrientation(radio.value);
       replaceAerovisualizerData('axesOrientation',radio.value);
     }
@@ -705,11 +705,11 @@ const handleTorqueOptionMenu = function(){
   }
 
   sdo.needsRefresh = true;
-  vso.needsRefresh = true;
+  vo.needsRefresh = true;
   pac.needsRefresh = true;
   sdo.reset();
   sdo.refresh();
-  vso.refresh();
+  vo.refresh();
   pac.refresh();
   displayNumerical();
   previousTorqueOption = torqueOption;
@@ -868,7 +868,7 @@ const syncEulerAnglesToObject = function(){
 
 const resetAttitudeAndRates = function(includeRates = true){
   sdo.setEulerAngles(euler1,euler2,euler3);
-  vso.receiveVectorData(...sdo.sendVectorData());
+  vo.receiveVectorData(...sdo.sendVectorData());
 
   if (includeRates){
     if (torqueOption === 1){
@@ -889,11 +889,11 @@ const resetAttitudeAndRates = function(includeRates = true){
   syncQuatToObject();
 
   sdo.needsRefresh = true;
-  vso.needsRefresh = true;
+  vo.needsRefresh = true;
   pac.needsRefresh = true;
 
   sdo.refresh();
-  vso.refresh();
+  vo.refresh();
   pac.refresh();
   displayEulerAngles();
   displayNumerical(true);
@@ -903,7 +903,7 @@ const resetAttitudeAndRates = function(includeRates = true){
 attitudeOptionButton1.addEventListener('click', () => {
   setQuatSlidersToQuat();
   sdo.refresh();
-  vso.refresh();
+  vo.refresh();
   pac.refresh();
   attitudeOption = attitudeOption === 1 ? 2 : 1;
   handleMainButtons('attitude');
@@ -917,7 +917,7 @@ attitudeOptionButton2.addEventListener('click', () => {
   euler3Slider.value = euler3;
   displayEulerAngles();
   sdo.refresh();
-  vso.refresh();
+  vo.refresh();
   pac.refresh();
   attitudeOption = attitudeOption === 1 ? 2 : 1;
   handleMainButtons('attitude');
@@ -936,7 +936,7 @@ const handleEulerOnInput = function(){
   syncQuatToObject();
   displayEulerAngles();
   haltPlay();
-  vso.needsRefresh = true;
+  vo.needsRefresh = true;
   pac.needsRefresh = true;
 }
 
@@ -1060,7 +1060,7 @@ const handleQuatOnInput = function(){
   sdo.setEulerAnglesFromQuaternion(quatW, quatX, quatY, quatZ);
   syncEulerAnglesToObject();
   haltPlay();
-  vso.needsRefresh = true;
+  vo.needsRefresh = true;
   pac.needsRefresh = true;
 }
 
@@ -1154,7 +1154,7 @@ const handleOmegaSliderOnpointerup = function(){
   omHkhat = omegaKhatSlider.value;
   
   resetAttitudeAndRates();
-  vso.needsRefresh = true;
+  vo.needsRefresh = true;
   displayOmegaValues();
 }
 
@@ -1382,8 +1382,8 @@ const handleTorqueSlidersOnpointerup = function(option){
   }
 
   sdo.setTorque(torqueOption, torqueMag, torqueIhat, torqueJhat, torqueKhat);
-  vso.receiveVectorData(...sdo.sendVectorData());
-  vso.needsRefresh = true;
+  vo.receiveVectorData(...sdo.sendVectorData());
+  vo.needsRefresh = true;
   saveToLocalStorage();
   resetAttitudeAndRates();
   haltPlay();
@@ -1690,7 +1690,7 @@ maxOmegaSlider.onpointerup = function(){
 }
 
 vectorSizeSlider.onpointerup = function(){
-  vso.setVectorSize(this.value);
+  vo.setVectorSize(this.value);
   pac.setConeSize(this.value);
   replaceAerovisualizerData('vectorSize',this.value);
   saveToLocalStorage();
@@ -1699,7 +1699,7 @@ vectorSizeSlider.onpointerup = function(){
 const setTransparency = function(thing, transparency){
   const opacity = (100 - transparency)/100;
   sdo.setOpacity(thing, opacity);
-  vso.setOpacity(thing, opacity);
+  vo.setOpacity(thing, opacity);
   pac.setOpacity(thing, opacity);
 
   switch (thing){
@@ -1750,12 +1750,12 @@ bodyFrameTransparencySlider.oninput = function(){
 bodyFrameTransparencySlider.onpointerup = function(){
   setTransparency('bodyFrame',this.value);
   replaceAerovisualizerData('bodyFrameTransparency',this.value);
-  vso.showBodyFrame(this.value < maxTransparency);
+  vo.showBodyFrame(this.value < maxTransparency);
   saveToLocalStorage();
 }
 
 const showBodyVector = function(){
-  vso.showBodyAxis(showBodyXVectorCheckbox.checked, showBodyYVectorCheckbox.checked, showBodyZVectorCheckbox.checked);
+  vo.showBodyAxis(showBodyXVectorCheckbox.checked, showBodyYVectorCheckbox.checked, showBodyZVectorCheckbox.checked);
   renderer.clear();
   renderer.render(scene, camera);
 }
@@ -1785,7 +1785,7 @@ spaceFrameTransparencySlider.oninput = function(){
 
 spaceFrameTransparencySlider.onpointerup = function(){
   replaceAerovisualizerData('spaceFrameTransparency',this.value);
-  vso.showSpaceFrame(this.value < maxTransparency);
+  vo.showSpaceFrame(this.value < maxTransparency);
   saveToLocalStorage();
 }
 
@@ -1797,7 +1797,7 @@ omegaTransparencySlider.oninput = function(){
 omegaTransparencySlider.onpointerup = function(){
   setTransparency('omega',this.value);
   replaceAerovisualizerData('omegaTransparency',this.value);
-  vso.showOmega(this.value < maxTransparency);
+  vo.showOmega(this.value < maxTransparency);
   saveToLocalStorage();
 }
 
@@ -1809,7 +1809,7 @@ hTransparencySlider.oninput = function(){
 hTransparencySlider.onpointerup = function(){
   setTransparency('h',this.value);
   replaceAerovisualizerData('hTransparency',this.value);
-  vso.showAngularMomentum(this.value < maxTransparency);
+  vo.showAngularMomentum(this.value < maxTransparency);
   saveToLocalStorage();
 }
 
@@ -1821,7 +1821,7 @@ torqueTransparencySlider.oninput = function(){
 torqueTransparencySlider.onpointerup = function(){
   setTransparency('torque',this.value);
   replaceAerovisualizerData('torqueTransparency',this.value);
-  vso.showTorque(this.value < maxTransparency);
+  vo.showTorque(this.value < maxTransparency);
   saveToLocalStorage();
 }
 
@@ -1862,38 +1862,38 @@ objectOffsetCheckbox.addEventListener('change', () => {
 });
 
 bodyFrameOffsetCheckbox.addEventListener('change', () => {
-  vso.setOrigin('bodyFrame', bodyFrameOffsetCheckbox.checked);
+  vo.setOrigin('bodyFrame', bodyFrameOffsetCheckbox.checked);
   replaceAerovisualizerData('bodyFrameOffset',bodyFrameOffsetCheckbox.checked);
   saveToLocalStorage();
-  vso.refresh();
+  vo.refresh();
 });
 
 spaceFrameOffsetCheckbox.addEventListener('change', () => {
-  vso.setOrigin('spaceFrame', spaceFrameOffsetCheckbox.checked);
+  vo.setOrigin('spaceFrame', spaceFrameOffsetCheckbox.checked);
   replaceAerovisualizerData('spaceFrameOffset',spaceFrameOffsetCheckbox.checked);
   saveToLocalStorage();
-  vso.refresh();
+  vo.refresh();
 });
 
 omegaOffsetCheckbox.addEventListener('change', () => {
-  vso.setOrigin('omega', omegaOffsetCheckbox.checked);
+  vo.setOrigin('omega', omegaOffsetCheckbox.checked);
   replaceAerovisualizerData('omegaOffset',omegaOffsetCheckbox.checked);
   saveToLocalStorage();
-  vso.refresh();
+  vo.refresh();
 });
 
 hOffsetCheckbox.addEventListener('change', () => {
-  vso.setOrigin('h', hOffsetCheckbox.checked);
+  vo.setOrigin('h', hOffsetCheckbox.checked);
   replaceAerovisualizerData('hOffset',hOffsetCheckbox.checked);
   saveToLocalStorage();
-  vso.refresh();
+  vo.refresh();
 });
 
 torqueOffsetCheckbox.addEventListener('change', () => {
-  vso.setOrigin('torque', torqueOffsetCheckbox.checked);
+  vo.setOrigin('torque', torqueOffsetCheckbox.checked);
   replaceAerovisualizerData('torqueOffset',torqueOffsetCheckbox.checked);
   saveToLocalStorage();
-  vso.refresh();
+  vo.refresh();
 });
 
 conesOffsetCheckbox.addEventListener('change', () => {
@@ -1911,7 +1911,7 @@ poinsotOffsetCheckbox.addEventListener('change', () => {
 });
 
 const setBodyFrameColor = function(color, save=false){
-  vso.setColor('bodyFrame', color);
+  vo.setColor('bodyFrame', color);
 
   if (save){
     replaceAerovisualizerData('bodyFrameColor',color);
@@ -1919,7 +1919,7 @@ const setBodyFrameColor = function(color, save=false){
 }
 
 const setSpaceFrameColor = function(color, save=false){
-  vso.setColor('spaceFrame', color);
+  vo.setColor('spaceFrame', color);
 
   if (save){
     replaceAerovisualizerData('spaceFrameColor',color);
@@ -1927,7 +1927,7 @@ const setSpaceFrameColor = function(color, save=false){
 }
 
 const setOmegaColor = function(color, save=false){
-  vso.setColor('omega', color);
+  vo.setColor('omega', color);
 
   if (save){
     replaceAerovisualizerData('omegaColor',color);
@@ -1935,7 +1935,7 @@ const setOmegaColor = function(color, save=false){
 }
 
 const setHColor = function(color, save=false){
-  vso.setColor('h', color);
+  vo.setColor('h', color);
 
   if (save){
     replaceAerovisualizerData('hColor',color);
@@ -1943,7 +1943,7 @@ const setHColor = function(color, save=false){
 }
 
 const setTorqueColor = function(color, save=false){
-  vso.setColor('torque', color);
+  vo.setColor('torque', color);
 
   if (save){
     replaceAerovisualizerData('torqueColor',color);
@@ -2223,7 +2223,7 @@ const handleInfoMenuChoice = function(choice){
       initial attitude and rotation rate.  Click the <em>play</em> button.</p>
       
       <p class="p-normal"><em>Note</em>: Space and body cones and Poinsot's 
-      construction are only appear when using this option.
+      construction only appear when using this option.
       </p>`;
       break;
 
@@ -2862,8 +2862,8 @@ const createAndInitialize = function(data, camera){
     sdo = new SixDOFObject(mass, dimX, dimY, dimZ, scene, camera, objectAppearance, objectMassProperties);
   }
 
-  if (vso === null){
-    vso = new VectorSetObject(scene, camera);
+  if (vo === null){
+    vo = new Vectors(scene, camera);
   }
 
   if (pac === null){
@@ -2975,10 +2975,10 @@ const createAndInitialize = function(data, camera){
   planeColorMenu.value = planeColor;
 
   sdo.setOffset(objectOffset);
-  vso.setOffsets(bodyFrameOffset, spaceFrameOffset, omegaOffset, hOffset, torqueOffset);
+  vo.setOffsets(bodyFrameOffset, spaceFrameOffset, omegaOffset, hOffset, torqueOffset);
   pac.setOffsets(conesOffset, poinsotOffset);
   sdo.setOrientation(axesOrientation);
-  vso.setOrientation(axesOrientation);
+  vo.setOrientation(axesOrientation);
   pac.setOrientation(axesOrientation);
 
   presetMassPropertiesMenu.value = objectMassProperties;
@@ -2989,13 +2989,13 @@ const completeInitialization = function(continueAnimation = true) {
   // the reason for this is that the VectorSet.js file contains
   // the function _constructLabels() which contains a FontLoader 
   // object called loader that creates code that runs asynchronously.
-  // once vso.constructionComplete is true, we can finish
+  // once vo.constructionComplete is true, we can finish
   // our initialization
-  if (continueAnimation && !(vso.constructionComplete)) {
+  if (continueAnimation && !(vo.constructionComplete)) {
     requestAnimationFrame(completeInitialization);
   }
   
-  if (vso.constructionComplete){
+  if (vo.constructionComplete){
     sdo.constructionComplete = true;
     pac.constructionComplete = true;
     handleMainButtons('numerical');
@@ -3036,12 +3036,12 @@ const completeInitialization = function(continueAnimation = true) {
     infoMenu.value = 'info-intro';
     handleInfoMenuChoice(infoMenu.value);
     sdo.showObject(objectTransparency < maxTransparency);
-    vso.showBodyFrame(bodyFrameTransparency < maxTransparency);
-    vso.showBodyAxis(showBodyXVector, showBodyYVector, showBodyZVector);
-    vso.showSpaceFrame(spaceFrameTransparency < maxTransparency);
-    vso.showOmega(omegaTransparency < maxTransparency);
-    vso.showAngularMomentum(hTransparency < maxTransparency);
-    vso.showTorque(torqueTransparency < maxTransparency);
+    vo.showBodyFrame(bodyFrameTransparency < maxTransparency);
+    vo.showBodyAxis(showBodyXVector, showBodyYVector, showBodyZVector);
+    vo.showSpaceFrame(spaceFrameTransparency < maxTransparency);
+    vo.showOmega(omegaTransparency < maxTransparency);
+    vo.showAngularMomentum(hTransparency < maxTransparency);
+    vo.showTorque(torqueTransparency < maxTransparency);
 
     setEnvironment(environment);
     setOmegaOrHChoice(omegaOrH);
@@ -3067,8 +3067,8 @@ const completeInitialization = function(continueAnimation = true) {
 
     sdo.setTorque(torqueOption, torqueMag, torqueIhat, torqueJhat, torqueKhat);
     displayNumerical(true);
-    vso.setVectorSize(vectorSize);
-    vso.needsRefresh = true;
+    vo.setVectorSize(vectorSize);
+    vo.needsRefresh = true;
     pac.setConeSize(vectorSize);
     vectorSizeSlider.value = Number(vectorSize);
   }
@@ -3105,7 +3105,7 @@ const animate = function(continueAnimation = true) {
     cpx = camera.position.x;
     cpy = camera.position.y;
     cpz = camera.position.z;
-    vso.needsRefresh = true;
+    vo.needsRefresh = true;
     pac.needsRefresh = true;
   } 
 
@@ -3125,7 +3125,7 @@ const animate = function(continueAnimation = true) {
       pac.needsRefresh = true;
     }
 
-    vso.needsRefresh = true;
+    vo.needsRefresh = true;
 
     if (sdo.getOmegaMagnitude() > maxOmega){
       displayMaxOmega(true);
@@ -3136,8 +3136,8 @@ const animate = function(continueAnimation = true) {
   }
 
   sdo.refresh();
-  vso.receiveVectorData(...sdo.sendVectorData());
-  vso.refresh();
+  vo.receiveVectorData(...sdo.sendVectorData());
+  vo.refresh();
   pac.refresh();
 };
 

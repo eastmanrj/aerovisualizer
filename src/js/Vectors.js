@@ -3,26 +3,28 @@ import {FontLoader} from './FontLoader.js';
 import {TextGeometry} from './TextGeometry.js';
 
 /**
- VectorSetObject is a class that encapsulates the computation and drawing of vectors
+ Vectors is a class that encapsulates the computation and drawing of vectors
  associated with the SixDOFObject class.  These vectors are the 3 body
  frame vectors, the 3 space frame vectors, the angular velocity and momentum
- vectors, and the torque vector.  It also handles the labels for the vectors.
+ vectors, and the torque vector.  This class also handles the labels for the 
+ vectors.
 **/
 
 const oneOverSqrt2 = Math.sqrt(0.5);
 
-class VectorSetObject {
+class Vectors {
   constructor(scene, camera) {
-    this._omega = new THREE.Vector3(0,0,0);
-    this._H = new THREE.Vector3(0,0,0);
     this._quat = new THREE.Quaternion();
-    this._torque = new THREE.Vector3(0,0,0);
     this._camera = camera;
     this._scene = scene;
     this.needsRefresh = true;
     this._scale = new THREE.Vector3();
     this._unitScale = new THREE.Vector3();
     this._unitScale.set(1, 1, 1);
+    
+    this._omega = new THREE.Vector3(0,0,0);
+    this._H = new THREE.Vector3(0,0,0);
+    this._torque = new THREE.Vector3(0,0,0);
 
     this._origin = new THREE.Vector3(0,0,0);
     this._bodyFrameOrigin = new THREE.Vector3(0,0,0);
@@ -46,10 +48,10 @@ class VectorSetObject {
     this._xVectorPos = new THREE.Vector3(this._vectorSize/2, 0, 0);
     this._yVectorPos = new THREE.Vector3(0, this._vectorSize/2, 0);
     this._zVectorPos = new THREE.Vector3(0, 0, this._vectorSize/2);
+    this._zeroVector = new THREE.Vector3();
     this._q0 = new THREE.Quaternion();
     this._q1 = new THREE.Quaternion();
     this._qn = new THREE.Quaternion();
-    this._zeroVector = new THREE.Vector3();
     this._v0 = new THREE.Vector3();
     this._v1 = new THREE.Vector3();
 
@@ -96,7 +98,7 @@ class VectorSetObject {
     this._showZBodyAxis = false;
     this._showSpaceFrame = false;
     this._showOmega = false;
-    this._showAngularMomentum = false;
+    this._showH = false;
     this._showTorque = false;
     
     this._bodyFrameOpacity = 0;
@@ -190,7 +192,6 @@ class VectorSetObject {
           shaftMesh.visible = false;
           arrowheadMesh.visible = false;
           label.visible = false;
-          // this._v0.set(1,1,1);
         }
     
         this._v0.normalize();
@@ -217,7 +218,6 @@ class VectorSetObject {
           shaftMesh.visible = false;
           arrowheadMesh.visible = false;
           label.visible = false;
-          // this._v0.set(1,1,1);
         }
     
         this._v0.normalize();
@@ -426,10 +426,10 @@ class VectorSetObject {
         theColor = 0xffff00;//0xffff55;//light yellow
         break;
       case 'purple':
-        theColor = 0x800080;//0xcbc3e3;//light purple, 0x800080;//purple
+        theColor = 0x800080;//0xcbc3e3;//light purple
         break;
       case 'orange':
-        theColor = 0xffa500; //0xffd580;//light orange, 0xffa500;//orange
+        theColor = 0xffa500; //0xffd580;//light orange
         break;
     }
 
@@ -626,12 +626,16 @@ class VectorSetObject {
   }
 
   _constructLabels(fontName, fontWeight) {
+    // IMPORTANT: The FontLoader.load function generates a Javascript promise
+    // which results in asynchronous code execution.  The variable
+    // constructionComplete is initialized to false but is set to true once
+    // the asynchronous code is complete.  Until then, the refresh function
+    // should not be allowed to execute.
     THREE.Cache.enabled = true;
     let font = undefined;
     // body frame, space frame, omega, H, torque
     let lettersArray = ['X', 'Y', 'Z', 'X', 'Y', 'Z', 'ω', 'H', 'τ'];
-  
-    //fontName = helvetiker, optimer, gentilis, droid sans, droid serif
+    //fontName = helvetiker
     //fontWeight = normal bold
     const loader = new FontLoader();
     // loader.load('./fonts/' + fontName + '_' + fontWeight + '.typeface.json', (response) => {
@@ -754,7 +758,7 @@ class VectorSetObject {
       scene.add(this._omegaLabel);
     }
 
-    if (this._showAngularMomentum){
+    if (this._showH){
       scene.add(this._hVectorShaftMesh);
       scene.add(this._hVectorArrowheadMesh);
       scene.add(this._hLabel);
@@ -797,7 +801,7 @@ class VectorSetObject {
       scene.remove(this._omegaVectorArrowheadMesh);
     }
 
-    if (this._showAngularMomentum){
+    if (this._showH){
       scene.remove(this._hVectorShaftMesh);
       scene.remove(this._hVectorArrowheadMesh);
     }
@@ -836,7 +840,7 @@ class VectorSetObject {
       scene.add(this._omegaVectorArrowheadMesh);
     }
 
-    if (this._showAngularMomentum){
+    if (this._showH){
       scene.add(this._hVectorShaftMesh);
       scene.add(this._hVectorArrowheadMesh);
     }
@@ -939,13 +943,13 @@ class VectorSetObject {
   }
 
   showAngularMomentum(show){
-    if (this._showAngularMomentum === show){
+    if (this._showH === show){
       return;
     }
 
     this.needsRefresh = true;
     const scene = this._scene;
-    this._showAngularMomentum = show;
+    this._showH = show;
     
     if (show){
       scene.add(this._hVectorShaftMesh);
@@ -1092,8 +1096,8 @@ class VectorSetObject {
       this._zBodyLabel.material[1].opacity = opacity;
     }
 
-    this.refresh();//  leave this here?   necessary?  too much?
+    this.refresh();// necessary?
   }
 }
 
-export default VectorSetObject;
+export default Vectors;

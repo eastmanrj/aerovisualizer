@@ -3,7 +3,7 @@ import * as THREE from '../../node_modules/three/build/three.module.js';
 /**
  SpecialEllipsoidGeometry is a modification of the THREE.js class
  EllipsoidGeometry.  xRadius, yRadius, and zRadius were added to
- give the ellipsoid ability to have 3 different radii rather than 2.
+ give the ellipsoid the ability to have 3 different radii rather than 2.
 **/
 class SpecialEllipsoidGeometry extends THREE.BufferGeometry {
 

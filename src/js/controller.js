@@ -2613,7 +2613,7 @@ const loadBackground = function(option='atmosphere'){
     
       if (sun === null){
         const sunGeometry = new THREE.PlaneGeometry(15, 15, 1, 1);
-        const sunTexture = tl.load('./img/sun.jpg');
+        const sunTexture = tl.load('./img/sun.png');
         const sunMat = new THREE.MeshBasicMaterial({
           map: sunTexture,
           visible: true,
@@ -2623,7 +2623,7 @@ const loadBackground = function(option='atmosphere'){
         sun = new THREE.Mesh(sunGeometry, sunMat);
         sun.receiveShadow = false;
         sun.castShadow = false;
-        sun.position.set(-100,50,100);
+        sun.position.set(-100,100,100);
       }
 
       scene.add(jupiter);
@@ -2646,10 +2646,6 @@ const initTHREE = function() {
   sunLight.intensity = 1;
   scene.add(ambientLight);
   scene.add(sunLight);
-
-  // const dirLight = new THREE.DirectionalLight(0xffffff, 0.625);
-  // dirLight.position.set(1, 1, 1).normalize();
-  // scene.add(dirLight);
 
   renderer = new THREE.WebGLRenderer({
     devicePixelRatio: window.devicePixelRatio,

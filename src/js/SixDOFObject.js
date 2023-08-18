@@ -11,7 +11,7 @@ import Torquer from './Torquer.js';
 
 const piOver180 = Math.PI / 180;
 
-// Vehicle Mass Properties (kg, m) - mass Ixx Iyy Izz Ixz
+// Vehicle Mass Properties (metric) - mass Ixx Iyy Izz Ixz
 const vehicleMassProperties =
 //Cessna 172
 [[1043.3,1285.3,1824.9,2666.9,0],
@@ -44,9 +44,9 @@ class SixDOFObject {
     this._dcm = new THREE.Matrix4();
     // the reason that _dcm (direction cosine matrix) is a Matrix4 and
     // not a Matrix3 is because the THREE function makeRotationFromQuaternion
-    // exists only for Matrix4. We are sometimes forced to convert that to a
-    // 3x3 matrix using the THREE function setFromMatrix4.
-    this._pos = new THREE.Vector3(0, 0, 0);
+    // exists only for Matrix4. Convert it to a 3x3 matrix using the THREE 
+    // function setFromMatrix4 if desired.
+    this._pos = new THREE.Vector3(0, 0, 0);// not presently used
     this._torqueOption = 1;
     // 1 = no torque
     // 2 = space frame torque
@@ -56,18 +56,18 @@ class SixDOFObject {
     // 6 = torque on a top
     this._H = new THREE.Vector3(0, 0, 0);
     this._Hinertial = new THREE.Vector3(0, 0, 0);
-    this._mat0 = new THREE.Matrix3();
-    this._mat1 = new THREE.Matrix3();
+    // _H is the angular momentum vector expressed in body coordinates.
+    // _Hinertial is _H expressed in inertial (space) coordinates
     this._euler = new THREE.Euler();
     this._eulerOrder = 'ZYX';
     this._eulerOrderTriplet = {XYZ:[0,1,2],YXZ:[1,0,2],ZXY:[2,0,1],ZYX:[2,1,0],YZX:[1,2,0],XZY:[0,2,1]};
+    // 0 = X, 1 = Y, 2 = Z
+    // THREE.js uses intrinsic Tait-Bryan angles only, not proper Euler angles
+    // nor extrinsic
     this._k1 = new THREE.Vector3();
     this._k2 = new THREE.Vector3();
     this._k3 = new THREE.Vector3();
     this._k4 = new THREE.Vector3();
-    // 0 = X = phi, 1 = Y = theta, 2 = Z = psi
-    // THREE.js uses intrinsic Tait-Bryan angles only, not proper Euler angles
-    // nor extrinsic
     this._inertiaMatrix = new THREE.Matrix3();
     this._scale = new THREE.Vector3();
     this._unitScale = new THREE.Vector3(1,1,1);
@@ -89,6 +89,8 @@ class SixDOFObject {
     this._xUnitVector = new THREE.Vector3(1, 0, 0);
     this._yUnitVector = new THREE.Vector3(0, 1, 0);
     this._zUnitVector = new THREE.Vector3(0, 0, 1);
+    this._mat0 = new THREE.Matrix3();
+    this._mat1 = new THREE.Matrix3();
     this._q0 = new THREE.Quaternion();
     this._q1 = new THREE.Quaternion();
     this._q2 = new THREE.Quaternion();
@@ -101,10 +103,10 @@ class SixDOFObject {
     this._isAxisymmetric = false;
     this._axisOfSymmetry = 0;//1=x, 2=y, 3=z
     this._itemOpacity = 0;
+    this.constructionComplete = false;
     //constructionComplete is an admittedly kludgy way of ensuring that the
     //code in here does not execute until asynchronous code from other classes
     //has completed execution
-    this.constructionComplete = false;
     this._camera = camera;
     this._scene = scene;
 
@@ -203,9 +205,20 @@ class SixDOFObject {
     // the moments of inertia are required for the gravity gradient option
     this._torquer.setMass(mass);// required for the spinning top torque (mg)
     this._torquer.setInertiaMatrix(ixx, iyy, izz, ixz);
-    this._determineIfAxisymmetric();//it isn't but call this to set variables
+    this._determineIfAxisymmetric();//it isn't now but call this to set variables
     this.needsRefresh = true;
   }
+
+  /**
+   _quat represents the rotation of the object's body frame with respect to 
+    the inertial (space) frame.  The tick() function advances the quaternion  
+    through a small time delta (_h) based on the rate of change of the quaternion,
+    which is computed from _omega (p, q, and r).  This function also computes 
+    _dcm, _H, and _Hinertial.
+
+    For dynamic motion, this function is called by tickDynamic, whose main
+    job is to compute _omega.
+   **/
 
   tick() {
     let h = this._h;
@@ -243,6 +256,10 @@ class SixDOFObject {
     this._Hinertial.applyQuaternion(this._quat);
     this.needsRefresh = true;
   }
+
+  /**
+
+   **/
 
   tickDynamic(){
     //4th order Runge Kutta
@@ -329,15 +346,17 @@ class SixDOFObject {
 
     this.tick();
 
+    // compute the rotational kinetic energy (_T)
     this._v0.copy(this._omega);
     this._v0.applyMatrix3(this._inertiaMatrix);
     this._T = 0.5*this._v0.dot(this._omega);
 
     if (this._torqueOption === 1){
-      // this code helps to correct the omega vector by multiplying
-      // 2 or 3 of the components of the angular velocity (omega) by
-      // the ratio of the original kinetic energy to the current
-      // kinetic energy.  This is only done when there is no torque
+      // this section of code helps to correct the omega vector by 
+      // multiplying 2 or 3 of the components of the angular velocity 
+      // (omega) by the ratio of the original kinetic energy to the current
+      // kinetic energy.  This is only performed when there is no torque and
+      // when the object is rotating
       if (this._T0 === 0){
         return;
       }
@@ -354,7 +373,7 @@ class SixDOFObject {
         this._omega.x /= b;
         this._omega.y /= b;
       }else{
-        // maybe don't correct if not axisymmetric?  not sure
+        // maybe don't correct if not axisymmetric?
         this._omega.x /= b;
         this._omega.y /= b;
         this._omega.z /= b;
@@ -380,6 +399,7 @@ class SixDOFObject {
    or lookat point.  This function does not generate the block object 
    (see constructBlock).
   **/
+
   refresh(){
     if (!this.constructionComplete){
       return;
@@ -427,7 +447,8 @@ class SixDOFObject {
     xyz.normalize();
 
     if (omegaOrH === 'H'){
-      // inverse of inertia matrix, the products of inertia MUST be zero
+      // the inverse of inertia matrix is computed here.  It is assumed that
+      // the products of inertia are zero
       let Iinv = new THREE.Matrix3();
       Iinv.elements[0] = 1/(this._inertiaMatrix.elements[0]);
       Iinv.elements[4] = 1/(this._inertiaMatrix.elements[4]);
@@ -615,8 +636,8 @@ class SixDOFObject {
   }
 
   setEulerAngles(angle1, angle2, angle3){
-    // angles are entered in degrees
-    // set to between -180 and 180 for angles 1 and 3
+    // angles are entered in degrees.
+    // Set to between -180 and 180 for angles 1 and 3
     this.needsRefresh = true;
     angle1 = angle1 > 180 ? angle1 - 180 : angle1;
     angle3 = angle3 > 180 ? angle3 - 180 : angle3;
@@ -667,16 +688,16 @@ class SixDOFObject {
     return this._blockMesh;
   }
 
-  set3MuOverR3(value){
-    this._torquer.set3MuOverR3(value);
-  }
-
   setACSDeadzoneOmega(value){
     this._torquer.setACSDeadzoneOmega(value);
   }
 
   setACSTorque(value){
     this._torquer.setACSTorque(value);
+  }
+
+  set3MuOverR3(value){
+    this._torquer.set3MuOverR3(value);
   }
 
   setTopRDistance(value){

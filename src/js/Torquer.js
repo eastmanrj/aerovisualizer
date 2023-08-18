@@ -32,8 +32,8 @@ class Torquer {
     this._dcm = new THREE.Matrix4();
     // the reason that _dcm (direction cosine matrix) is a Matrix4 and
     // not a Matrix3 is because the THREE function makeRotationFromQuaternion
-    // exists only for Matrix4. We are sometimes forced to convert that to a
-    // 3x3 matrix using the THREE function setFromMatrix4.
+    // exists only for Matrix4. Convert it to a 3x3 matrix using the THREE 
+    // function setFromMatrix4.
     this._inertiaMatrix = new THREE.Matrix3();
     this._T = 0;
     this._3muOverR3 = 1;

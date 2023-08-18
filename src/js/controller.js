@@ -2084,7 +2084,7 @@ const handleInfoMenuChoice = function(choice){
       animations to complement the dry equations found in textbooks and online.  Controls
       are also provided to manipulate the displays.</p>
       
-      <p class="p-normal">Aerovisualizer version 1 focuses only on the orientation and rotational dynamics of 
+      <p class="p-normal">Aerovisualizer currently focuses only on the orientation and rotational dynamics of 
       rigid bodies.  Topics include Euler angles, quaternions, direction cosines, angular 
       velocity and momentum and torque (ACS engines, gravity gradient, spinning top).  Also 
       included are space and body cones and Poinsot's construction.  It is assumed that  

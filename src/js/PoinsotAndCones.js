@@ -4,7 +4,7 @@ import SpecialEllipsoidGeometry from './ellipsoid.js';
 /**
  PoinsotAndCones is a class that encapsulates the computation of 
  THREE.js objects representing the body cones, space cones, and Poinsot's 
- construction, including the inertia ellipse, the invariable plane, the 
+ construction, including the inertia ellipsoid, the invariable plane, the 
  polhode, and the herpolhode for use with the SixDOFObject class.
 **/
 
@@ -44,7 +44,7 @@ class PoinsotAndCones {
     this._xUnitVector = new THREE.Vector3(1, 0, 0);
     this._yUnitVector = new THREE.Vector3(0, 1, 0);
     this._zUnitVector = new THREE.Vector3(0, 0, 1);
-    this._zeroVector = new THREE.Vector3(0,0,0);
+    this._zeroVector = new THREE.Vector3(0, 0, 0);
     this._q0 = new THREE.Quaternion();
     this._q1 = new THREE.Quaternion();
     this._q2 = new THREE.Quaternion();

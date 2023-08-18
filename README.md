@@ -1,27 +1,34 @@
+
+<h1 align="center">
+    Aerovisualizer
+</h1>
+<h3 align="center">
+    Aerospace Engineering Made Fun!
+</h3>
 <p align="center">
+  <a href="https://aerovisualizer.com">Website</a>
+  ·
   <a href="https://github.com/eastmanrj/aerovisualizer/blob/main/contributing.md">Contributing Guidelines</a>
   ·
   <a href="https://github.com/eastmanrj/aerovisualizer/issues">Submit an Issue</a>
-  ·
-  <a href="https://aerovisualizer.com">Website</a>
   <br>
   <br>
 </p>
 
-# Aerovisualizer
-The purpose of Aerovisualizer is to help teach or reinforce concepts in aerospace engineering by presenting them in fun and engaging ways.  Topics are displayed using 2D and 3D animations to complement the dry equations found in textbooks and online.
+The purpose of Aerovisualizer is to assist in teaching or reinforcing concepts in aerospace engineering by presenting them in interesting and engaging ways.  Subjects are displayed as 2D and 3D animations to complement the dry equations found in textbooks and online.  Controls are also provided to manipulate the displays.
 
-Aerovisualizer is a web site that can be opened in a browser on your phone, tablet, or laptop or desktop computer.  Its source code is HTML, CSS, and Javascript, and thus does not require a compiler or any other development tools. Since it is open source, anyone can contribute to its future evolution.
+Aerovisualizer is a web site that can be opened in a browser on your phone, tablet, or laptop or desktop computer.  It is built on HTML, CSS, and Javascript, and thus does not require a compiler or any other development tools. Since it is open source, anyone can contribute to its future evolution.
 
-Aerovisualizer v1.0.0 focuses only on the orientation and rotational dynamics of rigid bodies.  Topics include Euler angles, quaternions, direction cosines, angular velocity and momentum and torque (ACS engines, gravity gradient, spinning top).  Also included are space and body cones and Poinsot's construction.
+Aerovisualizer currently focuses only on the orientation and rotational dynamics of rigid bodies.  Topics include Euler angles, quaternions, direction cosines, angular velocity and momentum and torque (ACS engines, gravity gradient, spinning top).  Also included are space and body cones and Poinsot's construction.  It is assumed that the user has taken or is currently taking a course in in these subjects.
 
-Future versions of Aerovisualizer may include the following depending on interest:
+Future versions of Aerovisualizer may include the following, depending on interest:
 
 * Orbital Mechanics
 * Aircraft Dynamics
 * 2D Flow (Sources, Sinks, and Vortices)
 * Computational Fluid Dynamics (yes really)
-* Free Molecule Flow and Thermodynamics
+* Free Molecule Flow
+* Thermodynamics
 * Finite Elements
 * Aeroelasticity
 * Whatever else aerospace thing you can think of!
@@ -31,17 +38,19 @@ Future versions of Aerovisualizer may include the following depending on interes
 
 ## Contributing
 
-### Contributing Guidelines
+Want to report a bug or contribute some code?  Great!  See our guidelines for [contributing](https://github.com/eastmanrj/aerovisualizer/blob/main/contributing.md) and then check out one of our issues labeled as <kbd>[help wanted](https://github.com/eastmanrj/aerovisualizer/labels/help%20wanted)</kbd> or <kbd>[good first issue](https://github.com/eastmanrj/aerovisualizer/labels/good%20first%20issue)</kbd>
 
-Read through our [contributing guidelines][contributing] to learn about our submission process, coding rules, and more.
+### Subject Matter Experts
 
-### Want to Help?
+Do you know a lot about a particular area of aerospace engineering?  Perhaps you have a Python or Matlab program somewhere that you could adapt?  Please send us your ideas!
 
-Want to report a bug, contribute some code, or improve the documentation? Excellent! Read up on our guidelines for [contributing][contributing] and then check out one of our issues labeled as <kbd>[help wanted](https://github.com/angular/angular/labels/help%20wanted)</kbd> or <kbd>[good first issue](https://github.com/angular/angular/labels/good%20first%20issue)</kbd>.
+### Javascript Developers
 
-### Code of Conduct
+Already know HTML, CSS, and Javascript? Are you looking for a fun and interesting project to contribute to?  Then check us out!  We are always interested in ways to enhance the user experience and to improve our source code.
 
-Help us keep Angular open and inclusive. Please read and follow our [Code of Conduct][codeofconduct].
+### Students, Teachers, and Working Engineers
+
+Do you have an idea in your head or on a paper drawing.  Nothing is off limits as long as it is related to aerospace.  send us your ideas
 
 ## Contact
 
@@ -49,22 +58,3 @@ Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.c
 
 Project Link: [https://github.com/eastmanrj/aerovisualizer](https://github.com/eastmanrj/aerovisualizer)
 
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-
-### Built With
-
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
-* [![Next][Next.js]][Next-url]

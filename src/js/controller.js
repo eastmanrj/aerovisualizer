@@ -618,6 +618,7 @@ const toggleShowPrefs = function(){
     handlePreferencesButtons('none');
     doWindowResizeOrOrientationChange();
     handleMainButtons('numerical');
+    resetAttitudeAndRates();
   }else{
     sixDOFworld.style.display = 'none';
     numericalButton.style.display = 'none';
@@ -707,6 +708,7 @@ const handleTorqueOptionMenu = function(){
   sdo.needsRefresh = true;
   vo.needsRefresh = true;
   pac.needsRefresh = true;
+  sdo.setOmega(omegaOrH,omegaMag,omHihat,omHjhat,omHkhat);
   sdo.reset();
   sdo.refresh();
   vo.refresh();
@@ -718,8 +720,8 @@ const handleTorqueOptionMenu = function(){
 const handleMassPropsSliders = function(){
   displayMomentsOfInertia();
   sdo.setDimensionsAndInertiaProperties(mass, dimX, dimY, dimZ);
-  sdo.reset();
   resetAttitudeAndRates();
+  sdo.reset();
   //make sure that massSlider, dimXSlider, dimYSlider, and dimZSlider are
   //such that there are not too many choices, otherwise things get called many
   //times here as the slider is being moved. use onpointerup instead of oninput
@@ -1381,6 +1383,8 @@ const handleTorqueSlidersOnpointerup = function(option){
       break;
   }
 
+  sdo.setEulerAngles(euler1,euler2,euler3);
+  sdo.setOmega(omegaOrH,omegaMag,omHihat,omHjhat,omHkhat);
   sdo.setTorque(torqueOption, torqueMag, torqueIhat, torqueJhat, torqueKhat);
   vo.receiveVectorData(...sdo.sendVectorData());
   vo.needsRefresh = true;
@@ -2272,7 +2276,7 @@ const handleInfoMenuChoice = function(choice){
 
       <p class="p-normal">Choose the <em>gravity gradient</em> torque and use the 
       slider to set the value of the torque magnification.  Set the initial 
-      attitude (45&deg; for example) and rotation rate (zero is usually best).  
+      attitude (45&deg; for example) and rotation rate (such as zero).  
       Click the <em>play</em> button to observe the effect of the torque.`
       break;
 
@@ -2286,8 +2290,8 @@ const handleInfoMenuChoice = function(choice){
       <p class="p-normal">Aerovisualizer does not render either a top shape nor 
       a table, so these are left to the imagination.</p>
     
-      <p class="p-normal">Choose the <em>spinning top</em> torque.  Use the <em>r</em> slider 
-      to set the length and sign of the r vector.  Its direction is along 
+      <p class="p-normal">Choose the <em>spinning top</em> torque.  Use the <em>r</em>
+      slider to set the length and sign of the r vector.  Its direction is along 
       the x body axis.  Use the <em>g</em> slider to set the magnitude of the 
       gravity vector.  Its direction is downward along the local vertical.</p>
 
@@ -2982,10 +2986,10 @@ const createAndInitialize = function(data, camera){
 }
 
 const completeInitialization = function(continueAnimation = true) {
-  // the reason for this is that the VectorSet.js file contains
+  // the reason for this is that the Vectors.js file contains
   // the function _constructLabels() which contains a FontLoader 
   // object called loader that creates code that runs asynchronously.
-  // once vo.constructionComplete is true, we can finish
+  // Once vo.constructionComplete is true, we can finish
   // our initialization
   if (continueAnimation && !(vo.constructionComplete)) {
     requestAnimationFrame(completeInitialization);
@@ -3085,9 +3089,9 @@ playPauseButton.addEventListener('click', () => {
 resetButton.addEventListener('click', () => {
   displayMaxOmega(false);
   resetAttitudeAndRates();
-  sdo.tickDynamic();
-  sdo.needsRefresh = true;
-  sdo.refresh();
+  // sdo.tickDynamic();
+  // sdo.needsRefresh = true;
+  // sdo.refresh();
 });
 
 const animate = function(continueAnimation = true) {

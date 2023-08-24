@@ -11,12 +11,14 @@ const piOver180 = Math.PI / 180;
 class Torquer {
   constructor() {
     this._torqueOption = 1;
+    // torque options
     // 1 = no torque
     // 2 = space frame torque
     // 3 = body frame torque
     // 4 = acs stabilization
     // 5 = gravity gradient torque
     // 6 = torque on a top
+
     this._torque = new THREE.Vector3(0, 0, 0);
 
     // space frame and body frame torque variables
@@ -29,16 +31,16 @@ class Torquer {
     this._acsTorque = 0;
 
     // gravity gradient torque variables
+    this._inertiaMatrix = new THREE.Matrix3();
     this._dcm = new THREE.Matrix4();
     // the reason that _dcm (direction cosine matrix) is a Matrix4 and
     // not a Matrix3 is because the THREE function makeRotationFromQuaternion
     // exists only for Matrix4. Convert it to a 3x3 matrix using the THREE 
     // function setFromMatrix4.
-    this._inertiaMatrix = new THREE.Matrix3();
     this._T = 0;
     this._3muOverR3 = 1;
-    this._totalGGEnergy0 = 0;
-    this._ggCorrection = 1;
+    this._ggE0 = 0;
+    this._ggCounter = 0;
 
     // spinning top torque variables
     this._topRDistance = 1;
@@ -68,20 +70,33 @@ class Torquer {
   }
 
   sendTorqueData(){
-    return [this._torque, this._torqueOption, this._omega, this._quat, this._dcm, this._T];
+    return [this._torque.x,this._torque.y,this._torque.z,
+      this._omega.x,this._omega.y,this._omega.z];
   }
 
-  receiveTorqueData(torque, torqueOption, omega, quat, dcm, T){
-    this._torque = torque;
-    this._torqueOption = torqueOption;
-    this._omega = omega;
-    this._quat = quat;
-    this._dcm = dcm;
+  receiveTorqueData(tx,ty,tz,opt,omx,omy,omz,qw,qx,qy,qz,
+    e0,e1,e2,e4,e5,e6,e8,e9,e10,T){
+    this._torque.x = tx;
+    this._torque.y = ty;
+    this._torque.z = tz;
+    this._torqueOption = opt;
+    this._omega.x = omx;
+    this._omega.y = omy;
+    this._omega.z = omz;
+    this._quat._w = qw;
+    this._quat._x = qx;
+    this._quat._y = qy;
+    this._quat._z = qz;
+    this._dcm.elements[0] = e0;
+    this._dcm.elements[1] = e1;
+    this._dcm.elements[2] = e2;
+    this._dcm.elements[4] = e4;
+    this._dcm.elements[5] = e5;
+    this._dcm.elements[6] = e6;
+    this._dcm.elements[8] = e8;
+    this._dcm.elements[9] = e9;
+    this._dcm.elements[10] = e10;
     this._T = T;
-  }
-
-  setTorqueOption(value){
-    this._torqueOption = value;
   }
 
   setAxesOrientation(xyz){
@@ -146,27 +161,30 @@ class Torquer {
         // 5 = gravity gradient torque
         // the gravity gradient torque equals
         // (3mu/R^3)e1 cross Ig dot e1, where e1 is a unit vector from
-        // the planet to the cm of the object, Ig is the inertia dyadic
+        // the planet to the CM of the object, Ig is the inertia dyadic
         // of the object, mu is the gravity constant, and R is the distance
         // to the center of the planet ("Spacecraft Dynamics", T. Kane et al,
-        // 1983 McGraw Hill, p. 235).  The dot product of a dyadic with a
+        // 1983 McGraw Hill, p. 235).  The dot product of a dyadic and a
         // vector is another vector.
         
         // *** This program does NOT model orbital motion effects on the    ***
         // *** gravity gradient!  It is assumed that the object remains at  ***
         // *** the same static position above the planet by whatever means. ***
+        // *** Also, the orbital motion effects are overwhelmed by the      ***
+        // *** magnification factor (see below).                            ***
 
         // mu (GM) for earth is 3.986004418E+14 m^3/s^2 according to Wikipedia.
         // R for a body in low earth orbit is about 6500000 meters.
         // mu / R^3 then equals about 1.451422E-06.  This program sets the
         // variable _3muOverR3 equal to whatever the user wants.  The purpose
         // of this program is to give the user an intuitive feel for rotating
-        // rigid bodies and the torques on them, so we set this value much larger
-        // in order to see the gravity gradient effect.
+        // rigid bodies, so we can set this value much larger in order to see  
+        // the gravity gradient effect.  We can set this "magification factor" 
+        // to up to 1 million times if we desire.
 
         // The planet is assumed to be in the "down" direction for whatever
         // inertial axis orientation the user chooses.  e1 is a unit vector.
-        // If Z points down, then e1 points in the -Z direction, for example.  
+        // If Z points down, then e1 points in the -Z direction (up), for example.  
         // Products of inertia are zero for this program which simplifies the
         // gravity gradient torque to be this:
 
@@ -174,8 +192,10 @@ class Torquer {
         //                            e1.z * e1.x * (ixx - izz)             
         //                            e1.x * e1.y * (iyy - ixx)] * 3mu/R^3
 
-        // We want e in body coordinates, so we just use the direction
-        // cosine matrix elements.
+        // We want the unit vector e to be in body coordinates, so we just use 
+        // the appropriate direction cosine matrix (DCM) elements.  _dcm is a 4x4 
+        // matrix for reasons explained elsewhere.
+
         let e1x, e1y, e1z;
 
         switch (this._axesOrientation){
@@ -200,7 +220,6 @@ class Torquer {
         }
 
         const elements = this._inertiaMatrix.elements;
-        // _intertiaMatrix is a 4x4 matrix for reasons explained earlier
         const ixx = elements[0];
         const iyy = elements[4];
         const izz = elements[8];
@@ -210,33 +229,58 @@ class Torquer {
         this._torque.y = this._3muOverR3*e1z*e1x*(ixx - izz);
         this._torque.z = this._3muOverR3*e1x*e1y*(iyy - ixx);
 
-        // adjust the angular velocity such that the total energy remains
-        // constant.  This reduces the possiblility that energy can increase
-        // or decrease due to numerical errors.  _totalGGEnergy0 is set
-        // in the refreshGG() function.
-        const totalGGEnergy = this._T + this.computeGravityGradientPotential();
-        let correction = this._totalGGEnergy0/totalGGEnergy;
-        
-        // the correction has a possibility of into entering an
-        // unstable situation and the logic below helps prevent this
-        // THIS CORRECTION DOES NOT ALWAYS WORK
-        if (!(correction > 1 && this._ggCorrection < 1)){
-          this._ggCorrection = correction;
-          this._omega.x *= correction;
-          this._omega.y *= correction;
-          this._omega.z *= correction;
+        // For the gravity gradient torque, the rotational kinetic engergy 
+        // plus the gravitational potential energy must remain constant.  
+        // For torqued motion, the _omega vector drifts slightly due to 
+        // computational errors.  We adjust this vector here to maintain a 
+        // constant total energy.  _ggE0 is the total energy, and is set in
+        // the refreshGG() function.  ke0 is what the rotational kinetic energy 
+        // should be based on _ggE0 and the computed current potential energy.  
+        // Also, we don't need to adjust the _omega vector every time step, 
+        // so we use a counter to skip this most of the time.
+        this._ggCounter += 1;
+
+        if (this._ggCounter === 50){
+          this._ggCounter = 0;
+
+          let pe = this.computeGravityGradientPotential();
+          let ke0 = this._ggE0 - pe;
+
+          if (ke0){
+            // console.log('totalGGEnergy0,',this._ggE0,' ,potential,',potential,
+            //   ' ,T,',T,' ,xx,',xx,' ,yy,',yy,' ,zz,',zz,',Ixx,',this._inertiaMatrix.elements[0],
+            //   ',Iyy,',this._inertiaMatrix.elements[4],',Izz,',this._inertiaMatrix.elements[8],
+            //   'P',this._omega.x,'Q',this._omega.y,'R',this._omega.z);
+
+            // Compute the current rotational kinetic energy, knowing that the
+            // _omega vector is in error.  The total kinetic energy is just the sum
+            // of the kinetic energy for each of the 3 body axes.  We compute this, 
+            // divide by what it should be, and adjust _omega based on this ratio.
+            let kex = 0.5*this._inertiaMatrix.elements[0]*(this._omega.x)*(this._omega.x);
+            let key = 0.5*this._inertiaMatrix.elements[4]*(this._omega.y)*(this._omega.y);
+            let kez = 0.5*this._inertiaMatrix.elements[8]*(this._omega.z)*(this._omega.z);
+
+            if (!((kex + key + kez) === 0)){
+              let ratio = (kex + key + kez)/ke0;
+              this._omega.x /= ratio;
+              this._omega.y /= ratio;
+              this._omega.z /= ratio;
+            }
+          }
         }
+        
         break;
       case 6:
         // 6 = torque on a spinning top
-        // this option computes the torque that would occur if a
+        // This option computes the torque that would occur if a
         // force were applied along the x body vector a distance of
         // "_topRDistance" from the center of mass with the force direction
-        // in the "up" direction for whatever the user chooses.  For a real
+        // in the "up" direction for whatever it is set to be.  For a real
         // spinning top, this would be where the point of the top is.
         // This program does not currently display a table top nor does
         // it force the 3D model to look like a top.  In fact, the object
         // does not even have to spin!
+
         // To use this option effectively, set the omega vector to point
         // along or nearly along the X body direction.  Set the orientation
         // however you like.  The torque vector should remain in a plane
@@ -244,7 +288,7 @@ class Torquer {
         // vector should chase the torque vector around the object.
         this._torque.copy(this._xUnitVector);
         this._torque.multiplyScalar(this._topRDistance);
-        // _torque is set here to the r in rXf, the cross product happens later
+        // _torque is set here to the r in rXf.  The cross product happens later.
 
         switch (this._axesOrientation){
           case 'X Up':
@@ -276,7 +320,7 @@ class Torquer {
         this._q0.invert(); // _quat is body to space, but want space to body
         this._v1.applyQuaternion(this._q0);// bring _v1 into the body frame
         // _v1 is now the f in rXf
-        this._torque.cross(this._v1);// torque is rXf
+        this._torque.cross(this._v1);// _torque was just r, now it is rXf
         break;
     }
   }
@@ -337,8 +381,9 @@ class Torquer {
     this._v0.copy(this._omega);
     this._v0.applyMatrix3(this._inertiaMatrix);
     this._T = 0.5*this._v0.dot(this._omega);
-    this._totalGGEnergy0 = this._T + this.computeGravityGradientPotential();
-    this._ggCorrection = 1;
+    let pe = this.computeGravityGradientPotential();
+    this._ggE0 = this._T + pe;
+    this._ggCounter = 0;
   }
 
   computeGravityGradientPotential(){

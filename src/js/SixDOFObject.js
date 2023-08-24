@@ -136,16 +136,23 @@ class SixDOFObject {
   }
 
   sendTorqueData(){
-    return [this._torque, this._torqueOption, this._omega, this._quat, this._dcm, this._T];
+    return [this._torque.x,this._torque.y,this._torque.z,
+    this._torqueOption,
+    this._omega.x,this._omega.y,this._omega.z,
+    this._quat._w,this._quat._x,this._quat._y,this._quat._z,
+    this._dcm.elements[0],this._dcm.elements[1],this._dcm.elements[2],
+    this._dcm.elements[4],this._dcm.elements[5],this._dcm.elements[6],
+    this._dcm.elements[8],this._dcm.elements[9],this._dcm.elements[10],
+    this._T]; 
   }
 
-  receiveTorqueData(torque, torqueOption, omega, quat, dcm, T){
-    this._torque = torque;
-    this._torqueOption = torqueOption;
-    this._omega = omega;
-    this._quat = quat;
-    this._dcm = dcm;
-    this._T = T;
+  receiveTorqueData(tx,ty,tz,omx,omy,omz){
+    this._torque.x = tx;
+    this._torque.y = ty;
+    this._torque.z = tz;
+    this._omega.x = omx;
+    this._omega.y = omy;
+    this._omega.z = omz;
   }
 
   reset(){
@@ -177,7 +184,6 @@ class SixDOFObject {
     }
     
     this._torqueOption = torqueOption;
-    this._torquer.setTorqueOption(torqueOption);
     this._torquer.receiveTorqueData(...this.sendTorqueData());
     this._torquer.doTorque();
     this.receiveTorqueData(...this._torquer.sendTorqueData());
@@ -288,6 +294,9 @@ class SixDOFObject {
     this._torquer.receiveTorqueData(...this.sendTorqueData());
     this._torquer.doTorque();
     this.receiveTorqueData(...this._torquer.sendTorqueData());
+    // console.log('omega after torque',this._omega.x, this._omega.y, this._omega.z);
+    // this._torquer.refreshGG();//blah  needed?
+
     this._v0.copy(this._torque);
     //no check is made if ixx, iyy, or izz is zero
     pdot = -((ixy*(qdot0 - p*r) + ixz*(rdot0 + p*q) + (izz - iyy)*q*r + iyz*(q*q - r*r) - this._v0.x))/ixx;
@@ -339,10 +348,16 @@ class SixDOFObject {
     k4.y = qdot*h;
     k4.z = rdot*h;
 
+    //save omegadot for next integration step
+    this._omegadot.x = pdot;
+    this._omegadot.y = qdot;
+    this._omegadot.z = rdot;
+
     //total
     this._omega.x += (k1.x + 2*k2.x + 2*k3.x + k4.x)/6;
     this._omega.y += (k1.y + 2*k2.y + 2*k3.y + k4.y)/6;
     this._omega.z += (k1.z + 2*k2.z + 2*k3.z + k4.z)/6;
+    // console.log('omega after runge',this._omega.x, this._omega.y, this._omega.z);
 
     this.tick();
 

@@ -295,7 +295,7 @@ class SixDOFObject {
     this._torquer.doTorque();
     this.receiveTorqueData(...this._torquer.sendTorqueData());
     // console.log('omega after torque',this._omega.x, this._omega.y, this._omega.z);
-    // this._torquer.refreshGG();//blah  needed?
+    // this._torquer.refreshGG();//needed?
 
     this._v0.copy(this._torque);
     //no check is made if ixx, iyy, or izz is zero

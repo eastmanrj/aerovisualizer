@@ -1,5 +1,5 @@
 import * as THREE from '../../node_modules/three/build/three.module.js';
-import SpecialEllipsoidGeometry from './ellipsoid.js';
+import SpecialEllipsoidGeometry from './SpecialEllipsoidGeometry.js';
 
 /**
  PoinsotAndCones is a class that encapsulates the computation of 

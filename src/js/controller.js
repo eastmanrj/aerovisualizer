@@ -1,4 +1,4 @@
-import * as THREE from '../../node_modules/three/build/three.module.js';
+import * as THREE from 'three/build/three.module.js';
 import SixDOFObject from './SixDOFObject.js';
 import Vectors from './Vectors.js';
 import PoinsotAndCones from './PoinsotAndCones.js';

@@ -20,12 +20,12 @@ let jupiter = null;
 let sun = null;
 const cameraRadius = 25;
 let nominalCameraPos = new THREE.Vector3(-cameraRadius, 0, 0);
-let cpx, cpy, cpz; // camera position
+let cpx, cpy, cpz;// camera position
 const centerOfRotation = [0, 0, 0];
 let clock = null;
-let sdo = null; //"six degree of freedom object" (currently only handles rotational)
-let vo = null; //"vectors object" (handles all of the vectors)
-let pac = null; //"Poinsot and cones" (handles the Poinsot ellipsoid and plane,
+let sdo = null;//"six degree of freedom object" (currently only handles rotational)
+let vo = null;//"vectors object" (handles all of the vectors)
+let pac = null;//"Poinsot and cones" (handles the Poinsot ellipsoid and plane,
                 //polode and herpolhode, and the space and body cones)
 let orbitControls = null;
 let playing = false;
@@ -2639,7 +2639,7 @@ const loadBackground = function(option='atmosphere'){
 const initTHREE = function() {
   scene = new THREE.Scene();
   clock = new THREE.Clock();
-  clock.getElapsedTime(); // sets 'oldTime'
+  clock.getElapsedTime();// sets 'oldTime'
   
   const ambientLight = new THREE.AmbientLight(0x707070);
   const sunLight = new THREE.SpotLight(0xffffff);

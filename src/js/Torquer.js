@@ -115,7 +115,7 @@ class Torquer {
         // so we need to rotate it into the body frame
         this._torque.copy(this._constantTorque);
         this._q0.copy(this._quat);
-        this._q0.invert(); // _quat is body to space so need to invert it
+        this._q0.invert();// _quat is body to space so need to invert it
         this._torque.applyQuaternion(this._q0);
         break;
       case 3:
@@ -240,7 +240,7 @@ class Torquer {
         // so we use a counter to skip this most of the time.
         this._ggCounter += 1;
 
-        if (this._ggCounter === 50){
+        if (this._ggCounter === 5){
           this._ggCounter = 0;
 
           let pe = this.computeGravityGradientPotential();
@@ -317,7 +317,7 @@ class Torquer {
         this._v1.multiplyScalar(this._topGravity);
         this._v1.multiplyScalar(this._mass);
         this._q0.copy(this._quat);
-        this._q0.invert(); // _quat is body to space, but want space to body
+        this._q0.invert();// _quat is body to space, but want space to body
         this._v1.applyQuaternion(this._q0);// bring _v1 into the body frame
         // _v1 is now the f in rXf
         this._torque.cross(this._v1);// _torque was just r, now it is rXf
@@ -399,7 +399,7 @@ class Torquer {
 
     const trace =  this._inertiaMatrix.elements[0]
            + this._inertiaMatrix.elements[4] + this._inertiaMatrix.elements[8];
-    this._mat0.setFromMatrix4(this._dcm); // dcm is the direction cosine matrix
+    this._mat0.setFromMatrix4(this._dcm);// dcm is the direction cosine matrix
     this._mat1.copy(this._mat0);
     this._mat1.transpose();
     this._mat0.multiply(this._inertiaMatrix);

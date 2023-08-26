@@ -5,8 +5,8 @@ import Torquer from './Torquer.js';
  SixDOFObject is a class that encapsulates the computation of the 
  rotational dynamics of a brick-shaped THREE.js object representing
  a rigid body.  Although the term six DOF stands for 6 degrees of
- freedom, only the 3 rotational degrees of freedom are handled
- at this time.
+ freedom, only the 3 rotational degrees of freedom are currently 
+ handled.
 **/
 
 const piOver180 = Math.PI / 180;
@@ -17,22 +17,16 @@ const vehicleMassProperties =
 [[1043.3,1285.3,1824.9,2666.9,0],
 //New Horizons Probe
 [401,161.38,402.12,316,0]
-// //Boeing 747 on approach, gear up, flaps 20 deg
-// [255841,19388193,43792911,61418541,-3023473],
-// //Boeing 747 clean aircraft
-// [288774,24947045,44877565,67112975,-3742057],
-// //F-104 Starfighter
-// [7393.5653,4880.9436,79993.2429,81349.0605,0]
 ];
 
 class SixDOFObject {
   constructor(mass, length, width, height, scene, camera, blockImageOption, massPropOption) {
     this._h = 0.0025;// simulation time step. Based on an analysis, _h could
-    // be set to as low as 0.0000372 for the Mac Mini with the number of ticks
-    // within a 60 fps screen refresh equal to about 448.  _maxTicksPerFrame
-    // should be set to well below that.  set _h to well above its limit
-    this._maxTicksPerFrame = 10;
+    // be set to as low as 0.0000372 for the Apple M1 chip with the number of 
+    // ticks within a 60 fps screen refresh equal to about 448.  _maxTicksPerFrame
+    // should be set to well below that.  set _h to well above its limit.
     // _h times _maxTicksPerFrame should be be greater than 0.016667
+    this._maxTicksPerFrame = 10;
     this.simulationTime = 0;
     this.realTime = 0;
     this._torquer = new Torquer();
@@ -46,7 +40,6 @@ class SixDOFObject {
     // not a Matrix3 is because the THREE function makeRotationFromQuaternion
     // exists only for Matrix4. Convert it to a 3x3 matrix using the THREE 
     // function setFromMatrix4 if desired.
-    this._pos = new THREE.Vector3(0, 0, 0);// not presently used
     this._torqueOption = 1;
     // 1 = no torque
     // 2 = space frame torque
@@ -63,16 +56,21 @@ class SixDOFObject {
     this._eulerOrderTriplet = {XYZ:[0,1,2],YXZ:[1,0,2],ZXY:[2,0,1],ZYX:[2,1,0],YZX:[1,2,0],XZY:[0,2,1]};
     // 0 = X, 1 = Y, 2 = Z
     // THREE.js uses intrinsic Tait-Bryan angles only, not proper Euler angles
-    // nor extrinsic
-    this._k1 = new THREE.Vector3();
+    // nor extrinsic angles
+    this._k1 = new THREE.Vector3();// used in runge kutta integration
     this._k2 = new THREE.Vector3();
     this._k3 = new THREE.Vector3();
     this._k4 = new THREE.Vector3();
-    this._inertiaMatrix = new THREE.Matrix3();
+    this._inertiaMatrix = new THREE.Matrix3();//the products of inertia are
+    //currently kept set to zero for simplicity.  The off-diagonal elements of
+    //this matrix should be zero.  The tickDynamic function does not require
+    //this assumption but still computes omega using the products of inertia
+    //in order to facilitate a future possible transition to using them.
     this._scale = new THREE.Vector3();
     this._unitScale = new THREE.Vector3(1,1,1);
-    this._T = 0;
-    this._T0 = 0;
+    this._T = 0;//current rotational kinetic energy
+    this._T0 = 0;//rotational kinetic energy that is established in the setOmega
+    // function and which should remain constant during torque-free motion
     this.needsRefresh = true;
     this._showObject = true;
     this._blockMesh = null;
@@ -89,24 +87,29 @@ class SixDOFObject {
     this._xUnitVector = new THREE.Vector3(1, 0, 0);
     this._yUnitVector = new THREE.Vector3(0, 1, 0);
     this._zUnitVector = new THREE.Vector3(0, 0, 1);
+    //mat0, mat1, q0, q1, q2, q3, v0, v1, and v2 are temporary objects
+    //that can be used as needed.  Avoid creating objects with "new"
+    //as much as possible. Use the .copy method for THREE.js objects
+    //to avoid creating new ones and causing memory issues
     this._mat0 = new THREE.Matrix3();
     this._mat1 = new THREE.Matrix3();
     this._q0 = new THREE.Quaternion();
     this._q1 = new THREE.Quaternion();
     this._q2 = new THREE.Quaternion();
-    this._qn = new THREE.Quaternion();
-    this._zeroVector = new THREE.Vector3();
     this._v0 = new THREE.Vector3();
     this._v1 = new THREE.Vector3();
     this._v2 = new THREE.Vector3();
+    this._qn = new THREE.Quaternion();//used for vector labels to keep them
+    //oriented toward the camera
+    this._zeroVector = new THREE.Vector3();
     this._hQuat = new THREE.Quaternion();
     this._isAxisymmetric = false;
     this._axisOfSymmetry = 0;//1=x, 2=y, 3=z
     this._itemOpacity = 0;
     this.constructionComplete = false;
     //constructionComplete is an admittedly kludgy way of ensuring that the
-    //code in here does not execute until asynchronous code from other classes
-    //has completed execution
+    //code in here does not execute until asynchronous code from the Vectors 
+    //class has completed execution
     this._camera = camera;
     this._scene = scene;
 
@@ -216,16 +219,14 @@ class SixDOFObject {
   }
 
   /**
-   _quat represents the rotation of the object's body frame with respect to 
-    the inertial (space) frame.  The tick() function advances the quaternion  
-    through a small time delta (_h) based on the rate of change of the quaternion,
-    which is computed from _omega (p, q, and r).  This function also computes 
-    _dcm, _H, and _Hinertial.
-
-    For dynamic motion, this function is called by tickDynamic, whose main
-    job is to compute _omega.
+   The tick function advances the quaternion _quat through a small delta  
+   time (_h) based on the rate of change of the quaternion,
+   which is computed from _omega (p, q, and r).  This quaternion represents 
+   the rotation of the object's body frame with respect to the inertial (space) 
+   frame.  The tick function also computes _dcm, _H, and _Hinertial.  For 
+   dynamic motion, tick is called by tickDynamic, whose main job is to 
+   compute _omega.
    **/
-
   tick() {
     let h = this._h;
     let p = this._omega.x;
@@ -251,11 +252,13 @@ class SixDOFObject {
       qx += (qxdot0 + this._quatdot.x)*h/2;
       qy += (qydot0 + this._quatdot.y)*h/2;
       qz += (qzdot0 + this._quatdot.z)*h/2;
+      //set the quaternion and normalize it, make the dcm
       this._quat.set(qx, qy, qz, qw);
       this._quat.normalize();
       this._dcm.makeRotationFromQuaternion(this._quat);
     }
 
+    //set the angular momentum using omega and the inertia matrix
     this._H.copy(this._omega);
     this._H.applyMatrix3(this._inertiaMatrix);
     this._Hinertial.copy(this._H);
@@ -264,24 +267,38 @@ class SixDOFObject {
   }
 
   /**
+   The tickDynamic function is called each time through the
+   integration loop.  It calls the _torquer.doTorque function to 
+   torque the object (or not).  It then computes _omega using 4th 
+   order Runge Kutta and then calls the tick function to advance the 
+   quaternion representing the orientation.  It then computes the 
+   rotational kinetic energy and makes a small adjustment to _omega 
+   during torque-free motion to ensure that numerical errors do not 
+   propagate and cause the angular momentum vector to drift.
 
+   Although the products of inertia are included in the computation
+   of _omega, this function has not been tested with non-zero products
+   of inertia.
    **/
-
   tickDynamic(){
-    //4th order Runge Kutta
     let h = this._h;
     let pdot, qdot, rdot;
     const elements = this._inertiaMatrix.elements;
     const ixx = elements[0];
     const iyy = elements[4];
     const izz = elements[8];
-    const ixy = elements[1];//this seems to work better, but should it be minus?
-    const ixz = elements[2];//this seems to work better, but should it be minus?
-    const iyz = elements[5];//this seems to work better, but should it be minus?
+    const ixy = -(elements[1]);
+    const ixz = -(elements[2]);
+    const iyz = -(elements[5]);
     let k1 = this._k1;
     let k2 = this._k2;
     let k3 = this._k3;
     let k4 = this._k4;
+
+    this._torquer.receiveTorqueData(...this.sendTorqueData());
+    this._torquer.doTorque();
+    this.receiveTorqueData(...this._torquer.sendTorqueData());
+    this._v0.copy(this._torque);
 
     //pass 1
     let p = this._omega.x;
@@ -291,14 +308,9 @@ class SixDOFObject {
     let qdot0 = this._omegadot.y;
     let rdot0 = this._omegadot.z;
 
-    this._torquer.receiveTorqueData(...this.sendTorqueData());
-    this._torquer.doTorque();
-    this.receiveTorqueData(...this._torquer.sendTorqueData());
-    // console.log('omega after torque',this._omega.x, this._omega.y, this._omega.z);
-    // this._torquer.refreshGG();//needed?
-
-    this._v0.copy(this._torque);
-    //no check is made if ixx, iyy, or izz is zero
+    //no check is made if ixx, iyy, or izz is zero because this would
+    //add an unnecessary burden on this function which is called each time
+    //of the integration loop
     pdot = -((ixy*(qdot0 - p*r) + ixz*(rdot0 + p*q) + (izz - iyy)*q*r + iyz*(q*q - r*r) - this._v0.x))/ixx;
     qdot = -((iyz*(rdot0 - q*p) + ixy*(pdot0 + q*r) + (ixx - izz)*r*p + ixz*(r*r - p*p) - this._v0.y))/iyy;
     rdot = -((ixz*(pdot0 - r*q) + iyz*(qdot0 + r*p) + (iyy - ixx)*p*q + ixy*(p*p - q*q) - this._v0.z))/izz;
@@ -348,7 +360,7 @@ class SixDOFObject {
     k4.y = qdot*h;
     k4.z = rdot*h;
 
-    //save omegadot for next integration step
+    //save omegadot for the next integration step
     this._omegadot.x = pdot;
     this._omegadot.y = qdot;
     this._omegadot.z = rdot;
@@ -357,7 +369,6 @@ class SixDOFObject {
     this._omega.x += (k1.x + 2*k2.x + 2*k3.x + k4.x)/6;
     this._omega.y += (k1.y + 2*k2.y + 2*k3.y + k4.y)/6;
     this._omega.z += (k1.z + 2*k2.z + 2*k3.z + k4.z)/6;
-    // console.log('omega after runge',this._omega.x, this._omega.y, this._omega.z);
 
     this.tick();
 
@@ -366,12 +377,10 @@ class SixDOFObject {
     this._v0.applyMatrix3(this._inertiaMatrix);
     this._T = 0.5*this._v0.dot(this._omega);
 
+    // The code below helps to prevent the angular momentum (H) from
+    // drifting during torque-free motion by multiplying _omega by the 
+    // ratio of the original kinetic energy to the current kinetic energy.
     if (this._torqueOption === 1){
-      // this section of code helps to correct the omega vector by 
-      // multiplying 2 or 3 of the components of the angular velocity 
-      // (omega) by the ratio of the original kinetic energy to the current
-      // kinetic energy.  This is only performed when there is no torque and
-      // when the object is rotating
       if (this._T0 === 0){
         return;
       }
@@ -388,7 +397,6 @@ class SixDOFObject {
         this._omega.x /= b;
         this._omega.y /= b;
       }else{
-        // maybe don't correct if not axisymmetric?
         this._omega.x /= b;
         this._omega.y /= b;
         this._omega.z /= b;
@@ -396,6 +404,15 @@ class SixDOFObject {
     }
   }
 
+  /**
+   The simulate function is called each time through the rendering loop.
+   The dt variable is the real amount of time that has passed between 
+   screen refreshes for the 3D animation.  The simulation delta time _h
+   is capable of being much smaller than dt.  A "safety counter" and 
+   maxTicks are added to ensure that it does not enter into an infinite 
+   loop for whatever reason.  The interesting stuff happens in the
+   tickDynamic function.
+  **/
   simulate(dt){
     let safetyCounter = 0;
     const maxTicks = this._maxTicksPerFrame;
@@ -409,12 +426,11 @@ class SixDOFObject {
   }
 
   /**
-   refresh should be called whenever the orientation of the block changes 
-   relative to the inertial frame or when the camera changes its position 
-   or lookat point.  This function does not generate the block object 
-   (see constructBlock).
+   The refresh function should be called whenever the orientation of the 
+   block changes relative to the inertial frame or when the camera changes 
+   its position or lookat point.  This function does not generate the block 
+   object (see constructBlock).
   **/
-
   refresh(){
     if (!this.constructionComplete){
       return;
@@ -456,6 +472,12 @@ class SixDOFObject {
     this._scale.set(len*0.5, wid*0.5, ht*0.5);
   }
 
+  /**
+   The setOmega function sets _omega using the provided magnitude
+   and components of a vector in the desired direction.  The
+   components do not have to be normalized to 1.  Alternatively,
+   this function can be used to set the angular momentum (H).
+  **/
   setOmega(omegaOrH, omegaMagnitude, x, y, z){
     this.needsRefresh = true;
     const xyz = new THREE.Vector3(x, y, z);
@@ -652,7 +674,7 @@ class SixDOFObject {
 
   setEulerAngles(angle1, angle2, angle3){
     // angles are entered in degrees.
-    // Set to between -180 and 180 for angles 1 and 3
+    // Set them to between -180 and 180 for angles 1 and 3
     this.needsRefresh = true;
     angle1 = angle1 > 180 ? angle1 - 180 : angle1;
     angle3 = angle3 > 180 ? angle3 - 180 : angle3;
@@ -677,14 +699,6 @@ class SixDOFObject {
 
   getAngularMomentumMagnitude(){
     return this._H.length();
-  }
-
-  get pos() {
-    return this._pos;
-  }
-
-  set pos(value) {
-    this._pos = value;
   }
 
   set mass(value) {

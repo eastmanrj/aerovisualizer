@@ -328,7 +328,7 @@ class PoinsotAndCones {
         theColor = 0x800080;//0xcbc3e3;//light purple
         break;
       case 'orange':
-        theColor = 0xffa500; //0xffd580;//light orange
+        theColor = 0xffa500;//0xffd580;//light orange
         break;
     }
 

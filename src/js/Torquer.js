@@ -40,7 +40,6 @@ class Torquer {
     this._T = 0;
     this._3muOverR3 = 1;
     this._ggE0 = 0;
-    this._ggCounter = 0;
 
     // spinning top torque variables
     this._topRDistance = 1;
@@ -167,11 +166,11 @@ class Torquer {
         // 1983 McGraw Hill, p. 235).  The dot product of a dyadic and a
         // vector is another vector.
         
-        // *** This program does NOT model orbital motion effects on the    ***
-        // *** gravity gradient!  It is assumed that the object remains at  ***
-        // *** the same static position above the planet by whatever means. ***
-        // *** Also, the orbital motion effects are overwhelmed by the      ***
-        // *** magnification factor (see below).                            ***
+        // *** This program does NOT model the centrifugal effect on the    ***
+        // *** gravity gradient!  It was decided that since we are only     ***
+        // *** interested in gaining an intuitive feel for the gravity      ***
+        // *** gradient by increasing the "magnification factor"            ***
+        // *** (see below), we do not gain anything by adding that effect.  ***
 
         // mu (GM) for earth is 3.986004418E+14 m^3/s^2 according to Wikipedia.
         // R for a body in low earth orbit is about 6500000 meters.
@@ -235,40 +234,35 @@ class Torquer {
         // computational errors.  We adjust this vector here to maintain a 
         // constant total energy.  _ggE0 is the total energy, and is set in
         // the refreshGG() function.  ke0 is what the rotational kinetic energy 
-        // should be based on _ggE0 and the computed current potential energy.  
-        // Also, we don't need to adjust the _omega vector every time step, 
-        // so we use a counter to skip this most of the time.
-        this._ggCounter += 1;
+        // should be based on _ggE0 and the computed current potential energy.
+        let pe = this.computeGravityGradientPotential();
+        let ke0 = this._ggE0 - pe;
 
-        if (this._ggCounter === 5){
-          this._ggCounter = 0;
+        if (ke0){
+          // console.log('_ggE0,',this._ggE0,' ,pe,',pe,
+          //   ' ,T,',this._T,',Ixx,',this._inertiaMatrix.elements[0],
+          //   ',Iyy,',this._inertiaMatrix.elements[4],',Izz,',this._inertiaMatrix.elements[8],
+          //   'P',this._omega.x,'Q',this._omega.y,'R',this._omega.z);
 
-          let pe = this.computeGravityGradientPotential();
-          let ke0 = this._ggE0 - pe;
+          // Compute the current rotational kinetic energy, knowing that the
+          // _omega vector is in error.  The total kinetic energy is just the sum
+          // of the kinetic energy for each of the 3 body axes.  We compute this, 
+          // divide by what it should be, and adjust _omega based on this ratio.
+          let kex = 0.5*this._inertiaMatrix.elements[0]*(this._omega.x)*(this._omega.x);
+          let key = 0.5*this._inertiaMatrix.elements[4]*(this._omega.y)*(this._omega.y);
+          let kez = 0.5*this._inertiaMatrix.elements[8]*(this._omega.z)*(this._omega.z);
 
-          if (ke0){
-            // console.log('totalGGEnergy0,',this._ggE0,' ,potential,',potential,
-            //   ' ,T,',T,' ,xx,',xx,' ,yy,',yy,' ,zz,',zz,',Ixx,',this._inertiaMatrix.elements[0],
-            //   ',Iyy,',this._inertiaMatrix.elements[4],',Izz,',this._inertiaMatrix.elements[8],
-            //   'P',this._omega.x,'Q',this._omega.y,'R',this._omega.z);
+          if (!((kex + key + kez) === 0)){
+            let ratio = (kex + key + kez)/ke0;
 
-            // Compute the current rotational kinetic energy, knowing that the
-            // _omega vector is in error.  The total kinetic energy is just the sum
-            // of the kinetic energy for each of the 3 body axes.  We compute this, 
-            // divide by what it should be, and adjust _omega based on this ratio.
-            let kex = 0.5*this._inertiaMatrix.elements[0]*(this._omega.x)*(this._omega.x);
-            let key = 0.5*this._inertiaMatrix.elements[4]*(this._omega.y)*(this._omega.y);
-            let kez = 0.5*this._inertiaMatrix.elements[8]*(this._omega.z)*(this._omega.z);
-
-            if (!((kex + key + kez) === 0)){
-              let ratio = (kex + key + kez)/ke0;
+            // don't try to correct it if it is too wildly off
+            if (ratio > 0.995 && ratio < 1.005){
               this._omega.x /= ratio;
               this._omega.y /= ratio;
               this._omega.z /= ratio;
             }
           }
         }
-        
         break;
       case 6:
         // 6 = torque on a spinning top
@@ -317,7 +311,7 @@ class Torquer {
         this._v1.multiplyScalar(this._topGravity);
         this._v1.multiplyScalar(this._mass);
         this._q0.copy(this._quat);
-        this._q0.invert();// _quat is body to space, but want space to body
+        this._q0.invert();// _quat is body to space, but we want space to body
         this._v1.applyQuaternion(this._q0);// bring _v1 into the body frame
         // _v1 is now the f in rXf
         this._torque.cross(this._v1);// _torque was just r, now it is rXf
@@ -383,7 +377,6 @@ class Torquer {
     this._T = 0.5*this._v0.dot(this._omega);
     let pe = this.computeGravityGradientPotential();
     this._ggE0 = this._T + pe;
-    this._ggCounter = 0;
   }
 
   computeGravityGradientPotential(){
@@ -395,7 +388,8 @@ class Torquer {
     // of inertia, but we choose X, Y or Z.  V is basically the potential
     // energy stored in the body due to the fact that its attitude is not in
     // the lowest energy state for the gravity gradient.
-    // We simplify the equation to just V = _3muOverR3 / 6 * (tr(I) - 3*I11)
+    // We simplify the equation to just V = _3muOverR3 / 6 * (tr(I) - 3*I11).
+    // Also, we do not take the centrifugal effect into account (see above).
 
     const trace =  this._inertiaMatrix.elements[0]
            + this._inertiaMatrix.elements[4] + this._inertiaMatrix.elements[8];
@@ -404,7 +398,7 @@ class Torquer {
     this._mat1.transpose();
     this._mat0.multiply(this._inertiaMatrix);
     this._mat0.multiply(this._mat1);
-    // _mat0 is now an inertia matrix expressed in a basis with the
+    // _mat0 is now the inertia matrix expressed in a basis with the
     // first vector being in the up/down direction
     let i11;
 

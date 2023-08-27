@@ -105,14 +105,14 @@ label {
   background-color: rgb(125, 125, 255);
   color: rgb(225, 225, 255);
   font-family: inherit;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 600;
   border-width: 2px;
   border-radius: 0.7rem;
   border-color:rgb(125, 225, 255);
   cursor: pointer;
   /* text-transform: uppercase; */
-  padding: 1.5rem 1.5rem;
+  padding: 0.5rem 0.5rem;
 }
 
 
@@ -140,6 +140,11 @@ label {
 .btn.disabled:active {
   background-color: #aaa;
   color: #555;
+}
+
+.btn-with-icon {
+  font-size: 0.5rem;
+  padding: 0.1rem 0.1rem;
 }
 
 .no-uppercase{

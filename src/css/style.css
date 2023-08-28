@@ -94,7 +94,7 @@ label {
 .btn-group-fixed{
   position: absolute;
   right: 0%;
-  bottom: 2%;
+  bottom: 3%;
   width: 100%;
   grid-template-columns: 1fr 1fr;
   margin-bottom: 0;
@@ -259,12 +259,12 @@ input[type="range"]::-webkit-slider-runnable-track {
 input[type="range"]::-webkit-slider-thumb {
  -webkit-appearance: none; /* Override default look */
   appearance: none;
-  margin-top: -12px; /* Centers thumb on the track */
+  margin-top: -10px; /* Centers thumb on the track */
 
   /*custom styles*/
   background-color: #3243ff;
-  height: 3rem; /*testing*/
-  width: 3rem;/* keep */
+  height: 2.5rem;
+  width: 2.5rem;
   border-radius: 50%;
 }
 
@@ -286,8 +286,8 @@ input[type="range"]:focus::-webkit-slider-thumb {
   align-content: space-around;
   padding-left: 1.5%;
   padding-right: 1.5%;
-  padding-top: 4%;
-  row-gap: 4%;
+  padding-top: 1.5%;
+  row-gap: 1.5%;
   touch-action: none;
 }
 

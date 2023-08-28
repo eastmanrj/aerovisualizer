@@ -177,6 +177,8 @@ label {
   grid-column: span 6;
   text-align: center;
   justify-self: center;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
 }
 
 .special-span{
@@ -367,7 +369,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
   }
 
   .numerical{
-    font-size: xx-small;
+    font-size: small;
   }
 }
 
@@ -416,7 +418,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
   }
 
   .numerical{
-    font-size: xx-small;
+    font-size: small;
   }
 }
 

@@ -2065,7 +2065,7 @@ const toggleShowInfo = function(){
     preferencesButton.style.display = 'none';
     playPauseButton.style.display = 'none';
     resetButton.style.display = 'none';
-    infoElements.style.display = 'block';
+    infoElements.style.display = 'grid';
     handleMainButtons('none');
   }
 }

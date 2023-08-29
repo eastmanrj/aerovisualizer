@@ -2171,7 +2171,7 @@ const handleInfoMenuChoice = function(choice){
       respectively.</p>`;
       break;
 
-      case 'info-cones': //space and body cones
+    case 'info-cones': //space and body cones
       infoText.innerHTML = `<p class="p-normal">Rigid bodies for which 2 of 
       the 3 principal moments of inertia at the center of mass are equal are 
       said to be axially symmetric whether or not the mass distribution is 
@@ -2195,7 +2195,7 @@ const handleInfoMenuChoice = function(choice){
       preferences.</p>`;
       break;
 
-      case 'info-poinsot': //Poinsot's construction
+    case 'info-poinsot': //Poinsot's construction
       infoText.innerHTML = `<p class="p-normal">A method of analyzing the free 
       motion of a rigid body was developed by <em>Louis Poinsot</em> in 1834.  In the 
       Poinsot method, the rotational inertia characteristics can be expressed 
@@ -2357,7 +2357,7 @@ const handleInfoMenuChoice = function(choice){
       rotated Y&prime; axis, and the third is &phi; (roll) about the twice-rotated 
       X&Prime; axis.</p>`;
       break;
-    
+
     case 'info-units': //units
       infoText.innerHTML = `<p class="p-normal">You might ask, "What are the units of 
       length and mass"?  The answer is that it does not matter.  It is up to you.</p>
@@ -2368,6 +2368,17 @@ const handleInfoMenuChoice = function(choice){
       foot, and the unit of mass is the slug if you prefer.</p>
       
       <p class="p-normal">The unit of time is the second.</p>`;
+    
+    case 'info-contact-disclaimer':
+      infoText.innerHTML = `<p class="p-normal">Aerovisualizer is an open source 
+      project.  To report bugs or to contribute to its future development, 
+      please contact us at github.com/eastmanrj/aerovisualizer.</p>
+
+      <p class="p-normal">We do not take responsibility for missed problems on 
+      quizes, tests, projects, or homework due to software bugs or the 
+      misinterpretation of displays in Aerovisualizer.  Do not use Aerovisualizer 
+      for hardware or software qualification in either aerospace or other 
+      industries or other applications.</p>`;
       break;
   }
 }

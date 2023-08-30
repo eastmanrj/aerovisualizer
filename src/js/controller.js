@@ -2368,7 +2368,8 @@ const handleInfoMenuChoice = function(choice){
       foot, and the unit of mass is the slug if you prefer.</p>
       
       <p class="p-normal">The unit of time is the second.</p>`;
-    
+      break;
+
     case 'info-contact-disclaimer':
       infoText.innerHTML = `<p class="p-normal">Aerovisualizer is an open source 
       project.  To report bugs or to contribute to its future development, 

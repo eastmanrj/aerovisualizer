@@ -2378,7 +2378,7 @@ const handleInfoMenuChoice = function(choice){
       quizes, tests, projects, or homework due to software bugs or the 
       misinterpretation of displays in Aerovisualizer.  Do not use Aerovisualizer 
       for hardware or software qualification in either aerospace or other 
-      industries or other applications. </p>`;
+      industries or other applications.</p>`;
       break;
   }
 }

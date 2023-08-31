@@ -2,48 +2,45 @@
 
 ## Github Issues
 
-Please use the Github issues for:
+Please use our <a href="https://github.com/eastmanrj/aerovisualizer/issues">issues</a> board to ask quesions, submit a bug report, submit ideas, or participate in discussing others' ideas.
 
-- <kbd>[bug](https://github.com/eastmanrj/aerovisualizer/labels/bug)</kbd>
-- <kbd>[question](https://github.com/eastmanrj/aerovisualizer/labels/question)</kbd>
-- <kbd>[help wanted](https://github.com/eastmanrj/aerovisualizer/labels/help%20wanted)</kbd>
-- <kbd>[good first issue](https://github.com/eastmanrj/aerovisualizer/labels/good%20first%20issue)</kbd>
+### Questions
 
-## Pull requests
+Got a question?  Ask [here](https://github.com/eastmanrj/aerovisualizer/labels/question).
 
-coding guidelines
+### Bug Reports
 
-post and see if there is an interest before working on your source code
+If you find a bug in Aerovisualizer, please tell us [here](https://github.com/eastmanrj/aerovisualizer/labels/bug).  Bugs include spelling and grammar errors, problems with displays and controls, and logic problems to name a few.
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+### Submit an Idea / Participate in Discussions
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
+If you have an idea for how to improve Aerovisualizer, big or small, let us know [here](https://github.com/eastmanrj/aerovisualizer/labels/enhancement).  Provide your feedback for other people's ideas too. This is the place for lots of back and forth to flesh out a design before the coding starts.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## Contributing Code
 
+After an idea for enhancement has been accepted, you can contribute in a couple of ways.
 
-## Coding Guidelines
+### Submit Code from Python, Matlab, C, Fortran, Other Languages
 
-You must follow these "rules" when contributing to **Aerovisualizer**:
+Aerovisualizer is written in Javascript. Even so, if you have some "back end" source code hidden away as part of a desktop program somewhere, just send it to us and we will adapt it to Javascript as long as you follow these guidelines:
 
-1. New code cannot break old code
-2. Code must be HTML/CSS/Javascript
-3. Only "vanilla" Javascript (no frameworks like React or Vue)
-4. Code must follow the established style and must include documentation that it easy to follow
-5. Performance.  Aerovisualizer uses 3D rendering.
+- Read the discussion in [issues](https://github.com/eastmanrj/aerovisualizer/labels/enhancement) and understand how your code could fit into the final design.
+- Know your code.  That is, know exactly what it is attempting to do.  No black boxes allowed!
+- If your SLOC (software lines of code) is large, please break it up into smaller independent parts to submit separately.
+- Comment your code thoroughly (but not excessively).  This is for everyone's benefit, including yours!
+- DON'T PLAGIARIZE. If someone else spent a lot of time and effort generating some tricky source code, please give them credit for it.  Small code snippets are fine.
 
-## Built With
+### HTML / CSS / Javascript
 
-major frameworks/libraries 
+If you know HTML, CSS, or Javascript and would like to contribute directly to our code, we have some other guidelines for you:
 
-* [![THREE][THREE.js]][threejs.org]
-
-
-## Code of Conduct
-
-Help us keep our software open and inclusive. Please read and follow our [Code of Conduct](https://github.com/eastmanrj/aerovisualizer/blob/main/code-of-conduct.md).
+- All of the previous guidelines still apply.
+- Code must be HTML, CSS, and Javascript only.
+- Use only "vanilla" Javascript (no frameworks like React, Vue, or Angular).  Including those only adds to bloat and creates something new people have to learn.
+- Avoid importing third party modules.  Again, this adds bloat and also dependencies.  Your code could also end up being rejected, which nobody wants.
+- New code cannot break old code.
+- Follow the established style.
+- If your code requires 2D or 3D rendering, learn how to use the very popular [THREE.js](https://threejs.org) framework.  All 2D and 3D will use this.
+- Know how to use Git and GitHub.  Fork Aerovisualizer, clone it, checkout a new branch, make your changes, add and commit, push to your fork, and open a pull request.
+ 
+If you do not currently program in HTML, CSS, and Javascript, [udemy.com](https://udemy.com) offers some great courses at reasonable prices. Jonas Schmedtmann is an excellent instructor.

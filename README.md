@@ -10,22 +10,22 @@
   ·
   <a href="https://github.com/eastmanrj/aerovisualizer/blob/main/CONTRIBUTING.md">Contributing Guidelines</a>
   ·
-  <a href="https://github.com/eastmanrj/aerovisualizer/issues">Submit an Issue</a>
+  <a href="https://github.com/eastmanrj/aerovisualizer/issues">Report Bugs / Submit Suggestions</a>
   <br>
   <br>
 </p>
 
-The purpose of Aerovisualizer is to assist in the teaching and reinforcement of concepts in aerospace engineering by presenting them in interesting and engaging ways.  Subjects are displayed in 2D and 3D animations to complement the dry equations found in textbooks and online.  Controls are also provided to manipulate the displays.
+The purpose of Aerovisualizer is to assist in the teaching and reinforcement of concepts in aerospace engineering by presenting them in interesting and engaging ways.  3D animations are displayed to complement the dry equations found in textbooks and online, and controls are also provided to manipulate the displays.
 
-Aerovisualizer is a web site that can be opened in a browser on your phone, tablet, or laptop or desktop computer.  Since its computer code is open source, anyone can contribute to its future evolution.  Since it is built with HTML, CSS, and Javascript, it does not require a compiler for development. 
+Aerovisualizer can be opened in a browser on your phone, tablet, laptop or desktop computer or installed as a "web app".  It is also open source, so anyone can contribute to its future evolution.  Its source code is HTML, CSS, and Javascript and does not require a software compiler. 
 
-Aerovisualizer currently focuses only on the orientation and rotational dynamics of rigid bodies.  Topics include Euler angles, quaternions, direction cosines, angular velocity and momentum and torque (ACS engines, gravity gradient, spinning top).  Also included are space and body cones and Poinsot's construction.  It is assumed that the user has taken or is currently taking a course covering these subjects.
+Aerovisualizer currently focuses only on the orientation and rotational dynamics of rigid bodies.  Subjects include Euler angles, quaternions, direction cosines, angular velocity and momentum and torque (ACS engines, gravity gradient, spinning top).  Also included are space and body cones and Poinsot's construction.  It is assumed that the user has taken or is currently taking a course in these topics.
 
-Future versions of Aerovisualizer may include the following, depending on interest:
+Future releases of Aerovisualizer may include the following, depending on interest:
 
 * Orbital Mechanics
 * Aircraft Dynamics
-* 2D Flow (Sources, Sinks, and Vortices)
+* 2D Flow (sources, sinks, and vortices)
 * Computational Fluid Dynamics (yes really)
 * Free Molecule Flow
 * Thermodynamics
@@ -33,28 +33,26 @@ Future versions of Aerovisualizer may include the following, depending on intere
 * Aeroelasticity
 * Whatever else aerospace thing you can think of!
 
+Finally, if you enjoy Aerovisualizer, please help promote it by giving the project a star!  Thanks!
+
 ## Website
 - <https://aerovisualizer.com>
 
 ## Contributing
 
-Want to report a bug or contribute some code?  Great!  See our guidelines for [contributing](https://github.com/eastmanrj/aerovisualizer/blob/main/CONTRIBUTING.md) and then check out one of our issues labeled as <kbd>[help wanted](https://github.com/eastmanrj/aerovisualizer/labels/help%20wanted)</kbd> or <kbd>[good first issue](https://github.com/eastmanrj/aerovisualizer/labels/good%20first%20issue)</kbd>
-
-### Subject Matter Experts
-
-Do you have a particular specialty of aerospace engineering?  Perhaps you have Python, Matlab, C, or Fortran code somewhere that we could adapt?  Please send us your ideas!
-
-### Javascript Developers
-
-Already know HTML, CSS, and Javascript? Are you looking for a fun and interesting project to contribute to?  Then check us out!  We are always interested in ways to enhance the user experience and to improve our source code.
+Do you want to report a bug, make an enhancement, or contribute some code?  Great!  See our guidelines for [contributing](https://github.com/eastmanrj/aerovisualizer/blob/main/CONTRIBUTING.md) and then check out one of our <a href="https://github.com/eastmanrj/aerovisualizer/issues">issues</a>.
 
 ### Students, Teachers, and Working Aerospace Engineers
 
-If you have thoughts on how to improve Aerovisualizer, please send them here!  Do you have some computer code that you have written, but it is not Javascript?  Not a problem!  As mentioned above, other languages can be adapted to it.
+Do you have an idea for something to add or improve?  Please send us your ideas!  Do you have a particular specialty in aerospace engineering?  Maybe you have some Python, Matlab, C, or Fortran code that we could adapt?  Please let us know!
+
+### Javascript Developers
+
+Do you already know HTML, CSS, and Javascript? Are you looking for a fun and interesting project to contribute to?  Then check us out!  We are always interested in ways to enhance the user experience and to improve our source code.
 
 ## Contact
 
-R Eastman - [info](eastmanrj@users.noreply.github.com) - eastmanrj@users.noreply.github.com
+ R. Eastman - eastmanrj@users.noreply.github.com
 
 Project Link: [https://github.com/eastmanrj/aerovisualizer](https://github.com/eastmanrj/aerovisualizer)
 

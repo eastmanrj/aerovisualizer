@@ -1147,6 +1147,19 @@ zeroQuaternionKhatButton.addEventListener('click', () => {
   saveToLocalStorage();
 });
 
+// omegaMagnitudeSlider.oninput = function(){
+//   console.log('xxxxxxxxxxxxxx');
+// }
+omegaMagnitudeSlider.onpointerdown = function(){
+  // console.log('xxxxxx');
+  omegaMag = omegaMagnitudeSlider.value/10;
+  omHihat = omegaIhatSlider.value;
+  omHjhat = omegaJhatSlider.value;
+  omHkhat = omegaKhatSlider.value;
+  
+  displayOmegaValues();
+}
+
 const handleOmegaSliderOnpointerup = function(){
   // slider goes from 0 to 100, we want 10 to be the
   // upper limit, so we divide by 10 here

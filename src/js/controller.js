@@ -1148,7 +1148,7 @@ zeroQuaternionKhatButton.addEventListener('click', () => {
 });
 
 // omegaMagnitudeSlider.oninput = function(){
-//   console.log('xxxxxxxxxxxxxx');
+//   console.log('xxxxxxxxxxxxxx'); 
 // }
 omegaMagnitudeSlider.onpointerdown = function(){
   // console.log('xxxxxx');

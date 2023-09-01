@@ -43,4 +43,4 @@ If you know HTML, CSS, or Javascript and would like to contribute directly to ou
 - If your code requires 2D or 3D rendering, learn how to use the very popular [THREE.js](https://threejs.org) framework.  All 2D and 3D will use this.
 - Know how to use Git and GitHub.  Fork Aerovisualizer, clone it, checkout a new branch, make your changes, add and commit, push to your fork, and open a pull request.
  
-If you do not currently program in HTML, CSS, and Javascript, [udemy.com](https://udemy.com) offers some great courses at reasonable prices. Jonas Schmedtmann is an excellent instructor.
+If you do not currently program in HTML, CSS, and Javascript, [udemy.com](https://udemy.com) offers some great courses at reasonable prices. Jonas Schmedtmann is an excellent instructor. 

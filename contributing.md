@@ -28,7 +28,7 @@ Aerovisualizer is written in Javascript. Even so, if you have some "back end" so
 - Know your code.  That is, know exactly what it is attempting to do.  No black boxes allowed!
 - If your SLOC (software lines of code) is large, please break it up into smaller independent parts to submit separately.
 - Comment your code thoroughly (but not excessively).  This is for everyone's benefit, including yours!
-- DON'T PLAGIARIZE. If someone else spent a lot of time and effort generating some tricky source code, please give them credit for it.  Small code snippets are fine.
+- DON'T PLAGIARIZE. If someone else spent a lot of time and effort generating some tricky source code, please give them credit for it.  Small code snippets are fine.  DO NOT USE PROPRIETARY CODE.
 
 ### HTML / CSS / Javascript
 

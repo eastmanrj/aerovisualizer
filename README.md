@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://aerovisualizer.com">Website</a>
   ·
-  <a href="https://github.com/eastmanrj/aerovisualizer/blob/main/CONTRIBUTING.md">Contributing Guidelines</a>
+  <a href="https://github.com/eastmanrj/aerovisualizer/blob/main/contributing.md">Contributing Guidelines</a>
   ·
   <a href="https://github.com/eastmanrj/aerovisualizer/issues">Report Bugs / Submit Suggestions</a>
   <br>
@@ -40,7 +40,7 @@ Finally, if you enjoy Aerovisualizer, please help promote it by giving the proje
 
 ## Contributing
 
-Do you want to report a bug, make an enhancement, or contribute some code?  Great!  See our guidelines for [contributing](https://github.com/eastmanrj/aerovisualizer/blob/main/CONTRIBUTING.md) and then check out one of our <a href="https://github.com/eastmanrj/aerovisualizer/issues">issues</a>.
+Do you want to report a bug, make an enhancement, or contribute some code?  Great!  See our guidelines for [contributing](https://github.com/eastmanrj/aerovisualizer/blob/main/contributing.md) and then check out one of our <a href="https://github.com/eastmanrj/aerovisualizer/issues">issues</a>.
 
 ### Students, Teachers, and Working Aerospace Engineers
 

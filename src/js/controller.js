@@ -1156,7 +1156,9 @@ omegaMagnitudeSlider.onpointerdown = function(){
   omHihat = omegaIhatSlider.value;
   omHjhat = omegaJhatSlider.value;
   omHkhat = omegaKhatSlider.value;
-  
+  sdo.reset();
+  syncQuatToObject();
+  sdo.setOmega(omegaOrH,omegaMag,omHihat,omHjhat,omHkhat);
   displayOmegaValues();
 }
 

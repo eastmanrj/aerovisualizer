@@ -1150,7 +1150,7 @@ zeroQuaternionKhatButton.addEventListener('click', () => {
 // omegaMagnitudeSlider.oninput = function(){
 //   console.log('xxxxxxxxxxxxxx'); 
 // }
-omegaMagnitudeSlider.onpointerdown = function(){
+omegaMagnitudeSlider.ontouchstart = function(){
   // console.log('xxxxxx');
   omegaMag = omegaMagnitudeSlider.value/10;
   omHihat = omegaIhatSlider.value;

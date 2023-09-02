@@ -1151,14 +1151,15 @@ zeroQuaternionKhatButton.addEventListener('click', () => {
 //   console.log('xxxxxxxxxxxxxx'); 
 // }
 omegaMagnitudeSlider.ontouchstart = function(){
+  handleOmegaSliderOnpointerup();
   // console.log('xxxxxx');
-  omegaMag = omegaMagnitudeSlider.value/10;
-  omHihat = omegaIhatSlider.value;
-  omHjhat = omegaJhatSlider.value;
-  omHkhat = omegaKhatSlider.value;
-  sdo.setOmega(omegaOrH,omegaMag,omHihat,omHjhat,omHkhat);
-  sdo.reset();
-  displayOmegaValues();
+  // omegaMag = omegaMagnitudeSlider.value/10;
+  // omHihat = omegaIhatSlider.value;
+  // omHjhat = omegaJhatSlider.value;
+  // omHkhat = omegaKhatSlider.value;
+  // sdo.setOmega(omegaOrH,omegaMag,omHihat,omHjhat,omHkhat);
+  // sdo.reset();
+  // displayOmegaValues();
 }
 
 const handleOmegaSliderOnpointerup = function(){

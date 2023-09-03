@@ -18,11 +18,27 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <link rel="manifest" href="./manifest.json">
-    <!-- <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Aerovisualizer"> -->
+    <meta name="apple-mobile-web-app-title" content="Aerovisualizer">
 
     <meta name="theme-color" content="#3f51b5">
+
+    <!-- Register the app's service worker. -->
+    <script type="module">
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register(new URL('sw.js', import.meta.url)).then(
+          (registration) => {
+            console.log("Service worker registration successful:", registration);
+          },
+          (error) => {
+            console.error(`Service worker registration failed: ${error}`);
+          },
+        );
+      } else {
+        console.error("Service workers are not supported.");
+      }
+    </script>
   </head>
   <body>
     <div class="container">

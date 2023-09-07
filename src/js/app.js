@@ -3,16 +3,14 @@ import SixDOFObject from './SixDOFObject.js';
 import Vectors from './Vectors.js';
 import PoinsotAndCones from './PoinsotAndCones.js';
 import {OrbitControls} from './OrbitControls.js';
-
-// import {GLTFLoader} from './GLTFLoader.js';
-// import {initAudio, playSound} from './audio.js';
-
-// if ('serviceWorker' in navigator){
-//   navigator.serviceWorker
-//   .register('./sw.js')
-//   .then(function(){
-//   });
-// }
+// let SixDOFObjectURL = new URL('/SixDOFObject.js', import.meta.url).toString();
+// let VectorsURL = new URL('/Vectors.js', import.meta.url).toString();
+// let PoinsotAndConesURL = new URL('/PoinsotAndCones.js', import.meta.url).toString();
+// let OrbitControlsURL = new URL('/OrbitControls.js', import.meta.url).toString();
+// import SixDOFObject from SixDOFObjectURL;
+// import Vectors from VectorsURL;
+// import PoinsotAndCones from PoinsotAndConesURL;
+// import {OrbitControls} from OrbitControlsURL;
 
 let scene, camera, renderer;
 let background = null;
@@ -2600,7 +2598,19 @@ const loadBackground = function(option='atmosphere'){
         background = null;
       }
 
-      background = new THREE.CubeTextureLoader().load(['./img/stormydays_ft.jpg','./img/stormydays_bk.jpg','./img/stormydays_up.jpg','./img/stormydays_dn.jpg','./img/stormydays_rt.jpg','./img/stormydays_lf.jpg']);
+      // let img = document.createElement('img');
+      // img.src = new URL('hero.jpg', import.meta.url);
+      // document.body.appendChild(img);
+
+      let stormydays_ft = new URL('/static/img/stormydays_ft.jpg', import.meta.url);
+      let stormydays_bk = new URL('/static/img/stormydays_bk.jpg', import.meta.url);
+      let stormydays_up = new URL('/static/img/stormydays_up.jpg', import.meta.url);
+      let stormydays_dn = new URL('/static/img/stormydays_dn.jpg', import.meta.url);
+      let stormydays_rt = new URL('/static/img/stormydays_rt.jpg', import.meta.url);
+      let stormydays_lf = new URL('/static/img/stormydays_lf.jpg', import.meta.url);
+
+      background = new THREE.CubeTextureLoader().load([stormydays_ft.pathname,stormydays_bk.pathname,stormydays_up.pathname,stormydays_dn.pathname,stormydays_rt.pathname,stormydays_lf.pathname]);
+      // background = new THREE.CubeTextureLoader().load(['./static/img/stormydays_ft.jpg','./static/img/stormydays_bk.jpg','./static/img/stormydays_up.jpg','./static/img/stormydays_dn.jpg','./static/img/stormydays_rt.jpg','./static/img/stormydays_lf.jpg']);
 
       scene.background = background;
 
@@ -2617,8 +2627,10 @@ const loadBackground = function(option='atmosphere'){
       if (background != null){
         background = null;
       }
-
-      background = new THREE.CubeTextureLoader().load(['./img/stars.jpg','./img/stars.jpg','./img/stars.jpg','./img/stars.jpg','./img/stars.jpg','./img/stars.jpg']);
+      
+      let stars = new URL('/static/img/stars.jpg', import.meta.url);
+      // background = new THREE.CubeTextureLoader().load(['./img/stars.jpg','./img/stars.jpg','./img/stars.jpg','./img/stars.jpg','./img/stars.jpg','./img/stars.jpg']);
+      background = new THREE.CubeTextureLoader().load([stars.pathname,stars.pathname,stars.pathname,stars.pathname,stars.pathname,stars.pathname]);
 
       scene.background = background;
       const tl = new THREE.TextureLoader();
@@ -2626,7 +2638,9 @@ const loadBackground = function(option='atmosphere'){
       if (jupiter === null){
         jupiter = null;
         const jupiterGeometry = new THREE.PlaneGeometry(150, 150, 1, 1);
-        const jupiterTexture = tl.load('./img/jupiter.png');
+        let jup = new URL('/static/img/jupiter.png', import.meta.url);
+        // const jupiterTexture = tl.load('./img/jupiter.png');
+        const jupiterTexture = tl.load(jup.pathname);
         const jupiterMat = new THREE.MeshBasicMaterial({
           map: jupiterTexture,
           visible: true,
@@ -2644,7 +2658,9 @@ const loadBackground = function(option='atmosphere'){
     
       if (sun === null){
         const sunGeometry = new THREE.PlaneGeometry(15, 15, 1, 1);
-        const sunTexture = tl.load('./img/sun.png');
+        let sol = new URL('/static/img/sun.png', import.meta.url);
+        // const sunTexture = tl.load('./img/sun.png');
+        const sunTexture = tl.load(sol.pathname);
         const sunMat = new THREE.MeshBasicMaterial({
           map: sunTexture,
           visible: true,

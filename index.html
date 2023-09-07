@@ -8,14 +8,14 @@
       name="description"
       content="Aerovisualizer is a site for teaching concepts of aerospace engineering.">
     <link rel="stylesheet" href="./src/css/style.css">
-    <script type="module" src="./src/js/controller.js"></script>
+    <script type="module" src="./src/js/app.js"></script>
     <title>Aerovisualizer</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
       href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,500;0,800;1,800&display=swap"
       rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> -->
 
     <link rel="manifest" href="./manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -27,7 +27,7 @@
     <!-- Register the app's service worker. -->
     <script type="module">
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register(new URL('sw.js', import.meta.url)).then(
+        navigator.serviceWorker.register(new URL('sw.js', import.meta.url),{type: 'module'}).then(
           (registration) => {
             console.log("Service worker registration successful:", registration);
           },

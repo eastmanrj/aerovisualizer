@@ -1,3 +1,4 @@
+import {manifest, version} from '@parcel/service-worker';
 const VERSION = "v1.0.0beta";
 const CACHE_NAME = `aerovisualizer-${VERSION}`;
 
@@ -6,7 +7,7 @@ const APP_STATIC_RESOURCES = [
     "/index.html",
     "/manifest.json",
     "/src/css/style.css",
-    "/src/js/controller.js",
+    "/src/js/app.js",
     "/src/js/FontLoader.js",
     "/src/js/OrbitControls.js",
     "/src/js/PoinsotAndCones.js",
@@ -32,32 +33,54 @@ const APP_STATIC_RESOURCES = [
     "/static/img/icons/1024.png"
   ];
 
+
+
+
+  // async function install() {
+  //   const cache = await caches.open(version);
+  //   await cache.addAll(manifest);
+  // }
+  // addEventListener('install', e => e.waitUntil(install()));
+
   // On install, cache the static resources
   self.addEventListener("install", (event) => {
     event.waitUntil(
       (async () => {
-        const cache = await caches.open(CACHE_NAME);
-        cache.addAll(APP_STATIC_RESOURCES);
+        const cache = await caches.open(version);
+        await cache.addAll(manifest);
+        // const cache = await caches.open(CACHE_NAME);
+        // cache.addAll(APP_STATIC_RESOURCES);
       })()
     );
   });
 
-  // delete old caches on activate
-  self.addEventListener("activate", (event) => {
-    event.waitUntil(
-      (async () => {
-        const names = await caches.keys();
-        await Promise.all(
-          names.map((name) => {
-            if (name !== CACHE_NAME) {
-              return caches.delete(name);
-            }
-          })
-        );
-        await clients.claim();
-      })()
+
+  async function activate() {
+    const keys = await caches.keys();
+    await Promise.all(
+      keys.map(key => key !== version && caches.delete(key))
     );
-  });
+  }
+  self.addEventListener('activate', e => e.waitUntil(activate()));
+
+
+  // // delete old caches on activate
+  // self.addEventListener("activate", (event) => {
+  //   event.waitUntil(
+  //     (async () => {
+  //       const names = await caches.keys();
+  //       await Promise.all(
+  //         names.map((key) => {
+  //           if (key !== version) {
+  //           // if (name !== CACHE_NAME) {
+  //             return caches.delete(key);
+  //           }
+  //         })
+  //       );
+  //       await clients.claim();
+  //     })()
+  //   );
+  // });
 
   // On fetch, intercept server requests and respond 
   // with cached responses instead of going to network
@@ -65,22 +88,41 @@ const APP_STATIC_RESOURCES = [
     // when seeking an HTML page
     if (event.request.mode === "navigate") {
       // Return to the index.html page
-      event.respondWith(caches.match("/"));
+      // event.respondWith(caches.match("/"));
+      event.respondWith(cacheThenNetwork(event.request));
       return;
     }
   
     // For every other request type
     event.respondWith(
       (async () => {
-        const cache = await caches.open(CACHE_NAME);
+        const cache = await caches.open(version);
         const cachedResponse = await cache.match(event.request);
         if (cachedResponse) {
           // Return the cached response if it's available.
           return cachedResponse;
         } else {
           // Respond with a HTTP 404 response status.
-          return new Response(null, { status: 404 });
+          return new Response(null, {status: 404});
         }
       })()
     );
   });
+
+
+
+
+  // async function cacheThenNetwork(request) {
+  //   const cachedResponse = await caches.match(request);
+  //   if (cachedResponse) {
+  //     self.console.log("Found response in cache:", cachedResponse);
+  //     return cachedResponse;
+  //   }
+  //   self.console.log("Falling back to network");
+  //   return fetch(request);
+  // }
+  
+  // self.addEventListener("fetch", (event) => {
+  //   self.console.log(`Handling fetch event for ${event.request.url}`);
+  //   event.respondWith(cacheThenNetwork(event.request));
+  // });

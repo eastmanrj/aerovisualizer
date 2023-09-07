@@ -3,5 +3,6 @@
   "reporters": [
     "...",
     "parcel-reporter-static-files-copy"
-  ]
+  ],
+  "namers": [ "parcel-namer-rewrite" ]
 }

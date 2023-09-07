@@ -631,6 +631,7 @@ class Vectors {
     // constructionComplete is initialized to false but is set to true once
     // the asynchronous code is complete.  Until then, the refresh function
     // should not be allowed to execute.
+
     THREE.Cache.enabled = true;
     let font = undefined;
     // body frame, space frame, omega, H, torque
@@ -639,7 +640,10 @@ class Vectors {
     //fontWeight = normal bold
     const loader = new FontLoader();
     // loader.load('./fonts/' + fontName + '_' + fontWeight + '.typeface.json', (response) => {
-    loader.load('./fonts/helvetiker_regular.typeface.json', (response) => {
+    // let fontJSON = new URL('/static/fonts/helvetiker_regular_mod.typeface.json', import.meta.url);
+    // console.log('fontJSON = ',fontJSON);
+    // loader.load(fontJSON.pathname, (response) => {
+    loader.load('./fonts/helvetiker_regular_mod.typeface.json', (response) => {
       font = response;
       const size = 0.5;
       const height = 0.1;

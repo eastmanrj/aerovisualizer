@@ -2627,7 +2627,7 @@ const loadBackground = function(option='atmosphere'){
       if (background != null){
         background = null;
       }
-      
+
       let stars = new URL('/static/img/stars.jpg', import.meta.url);
       // background = new THREE.CubeTextureLoader().load(['./img/stars.jpg','./img/stars.jpg','./img/stars.jpg','./img/stars.jpg','./img/stars.jpg','./img/stars.jpg']);
       background = new THREE.CubeTextureLoader().load([stars.pathname,stars.pathname,stars.pathname,stars.pathname,stars.pathname,stars.pathname]);
@@ -2638,8 +2638,8 @@ const loadBackground = function(option='atmosphere'){
       if (jupiter === null){
         jupiter = null;
         const jupiterGeometry = new THREE.PlaneGeometry(150, 150, 1, 1);
-        let jup = new URL('/static/img/jupiter.png', import.meta.url);
-        // const jupiterTexture = tl.load('./img/jupiter.png');
+        let jup = new URL('/static/img/Jupiter.png', import.meta.url);
+        // const jupiterTexture = tl.load('./img/Jupiter.png');
         const jupiterTexture = tl.load(jup.pathname);
         const jupiterMat = new THREE.MeshBasicMaterial({
           map: jupiterTexture,

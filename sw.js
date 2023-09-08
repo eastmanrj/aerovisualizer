@@ -1,5 +1,5 @@
 import {manifest, version} from '@parcel/service-worker';
-const VERSION = "v1.0.38beta";
+const VERSION = "v1.0.39beta";
 const CACHE_NAME = `aerovisualizer-${VERSION}`;
 
 // On install, cache the static resources
@@ -22,7 +22,7 @@ self.addEventListener('activate', e => e.waitUntil(activate()));
 
 self.addEventListener('fetch', (event) => {
   // Check if this is a request for an image
-  event.respondWith(caches.open(CACHE_NAME).then((cache) => {
+  event.respondWith(caches.open(CACHE_NAME).then( (cache) => {
     // Go to the cache first
     return cache.match(event.request.url).then((cachedResponse) => {
       // Return a cached response if we have one

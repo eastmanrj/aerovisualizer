@@ -21,7 +21,7 @@
     <!-- Register the app's service worker. -->
     <script type="module">
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register(new URL('sw.js', import.meta.url),{type: 'module'}).then(
+        navigator.serviceWorker.register(new URL('sw.js', import.meta.url),{type: 'module', scope: '/'}).then(
           (registration) => {
             console.log("Service worker registration successful:", registration);
           },

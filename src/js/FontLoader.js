@@ -43,7 +43,7 @@ class FontLoader extends THREE.Loader {
 			} catch ( e ) {
 
 				console.warn( 'THREE.FontLoader: typeface.js support is being deprecated. Use typeface.json instead.' );
-				json = JSON.parse( text.substring( 65, text.length - 2 ) );
+				json = JSON.parse( theFont.substring( 65, theFont.length - 2 ) );
 
 			}
 

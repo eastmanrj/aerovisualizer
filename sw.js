@@ -1,5 +1,5 @@
 import {manifest, version} from '@parcel/service-worker';
-const VERSION = "v1.0.37beta";
+const VERSION = "v1.0.38beta";
 const CACHE_NAME = `aerovisualizer-${VERSION}`;
 
 // On install, cache the static resources

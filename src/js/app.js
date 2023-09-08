@@ -1151,17 +1151,33 @@ zeroQuaternionKhatButton.addEventListener('click', () => {
 // omegaMagnitudeSlider.oninput = function(){
 //   console.log('xxxxxxxxxxxxxx'); 
 // }
-omegaMagnitudeSlider.ontouchstart = function(){
-  handleOmegaSliderOnpointerup();
-  // console.log('xxxxxx');
-  // omegaMag = omegaMagnitudeSlider.value/10;
-  // omHihat = omegaIhatSlider.value;
-  // omHjhat = omegaJhatSlider.value;
-  // omHkhat = omegaKhatSlider.value;
-  // sdo.setOmega(omegaOrH,omegaMag,omHihat,omHjhat,omHkhat);
-  // sdo.reset();
-  // displayOmegaValues();
-}
+// omegaMagnitudeSlider.ontouchstart = function(){
+//   handleOmegaSliderOnpointerup();
+//   // console.log('xxxxxx');
+//   // omegaMag = omegaMagnitudeSlider.value/10;
+//   // omHihat = omegaIhatSlider.value;
+//   // omHjhat = omegaJhatSlider.value;
+//   // omHkhat = omegaKhatSlider.value;
+//   // sdo.setOmega(omegaOrH,omegaMag,omHihat,omHjhat,omHkhat);
+//   // sdo.reset();
+//   // displayOmegaValues();
+// }
+
+omegaMagnitudeSlider.addEventListener('click', (e) => {
+  e.preventDefault();
+});
+
+omegaIhatSlider.addEventListener('click', (e) => {
+  e.preventDefault();
+});
+
+omegaJhatSlider.addEventListener('click', (e) => {
+  e.preventDefault();
+});
+
+omegaKhatSlider.addEventListener('click', (e) => {
+  e.preventDefault();
+});
 
 const handleOmegaSliderOnpointerup = function(){
   // slider goes from 0 to 100, we want 10 to be the

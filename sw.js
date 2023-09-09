@@ -6,8 +6,8 @@ const CACHE_NAME = `aerovisualizer-${VERSION}`;
 self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
-      self.console.log("version ---------",version);
-      const cache = await caches.open(version);
+      self.console.log("version ---------",VERSION);
+      const cache = await caches.open(VERSION);
       await cache.addAll(manifest);
     })()
   );
@@ -16,14 +16,14 @@ self.addEventListener("install", (event) => {
 async function activate() {
   const keys = await caches.keys();
   await Promise.all(
-    keys.map(key => key !== version && caches.delete(key))
+    keys.map(key => key !== VERSION && caches.delete(key))
   );
 }
 self.addEventListener('activate', e => e.waitUntil(activate()));
 
 self.addEventListener('fetch', (event) => {
   // Check if this is a request for an image
-  event.respondWith(caches.open(version).then( (cache) => {
+  event.respondWith(caches.open(CACHE_NAME).then( (cache) => {
     // Go to the cache first
     return cache.match(event.request.url).then((cachedResponse) => {
       // Return a cached response if we have one

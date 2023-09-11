@@ -1163,9 +1163,10 @@ zeroQuaternionKhatButton.addEventListener('click', () => {
 //   // displayOmegaValues();
 // }
 
-omegaMagnitudeSlider.addEventListener('touchstart', (e) => {
+omegaMagnitudeSlider.addEventListener('touchend', (e) => {
   e.preventDefault();
   handleOmegaSliderOnpointerup();
+  numericalButton.style.backgroundColor = 'yellow';
   replaceAerovisualizerData('omegaMagnitude',this.value);
   saveToLocalStorage();
 });
@@ -1185,7 +1186,7 @@ omegaMagnitudeSlider.addEventListener('touchstart', (e) => {
 
 // omegaMagnitudeSlider.on("touchstart", function(event) {
 //   slider.move(event);
-// });
+// });   BLAH  blah
 
 const handleOmegaSliderOnpointerup = function(){
   // slider goes from 0 to 100, we want 10 to be the
@@ -1222,6 +1223,7 @@ omegaKhatSlider.oninput = function(){
 
 omegaMagnitudeSlider.onpointerup = function(){
   handleOmegaSliderOnpointerup();
+  numericalButton.style.backgroundColor = 'red';
   replaceAerovisualizerData('omegaMagnitude',this.value);
   saveToLocalStorage();
 }

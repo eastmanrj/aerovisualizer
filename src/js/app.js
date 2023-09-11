@@ -1165,6 +1165,9 @@ zeroQuaternionKhatButton.addEventListener('click', () => {
 
 omegaMagnitudeSlider.addEventListener('touchstart', (e) => {
   e.preventDefault();
+  handleOmegaSliderOnpointerup();
+  replaceAerovisualizerData('omegaMagnitude',this.value);
+  saveToLocalStorage();
 });
 
 // omegaIhatSlider.addEventListener('click', (e) => {

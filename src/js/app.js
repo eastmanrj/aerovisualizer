@@ -1163,21 +1163,26 @@ zeroQuaternionKhatButton.addEventListener('click', () => {
 //   // displayOmegaValues();
 // }
 
-omegaMagnitudeSlider.addEventListener('click', (e) => {
+omegaMagnitudeSlider.addEventListener('touchstart', (e) => {
   e.preventDefault();
 });
 
-omegaIhatSlider.addEventListener('click', (e) => {
-  e.preventDefault();
-});
+// omegaIhatSlider.addEventListener('click', (e) => {
+//   e.preventDefault();
+// });
 
-omegaJhatSlider.addEventListener('click', (e) => {
-  e.preventDefault();
-});
+// omegaJhatSlider.addEventListener('click', (e) => {
+//   e.preventDefault();
+// });
 
-omegaKhatSlider.addEventListener('click', (e) => {
-  e.preventDefault();
-});
+// omegaKhatSlider.addEventListener('click', (e) => {
+//   e.preventDefault();
+// });
+
+
+// omegaMagnitudeSlider.on("touchstart", function(event) {
+//   slider.move(event);
+// });
 
 const handleOmegaSliderOnpointerup = function(){
   // slider goes from 0 to 100, we want 10 to be the
@@ -1190,36 +1195,6 @@ const handleOmegaSliderOnpointerup = function(){
   resetAttitudeAndRates();
   vo.needsRefresh = true;
   displayOmegaValues();
-}
-
-omegaOrHOmegaRadio.addEventListener('click', () => {
-  omegaOrH = 'omega';
-  handleOmegaSliderOnpointerup();
-  replaceAerovisualizerData('omegaOrH',omegaOrH);
-  saveToLocalStorage();
-});
-
-omegaOrHHRadio.addEventListener('click', () => {
-  omegaOrH = 'H';
-  handleOmegaSliderOnpointerup();
-  replaceAerovisualizerData('omegaOrH',omegaOrH);
-  saveToLocalStorage();
-});
-
-const setOmegaOrHChoice = function(omOrH, getFromRadios=false){
-  for (let radio of omegaOrHRadios) {
-    if (getFromRadios){
-      if (radio.checked){
-        replaceAerovisualizerData('omegaOrH',radio.value);
-      }
-    }else{
-      radio.checked = radio.value === omOrH;
-    }
-
-    if (radio.checked){
-      omegaOrH = radio.value;
-    }
-  }
 }
 
 omegaMagnitudeSlider.oninput = function(){
@@ -1292,6 +1267,36 @@ zeroOmegaKhatButton.addEventListener('click', () => {
   replaceAerovisualizerData('omHkhat',0);
   saveToLocalStorage();
 });
+
+omegaOrHOmegaRadio.addEventListener('click', () => {
+  omegaOrH = 'omega';
+  handleOmegaSliderOnpointerup();
+  replaceAerovisualizerData('omegaOrH',omegaOrH);
+  saveToLocalStorage();
+});
+
+omegaOrHHRadio.addEventListener('click', () => {
+  omegaOrH = 'H';
+  handleOmegaSliderOnpointerup();
+  replaceAerovisualizerData('omegaOrH',omegaOrH);
+  saveToLocalStorage();
+});
+
+const setOmegaOrHChoice = function(omOrH, getFromRadios=false){
+  for (let radio of omegaOrHRadios) {
+    if (getFromRadios){
+      if (radio.checked){
+        replaceAerovisualizerData('omegaOrH',radio.value);
+      }
+    }else{
+      radio.checked = radio.value === omOrH;
+    }
+
+    if (radio.checked){
+      omegaOrH = radio.value;
+    }
+  }
+}
 
 torqueOptionMenu.addEventListener('change', () => {
   const choice = torqueOptionMenu.value;

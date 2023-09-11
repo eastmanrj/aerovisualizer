@@ -870,9 +870,6 @@ const syncEulerAnglesToObject = function(){
 }
 
 const resetAttitudeAndRates = function(includeRates = true){
-  sdo.setEulerAngles(euler1,euler2,euler3);
-  vo.receiveVectorData(...sdo.sendVectorData());
-
   if (includeRates){
     if (torqueOption === 1){
       pac.showCones(conesTransparency < maxTransparency);
@@ -883,6 +880,8 @@ const resetAttitudeAndRates = function(includeRates = true){
     }
 
     sdo.setOmega(omegaOrH,omegaMag,omHihat,omHjhat,omHkhat);
+    sdo.setEulerAngles(euler1,euler2,euler3);
+    vo.receiveVectorData(...sdo.sendVectorData());
     pac.receiveEphemeralData(...sdo.sendPaCEphemeralData());
     pac.receiveNonEphemeralData(...sdo.sendPaCNonEphemeralData());
     pac.construct();
@@ -1529,10 +1528,10 @@ const displayEulerAngles = function(){
 }
 
 const displayOmegaValues = function(){
-  let omx = omegaIhatSlider.value;
-  let omy = omegaJhatSlider.value;
-  let omz = omegaKhatSlider.value;
-  let omm = Number(omegaMagnitudeSlider.value)/10;
+  let omx = omHihat;
+  let omy = omHjhat;
+  let omz = omHkhat;
+  let omm = omegaMag;
   const rss = Math.sqrt(omx*omx + omy*omy + omz*omz);
 
   if (rss === 0){

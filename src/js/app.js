@@ -1162,13 +1162,13 @@ zeroQuaternionKhatButton.addEventListener('click', () => {
 //   // displayOmegaValues();
 // }
 
-omegaMagnitudeSlider.addEventListener('touchend', (e) => {
-  e.preventDefault();
-  handleOmegaSliderOnpointerup();
-  numericalButton.style.backgroundColor = 'yellow';
-  replaceAerovisualizerData('omegaMagnitude',this.value);
-  saveToLocalStorage();
-});
+// omegaMagnitudeSlider.addEventListener('touchend', (e) => {
+//   e.preventDefault();
+//   handleOmegaSliderOnpointerup();
+//   numericalButton.style.backgroundColor = 'yellow';
+//   replaceAerovisualizerData('omegaMagnitude',this.value);
+//   saveToLocalStorage();
+// });
 
 // omegaIhatSlider.addEventListener('click', (e) => {
 //   e.preventDefault();
@@ -1220,7 +1220,14 @@ omegaKhatSlider.oninput = function(){
   haltPlay();
 }
 
-omegaMagnitudeSlider.onpointerup = function(){
+// omegaMagnitudeSlider.onpointerup = function(){
+//   handleOmegaSliderOnpointerup();
+//   numericalButton.style.backgroundColor = 'red';
+//   replaceAerovisualizerData('omegaMagnitude',this.value);
+//   saveToLocalStorage();
+// }
+
+omegaMagnitudeSlider.onchange = function(){
   handleOmegaSliderOnpointerup();
   numericalButton.style.backgroundColor = 'red';
   replaceAerovisualizerData('omegaMagnitude',this.value);

@@ -500,7 +500,7 @@ class SixDOFObject {
     this._v1.copy(this._omega);
     this._v1.applyMatrix3(this._inertiaMatrix);
     this._T0 = 0.5*this._v1.dot(this._omega);
-    this._T1.copy(this._T0);
+    this._T1 = this._T0;
     this._determineIfAxisymmetric();
 
     this._dcm.makeRotationFromQuaternion(this._quat);

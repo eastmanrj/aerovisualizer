@@ -2084,7 +2084,7 @@ const handleInfoMenuChoice = function(choice){
       rigid bodies.  Topics include Euler angles, quaternions, direction cosines, angular 
       velocity and momentum and torque (ACS engines, gravity gradient, spinning top).  Also 
       included are space and body cones and Poinsot's construction.  It is assumed that  
-      the user has taken or is currently taking a course in this subject.</p>`;
+      the user has taken or is currently taking a course covering these subjects.</p>`;
       break;
 
     case 'info-how-to-use': //how to use aerovisualizer
@@ -2139,7 +2139,7 @@ const handleInfoMenuChoice = function(choice){
       second is &theta; (pitch), and the third is &phi; (roll).  Use the sliders to set 
       these values in degrees.  Use the buttons to set the values to zero.  Tait-Bryan 
       rotation sequences are a subset of the set of the Euler angle sequences.  Choose 
-      from 6 intrinsic Tait-Bryan sequences (see <em>preferences/Euler angle order</em>).
+      from 6 intrinsic Tait-Bryan sequences.
 
       <p class="p-normal"><em>Quaternions</em>: Use the sliders to set the 
       rotation angle of the object in degrees and also the components of the unit 
@@ -2198,7 +2198,7 @@ const handleInfoMenuChoice = function(choice){
       torque-free motion, the ellipsoid touches the plane at a point on a line along 
       the &omega; vector.  Curves called the <em>polhode</em> and the <em>herpolhode</em> 
       can be constructed from the osculation points.  Aerovisualizer generates these 
-      curves for a short period of time and then displays them when complete.</p>
+      curves for up to half a minute and then displays them when complete.</p>
 
       <p class="p-normal">The following conditions must be met for the Poinsot's 
       construction to appear: 1) &omega; must not be zero, 2) the <em>no torque</em> 
@@ -2210,8 +2210,8 @@ const handleInfoMenuChoice = function(choice){
       infoText.innerHTML = `<p class="p-normal">Click <em>&tau;</em> and use the menu 
       that appears to choose from the following torque options:</p>
       
-      <p class="p-normal">no torque, space frame, body frame, ACS stabilization, 
-      gravity gradient, and spinning top.</p>`;
+      <p class="p-normal">1) no torque, space frame, 2) body frame, 3) ACS stabilization, 
+      4) gravity gradient, and 5) spinning top.</p>`;
       break;
 
     case 'info-torque-no-torque': //torque - no torque
@@ -2316,16 +2316,19 @@ const handleInfoMenuChoice = function(choice){
       be either a stormy atmosphere or outer space above Jupiter.</p>
       <p class="p-normal"><em>maximum rotation rate</em> - Use the slider to set the maximum rotation 
       rate (&vert;&omega;&vert;) that the object can attain.  The range is from 100 &deg;/sec to 
-      1000 &deg;/sec.  The default is 720 &deg;/sec.</p>
+      1000 &deg;/sec.  The default is 720 &deg;/sec.  The simulation stops if &vert;&omega;&vert; surpasses 
+      the maximum.  Click the reset button to return to normal.</p>
       <p class="p-normal"><em>vector size</em> - Use the slider to set how large all of the vectors 
       appear (body frame, space frame, &omega;, H, &tau;).  This also affects 
-      the size of the space and body cones.</p>`;
+      the size of the space and body cones.  NOTE: The rendered vectors are designed to convey direction 
+      only and not magnitude.  The magnitudes are obtained from the numerical display.</p>`;
       break;
 
     case 'info-prefs-trans-offset-color': //preferences - transparency, offset, color
       infoText.innerHTML = `<p class="p-normal">Use the sliders to set the <em>transparency</em> 
       (visibility) of the brick object, the vectors and vector frames, the space and body cones, 
-      and Poinsot's construction.  Slide it completely to the right to remove an item from the scene.</p>
+      and Poinsot's construction.  Move the sliders completely to the right to remove items from 
+      the scene.</p>
 
       <p class="p-normal">Check <em>offset</em> to make the items listed above appear off center.</p>
     
@@ -2356,22 +2359,23 @@ const handleInfoMenuChoice = function(choice){
 
       <p class="p-normal">If you choose the meter for length and the kilogram for mass, then 
       torque is expressed as kg m&sup2;/s&sup2; (Newton-meters), angular momentum is in 
-      kg m&sup2;/s, and the moment of inertia is in kg m&sup2;.  The English unit of length is the 
-      foot, and the unit of mass is the slug if you prefer.</p>
+      kg m&sup2;/s, and the moment of inertia is in kg m&sup2;.  The English units are the 
+      foot and the slug.  You can use the verst and the dalton if that is your 
+      preference.</p>
       
       <p class="p-normal">The unit of time is the second.</p>`;
       break;
 
     case 'info-contact-disclaimer':
       infoText.innerHTML = `<p class="p-normal">Aerovisualizer is an open source 
-      project.  To report bugs or to contribute to its future development, 
+      project.  To report bugs or suggestions or to contribute to its future development, 
       please contact us at github.com/eastmanrj/aerovisualizer.</p>
 
       <p class="p-normal">We do not take responsibility for missed problems on 
       quizes, tests, projects, or homework due to software bugs or the 
       misinterpretation of displays in Aerovisualizer.  Do not use Aerovisualizer 
       for hardware or software qualification in either aerospace or other 
-      industries or other applications.</p>`;
+      industries or in other applications.</p>`;
       break;
   }
 }

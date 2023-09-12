@@ -637,6 +637,8 @@ class SixDOFObject {
         texture = tl.load(blockFaces.pathname);
         break;
       case 'cessna-172':
+        // cessna 172 images purchased from hum2d.com
+        // bottom view was not offered
         let cessna172 = new URL('/static/img/cessna172.jpg', import.meta.url);
         // texture = tl.load('./img/cessna172.jpg');
         texture = tl.load(cessna172.pathname);

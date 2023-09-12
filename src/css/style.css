@@ -54,6 +54,10 @@ p, span, select {
   padding-bottom: 0.1rem; */
 }
 
+em {
+  font-weight: bold;
+}
+
 .p-normal {
   display: block;
   text-align:left;

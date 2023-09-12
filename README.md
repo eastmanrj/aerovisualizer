@@ -53,7 +53,7 @@ Do you already know HTML, CSS, and Javascript? Are you looking for a fun and int
 ## Contact
 
  R. Eastman - eastmanrj@users.noreply.github.com
- (include "Aerovisualizer" in the subject)
+ (please include "Aerovisualizer" in the subject)
 
 Project Link: [https://github.com/eastmanrj/aerovisualizer](https://github.com/eastmanrj/aerovisualizer)
 

@@ -17,7 +17,7 @@
 
 The purpose of Aerovisualizer is to assist in the teaching and reinforcement of concepts in aerospace engineering by presenting them in interesting and engaging ways.  3D animations are displayed to complement the dry equations found in textbooks and online, and controls are also provided to manipulate the displays.
 
-Aerovisualizer can be opened in a browser on your phone, tablet, laptop or desktop computer or installed as a "web app".  It is also open source, so anyone can contribute to its future evolution.  Its source code is HTML, CSS, and Javascript and does not require a software compiler. 
+Aerovisualizer can be opened in a browser on your phone, tablet, laptop or desktop computer or added to your device's home screen.  At present, it requires an internet connection (not a "web app" yet).  It is also open source, so anyone can contribute to its future evolution.  Its source code is HTML, CSS, and Javascript and does not require a software compiler. 
 
 Aerovisualizer currently focuses only on the orientation and rotational dynamics of rigid bodies.  Subjects include Euler angles, quaternions, direction cosines, angular velocity and momentum and torque (ACS engines, gravity gradient, spinning top).  Also included are space and body cones and Poinsot's construction.  It is assumed that the user has taken or is currently taking a course in these topics.
 
@@ -44,7 +44,7 @@ Do you want to report a bug, make an enhancement, or contribute some code?  Grea
 
 ### Students, Teachers, and Working Aerospace Engineers
 
-Do you have an idea for something to add or improve?  Please send us your ideas!  Do you have a particular specialty in aerospace engineering?  Maybe you have some Python, Matlab, C, or Fortran code that we could adapt?  Please let us know!
+Do you have an idea for something to add or improve?  Please send us your ideas!  Do you have a particular specialty in aerospace engineering?  Maybe you have or know about some Python, Matlab, C, or Fortran code that we could adapt (SourceForge perhaps)?  Please let us know!
 
 ### Javascript Developers
 

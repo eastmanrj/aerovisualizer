@@ -3,14 +3,6 @@ import SixDOFObject from './SixDOFObject.js';
 import Vectors from './Vectors.js';
 import PoinsotAndCones from './PoinsotAndCones.js';
 import {OrbitControls} from './OrbitControls.js';
-// let SixDOFObjectURL = new URL('/SixDOFObject.js', import.meta.url).toString();
-// let VectorsURL = new URL('/Vectors.js', import.meta.url).toString();
-// let PoinsotAndConesURL = new URL('/PoinsotAndCones.js', import.meta.url).toString();
-// let OrbitControlsURL = new URL('/OrbitControls.js', import.meta.url).toString();
-// import SixDOFObject from SixDOFObjectURL;
-// import Vectors from VectorsURL;
-// import PoinsotAndCones from PoinsotAndConesURL;
-// import {OrbitControls} from OrbitControlsURL;
 
 let scene, camera, renderer;
 let background = null;
@@ -1147,46 +1139,6 @@ zeroQuaternionKhatButton.addEventListener('click', () => {
   saveToLocalStorage();
 });
 
-// omegaMagnitudeSlider.oninput = function(){
-//   console.log('xxxxxxxxxxxxxx'); 
-// }
-// omegaMagnitudeSlider.ontouchstart = function(){
-//   handleOmegaSliderOnpointerup();
-//   // console.log('xxxxxx');
-//   // omegaMag = omegaMagnitudeSlider.value/10;
-//   // omHihat = omegaIhatSlider.value;
-//   // omHjhat = omegaJhatSlider.value;
-//   // omHkhat = omegaKhatSlider.value;
-//   // sdo.setOmega(omegaOrH,omegaMag,omHihat,omHjhat,omHkhat);
-//   // sdo.reset();
-//   // displayOmegaValues();
-// }
-
-// omegaMagnitudeSlider.addEventListener('touchend', (e) => {
-//   e.preventDefault();
-//   handleOmegaSliderOnpointerup();
-//   numericalButton.style.backgroundColor = 'yellow';
-//   replaceAerovisualizerData('omegaMagnitude',this.value);
-//   saveToLocalStorage();
-// });
-
-// omegaIhatSlider.addEventListener('click', (e) => {
-//   e.preventDefault();
-// });
-
-// omegaJhatSlider.addEventListener('click', (e) => {
-//   e.preventDefault();
-// });
-
-// omegaKhatSlider.addEventListener('click', (e) => {
-//   e.preventDefault();
-// });
-
-
-// omegaMagnitudeSlider.on("touchstart", function(event) {
-//   slider.move(event);
-// });   BLAH  blah
-
 const handleOmegaSliderOnpointerup = function(){
   // slider goes from 0 to 100, we want 10 to be the
   // upper limit, so we divide by 10 here
@@ -1220,16 +1172,8 @@ omegaKhatSlider.oninput = function(){
   haltPlay();
 }
 
-// omegaMagnitudeSlider.onpointerup = function(){
-//   handleOmegaSliderOnpointerup();
-//   numericalButton.style.backgroundColor = 'red';
-//   replaceAerovisualizerData('omegaMagnitude',this.value);
-//   saveToLocalStorage();
-// }
-
 omegaMagnitudeSlider.onchange = function(){
   handleOmegaSliderOnpointerup();
-  numericalButton.style.backgroundColor = 'red';
   replaceAerovisualizerData('omegaMagnitude',this.value);
   saveToLocalStorage();
 }
@@ -3175,9 +3119,6 @@ playPauseButton.addEventListener('click', () => {
 resetButton.addEventListener('click', () => {
   displayMaxOmega(false);
   resetAttitudeAndRates();
-  // sdo.tickDynamic();
-  // sdo.needsRefresh = true;
-  // sdo.refresh();
 });
 
 const animate = function(continueAnimation = true) {

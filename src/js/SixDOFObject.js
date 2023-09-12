@@ -187,10 +187,9 @@ class SixDOFObject {
     }
     
     this._torqueOption = torqueOption;
-    this._torquer.receiveTorqueData(...this.sendTorqueData());
+    this.reset();
     this._torquer.doTorque();
     this.receiveTorqueData(...this._torquer.sendTorqueData());
-    this.reset();
     this.needsRefresh = true;
   }
 
@@ -501,7 +500,14 @@ class SixDOFObject {
     this._v1.copy(this._omega);
     this._v1.applyMatrix3(this._inertiaMatrix);
     this._T0 = 0.5*this._v1.dot(this._omega);
+    this._T1.copy(this._T0);
     this._determineIfAxisymmetric();
+
+    this._dcm.makeRotationFromQuaternion(this._quat);
+    this._Hinertial.copy(this._H);
+    this._Hinertial.applyQuaternion(this._quat);
+    this._torquer.receiveTorqueData(...this.sendTorqueData());
+    this._torquer.refreshGG();
   }
 
   _determineIfAxisymmetric(){

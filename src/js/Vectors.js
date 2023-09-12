@@ -643,7 +643,7 @@ class Vectors {
     // let fontJSON = new URL('/static/fonts/helvetiker_regular_mod.typeface.json', import.meta.url);
     // console.log('fontJSON = ',fontJSON);
     // loader.load(fontJSON.pathname, (response) => {
-    loader.load('./fonts/helvetiker_regular_mod.typeface.json', (response) => {
+    loader.load('USED TO BE ./fonts/helvetiker_regular.typeface.json BUT NOT REQURED ANYMORE', (response) => {
       font = response;
       const size = 0.5;
       const height = 0.1;

@@ -102,7 +102,6 @@ class SixDOFObject {
     this._qn = new THREE.Quaternion();//used for vector labels to keep them
     //oriented toward the camera
     this._zeroVector = new THREE.Vector3();
-    this._hQuat = new THREE.Quaternion();
     this._isAxisymmetric = false;
     this._axisOfSymmetry = 0;//1=x, 2=y, 3=z
     this._itemOpacity = 0;

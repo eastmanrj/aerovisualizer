@@ -2650,6 +2650,14 @@ const loadBackground = function(option='atmosphere'){
         sun.receiveShadow = false;
         sun.castShadow = false;
         sun.position.set(-100,100,100);
+        // need to rotate the image of the sun to make it appear round
+        const quat = new THREE.Quaternion();
+        const pos = new THREE.Vector3(-100,100,100);
+        const scale = new THREE.Vector3(1,1,1);
+        quat.setFromAxisAngle(new THREE.Vector3(-1,0,1),Math.PI/4);
+        sun.matrix.compose(pos, quat, scale);
+
+        sun.applyQuaternion(quat);
       }
 
       scene.add(jupiter);

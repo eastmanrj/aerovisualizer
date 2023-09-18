@@ -637,12 +637,11 @@ class SixDOFObject {
         texture = tl.load(blockFaces.pathname);
         break;
       case 'cessna-172':
-        // cessna 172 images purchased from hum2d.com
+        // cessna 172 images purchased from hum2d.com and the
         // bottom view was not offered
         let cessna172 = new URL('/static/img/cessna172.jpg', import.meta.url);
         // texture = tl.load('./img/cessna172.jpg');
         texture = tl.load(cessna172.pathname);
-        this._scale.set(9*0.5, 7*0.5, 4*0.5);
         break;
       case 'new-horizons':
         // free images for the New Horizons spacecraft were obtained from
@@ -650,7 +649,6 @@ class SixDOFObject {
         let newHorizons = new URL('/static/img/newHorizons.jpg', import.meta.url);
         // texture = tl.load('./img/newHorizons.jpg');
         texture = tl.load(newHorizons.pathname);
-        this._scale.set(9*0.5, 4*0.5, 6*0.5);
         break;
     }
 

@@ -1602,6 +1602,7 @@ objectAppearanceChoiceMenu.addEventListener('change', () => {
     dimXSlider.value = dimX;
     dimYSlider.value = dimY;
     dimZSlider.value = dimZ;
+    // sdo._scale.set(9*0.5, 7*0.5, 4*0.5);
   }else if (objectAppearance === 'new-horizons'){
     dimX = 9;
     dimY = 4;
@@ -1612,6 +1613,7 @@ objectAppearanceChoiceMenu.addEventListener('change', () => {
     dimXSlider.value = dimX;
     dimYSlider.value = dimY;
     dimZSlider.value = dimZ;
+    // sdo._scale.set(9*0.5, 4*0.5, 6*0.5);
   }
 
   replaceAerovisualizerData('objectAppearance',objectAppearance);
@@ -1622,18 +1624,38 @@ objectAppearanceChoiceMenu.addEventListener('change', () => {
 });
 
 const setMassProperties = function(option){
+  // mass, Ixx, Iyy, Izz metric
+  //Cessna 172 1043.3,1285.3,1824.9,2666.9
+  //New Horizons Probe  401,161.38,402.12,316
   objectMassProperties = option;
   replaceAerovisualizerData('objectMassProperties',objectMassProperties);
 
-  if (option === 'select-an-object'){
-    replaceAerovisualizerData('mass',mass);
-    replaceAerovisualizerData('length',dimX);
-    replaceAerovisualizerData('width',dimY);
-    replaceAerovisualizerData('height',dimZ);
-    sdo.setDimensionsAndInertiaProperties(mass, dimX, dimY, dimZ);
-  }else{
+  if (!(option === 'select-an-object')){
+    if (option === 'cessna-172'){
+      dimX = 9;
+      dimY = 7;
+      dimZ = 4;
+    }else if (option === 'new-horizons'){
+      dimX = 9;
+      dimY = 4;
+      dimZ = 6;
+    }
+
+    dimXDisplay.innerHTML = dimX;
+    dimYDisplay.innerHTML = dimY;
+    dimZDisplay.innerHTML = dimZ;
+    dimXSlider.value = dimX;
+    dimYSlider.value = dimY;
+    dimZSlider.value = dimZ;
     sdo.setPresetMassProperties(option);
+  }else{
+    sdo.setDimensionsAndInertiaProperties(mass, dimX, dimY, dimZ);
   }
+
+  replaceAerovisualizerData('mass',mass);
+  replaceAerovisualizerData('length',dimX);
+  replaceAerovisualizerData('width',dimY);
+  replaceAerovisualizerData('height',dimZ);
 
   displayMomentsOfInertia();
   //look into this!  check if this is still true!!!!!
@@ -2675,7 +2697,7 @@ const initTHREE = function() {
   clock = new THREE.Clock();
   clock.getElapsedTime();// sets 'oldTime'
   
-  const ambientLight = new THREE.AmbientLight(0x707070);
+  const ambientLight = new THREE.AmbientLight(0x909090);
   const sunLight = new THREE.SpotLight(0xffffff);
 
   sunLight.position.set(-20, 20, 20);

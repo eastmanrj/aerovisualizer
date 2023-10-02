@@ -1,0 +1,41 @@
+{
+  "name": "aerovisualizer",
+  "version": "1.0.0",
+  "description": "Aerovisualizer",
+  "source": "index.html",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build"
+  },
+  "author": "R Eastman",
+  "license": "ISC",
+  "dependencies": {
+    "three": "^0.156.1"
+  },
+  "devDependencies": {
+    "@parcel/packager-raw-url": "^2.9.3",
+    "@parcel/service-worker": "^2.9.3",
+    "@parcel/transformer-webmanifest": "^2.9.3",
+    "parcel": "^2.9.3",
+    "parcel-namer-rewrite": "^2.0.0-rc.3",
+    "parcel-reporter-static-files-copy": "^1.5.2",
+    "parse-json": "^7.1.0"
+  },
+  "parcel-namer-rewrite": {
+    "chain": "@parcel/namer-default",
+    "hashing": "always",
+    "disable": false,
+    "rules": {
+      "helvetiker_regular.typeface*.js": "$1.json"
+    },
+    "profiles": {
+      "development": {
+      },
+      "production": {
+      },
+      "other-custom-profile": {
+      }
+    }
+  }
+}

@@ -2,7 +2,8 @@
   "name": "aerovisualizer",
   "version": "1.0.0",
   "description": "Aerovisualizer",
-  "source": "index.html",
+  "source": "rotation/index.html",
+  "workspaces": ["rotation"],
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "author": "R Eastman",
   "license": "ISC"

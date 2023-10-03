@@ -1,4 +1,4 @@
-import * as THREE from '../../node_modules/three/build/three.module.js';
+import * as THREE from '../../../../node_modules/three/build/three.module.js';
 import Torquer from './Torquer.js';
 
 /**
@@ -632,21 +632,21 @@ class SixDOFObject {
 
     switch (blockImageOption){
       case 'axis-labels':
-        let blockFaces = new URL('/static/img/blockFaces.jpg', import.meta.url);
+        let blockFaces = new URL('../../static/img/blockFaces.jpg', import.meta.url);
         // texture = tl.load('./img/blockFaces.jpg');
         texture = tl.load(blockFaces.pathname);
         break;
       case 'cessna-172':
         // cessna 172 images purchased from hum2d.com and the
         // bottom view was not offered
-        let cessna172 = new URL('/static/img/cessna172.jpg', import.meta.url);
+        let cessna172 = new URL('../../static/img/cessna172.jpg', import.meta.url);
         // texture = tl.load('./img/cessna172.jpg');
         texture = tl.load(cessna172.pathname);
         break;
       case 'new-horizons':
         // free images for the New Horizons spacecraft were obtained from
         // https://www.planetary.org/space-images/simulated-new-horizons-spacecraft
-        let newHorizons = new URL('/static/img/newHorizons.jpg', import.meta.url);
+        let newHorizons = new URL('../../static/img/newHorizons.jpg', import.meta.url);
         // texture = tl.load('./img/newHorizons.jpg');
         texture = tl.load(newHorizons.pathname);
         break;

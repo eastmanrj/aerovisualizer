@@ -1,10 +1,12 @@
 {
   "name": "aerovisualizer",
-  "version": "1.0.0",
-  "description": "Aerovisualizer",
-  "source": "rotation/index.html",
-  "workspaces": ["rotation"],
-  "browserslist": "> 0.5%, last 2 versions, not dead",
-  "author": "R Eastman",
-  "license": "ISC"
+  "private": true,
+  "workspaces": [
+    "packages/rotation",
+    "packages/orbital-mech"
+  ],
+  "devDependencies": {
+    "@parcel/packager-raw-url": "^2.9.3",
+    "@parcel/transformer-webmanifest": "^2.9.3"
+  }
 }

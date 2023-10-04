@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Aerovisualizer rotational dynamics",
   "source": "index.html",
+  "homepage":"https://aerovisualizer/test",
   "scripts": {
     "start": "parcel",
     "build": "parcel build"

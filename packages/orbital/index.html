@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="Aerovisualizer is a site for teaching concepts of aerospace engineering.">
+    <link rel="stylesheet" href="src/css/style.css">
+    <title>Aerovisualizer</title>
+    <script type="module" src="src/js/app.js"></script>
+
+    <!-- <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Aerovisualizer"> -->
+
+    <meta name="theme-color" content="#3f51b5">
+  </head>
+  <body>
+    <div class="container">
+      <div id="sixDOF-world"></div>
+      <div class="non-sixDOF-world">
+        <div class="btn-group bottom-margin">
+          <button id="central-body-btn" class="btn no-uppercase">C&nbsp;B</button>
+          <button id="aeP-btn" class="btn no-uppercase">a&nbsp;e&nbsp;P</button>
+          <button id="Omiom-btn" class="btn no-uppercase">&Omega;&nbsp;i&nbsp;&omega;</button>
+          <button id="motion-btn" class="btn no-uppercase">motion</button>
+          <button id="numerical-btn" class="btn no-uppercase">1&nbsp;2&nbsp;3</button>
+          <button id="preferences-btn" class="btn no-uppercase">pref</button>
+          <!-- <button id="default-btn" class="btn">default</button>
+          <button id="general-btn" class="btn">general</button>
+          <button id="prefs-return-btn" class="btn btn-with-icon"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M9 14l-4 -4l4 -4"></path>
+              <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
+            </svg>
+          </button> -->
+        </div>
+        <!-- <div class="elements" id="default-elements">
+          <label class="center-grid-item span3">reset to defaults?</label>
+          <label class="span3">&nbsp;</label>
+          <button id="default-do-reset-btn" class="btn span3 center-grid-item">yes</button>
+        </div> -->
+        <!-- <div class="elements" id="info-elements">
+          <select id="info-menu" class="menu span3" name="info-menu">
+            <option value="info-intro">introduction</option>
+            <option value="info-contact-disclaimer">contact, disclaimer</option>
+          </select>
+          <p class="center-grid-item span3">&nbsp;</p>
+          <p id="info-text" class="p-normal span3">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Maiores, alias rerum quis reiciendis voluptas, autem harum sint vel eos ex neque odit est incidunt ratione tempore quam dolore cum quos laborum numquam! Amet est nisi vel omnis, doloribus obcaecati soluta nesciunt, rerum unde doloremque sunt! Officiis nobis eum officia sit?</p>
+          <p class="center-grid-item span3">&nbsp;</p>
+          <p class="center-grid-item">&nbsp;</p>
+          <div class="btn-group">
+            <button id="info-return-btn" class="btn btn-with-icon center-grid-item"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M9 14l-4 -4l4 -4"></path>
+              <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
+           </svg></button>
+          </div>
+          <p class="center-grid-item">&nbsp;</p>
+        </div> -->
+        <div class="elements-group">
+          <div class="elements" id="header-elements">
+            <p class="span2 center-grid-item">orbital mechanics</p>
+            <button id="info-btn" class="btn span2 center-grid-item">&nbsp;?&nbsp;</button>
+          </div>
+          <div class="elements" id="central-body-elements">
+            <p class="span2">Central Body: </p>
+            <select id="central-body-menu" class="menu span2" name="central-body-menu">
+              <option value="sun">sun</option>
+              <option value="Mercury">Mercury</option>
+              <option value="Venus">Venus</option>
+              <option value="Earth">Earth</option>
+              <option value="moon">moon</option>
+              <option value="Mars">Mars</option>
+              <option value="Jupiter">Jupiter</option>
+              <option value="Saturn">Saturn</option>
+              <option value="Uranus">Uranus</option>
+              <option value="Neptune">Neptune</option>
+            </select>
+
+<!-- name: m: radius: gravSurf: vesc: mu: Tsid: perihel:
+aphel: Tsyn: vmean: vmax: vmin: srp: daylen: obliqu: incEqu:
+a: e: i: Om: om: ml: -->
+            <p>&mu;</p><span class="span2" id="mu">0</span><span id="mu-units"></span>
+            <p>a</p><span class="span2" id="a">0</span><span id="a-units"></span>
+            <p>e</p><span class="span2" id="e">0</span><span id="e-units"></span>
+            <p>i</p><span class="span2" id="i">0</span><span id="i-units"></span>
+            <p>&Omega;</p><span class="span2" id="Omega">0</span><span id="Omega-units"></span>
+            <p>&omega;</p><span class="span2" id="omega">0</span><span id="omega-units"></span>
+            <p>radius</p><span class="span2" id="radius">0</span><span id="radius-units"></span>
+            <p>v escape</p><span class="span2" id="vesc">0</span><span id="vesc-units"></span>
+          </div>
+          <div class="elements" id="a-e-P-elements">
+            <select id="conic-section-menu" class="menu span2" name="conic-section-menu">
+              <option value="ellipse">Elliptical</option>
+              <option value="hyperbola">Hyperbolic</option>
+              <option value="parabola">Trans Parabolic</option>
+            </select>
+            <select id="aep-menu" class="menu span2" name="aep-menu">
+              <option value="ae">a & e</option>
+              <option value="ep">e & P</option>
+              <option value="ap">a & P</option>
+            </select>
+            <p class="center-grid-item"><span id="ae-display">ae: 0</span></p>
+            <input class="slider span2" type="range" min="0" max="100" value="0" id="ae-slider">
+            <button id="zero-ae-btn" class="btn center-grid-item">zero</button>
+            <p class="center-grid-item"><span id="ep-display">ep: 0</span></p>
+            <input class="slider span2" type="range" min="0" max="100" value="0" id="ep-slider">
+            <button id="zero-ep-btn" class="btn center-grid-item">zero</button>
+          </div>
+          <div class="elements" id="omega-i-omega-elements">
+            <p class="center-grid-item">&Omega;: <span id="lan-display">0</span>&deg;</p>
+            <input class="slider span2" type="range" min="-180" max="179" value="0" id="lan-slider">
+            <button id="zero-lan-btn" class="btn center-grid-item">zero</button>
+            <p class="center-grid-item">i: <span id="inc-display">0</span>&deg;</p>
+            <input class="slider span2" type="range" min="-180" max="179" value="0" id="inc-slider">
+            <button id="zero-inc-btn" class="btn center-grid-item">zero</button>
+            <p class="center-grid-item">&omega;: <span id="aop-display">0</span>&deg;</p>
+            <input class="slider span2" type="range" min="-180" max="179" value="0" id="aop-slider">
+            <button id="zero-aop-btn" class="btn center-grid-item">zero</button>
+          </div>
+          <div class="elements" id="motion-elements">
+          </div>
+          <div class="elements numerical" id="numerical-elements">
+          </div>
+          <div class="elements" id="prefs-elements">
+            <select id="coordinate-frame-menu" class="menu span2" name="coordinate-frame-menu">
+              <option value="hOnly">h only</option>
+              <option value="eOnly">e only</option>
+              <option value="hAndE">both h and e</option>
+              <option value="pqw">Perifocal Frame</option>
+              <option value="none">No Vectors</option>
+            </select>
+          </div>
+          <!-- <div class="elements" id="general-elements">
+            <p class="center-grid-item">vector size: </p>
+            <input class="slider span2" type="range" min="2" max="10" value="5" id="vector-size">
+          </div> -->
+          <!-- <div class="elements" id="omega-elements">
+            <p class="center-grid-item">transparency:&nbsp;<span id="transparency-r-display">0</span>&nbsp;&nbsp;</p>
+            <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-r">
+            <label class="right-grid-item">color:</label>
+            <select id="r-color-menu" class="menu" name="r-color-menu">
+              <option value="select-a-color">select a color</option>
+              <option value="red">red</option>
+              <option value="yellow">yellow</option>
+              <option value="blue">blue</option>
+              <option value="green">green</option>
+              <option value="purple">purple</option>
+              <option value="orange">orange</option>
+            </select>
+            <button id="attitude-input-btn1" class="btn span2 grid-item-stretch bottom-margin">Euler / quat</button>
+            <p class="center-grid-item">Euler</p>
+          </div> -->
+        </div>
+        <div class="btn-group btn-group-fixed">
+          <button id="reset-btn" class="btn btn-with-icon">
+            <!-- <i class="material-icons">skip_previous</i> -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-skip-back-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M19.496 4.136l-12 7a1 1 0 0 0 0 1.728l12 7a1 1 0 0 0 1.504 -.864v-14a1 1 0 0 0 -1.504 -.864z" stroke-width="0" fill="currentColor"></path>
+              <path d="M4 4a1 1 0 0 1 .993 .883l.007 .117v14a1 1 0 0 1 -1.993 .117l-.007 -.117v-14a1 1 0 0 1 1 -1z" stroke-width="0" fill="currentColor"></path>
+           </svg>
+          </button>
+          <button id="play-pause-btn" class="btn btn-with-icon">
+            <!-- <i class="material-icons">play_arrow</i> -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" stroke-width="0" fill="currentColor"></path>
+           </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

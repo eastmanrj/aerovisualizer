@@ -1,15 +1,22 @@
 {
   "name": "aerovisualizer",
+  "version": "1.0.0",
+  "description": "Aerovisualizer",
   "private": true,
   "workspaces": [
     "packages/rotation",
-    "packages/orbital-mech"
+    "packages/orbital"
   ],
-  "devDependencies": {
-    "@parcel/packager-raw-url": "^2.9.3",
-    "@parcel/transformer-webmanifest": "^2.9.3"
+  "scripts": {
+    "build": "parcel build -ws"
   },
   "dependencies": {
-    "lightningcss": "^1.22.0"
+    "lightningcss": "^1.22.0",
+    "three": "^0.157.0"
+  },
+  "devDependencies": {
+    "@parcel/packager-raw-url": "^2.9.3",
+    "@parcel/transformer-webmanifest": "^2.9.3",
+    "parcel": "^2.9.3"
   }
 }

@@ -1,12 +1,11 @@
 {
-  "name": "@aerovisualizer/rotation",
+  "name": "@aerovisualizer/main",
   "version": "1.0.0",
-  "description": "Aerovisualizer rotational dynamics ",
+  "description": "Aerovisualizer main",
   "source": "index.html",
   "scripts": {
     "start": "parcel",
-    "build": "parcel build",
-    "startrotation": "export PORT=1234 && npm run start"
+    "build": "parcel build"
   },
   "keywords": [],
   "author": "R Eastman",

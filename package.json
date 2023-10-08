@@ -4,6 +4,7 @@
   "description": "Aerovisualizer",
   "private": true,
   "workspaces": [
+    "packages/main",
     "packages/rotation",
     "packages/orbital"
   ],

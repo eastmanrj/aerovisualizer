@@ -518,7 +518,7 @@ class OrbitalMechVectors {
       let tubeGeometry1 = new THREE.TubeGeometry(
         cp1,
         512,// path segments
-        0.01,// THICKNESS
+        0.002,// THICKNESS
         4, //Roundness of Tube
         true //closed
       );
@@ -537,7 +537,7 @@ class OrbitalMechVectors {
       let tubeGeometry2 = new THREE.TubeGeometry(
         cp2,
         512,// path segments
-        0.01,// THICKNESS
+        0.002,// THICKNESS
         4, //Roundness of Tube
         false //closed
       );
@@ -702,7 +702,7 @@ class OrbitalMechVectors {
     THREE.Cache.enabled = true;
     let font = undefined;
     // rotating frame, space frame, r, h, e
-    let lettersArray = ['X', 'Y', 'Z', 'X', 'Y', 'Z', 'ω', 'H', 'H', 'τ'];
+    let lettersArray = ['P', 'Q', 'W', 'X', 'Y', 'Z', 'r', 'v', 'h', 'e'];
     //fontName = helvetiker
     //fontWeight = normal bold
     const loader = new FontLoader();
@@ -978,7 +978,7 @@ class OrbitalMechVectors {
     this._addRemoveVectorsAndLabels('e',value);
   }
 
-  setCentralBodyIndex(i){
+  setMuIndex(i){
     this._scene.remove(this._planetMeshArray[this._planetMeshArrayIndex]);
     this._planetMeshArrayIndex = i;
     this._scene.add(this._planetMeshArray[i]);

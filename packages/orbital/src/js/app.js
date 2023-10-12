@@ -19,7 +19,6 @@ let playing = false;
 const piOver180 = Math.PI / 180;
 
 const defaultConicSection = 'hyperbola';
-const defaultAepOption = 'ae';
 const defaultA = 1;
 const defaultEellipse = 0;
 const defaultEhyperbola = Math.SQRT2;
@@ -28,6 +27,8 @@ const defaultPhyperbola = defaultA*(1 - defaultEhyperbola*defaultEhyperbola);
 const defaultLan = 0;
 const defaultInclination = 0;
 const defaultAop = 0;
+const defaultNu = 0;
+
 // const defaultVectorSize = 6;
 // const defaultRTransparency = 0;
 // 95 maxTransparency is arbirary and considered close enough to being completely 
@@ -88,76 +89,72 @@ let lan = lanDegrees*piOver180; // longitude of the ascending node
 let inc = incDegrees*piOver180;// inclination
 let aop = aopDegrees*piOver180;// argument of periapsis
 
+let nuDegrees = defaultNu;
+let nu = nuDegrees*piOver180;// true anomaly
+
 let conicSection = defaultConicSection;
 let centralBody = 'Earth';
-let aepOption = defaultAepOption;
-
 let coordinateFrameChoice = defaultCoordinateFrameChoice;
 
 // let vectorSize = defaultVectorSize;
 // let rTransparency = defaultRTransparency;
 // let rColor = defaultRColor;
 
-const sixDOFworld = document.getElementById('sixDOF-world');
-const playPauseButton = document.getElementById('play-pause-btn');
-const resetButton = document.getElementById('reset-btn');
+const threeDWorld = document.getElementById('threeD-world');
 
-const cbButton = document.getElementById('central-body-btn');
-const aePButton = document.getElementById('aeP-btn');
-const OmiomButton = document.getElementById('Omiom-btn');
-const motionButton = document.getElementById('motion-btn');
+const muButton = document.getElementById('mu-btn');
+const aeButton = document.getElementById('a-e-btn');
+const orientationButton = document.getElementById('orientation-btn');
+const rvButton = document.getElementById('r-v-btn');
 const numericalButton = document.getElementById('numerical-btn');
-const prefsButton = document.getElementById('preferences-btn');
 
+const prefsButton = document.getElementById('preferences-btn');
 const infoButton = document.getElementById('info-btn');
 const infoReturnButton = document.getElementById('info-return-btn');
 
-const aeSlider = document.getElementById('ae-slider');
-const epSlider = document.getElementById('ep-slider');
+const muMenu = document.getElementById('central-body-menu');
 
-const aeDisplay = document.getElementById('ae-display');    
-const epDisplay = document.getElementById('ep-display');    
-
-const zeroAEButton = document.getElementById('zero-ae-btn');
-const zeroEPButton = document.getElementById('zero-ep-btn');
-
-const lanSlider = document.getElementById('lan-slider');
-const incSlider = document.getElementById('inc-slider');
-const aopSlider = document.getElementById('aop-slider');
+const aDisplay = document.getElementById('a-display');    
+const eDisplay = document.getElementById('e-display');    
+const aSlider = document.getElementById('a-slider');
+const eSlider = document.getElementById('e-slider');
+const zeroAButton = document.getElementById('zero-a-btn');
+const zeroEButton = document.getElementById('zero-e-btn');
 
 const lanDisplay = document.getElementById('lan-display');    
 const incDisplay = document.getElementById('inc-display');    
 const aopDisplay = document.getElementById('aop-display');    
-
+const lanSlider = document.getElementById('lan-slider');
+const incSlider = document.getElementById('inc-slider');
+const aopSlider = document.getElementById('aop-slider');
 const zeroLanButton = document.getElementById('zero-lan-btn');
 const zeroIncButton = document.getElementById('zero-inc-btn');
 const zeroAopButton = document.getElementById('zero-aop-btn');
 
-const centralBodyMenu = document.getElementById('central-body-menu');
+const nuSlider = document.getElementById('nu-slider');
+const nuDisplay = document.getElementById('nu-display');    
+const zeroNuButton = document.getElementById('zero-nu-btn');
 
-// const defaultButton = document.getElementById('default-btn');
-// const defaultDoResetButton = document.getElementById('default-do-reset-btn');
-// const generalPrefButton = document.getElementById('general-btn');
-// const prefsReturnButton = document.getElementById('prefs-return-btn');
+const playPauseButton = document.getElementById('play-pause-btn');
+const resetButton = document.getElementById('reset-btn');
+
 // const infoMenu = document.getElementById('info-menu');
 // const infoText = document.getElementById('info-text');
 
 // const infoElements = document.getElementById('info-elements');
-const centralBodyElements = document.getElementById('central-body-elements');
-const aePElements = document.getElementById('a-e-P-elements');
-const OmiomElements = document.getElementById('omega-i-omega-elements');
-const motionElements = document.getElementById('motion-elements');
+const muElements = document.getElementById('central-body-elements');
+const aeElements = document.getElementById('a-e-elements');
+const orientationElements = document.getElementById('orientation-elements');
+const rvElements = document.getElementById('r-v-elements');
 const numericalElements = document.getElementById('numerical-elements');
 const prefsElements = document.getElementById('prefs-elements');
 
 const conicSectionMenu = document.getElementById('conic-section-menu');
 conicSectionMenu.value = defaultConicSection;
 
-const aepMenu = document.getElementById('aep-menu');
-
 const muDisplay = document.getElementById('mu');
-const aDisplay = document.getElementById('a');
-const eDisplay = document.getElementById('e');
+const aCBDisplay = document.getElementById('a');
+const eCBDisplay = document.getElementById('e');
 const iDisplay = document.getElementById('i');
 const OmegaDisplay = document.getElementById('Omega');
 const omegaDisplay = document.getElementById('omega');
@@ -322,12 +319,6 @@ const getFromLocalStorage = function(){
 //   return [this._r, this._h, this._h, this._quat];
 // }
 
-// const receiveVectorData = function(hx, hy, hz, e, quat){
-//   this._h.x = hx;
-//   this._h.y = hy;
-//   this._h.z = hz;
-// }
-
 const haltPlay = function(){
   if (playing){
     playing = false;
@@ -340,35 +331,35 @@ const haltPlay = function(){
 }
 
 const handleMainButtons = function(button){
-  cbButton.disabled = false;
-  aePButton.disabled = false;
-  OmiomButton.disabled = false;
-  motionButton.disabled = false;
+  muButton.disabled = false;
+  aeButton.disabled = false;
+  orientationButton.disabled = false;
+  rvButton.disabled = false;
   numericalButton.disabled = false;
   prefsButton.disabled = false;
-  centralBodyElements.style.display = 'none';
-  aePElements.style.display = 'none';
-  OmiomElements.style.display = 'none';
-  motionElements.style.display = 'none';
+  muElements.style.display = 'none';
+  aeElements.style.display = 'none';
+  orientationElements.style.display = 'none';
+  rvElements.style.display = 'none';
   numericalElements.style.display = 'none';
   prefsElements.style.display = 'none';
 
   switch (button){
-    case 'cb':
-      centralBodyElements.style.display = 'grid';
-      cbButton.disabled = true;
+    case 'mu':
+      muElements.style.display = 'grid';
+      muButton.disabled = true;
       break;
     case 'aeP':
-      aePElements.style.display = 'grid';
-      aePButton.disabled = true;
+      aeElements.style.display = 'grid';
+      aeButton.disabled = true;
       break;
-    case 'Omiom':
-      OmiomElements.style.display = 'grid';
-      OmiomButton.disabled = true;
+    case 'orientation':
+      orientationElements.style.display = 'grid';
+      orientationButton.disabled = true;
       break;
-    case 'motion':
-      motionElements.style.display = 'grid';
-      motionButton.disabled = true;
+    case 'rv':
+      rvElements.style.display = 'grid';
+      rvButton.disabled = true;
       break;
     case 'numerical':
       numericalElements.style.display = 'grid';
@@ -383,20 +374,20 @@ const handleMainButtons = function(button){
   }
 }
 
-cbButton.addEventListener('click', () => {
-  handleMainButtons('cb');
+muButton.addEventListener('click', () => {
+  handleMainButtons('mu');
 });
 
-aePButton.addEventListener('click', () => {
+aeButton.addEventListener('click', () => {
   handleMainButtons('aeP');
 });
 
-OmiomButton.addEventListener('click', () => {
-  handleMainButtons('Omiom');
+orientationButton.addEventListener('click', () => {
+  handleMainButtons('orientation');
 });
 
-motionButton.addEventListener('click', () => {
-  handleMainButtons('motion');
+rvButton.addEventListener('click', () => {
+  handleMainButtons('rv');
 });
 
 numericalButton.addEventListener('click', () => {
@@ -405,195 +396,91 @@ numericalButton.addEventListener('click', () => {
 
 prefsButton.addEventListener('click', () => {
   handleMainButtons('prefs');
-  // toggleShowPrefs();
 });
 
-// const toggleShowPrefs = function(){
-//   if (sixDOFworld.style.display === 'none'){
-//     sixDOFworld.style.display = 'block';
-//     numericalButton.style.display = 'block';
-//     attitudeButton.style.display = 'block';
-//     aePButton.style.display = 'block';
-//     cbButton.style.display = 'block';
-//     OmiomButton.style.display = 'block';
-//     prefsButton.style.display = 'block';
-//     playPauseButton.style.display = 'block';
-//     // resetButton.style.display = 'block';
-//     // defaultButton.style.display = 'none';
-//     // generalPrefButton.style.display = 'none';
-//     // prefsReturnButton.style.display = 'none';
-//     // handlePreferencesButtons('none');
-//     doWindowResizeOrOrientationChange();
-//     handleMainButtons('numerical');
-//   }else{
-//     sixDOFworld.style.display = 'none';
-//     numericalButton.style.display = 'none';
-//     prefsButton.style.display = 'none';
-//     playPauseButton.style.display = 'none';
-//     // resetButton.style.display = 'none';
-
-//     // defaultButton.style.display = 'block';
-//     // generalPrefButton.style.display = 'block';
-//     // prefsReturnButton.style.display = 'block';
-//     handleMainButtons('none');
-//   }
-// }
-
-const computeAEP = function(){
-  switch (aepOption){
-    case 'ae':
-      p = a*(1 - e*e);
-      break;
-
-    case 'ep':
-      a = p/(1 - e*e);
-      break;
-
-    case 'ap':
-      e = Math.sqrt(1 - p/a);
-      break;
-  }
+const computeP = function(){
+  p = a*(1 - e*e);
 }
 
-const doAESliderOnInput = function(value){
-  switch (aepOption){
-    case 'ae':
-    case 'ap':
-      a = value/aSliderRange*aRange + aMin;
-      aeDisplay.innerHTML = `a: ${Number(a).toFixed(2).toString()}`;
-      break;
+const doASliderOnInput = function(value){
+  let c = aRange/(Math.log(aSliderRange+1));;
+  let d = aMax;
+  value = aSliderRange - value;
+  a = d - c*Math.log(value+1);
 
-    case 'ep':
-      switch (conicSection){
-        case 'ellipse':
-          e = value/eSliderRange*eEllipseRange + eMinEllipse;
-          aeDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
-          break;
-
-        case 'hyperbola':
-          e = value/eSliderRange*eHyperbolaRange + eMinHyperbola;
-          aeDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
-          break;
-      }
-      break;
-  }
-
-  computeAEP();
+  // a = value/aSliderRange*aRange + aMin;
+  aDisplay.innerHTML = `a: ${Number(a).toFixed(2).toString()}`;
+  computeP();
   omt.shapeOrbitCurve(a, e);
 }
 
-const doEPSliderOnInput = function(value){
+const doESliderOnInput = function(value){
   let c;
   let d;
+  value = eSliderRange - value;
 
-  switch (aepOption){
-    case 'ae':
-      switch (conicSection){
-        case 'ellipse':
-          c = eEllipseRange/(Math.log(eSliderRange+1));
-          d = eMinEllipse;
-          e = c*Math.log(value+1) + d;
-          epDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
-          break;
-
-        case 'hyperbola':
-          // c = eHyperbolaRange/(Math.exp(eSliderRange));
-          // d = eMinHyperbola - c;
-          // e = c*Math.exp(+this.value) + d;
-          e = value/eSliderRange*eHyperbolaRange + eMinHyperbola;
-          epDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
-          break;
-      }
+  switch (conicSection){
+    case 'ellipse':
+      c = eEllipseRange/(Math.log(eSliderRange+1));
+      d = eMaxEllipse;
+      e = d - c*Math.log(value+1);
+      eDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
       break;
 
-    case 'ap':
-    case 'ep':
-      switch (conicSection){
-        case 'ellipse':
-          p = value/pSliderRange*pEllipseRange + pMinEllipse;
-          epDisplay.innerHTML = `p: ${Number(p).toFixed(1).toString()}`;
-          break;
-
-        case 'hyperbola':
-          p = value/pSliderRange*pHyperbolaRange + pMinHyperbola;
-          epDisplay.innerHTML = `p: ${Number(p).toFixed(1).toString()}`;
-          break;
-      }
+    case 'hyperbola':
+      // c = eHyperbolaRange/(Math.exp(eSliderRange));
+      // d = eMinHyperbola - c;
+      // e = c*Math.exp(+this.value) + d;
+      c = eHyperbolaRange/(Math.log(eSliderRange+1));
+      d = eMaxHyperbola;
+      e = d - c*Math.log(value+1);
+      // e = value/eSliderRange*eHyperbolaRange + eMinHyperbola;
+      eDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
       break;
   }
 
-  computeAEP();
+  computeP();
   omt.shapeOrbitCurve(a, e);
 }
 
-aeSlider.oninput = function(){
-  doAESliderOnInput(+this.value);
+aSlider.oninput = function(){
+  doASliderOnInput(+this.value);
 }
 
-epSlider.oninput = function(){
-  doEPSliderOnInput(+this.value);
+eSlider.oninput = function(){
+  doESliderOnInput(+this.value);
 }
 
-// epSlider.oninput = function(){
-//   switch (aepOption){
-//     case 'ae':
-//       switch (conicSection){
-//         case 'ellipse':
-//           e = +this.value/eSliderRange*eEllipseRange + eMinEllipse;
-//           epDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
-//           break;
+zeroAButton.addEventListener('click', () => {
+  a = aMin;
+  aSlider.value = a;
+  aDisplay.innerHTML = `a: ${a}`;
 
-//         case 'hyperbola':
-//           e = +this.value/eSliderRange*eHyperbolaRange + eMinHyperbola;
-//           epDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
-//           break;
-//       }
-//       break;
+  omt.needsRefresh = true;
+  // replaceAerovisualizerData('a',0);
+  // saveToLocalStorage();
+});
 
-//     case 'ap':
-//     case 'ep':
-//       switch (conicSection){
-//         case 'ellipse':
-//           p = +this.value/pSliderRange*pEllipseRange + pMinEllipse;
-//           epDisplay.innerHTML = `p: ${Number(p).toFixed(1).toString()}`;
-//           break;
-
-//         case 'hyperbola':
-//           p = +this.value/pSliderRange*pHyperbolaRange + pMinHyperbola;
-//           epDisplay.innerHTML = `p: ${Number(p).toFixed(1).toString()}`;
-//           break;
-//       }
-//       break;
-//   }
-
-//   computeAEP();
-//   omt.shapeOrbitCurve(a, e);
-// }
-
-zeroAEButton.addEventListener('click', () => {
-  // zeroEPButton
-
-  switch (aepOption){
-    case 'ae':
-    case 'ap':
-      a = aMin;
-      aeSlider.value = a;
-      aeDisplay.innerHTML = `a: ${a}`;
+zeroEButton.addEventListener('click', () => {
+  switch (conicSection){
+    case 'ellipse':
+      e = eMinEllipse;
       break;
 
-    case 'ep':
-      e = eMinEllipse;
-      aeSlider.value = e;
-      aeDisplay.innerHTML = `e: ${e}`;
+    case 'hyperbola':
+      e = eMinHyperbola;
       break;
   }
 
+  eSlider.value = e;
+  eDisplay.innerHTML = `e: ${e}`;
+
   omt.needsRefresh = true;
-  // replaceAerovisualizerData('longitudeOfAscendingNode',0);
-  saveToLocalStorage();
+  // replaceAerovisualizerData('e',0);
+  // saveToLocalStorage();
 });
 
-const handleOmegaIncOmegaOnInput = function(){
+const handleOrientationOnInput = function(){
   lanDegrees = lanSlider.value;
   incDegrees = incSlider.value;
   aopDegrees = aopSlider.value;
@@ -675,6 +562,40 @@ zeroAopButton.addEventListener('click', () => {
   saveToLocalStorage();
 });
 
+const doNuSliderOnInput = function(value){
+  nuDegrees = value;
+  nu = nuDegrees*piOver180;
+  nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees)}`;
+
+  switch (conicSection){
+    case 'ellipse':
+      break;
+
+    case 'hyperbola':
+        break;
+  }
+}
+
+nuSlider.oninput = function(){
+  doNuSliderOnInput(+this.value);
+}
+
+nuSlider.onpointerup = function(){
+  // replaceAerovisualizerData('trueAnomaly',this.value);
+  // saveToLocalStorage();
+}
+
+zeroNuButton.addEventListener('click', () => {
+  nu = 0;
+  nuDegrees = 0;
+  nuSlider.value = nuDegrees;
+  nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees)}`;
+
+  // omt.needsRefresh = true;
+  // replaceAerovisualizerData('trueAnomaly',0);
+  // saveToLocalStorage();
+});
+
 // vectorSizeSlider.onpointerup = function(){
 //   omt.setVectorSize(this.value);
 //   replaceAerovisualizerData('vectorSize',this.value);
@@ -719,8 +640,8 @@ const setTransparency = function(thing, transparency){
 // });
 
 // const toggleShowInfo = function(){
-//   if (sixDOFworld.style.display === 'none'){
-//     sixDOFworld.style.display = 'block';
+//   if (threeDWorld.style.display === 'none'){
+//     threeDWorld.style.display = 'block';
 //     prefsButton.style.display = 'block';
 //     playPauseButton.style.display = 'block';
 //     resetButton.style.display = 'block';
@@ -728,7 +649,7 @@ const setTransparency = function(thing, transparency){
 //     doWindowResizeOrOrientationChange();
 //     handleMainButtons('numerical');
 //   }else{
-//     sixDOFworld.style.display = 'none';
+//     threeDWorld.style.display = 'none';
 //     prefsButton.style.display = 'none';
 //     playPauseButton.style.display = 'none';
 //     resetButton.style.display = 'none';
@@ -746,33 +667,13 @@ const setTransparency = function(thing, transparency){
 //   toggleShowInfo();
 // });
 
-const handlePreferencesButtons = function(button){
-  // defaultButton.disabled = false;
-  // generalPrefButton.disabled = false;
-  // defaultElements.style.display = 'none';
-  // generalElements.style.display = 'none';
-
-  switch (button){
-    case 'default':
-      // defaultElements.style.display = 'grid';
-      // defaultButton.disabled = true;
-      break;
-    case 'general':
-      // generalElements.style.display = 'grid';
-      // generalPrefButton.disabled = true;
-      break;
-    case 'none':
-      break;
-  }
-}
-
-const handleCentralBodyChange = function(){
+const handleMuChange = function(){
   const theCB = centralBodyData.find(x => x.name === centralBody);
   const cbIndex = Number(theCB.id);
 
   muDisplay.innerHTML = +theCB.mu*1e6;//GM
-  aDisplay.innerHTML = theCB.a;//semimajor axis
-  eDisplay.innerHTML = theCB.e;//orbital eccentricity
+  aCBDisplay.innerHTML = theCB.a;//semimajor axis
+  eCBDisplay.innerHTML = theCB.e;//orbital eccentricity
   iDisplay.innerHTML = theCB.i;//orbital inclination
   OmegaDisplay.innerHTML = theCB.Om;//longitude of ascending node
   omegaDisplay.innerHTML = theCB.om;//longitude of perihelion
@@ -786,12 +687,12 @@ const handleCentralBodyChange = function(){
   omegaUnitsDisplay.innerHTML = ' &deg;';
   radiusUnitsDisplay.innerHTML = ' km';
   vescUnitsDisplay.innerHTML = ' km/s';
-  omt.setCentralBodyIndex(cbIndex);
+  omt.setMuIndex(cbIndex);
 }
 
-centralBodyMenu.addEventListener('change', () => {
-  centralBody = centralBodyMenu.value;
-  handleCentralBodyChange();
+muMenu.addEventListener('change', () => {
+  centralBody = muMenu.value;
+  handleMuChange();
   // saveToLocalStorage();
 });
 
@@ -835,61 +736,22 @@ coordinateFrameMenu.addEventListener('change', () => {
 
 conicSectionMenu.addEventListener('change', () => {
   conicSection = conicSectionMenu.value;
+  aSlider.value = aMin;
   
   if (conicSection === 'ellipse'){
-    if (aepOption === 'ae'){
-      aeSlider.value = aMin;
-      epSlider.value = eMinEllipse;
-      doAESliderOnInput(aMin);
-    }else if (aepOption === 'ep'){
-      aeSlider.value = eMinEllipse;
-      epSlider.value = pMinEllipse;
-      doEPSliderOnInput(eMinEllipse);
-    }else{
-      aeSlider.value = aMin;
-      epSlider.value = pMinEllipse;
-      doAESliderOnInput(aMin);
-      doEPSliderOnInput(pMinEllipse);
-    }
+    eSlider.value = eMinEllipse;
   }else{
-    if (aepOption === 'ae'){
-      aeSlider.value = aMin;
-      epSlider.value = eMinHyperbola;
-      doAESliderOnInput(aMin);
-    }else if (aepOption === 'ep'){
-      aeSlider.value = eMinHyperbola;
-      epSlider.value = pMinHyperbola;
-      doEPSliderOnInput(pMinHyperbola);
-    }else{
-      aeSlider.value = aMin;
-      epSlider.value = pMinHyperbola;
-      doAESliderOnInput(aMin);
-      doEPSliderOnInput(pMinHyperbola);
-    } 
+    eSlider.value = eMinHyperbola;
   }
 
+  doASliderOnInput(aMin);
 // saveToLocalStorage();
 });
 
-aepMenu.addEventListener('change', () => {
-  // aep = aepMenu.value;
-// 'ae'
-// 'ep'
-// 'ap'
-// saveToLocalStorage();
-});
-
-// defaultButton.addEventListener('click', () => {
-//   handlePreferencesButtons('default');
-// });
 
 // defaultDoResetButton.addEventListener('click', () => {
 //   localStorage.clear();
 //   location.reload();
-// });
-
-// generalPrefButton.addEventListener('click', () => {
-//   handlePreferencesButtons('general');
 // });
 
 // prefsReturnButton.addEventListener('click', () => {
@@ -899,7 +761,7 @@ aepMenu.addEventListener('change', () => {
 const doWindowResizeOrOrientationChange = function(){
   camera.aspect = 1;
   camera.updateProjectionMatrix();
-  renderer.setSize(sixDOFworld.clientWidth, sixDOFworld.clientHeight);
+  renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.clear();
   renderer.render(scene, camera);
@@ -940,7 +802,7 @@ const initTHREE = function() {
   });
 
   renderer.setClearColor(0x000000);
-  renderer.setSize(sixDOFworld.clientWidth, sixDOFworld.clientHeight);
+  renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.autoClear = false;
   camera = new THREE.PerspectiveCamera(45, 1, 0.1, 50);
@@ -950,7 +812,7 @@ const initTHREE = function() {
   camera.up.set(0,0,1);
   renderer.shadowMap.enabled = false;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  sixDOFworld.appendChild(renderer.domElement);
+  threeDWorld.appendChild(renderer.domElement);
   orbitControls = new OrbitControls(camera, renderer.domElement);
   // orbitControls.enableDamping;
 
@@ -995,7 +857,7 @@ const createAndInitialize = function(data, camera){
   lan = lanDegrees*piOver180;
   inc = incDegrees*piOver180;
   aop = aopDegrees*piOver180;
-  handleOmegaIncOmegaOnInput();
+  handleOrientationOnInput();
   // rTransparencySlider.value = rTransparency;
   // rColorMenu.value = rColor;
   // setVector(1,5,1,1,1);
@@ -1015,8 +877,7 @@ const completeInitialization = function(continueAnimation = true) {
   }
   
   if (omt.constructionComplete){
-    handleMainButtons('aeP');//'cb' <-- set back to this
-    // handlePreferencesButtons('none');
+    handleMainButtons('aeP');//'mu' <-- set back to this
     
     camera.aspect = 1;
     camera.updateProjectionMatrix();
@@ -1025,7 +886,7 @@ const completeInitialization = function(continueAnimation = true) {
     cpy = camera.position.y;
     cpz = camera.position.z;
 
-    renderer.setSize(sixDOFworld.clientWidth, sixDOFworld.clientHeight);
+    renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
 
     // setTransparency('r',rTransparency);
@@ -1053,9 +914,9 @@ const completeInitialization = function(continueAnimation = true) {
     omt.setColor('h','red');
     omt.setColor('e','green');
 
-    omt.setCentralBodyIndex(0);
+    omt.setMuIndex(0);
     omt.computeRotation(lan, inc, aop);
-    computeAEP();
+    computeP();
     omt.shapeOrbitCurve(a, e);
     // vectorSizeSlider.value = Number(vectorSize);
   // }

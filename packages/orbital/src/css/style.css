@@ -28,7 +28,7 @@ body {
   justify-content:space-between;
 }
 
-#sixDOF-world {
+#threeD-world {
   display: block;
   top: 0;
   left: 0;
@@ -41,7 +41,7 @@ body {
   flex-shrink: 0;
 }
 
-.non-sixDOF-world{
+.non-3D-world{
   pointer-events: all;
   background-color: #000;
 }
@@ -337,7 +337,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
  * Device Orientation Landscape
  *******************************/
 @media (orientation: landscape) {
-  #sixDOF-world {
+  #threeDWorld-world {
     width: 100vh; /* testing keep*/
     height: 100vh; /* testing keep*/
   }
@@ -345,7 +345,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
     flex-direction: row;
   }
 
-  .non-sixDOF-world{
+  .non-3D-world{
     width: calc(100vw - 100vh);
     height: 100%;/* testing not sure*/
   }
@@ -355,14 +355,14 @@ input[type="range"]:focus::-webkit-slider-thumb {
  * Device Orientation Portrait, iPhones
  ***************************************/
  @media (orientation: portrait) and (max-width: 450px) {
-  #sixDOF-world {
+  #threeD-world {
     /* flex-basis: 80vh; */
     width: 90vw;
     height: 90vw;
     align-self: center;
   }
 
-  .non-sixDOF-world{
+  .non-3D-world{
     width: 100%;/* testing not sure*/
     height: calc(100vh - 90vw);/* testing not sure*/
   }
@@ -384,12 +384,12 @@ input[type="range"]:focus::-webkit-slider-thumb {
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
   }
 
-  #sixDOF-world {
+  #threeD-world {
     width: 65vh;
     height: 65vh;
   }
 
-  .non-sixDOF-world{
+  .non-3D-world{
     width: 100%;
     /* width: calc(100vw - 60vh); */
     height: 100%;/* testing not sure*/
@@ -429,7 +429,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
 * Device Orientation Portrait, iPads
 *************************************/
 @media (orientation: portrait) and (min-width: 451px) {
-  #sixDOF-world {
+  #threeD-world {
     /* flex-basis: 80vw; */
     width: 70vw;
     height: 70vw;
@@ -441,13 +441,13 @@ input[type="range"]:focus::-webkit-slider-thumb {
 * Device Orientation Landscape, iPads
 **************************************/
 @media (orientation: landscape) and (min-width: 951px) {
-  #sixDOF-world {
+  #threeD-world {
     /* flex-basis: 80vh; */
     width: 80vh;
     height: 80vh;
   }
 
-  .non-sixDOF-world{
+  .non-3D-world{
     width: 100%;
     /* width: calc(100vw - 80vh); */
     height: 100%;/* testing not sure*/

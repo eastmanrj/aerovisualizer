@@ -1,9 +1,8 @@
 import * as THREE from '../../../../node_modules/three/build/three.module.js';
-// import * as THREE from 'three/build/three.module.js';
-
-import OrbitalMechVectors from './OrbitalMechThings.js';
+import OrbitalMechThings from './OrbitalMechThings.js';
 import {OrbitControls} from './OrbitControls.js';
 
+const piOver180 = Math.PI / 180;
 let scene, camera, renderer;
 let background = null;
 const cameraRadius = 5;
@@ -16,50 +15,53 @@ let clock = null;
 let omt = null;//"vectors object" (handles all of the vectors)
 let orbitControls = null;//in this context, "orbit" refers to the camera
 let playing = false;
-const piOver180 = Math.PI / 180;
 
-const defaultConicSection = 'hyperbola';
-const defaultA = 1;
-const defaultEellipse = 0;
-const defaultEhyperbola = Math.SQRT2;
-const defaultPellipse = defaultA*(1 - defaultEellipse*defaultEellipse);
-const defaultPhyperbola = defaultA*(1 - defaultEhyperbola*defaultEhyperbola);
-const defaultLan = 0;
-const defaultInclination = 0;
-const defaultAop = 0;
-const defaultNu = 0;
+const defaultCentralBody = 'Earth';
+const defaultConicSection = 'ellipse';
+const defaultA = 1;//positive for ellipses
+const defaultE = 0;//use 0 for ellipse or Math.SQRT2 for hyperbola
+const defaultLan = 0;//degrees
+const defaultInclination = 0;//degrees
+const defaultAop = 0;//degrees
+const defaultNu = 0;//degrees
 
+const defaultDelta = Math.PI/2;// 90 degrees for "square" hyperbola
 // const defaultVectorSize = 6;
-// const defaultRTransparency = 0;
-// 95 maxTransparency is arbirary and considered close enough to being completely 
-// invisible, this allows for a little slop when using the slider controls
-const maxTransparency = 95;
 const defaultRColor = 'blue';
-
 const defaultCoordinateFrameChoice = 'hAndE';
 
-//aerovisualizerData is modified and saved to local storage when preferences are 
-//changed and is retrieved from local storage at startup
+//aerovisualizerData is modified and saved to local storage when 
+// values and preferences are changed and is retrieved from local 
+// storage at startup
 let aerovisualizerData = [
-  {name:'longitudeOfAscendingNode', value:defaultLan},
+  {name:'central-body', value:defaultCentralBody},
+  {name:'conic-section', value:defaultConicSection},
+  {name:'semimajor-axis', value:defaultA},
+  {name:'eccentricity', value:defaultE},
+  {name:'longitude-of-ascending-node', value:defaultLan},
   {name:'inclination', value:defaultInclination},
-  {name:'argumentOfPeriapsis', value:defaultAop},
+  {name:'argument-of-periapsis', value:defaultAop},
+  {name:'true-anomaly', value:defaultNu}
   // {name:'vectorSize', value:defaultVectorSize},
-  // {name:'rTransparency', value:defaultRTransparency},
   // {name:'rColor', value:defaultRColor},
 ];
 
+let centralBody = defaultCentralBody;
+let conicSection = defaultConicSection;
 let a = defaultA;
-let e;
-let p;
+let e = defaultE;
+let lanDegrees = defaultLan;
+let lan = lanDegrees*piOver180; // longitude of the ascending node
+let incDegrees = defaultInclination;
+let inc = incDegrees*piOver180;// inclination
+let aopDegrees = defaultAop;
+let aop = aopDegrees*piOver180;// argument of periapsis
+let nuDegrees = defaultNu;
+let nu = nuDegrees*piOver180;// true anomaly
 
-if (defaultConicSection === 'ellipse'){
-  e = defaultEellipse;
-  p = defaultPellipse;
-}else{
-  e = defaultEhyperbola;
-  p = defaultPhyperbola;
-}
+let p;//parameter (semi-latus rectum)
+let delta = defaultDelta;//turning angle for hyperbolic orbits
+let rp = a*(1-e);//r vector magnitude at periapse
 
 const aMin = 1;
 const aMax = 60;
@@ -72,32 +74,9 @@ const eMaxHyperbola = 5;
 const eHyperbolaRange = eMaxHyperbola - eMinHyperbola;
 const aSliderRange = 100;
 const eSliderRange = 100;
-const pSliderRange = 100;
 
-const pMinEllipse = aMin*(1 - eMinEllipse*eMinEllipse);
-const pMaxEllipse = aMax*(1 - eMaxEllipse*eMaxEllipse);
-const pEllipseRange = pMaxEllipse - pMinEllipse;
-
-const pMinHyperbola = aMin*(1 - eMinHyperbola*eMinHyperbola);
-const pMaxHyperbola = aMax*(1 - eMaxHyperbola*eMaxHyperbola);
-const pHyperbolaRange = pMaxHyperbola - pMinHyperbola;
-
-let lanDegrees = defaultLan;
-let incDegrees = defaultInclination;
-let aopDegrees = defaultAop;
-let lan = lanDegrees*piOver180; // longitude of the ascending node
-let inc = incDegrees*piOver180;// inclination
-let aop = aopDegrees*piOver180;// argument of periapsis
-
-let nuDegrees = defaultNu;
-let nu = nuDegrees*piOver180;// true anomaly
-
-let conicSection = defaultConicSection;
-let centralBody = 'Earth';
 let coordinateFrameChoice = defaultCoordinateFrameChoice;
-
 // let vectorSize = defaultVectorSize;
-// let rTransparency = defaultRTransparency;
 // let rColor = defaultRColor;
 
 const threeDWorld = document.getElementById('threeD-world');
@@ -114,12 +93,13 @@ const infoReturnButton = document.getElementById('info-return-btn');
 
 const muMenu = document.getElementById('central-body-menu');
 
+const conicSectionMenu = document.getElementById('conic-section-menu');
 const aDisplay = document.getElementById('a-display');    
 const eDisplay = document.getElementById('e-display');    
 const aSlider = document.getElementById('a-slider');
 const eSlider = document.getElementById('e-slider');
-const zeroAButton = document.getElementById('zero-a-btn');
-const zeroEButton = document.getElementById('zero-e-btn');
+const defaultAButton = document.getElementById('default-a-btn');
+const defaultEButton = document.getElementById('default-e-btn');
 
 const lanDisplay = document.getElementById('lan-display');    
 const incDisplay = document.getElementById('inc-display');    
@@ -134,7 +114,6 @@ const zeroAopButton = document.getElementById('zero-aop-btn');
 const nuSlider = document.getElementById('nu-slider');
 const nuDisplay = document.getElementById('nu-display');    
 const zeroNuButton = document.getElementById('zero-nu-btn');
-
 const playPauseButton = document.getElementById('play-pause-btn');
 const resetButton = document.getElementById('reset-btn');
 
@@ -148,9 +127,6 @@ const orientationElements = document.getElementById('orientation-elements');
 const rvElements = document.getElementById('r-v-elements');
 const numericalElements = document.getElementById('numerical-elements');
 const prefsElements = document.getElementById('prefs-elements');
-
-const conicSectionMenu = document.getElementById('conic-section-menu');
-conicSectionMenu.value = defaultConicSection;
 
 const muDisplay = document.getElementById('mu');
 const aCBDisplay = document.getElementById('a');
@@ -176,8 +152,6 @@ coordinateFrameMenu.value = coordinateFrameChoice;
 // const defaultElements = document.getElementById('default-elements');
 
 // const vectorSizeSlider = document.getElementById('vector-size');
-// const rTransparencySlider = document.getElementById('transparency-r');
-// const rTransparencyDisplay = document.getElementById('transparency-r-display');
 // const rColorMenu = document.getElementById('r-color-menu');
 
 /*
@@ -399,7 +373,21 @@ prefsButton.addEventListener('click', () => {
 });
 
 const computeP = function(){
+  // a > 0 and e < 1 for ellipses
+  // a < 0 and e > 1 for hyperbolas
+  // thus p is always positive
   p = a*(1 - e*e);
+}
+
+const computeDelta = function(){
+  // delta is the turning angle (i.e. the angle through
+  // which the path of a space probe is turned by its
+  // encounter with a planet during a hyperbolic flyby)
+  if (e < 1){
+    return;
+  }
+
+  delta = 2*Math.asin(1/e);// delta is an angle in radians
 }
 
 const doASliderOnInput = function(value){
@@ -408,9 +396,15 @@ const doASliderOnInput = function(value){
   value = aSliderRange - value;
   a = d - c*Math.log(value+1);
 
+  if (conicSection === 'hyperbola'){
+    // a > 0 for ellipses, a < 0 for hyperbolas
+    a = -a;
+  }
+
   // a = value/aSliderRange*aRange + aMin;
   aDisplay.innerHTML = `a: ${Number(a).toFixed(2).toString()}`;
   computeP();
+  rp = a*(1-e);
   omt.shapeOrbitCurve(a, e);
 }
 
@@ -434,12 +428,14 @@ const doESliderOnInput = function(value){
       c = eHyperbolaRange/(Math.log(eSliderRange+1));
       d = eMaxHyperbola;
       e = d - c*Math.log(value+1);
+      computeDelta();//hypberbolic turning angle
       // e = value/eSliderRange*eHyperbolaRange + eMinHyperbola;
       eDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
       break;
   }
 
   computeP();
+  rp = a*(1-e);
   omt.shapeOrbitCurve(a, e);
 }
 
@@ -447,75 +443,81 @@ aSlider.oninput = function(){
   doASliderOnInput(+this.value);
 }
 
+aSlider.onpointerup = function(){
+  replaceAerovisualizerData('semimajor-axis',+this.value);
+  saveToLocalStorage();
+}
+
 eSlider.oninput = function(){
   doESliderOnInput(+this.value);
 }
 
-zeroAButton.addEventListener('click', () => {
-  a = aMin;
-  aSlider.value = a;
-  aDisplay.innerHTML = `a: ${a}`;
+eSlider.onpointerup = function(){
+  replaceAerovisualizerData('eccentricity',+this.value);
+  saveToLocalStorage();
+}
 
+defaultAButton.addEventListener('click', () => {
+  aSlider.value = 0;
+  doASliderOnInput(+aSlider.value);
+  aDisplay.innerHTML = `a: ${a}`;
+  rp = a*(1-e);
   omt.needsRefresh = true;
-  // replaceAerovisualizerData('a',0);
-  // saveToLocalStorage();
+  replaceAerovisualizerData('semimajor-axis',+aSlider.value);
+  saveToLocalStorage();
 });
 
-zeroEButton.addEventListener('click', () => {
-  switch (conicSection){
-    case 'ellipse':
-      e = eMinEllipse;
+defaultEButton.addEventListener('click', () => {
+  eSlider.value = 0;
+  doESliderOnInput(+eSlider.value);
+  eDisplay.innerHTML = `e: ${e}`;
+  rp = a*(1-e);
+  omt.needsRefresh = true;
+  replaceAerovisualizerData('eccentricity',+eSlider.value);
+  saveToLocalStorage();
+});
+
+const handleOrientationOnInput = function(opt, setValuesOnly = false){
+  switch (opt){
+    case 'lan':
+      lanDegrees = lanSlider.value;
+      lanDisplay.innerHTML = lanDegrees;
+      lan = lanDegrees*piOver180;
       break;
 
-    case 'hyperbola':
-      e = eMinHyperbola;
+    case 'inc':
+      incDegrees = incSlider.value;
+      incDisplay.innerHTML = incDegrees;
+      inc = incDegrees*piOver180;
+      break;
+
+    case 'aop':
+      aopDegrees = aopSlider.value;
+      aopDisplay.innerHTML = aopDegrees;
+      aop = aopDegrees*piOver180;
       break;
   }
 
-  eSlider.value = e;
-  eDisplay.innerHTML = `e: ${e}`;
-
-  omt.needsRefresh = true;
-  // replaceAerovisualizerData('e',0);
-  // saveToLocalStorage();
-});
-
-const handleOrientationOnInput = function(){
-  lanDegrees = lanSlider.value;
-  incDegrees = incSlider.value;
-  aopDegrees = aopSlider.value;
-  lan = lanDegrees*piOver180;
-  inc = incDegrees*piOver180;
-  aop = aopDegrees*piOver180;
-  omt.needsRefresh = true;
+  if (!setValuesOnly){
+    omt.computeRotation(lan, inc, aop);
+    omt.shapeOrbitCurve(a, e);
+  }
 }
 
 lanSlider.oninput = function(){
-  lanDegrees = this.value;
-  lanDisplay.innerHTML = lanDegrees;
-  lan = lanDegrees*piOver180;
-  omt.computeRotation(lan, inc, aop);
-  omt.shapeOrbitCurve(a, e);
+  handleOrientationOnInput('lan');
 }
 
 incSlider.oninput = function(){
-  incDegrees = this.value;
-  incDisplay.innerHTML = incDegrees;
-  inc = incDegrees*piOver180;
-  omt.computeRotation(lan, inc, aop);
-  omt.shapeOrbitCurve(a, e);
+  handleOrientationOnInput('inc');
 }
 
 aopSlider.oninput = function(){
-  aopDegrees = this.value;
-  aopDisplay.innerHTML = aopDegrees;
-  aop = aopDegrees*piOver180;
-  omt.computeRotation(lan, inc, aop);
-  omt.shapeOrbitCurve(a, e);
+  handleOrientationOnInput('aop');
 }
 
 lanSlider.onpointerup = function(){
-  replaceAerovisualizerData('longitudeOfAscendingNode',this.value);
+  replaceAerovisualizerData('longitude-of-ascending-node',this.value);
   saveToLocalStorage();
 }
 
@@ -525,7 +527,7 @@ incSlider.onpointerup = function(){
 }
 
 aopSlider.onpointerup = function(){
-  replaceAerovisualizerData('argumentOfPeriapsis',this.value);
+  replaceAerovisualizerData('argument-of-periapsis',this.value);
   saveToLocalStorage();
 }
 
@@ -536,7 +538,7 @@ zeroLanButton.addEventListener('click', () => {
   lanDisplay.innerHTML = lanDegrees;
   omt.computeRotation(lan, inc, aop);
   omt.needsRefresh = true;
-  replaceAerovisualizerData('longitudeOfAscendingNode',0);
+  replaceAerovisualizerData('longitude-of-ascending-node',0);
   saveToLocalStorage();
 });
 
@@ -558,21 +560,45 @@ zeroAopButton.addEventListener('click', () => {
   aopDisplay.innerHTML = aopDegrees;
   omt.computeRotation(lan, inc, aop);
   omt.needsRefresh = true;
-  replaceAerovisualizerData('argumentOfPeriapsis',0);
+  replaceAerovisualizerData('argument-of-periapsis',0);
   saveToLocalStorage();
 });
+
+const computeREllipse = function(){
+  const r = p/(1 + e*Math.cos(nu));
+  omt.setR(r*Math.cos(nu), r*Math.sin(nu), 0, a);
+}
+
+const computeRHyperbola = function(){
+  // don't render the r vector when the true anomaly
+  // is in a range such that r would point to the
+  // wrong branch of the hyperbola.
+  // do this if going from 0 to 360 -->
+  // if (nu > (Math.PI + delta)/2 && nu < 1.5*Math.PI - delta/2){
+
+  if (nu > (Math.PI + delta)/2 || nu < -(Math.PI + delta)/2){
+    omt.setRVisible(false);
+    return;
+  }
+
+  omt.setRVisible(true);
+  const r = p/(1 + e*Math.cos(nu));
+  omt.setR(r*Math.cos(nu), r*Math.sin(nu), 0, -a);
+}
 
 const doNuSliderOnInput = function(value){
   nuDegrees = value;
   nu = nuDegrees*piOver180;
-  nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees)}`;
+  nuDisplay.innerHTML = `&nu;: ${Number(nuDegrees)}`;
 
   switch (conicSection){
     case 'ellipse':
+      computeREllipse();
       break;
-
+      
     case 'hyperbola':
-        break;
+      computeRHyperbola();
+      break;
   }
 }
 
@@ -581,8 +607,8 @@ nuSlider.oninput = function(){
 }
 
 nuSlider.onpointerup = function(){
-  // replaceAerovisualizerData('trueAnomaly',this.value);
-  // saveToLocalStorage();
+  replaceAerovisualizerData('true-anomaly',nuDegrees);
+  saveToLocalStorage();
 }
 
 zeroNuButton.addEventListener('click', () => {
@@ -590,38 +616,18 @@ zeroNuButton.addEventListener('click', () => {
   nuDegrees = 0;
   nuSlider.value = nuDegrees;
   nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees)}`;
-
   // omt.needsRefresh = true;
-  // replaceAerovisualizerData('trueAnomaly',0);
+
+  localStorage.clear();//temporary
+  location.reload();//temporary
+  // temporary, add these back in!!!
+  // replaceAerovisualizerData('true-anomaly',nuDegrees);
   // saveToLocalStorage();
 });
 
 // vectorSizeSlider.onpointerup = function(){
 //   omt.setVectorSize(this.value);
 //   replaceAerovisualizerData('vectorSize',this.value);
-//   saveToLocalStorage();
-// }
-
-const setTransparency = function(thing, transparency){
-  const opacity = (100 - transparency)/100;
-  omt.setOpacity(thing, opacity);
-
-  switch (thing){
-    case 'r':
-      // rTransparencyDisplay.innerHTML = transparency;
-      break;
-  }
-}
-
-// rTransparencySlider.oninput = function(){
-  // rTransparencyDisplay.innerText = rTransparencySlider.value;
-  // setTransparency('r',this.value);
-// }
-
-// rTransparencySlider.onpointerup = function(){
-//   setTransparency('r',this.value);
-//   replaceAerovisualizerData('rTransparency',this.value);
-//   omt.showR(this.value < maxTransparency);
 //   saveToLocalStorage();
 // }
 
@@ -693,7 +699,8 @@ const handleMuChange = function(){
 muMenu.addEventListener('change', () => {
   centralBody = muMenu.value;
   handleMuChange();
-  // saveToLocalStorage();
+  replaceAerovisualizerData('central-body',centralBody);
+  saveToLocalStorage();
 });
 
 coordinateFrameMenu.addEventListener('change', () => {
@@ -736,18 +743,11 @@ coordinateFrameMenu.addEventListener('change', () => {
 
 conicSectionMenu.addEventListener('change', () => {
   conicSection = conicSectionMenu.value;
-  aSlider.value = aMin;
-  
-  if (conicSection === 'ellipse'){
-    eSlider.value = eMinEllipse;
-  }else{
-    eSlider.value = eMinHyperbola;
-  }
-
-  doASliderOnInput(aMin);
-// saveToLocalStorage();
+  doASliderOnInput(+aSlider.value);
+  doESliderOnInput(+eSlider.value);
+  replaceAerovisualizerData('conic-section',conicSection);
+  saveToLocalStorage();
 });
-
 
 // defaultDoResetButton.addEventListener('click', () => {
 //   localStorage.clear();
@@ -785,7 +785,7 @@ const loadBackground = function(){
     background = new THREE.CubeTextureLoader().load([stars.pathname,stars.pathname,stars.pathname,stars.pathname,stars.pathname,stars.pathname]);
 
     scene.background = background;
-    const tl = new THREE.TextureLoader();
+    // const tl = new THREE.TextureLoader();
 }
 
 const initTHREE = function() {
@@ -820,23 +820,38 @@ const initTHREE = function() {
 };
 
 const createAndInitialize = function(data, camera){
+  let aSl;
+  let eSl;
+
   if (data){
     aerovisualizerData = JSON.parse(JSON.stringify(data));
 
     for (let o of data) {
       switch (o.name){
-          case 'longitudeOfAscendingNode':
+          case 'central-body':
+            centralBody  = o.value;
+            break;
+          case 'conic-section':
+            conicSection  = o.value;
+            break;
+          case 'semimajor-axis':
+            aSl  = o.value;
+            break;
+          case 'eccentricity':
+            eSl  = o.value;
+            break;
+          case 'longitude-of-ascending-node':
             lanDegrees  = o.value;
             break;
           case 'inclination':
             incDegrees  = o.value;
             break;
-          case 'argumentOfPeriapsis':
+          case 'argument-of-periapsis':
             aopDegrees  = o.value;
             break;
-          // case 'rTransparency':
-          //   rTransparency  = o.value;
-          //   break;
+          case 'true-anomaly':
+            nuDegrees  = o.value;
+            break;
           // case 'rColor':
           //   rColor  = o.value;
           //   break;
@@ -848,25 +863,33 @@ const createAndInitialize = function(data, camera){
   }
 
   if (omt === null){
-    omt = new OrbitalMechVectors(scene, camera);
+    omt = new OrbitalMechThings(scene, camera);
   }
+  
+  muMenu.value = centralBody;
+  handleMuChange();
+
+  conicSectionMenu.value = conicSection;
+  aSlider.value = aSl;
+  eSlider.value = eSl;
+  doASliderOnInput(+aSl);
+  doESliderOnInput(+eSl);
 
   lanSlider.value = lanDegrees;
   incSlider.value = incDegrees;
   aopSlider.value = aopDegrees;
-  lan = lanDegrees*piOver180;
-  inc = incDegrees*piOver180;
-  aop = aopDegrees*piOver180;
-  handleOrientationOnInput();
-  // rTransparencySlider.value = rTransparency;
+  handleOrientationOnInput('lan',true);
+  handleOrientationOnInput('inc',true);
+  handleOrientationOnInput('aop');
+
+  nuSlider.value = nuDegrees;
+  doNuSliderOnInput(nuDegrees);
+
   // rColorMenu.value = rColor;
-  // setVector(1,5,1,1,1);
-  // setVector(2,4,1,-1,1);
-  // setVector(3,3,-1,1,1);
 }
 
 const completeInitialization = function(continueAnimation = true) {
-  // the reason for this is that the OrbitalMechVectors.js file contains
+  // the reason for this is that the OrbitalMechThings.js file contains
   // the function _constructLabels() which contains a FontLoader 
   // object called loader that creates code that runs asynchronously.
   // Once omt.constructionComplete is true, we can finish
@@ -889,7 +912,6 @@ const completeInitialization = function(continueAnimation = true) {
     renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
 
-    // setTransparency('r',rTransparency);
     // defaultButton.style.display = 'none';
     // generalPrefButton.style.display = 'none';
     // prefsReturnButton.style.display = 'none';
@@ -897,15 +919,9 @@ const completeInitialization = function(continueAnimation = true) {
     // infoMenu.value = 'info-intro';
     // handleInfoMenuChoice(infoMenu.value);
     loadBackground();
-    // omt.showR(rTransparency < maxTransparency);
+    omt.showR(true);
     // setRColor(rColor);
     // omt.setVectorSize(vectorSize);
-    setTransparency('pqwFrame',0);
-    setTransparency('xyzFrame',0);
-    setTransparency('r',0);
-    setTransparency('v',0);
-    setTransparency('h',0);
-    setTransparency('e',0);
 
     omt.setColor('pqwFrame','yellow');
     omt.setColor('xyzFrame','red');
@@ -914,10 +930,10 @@ const completeInitialization = function(continueAnimation = true) {
     omt.setColor('h','red');
     omt.setColor('e','green');
 
-    omt.setMuIndex(0);
-    omt.computeRotation(lan, inc, aop);
-    computeP();
-    omt.shapeOrbitCurve(a, e);
+    // omt.setMuIndex(0);
+    // omt.computeRotation(lan, inc, aop);
+    // computeP();
+    // omt.shapeOrbitCurve(a, e);
     // vectorSizeSlider.value = Number(vectorSize);
   // }
   }

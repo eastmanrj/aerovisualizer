@@ -44,8 +44,14 @@
           <button id="attitude-btn" class="btn no-uppercase">&psi;&nbsp;&theta;&nbsp;&phi;</button>
           <button id="rotation-btn" class="btn no-uppercase">&omega;&nbsp;/&nbsp;H</button>
           <button id="torque-btn" class="btn no-uppercase">&tau;</button>
-          <button id="preferences-btn" class="btn no-uppercase">pref</button>
-
+          <button id="main-return-btn" class="btn btn-with-icon" onclick="window.location.href='https://aerovisualizer.com'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" 
+            width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" 
+            stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M9 14l-4 -4l4 -4"></path>
+            <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
+          </svg>
           <button id="default-btn" class="btn">default</button>
           <button id="general-btn" class="btn">general</button>
           <button id="object-btn" class="btn">object</button>
@@ -357,7 +363,8 @@
         </div>
         <div class="elements-group">
           <div class="elements numerical" id="numerical-elements-general">
-            <p class="span6 center-grid-item">Aerovisualizer v0.0.71 beta</p>
+            <p class="span4 center-grid-item">Aerovisualizer v0.0.71</p>
+            <button id="preferences-btn" class="btn span2 no-uppercase center-grid-item">pref</button>
             <button id="info-btn" class="btn span2 center-grid-item">&nbsp;?&nbsp;</button>
             <p class="span2 top-border">moi</p><p class="span2 top-border left-border">&omega;</p>
             <p class="span2 top-border left-border">H</p><p class="span2 top-border left-border">&tau;</p>

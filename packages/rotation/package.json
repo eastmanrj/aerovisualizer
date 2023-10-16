@@ -6,7 +6,7 @@
   "scripts": {
     "start": "parcel",
     "build": "parcel build",
-    "startrotation": "export PORT=1234 && npm run start"
+    "startrotation": "export PORT=3000 && npm run start"
   },
   "keywords": [],
   "author": "R Eastman",

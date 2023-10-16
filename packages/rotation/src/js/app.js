@@ -456,11 +456,11 @@ const replaceAerovisualizerData = function(name, value){
 }
 
 const saveToLocalStorage = function(){
-  localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
+  localStorage.setItem('aerovisualizerData2', JSON.stringify(aerovisualizerData));
 }
 
 const getFromLocalStorage = function(){
-  const data = JSON.parse(localStorage.getItem('aerovisualizerData'));
+  const data = JSON.parse(localStorage.getItem('aerovisualizerData2'));
   return data;
 }
 

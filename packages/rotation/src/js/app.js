@@ -2233,8 +2233,8 @@ const handleInfoMenuChoice = function(choice){
       infoText.innerHTML = `<p class="p-normal">Click <em>&tau;</em> and use the menu 
       that appears to choose from the following torque options:</p>
       
-      <p class="p-normal">1) no torque, space frame, 2) body frame, 3) ACS stabilization, 
-      4) gravity gradient, and 5) spinning top.</p>`;
+      <p class="p-normal">1) no torque, 2) space frame, 3) body frame, 4) ACS stabilization, 
+      5) gravity gradient, and 6) spinning top.</p>`;
       break;
 
     case 'info-torque-no-torque': //torque - no torque

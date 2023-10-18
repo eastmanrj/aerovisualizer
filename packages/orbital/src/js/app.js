@@ -48,8 +48,8 @@ let aerovisualizerData = [
 
 let centralBody = defaultCentralBody;
 let conicSection = defaultConicSection;
-let a = defaultA;
-let e = defaultE;
+let a = Number(defaultA);
+let e = Number(defaultE);
 let lanDegrees = defaultLan;
 let lan = lanDegrees*piOver180; // longitude of the ascending node
 let incDegrees = defaultInclination;
@@ -61,7 +61,10 @@ let nu = nuDegrees*piOver180;// true anomaly
 
 let p;//parameter (semi-latus rectum)
 let delta = defaultDelta;//turning angle for hyperbolic orbits
-let rp = a*(1-e);//r vector magnitude at periapse
+let rp = Number(a*(1-e));//r vector magnitude at periapse
+let lockPeriapse = false;
+let sliderAshouldChange = false;//required for lockPeriapse
+let sliderEshouldChange = false;//required for lockPeriapse
 
 const aMin = 1;
 const aMax = 60;
@@ -72,8 +75,8 @@ const eEllipseRange = eMaxEllipse - eMinEllipse;
 const eMinHyperbola = 1.05;
 const eMaxHyperbola = 5;
 const eHyperbolaRange = eMaxHyperbola - eMinHyperbola;
-const aSliderRange = 100;
-const eSliderRange = 100;
+const aSliderRange = 150;
+const eSliderRange = 150;
 
 let coordinateFrameChoice = defaultCoordinateFrameChoice;
 // let vectorSize = defaultVectorSize;
@@ -100,6 +103,7 @@ const aSlider = document.getElementById('a-slider');
 const eSlider = document.getElementById('e-slider');
 const defaultAButton = document.getElementById('default-a-btn');
 const defaultEButton = document.getElementById('default-e-btn');
+const lockPeriapseButton = document.getElementById('lock-periapse-btn');
 
 const lanDisplay = document.getElementById('lan-display');    
 const incDisplay = document.getElementById('inc-display');    
@@ -391,20 +395,20 @@ const computeDelta = function(){
 }
 
 const doASliderOnInput = function(value){
-  let c = aRange/(Math.log(aSliderRange+1));;
+  let c = aRange/(Math.log(aSliderRange+1));
   let d = aMax;
   value = aSliderRange - value;
   a = d - c*Math.log(value+1);
-
+  
   if (conicSection === 'hyperbola'){
     // a > 0 for ellipses, a < 0 for hyperbolas
     a = -a;
   }
 
+  // console.log('A rp=',rp,' e=',e,' a=',a,' value=',value);
   // a = value/aSliderRange*aRange + aMin;
   aDisplay.innerHTML = `a: ${Number(a).toFixed(2).toString()}`;
   computeP();
-  rp = a*(1-e);
   omt.shapeOrbitCurve(a, e);
 }
 
@@ -422,37 +426,84 @@ const doESliderOnInput = function(value){
       break;
 
     case 'hyperbola':
-      // c = eHyperbolaRange/(Math.exp(eSliderRange));
-      // d = eMinHyperbola - c;
-      // e = c*Math.exp(+this.value) + d;
       c = eHyperbolaRange/(Math.log(eSliderRange+1));
       d = eMaxHyperbola;
       e = d - c*Math.log(value+1);
+
       computeDelta();//hypberbolic turning angle
-      // e = value/eSliderRange*eHyperbolaRange + eMinHyperbola;
       eDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
       break;
   }
 
+  // console.log('E rp=',rp,' e=',e,' a=',a,' value=',value);
   computeP();
-  rp = a*(1-e);
   omt.shapeOrbitCurve(a, e);
 }
 
 aSlider.oninput = function(){
   doASliderOnInput(+this.value);
-}
-
-aSlider.onpointerup = function(){
-  replaceAerovisualizerData('semimajor-axis',+this.value);
-  saveToLocalStorage();
+  sliderEshouldChange = true;
 }
 
 eSlider.oninput = function(){
   doESliderOnInput(+this.value);
+  sliderAshouldChange = true;
+}
+
+aSlider.onpointerup = function(){
+  if (lockPeriapse && sliderEshouldChange){
+    let ce;
+    let de;
+
+    if (conicSection === 'ellipse'){
+      ce = eEllipseRange/(Math.log(eSliderRange+1));
+      de = eMaxEllipse;
+    }else{
+      ce = eHyperbolaRange/(Math.log(eSliderRange+1));
+      de = eMaxHyperbola;
+    }
+
+    let etemp = 1 - rp/a;
+    let eS = eSliderRange - (Math.exp((de-etemp)/ce) - 1);
+
+    if (0 < eS && eS < eSliderRange){
+      e = etemp;
+      eSlider.value = +eS;
+      doESliderOnInput(+eS);
+    }
+  }
+
+  rp = a*(1-e);
+  sliderEshouldChange = false;
+  doNuSliderOnInput(nuDegrees);
+  replaceAerovisualizerData('semimajor-axis',+this.value);
+  saveToLocalStorage();
 }
 
 eSlider.onpointerup = function(){
+  if (lockPeriapse && sliderAshouldChange){
+    let atemp = rp/(1-e);
+
+    if (conicSection === 'hyperbola'){
+      // a > 0 for ellipses, a < 0 for hyperbolas
+      atemp = -atemp;
+    }
+
+    let ca = aRange/(Math.log(aSliderRange+1));
+    let da = aMax;
+    let aS = aSliderRange - (Math.exp((da-atemp)/ca) - 1);
+
+    if (0 < aS && aS < aSliderRange){
+      a = atemp;
+      aSlider.value = +aS;
+      // console.log('E rp=',rp,' e=',e,' a=',a,' atemp=',atemp,' aS=',aS);
+      doASliderOnInput(+aS);
+    }
+  }
+
+  rp = a*(1-e);
+  sliderAshouldChange = false;
+  doNuSliderOnInput(nuDegrees);
   replaceAerovisualizerData('eccentricity',+this.value);
   saveToLocalStorage();
 }
@@ -461,7 +512,6 @@ defaultAButton.addEventListener('click', () => {
   aSlider.value = 0;
   doASliderOnInput(+aSlider.value);
   aDisplay.innerHTML = `a: ${a}`;
-  rp = a*(1-e);
   omt.needsRefresh = true;
   replaceAerovisualizerData('semimajor-axis',+aSlider.value);
   saveToLocalStorage();
@@ -471,10 +521,19 @@ defaultEButton.addEventListener('click', () => {
   eSlider.value = 0;
   doESliderOnInput(+eSlider.value);
   eDisplay.innerHTML = `e: ${e}`;
-  rp = a*(1-e);
   omt.needsRefresh = true;
   replaceAerovisualizerData('eccentricity',+eSlider.value);
   saveToLocalStorage();
+});
+
+lockPeriapseButton.addEventListener('click', () => {
+  if (lockPeriapse){
+    lockPeriapse = false;
+    lockPeriapseButton.innerHTML = 'lock periapse';
+  }else{
+    lockPeriapse = true;
+    lockPeriapseButton.innerHTML = 'unlock periapse';
+  }
 });
 
 const handleOrientationOnInput = function(opt, setValuesOnly = false){
@@ -743,8 +802,12 @@ coordinateFrameMenu.addEventListener('change', () => {
 
 conicSectionMenu.addEventListener('change', () => {
   conicSection = conicSectionMenu.value;
+  lockPeriapse = false;
+  sliderAshouldChange = false;
+  sliderEshouldChange = false;
   doASliderOnInput(+aSlider.value);
   doESliderOnInput(+eSlider.value);
+  rp = Number(a*(1-e));
   replaceAerovisualizerData('conic-section',conicSection);
   saveToLocalStorage();
 });
@@ -752,10 +815,6 @@ conicSectionMenu.addEventListener('change', () => {
 // defaultDoResetButton.addEventListener('click', () => {
 //   localStorage.clear();
 //   location.reload();
-// });
-
-// prefsReturnButton.addEventListener('click', () => {
-//   toggleShowPrefs();
 // });
 
 const doWindowResizeOrOrientationChange = function(){
@@ -870,10 +929,11 @@ const createAndInitialize = function(data, camera){
   handleMuChange();
 
   conicSectionMenu.value = conicSection;
-  aSlider.value = aSl;
-  eSlider.value = eSl;
+  aSlider.value = +aSl;
+  eSlider.value = +eSl;
   doASliderOnInput(+aSl);
   doESliderOnInput(+eSl);
+  rp = Number(a*(1-e));//r vector magnitude at periapse
 
   lanSlider.value = lanDegrees;
   incSlider.value = incDegrees;

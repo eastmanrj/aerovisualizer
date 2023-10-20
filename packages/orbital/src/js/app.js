@@ -3,6 +3,7 @@ import OrbitalMechThings from './OrbitalMechThings.js';
 import {OrbitControls} from './OrbitControls.js';
 
 const piOver180 = Math.PI / 180;
+const kmPerCDU = 6378.1;//1.495979E+08;
 let scene, camera, renderer;
 let background = null;
 const cameraRadius = 5;
@@ -15,6 +16,8 @@ let clock = null;
 let omt = null;//"vectors object" (handles all of the vectors)
 let orbitControls = null;//in this context, "orbit" refers to the camera
 let playing = false;
+let cbRadius = 1;
+let periapseTooSmall = false;
 
 const defaultCentralBody = 'Earth';
 const defaultConicSection = 'ellipse';
@@ -28,8 +31,8 @@ const defaultNu = 0;//degrees
 const defaultDelta = Math.PI/2;// 90 degrees for "square" hyperbola
 // const defaultVectorSize = 6;
 const defaultRColor = 'blue';
-const defaultCoordinateFrameChoice = 'hAndE';
-
+const defaultInertialVectorsChoice = 'X-Y-Z';
+const defaultOrbitFixedVectorsChoice = 'h-and-e';
 //aerovisualizerData is modified and saved to local storage when 
 // values and preferences are changed and is retrieved from local 
 // storage at startup
@@ -62,6 +65,7 @@ let nu = nuDegrees*piOver180;// true anomaly
 let p;//parameter (semi-latus rectum)
 let delta = defaultDelta;//turning angle for hyperbolic orbits
 let rp = Number(a*(1-e));//r vector magnitude at periapse
+periapseTooSmall = rp < cbRadius ? true : false;
 let lockPeriapse = false;
 let sliderAshouldChange = false;//required for lockPeriapse
 let sliderEshouldChange = false;//required for lockPeriapse
@@ -78,7 +82,8 @@ const eHyperbolaRange = eMaxHyperbola - eMinHyperbola;
 const aSliderRange = 150;
 const eSliderRange = 150;
 
-let coordinateFrameChoice = defaultCoordinateFrameChoice;
+let inertialVectorsChoice = defaultInertialVectorsChoice;
+let orbitFixedVectorsChoice = defaultOrbitFixedVectorsChoice;
 // let vectorSize = defaultVectorSize;
 // let rColor = defaultRColor;
 
@@ -89,14 +94,15 @@ const aeButton = document.getElementById('a-e-btn');
 const orientationButton = document.getElementById('orientation-btn');
 const rvButton = document.getElementById('r-v-btn');
 const numericalButton = document.getElementById('numerical-btn');
+const mainReturnButton = document.getElementById('main-return-btn');
 
+const toggleConicSectionButton = document.getElementById('toggle-conic-btn');
 const prefsButton = document.getElementById('preferences-btn');
 const infoButton = document.getElementById('info-btn');
 const infoReturnButton = document.getElementById('info-return-btn');
 
 const muMenu = document.getElementById('central-body-menu');
 
-const conicSectionMenu = document.getElementById('conic-section-menu');
 const aDisplay = document.getElementById('a-display');    
 const eDisplay = document.getElementById('e-display');    
 const aSlider = document.getElementById('a-slider');
@@ -104,7 +110,7 @@ const eSlider = document.getElementById('e-slider');
 const defaultAButton = document.getElementById('default-a-btn');
 const defaultEButton = document.getElementById('default-e-btn');
 const lockPeriapseButton = document.getElementById('lock-periapse-btn');
-
+const periapseWarning = document.getElementById('periapse-warning');
 const lanDisplay = document.getElementById('lan-display');    
 const incDisplay = document.getElementById('inc-display');    
 const aopDisplay = document.getElementById('aop-display');    
@@ -140,17 +146,15 @@ const OmegaDisplay = document.getElementById('Omega');
 const omegaDisplay = document.getElementById('omega');
 const radiusDisplay = document.getElementById('radius');
 const vescDisplay = document.getElementById('vesc');
-const muUnitsDisplay = document.getElementById('mu-units');
-const aUnitsDisplay = document.getElementById('a-units');
-const eUnitsDisplay = document.getElementById('e-units');
-const iUnitsDisplay = document.getElementById('i-units');
-const OmegaUnitsDisplay = document.getElementById('Omega-units');
-const omegaUnitsDisplay = document.getElementById('omega-units');
-const radiusUnitsDisplay = document.getElementById('radius-units');
-const vescUnitsDisplay = document.getElementById('vesc-units');
 
-const coordinateFrameMenu = document.getElementById('coordinate-frame-menu');
-coordinateFrameMenu.value = coordinateFrameChoice;
+const mainPrefsMenu = document.getElementById('main-prefs-menu');
+mainPrefsMenu.value = 'main-preferences';
+const inertialVectorsMenu = document.getElementById('inertial-vectors-menu');
+inertialVectorsMenu.value = inertialVectorsChoice;
+const orbitFixedVectorsMenu = document.getElementById('orbit-fixed-vectors-menu');
+orbitFixedVectorsMenu.value = orbitFixedVectorsChoice;
+const inertialVectorsElements = document.getElementById('inertial-vectors-elements');
+const orbitFixedVectorsElements = document.getElementById('orbit-fixed-vectors-elements');
 
 // const generalElements = document.getElementById('general-elements');
 // const defaultElements = document.getElementById('default-elements');
@@ -161,10 +165,11 @@ coordinateFrameMenu.value = coordinateFrameChoice;
 /*
 name     = name
 m        = mass (x1e24 kg)
-radius   = Volumetric mean radius (km)
+CDU      = canonical distance unit (CDU), radius (km)
+CTU      = canonical time unit (s)
 gravSurf = Surface gravity (mean) (m/s^2)
 vesc     = Escape velocity (km/s)
-mu       = GM (x1e6 km^3/s^2)
+mu       = GM (km^3/s^2)
 Tsid     = Sidereal orbit period (days)
 perihel  = perihelion (x1e6 km) 
 aphel    = aphelion (x1e6 km)
@@ -184,7 +189,7 @@ om       = Longitude of perihelion (deg) J2000
 ml       = Mean Longitude (deg) J2000
 
 sun, 1.98847E+06, 696340, x, 615, 1.32712440018E+11
-{name:'sun', radius:696000},
+{name:'sun', CDU:696000},
 
 G, 6.67430E-11, m3/kg/s2
 G, 39.478, AU3/M(sun)/yr2
@@ -196,60 +201,108 @@ G, 6.67430E-20, km3/kg/s2
 moon
 Trev = Revolution period (days) 27.3217
 incEcl = Inclination to ecliptic (deg) 5.145
-{name:'moon', m:0.07346, radius:1737.4, gravSurf:1.62, vesc:2.38,
+{name:'moon', m:0.07346, CDU:1737.4, gravSurf:1.62, vesc:2.38,
  mu:0.0049, akm:0.3844, Tsid:x, perihel:0.3633, aphel:0.4055, Tsyn:29.53,
   vmean:1.022, vmax:1.082, vmin:0.97, inc:18.28, -28.58, srp:0.0549, 
   daylen:655.72, obliqu:x, incEqu:6.68, a:x,  e:0.002569555, i:0.0554, 
   Om:5.16, om:125.08, ml:318.15, 135.27, 
 */
 
+/*
+G km^3/kg/s^2 6.6743E-20
+
+AU (exact)
+km
+149597870.70
+according to source, for earth
+from https://archive.aoe.vt.edu/lutze/AOE2104/consts.pdf
+JGM-2
+CTU=13.44684985511 min
+CDU/CTU = 7.905366149846 km/s
+and heliocentric
+TU=58.132821 days
+avg dist=149599650
+AU/TU=29.784852 km/s
+
+cb,m (x1e24) kg,mu km^3/s^2,radius (CDU) km,CTU s,CDU/CTU km/s,
+Avg Dist from Sun (AU),Avg Dist from Sun (km),TU s,TU min,TU hrs,TU days,AU/TU km/s,2pi * TU days
+
+sun,1988470,132712440018,696000.0,1593.888886079390,
+436.66782928137800
+
+moon,0.0734767309,4904.8695,1079.6,506.501324477232,2.13148504816700
+
+Mercury,0.3301,22032,2439.7,811.853519657804,3.00509875356374,
+0.39,58343169.57,1223289.40,20388.16,339.80,14.16,47.69,88.96
+
+Venus,4.8673,324859,6051.8,825.998766884161,7.32664532034188,
+0.72,107710466.90,3068534.75,51142.25,852.37,35.52,35.10,223.15
+
+Earth,5.97220,398600.4418,6378.1,806.804103286409,7.90538864889216,
+1.00,149597870.70,5022642.89,83710.71,1395.18,58.13,29.78,365.26
+
+Mars,0.64169,42828,3389.5,953.541414862714,3.55464371779594,
+1.52,227388763.46,9412341.65,156872.36,2614.54,108.94,24.16,684.48
+
+Jupiter,1898.13,126687000,69911.0,1642.299064209990,42.56898242442230,
+5.20,777908927.64,59557617.54,992626.96,16543.78,689.32,13.06,4331.15
+
+Saturn,568.32,37931000,58232.0,2281.631023447120,25.52209336285330,
+9.50,1421179771.65,147067838.31,2451130.64,40852.18,1702.17,9.66,10695.08
+
+Uranus,86.811,5794000,25362.0,1677.976993115500,15.11462916598780,
+19.20,2872279117.44,422555874.80,7042597.91,117376.63,4890.69,6.80,30729.13
+
+Neptune,102.409,6835100,24622.0,1477.789423646780,16.66137245673320,
+30.10,4502895908.07,829434402.04,13823906.70,230398.45,9599.94,5.43,60318.17
+*/
 let centralBodyData = [
   {name:'sun', id:0},
   {name:'moon', id:1},
-  {name:'Mercury', id:2, m:0.3301, radius:2439.7, gravSurf:3.7, 
-  vesc:4.3, mu:0.022032, Tsid:87.969, perihel:46., 
+  {name:'Mercury', id:2, m:0.3301, CDU:2439.7, CTU: 811.853519657804, gravSurf:3.7, 
+  vesc:4.3, mu:22032., Tsid:87.969, perihel:46., 
   aphel:69.818, Tsyn:115.88, vmean:47.36, vmax:58.97, vmin:38.86, 
   srp:1407.6, daylen:4222.6, obliqu:0.034, incEqu:0.034, 
   a:0.38709893, e:0.20563069, i:7.00487, Om:48.33167, 
   om:77.45645, ml:252.25084},
-  {name:'Venus', id:3, m:4.8673, radius:6051.8, gravSurf:8.87, 
-  vesc:10.36, mu:0.32486, Tsid:224.701, perihel:107.48, 
+  {name:'Venus', id:3, m:4.8673, CDU:6051.8, CTU: 825.998766884161, gravSurf:8.87, 
+  vesc:10.36, mu:324859, Tsid:224.701, perihel:107.48, 
   aphel:108.941, Tsyn:583.92, vmean:35.02, vmax:35.26, vmin:34.78, 
   srp:-5832.6, daylen:2802., obliqu:177.36, incEqu:2.64, 
   a:0.72333199, e:0.00677323, i:3.39471, Om:76.68069, 
   om:131.53298, ml:181.97973},
-  {name:'Earth', id:4, m:5.9722, radius:6371, gravSurf:9.82, 
-  vesc:11.186, mu:0.3986004418, Tsid:365.256, perihel:147.095, 
+  {name:'Earth', id:4, m:5.9722, CDU:6378.1, CTU: 806.804103286409, gravSurf:9.82, 
+  vesc:11.186, mu:398600.4418, Tsid:365.256, perihel:147.095, 
   aphel:152.1, Tsyn:0, vmean:29.78, vmax:30.29, vmin:29.29, 
   srp:23.9345, daylen:24., obliqu:23.44, incEqu:23.44, 
   a:1.00000011, e:0.01671022, i:0.00005, Om:-11.26064, 
   om:102.94719, ml:100.46435},
-  {name:'Mars', id:5, m:0.64169, radius:3389.5, gravSurf:3.73, 
-  vesc:5.03, mu:0.042828, Tsid:686.98, perihel:206.65, 
+  {name:'Mars', id:5, m:0.64169, CDU:3389.5, CTU: 953.541414862714, gravSurf:3.73, 
+  vesc:5.03, mu:42828, Tsid:686.98, perihel:206.65, 
   aphel:249.261, Tsyn:779.94, vmean:24.08, vmax:26.5, vmin:21.97, 
   srp:24.6229, daylen:24.6597, obliqu:25.19, incEqu:25.19, 
   a:1.52366231, e:0.09341233, i:1.85061, Om:49.57854, 
   om:336.04084, ml:355.45332},
-  {name:'Jupiter', id:6, m:1898.13, radius:69911, gravSurf:25.92, 
-  vesc:59.5, mu:126.687, Tsid:4332.59, perihel:740.595, 
+  {name:'Jupiter', id:6, m:1898.13, CDU:69911, CTU: 1642.299064209990, gravSurf:25.92, 
+  vesc:59.5, mu:126687000, Tsid:4332.59, perihel:740.595, 
   aphel:816.363, Tsyn:398.88, vmean:13.06, vmax:13.72, vmin:12.44, 
   srp:9.925, daylen:9.9259, obliqu:3.13, incEqu:3.13, 
   a:5.20336301, e:0.04839266, i:1.3053, Om:100.55615, 
   om:14.75385, ml:34.40438},
-  {name:'Saturn', id:7, m:568.32, radius:58232, gravSurf:11.19, 
-  vesc:35.5, mu:37.931, Tsid:10759.22, perihel:1357.55, 
+  {name:'Saturn', id:7, m:568.32, CDU:58232, CTU: 2281.631023447120, gravSurf:11.19, 
+  vesc:35.5, mu:37931000, Tsid:10759.22, perihel:1357.55, 
   aphel:1506.53, Tsyn:378.09, vmean:9.67, vmax:10.14, vmin:9.14, 
   srp:10.656, daylen:10.656, obliqu:26.73, incEqu:undefined, 
   a:9.53707032, e:0.0541506, i:2.48446, Om:113.71504, 
   om:92.43194, ml:49.94432},
-  {name:'Uranus', id:8, m:86.811, radius:25362, gravSurf:9.01, 
-  vesc:21.3, mu:5.794, Tsid:30685.40, perihel:2732.70, 
+  {name:'Uranus', id:8, m:86.811, CDU:25362, CTU: 1677.976993115500, gravSurf:9.01, 
+  vesc:21.3, mu:5794000, Tsid:30685.40, perihel:2732.70, 
   aphel:3001.39, Tsyn:369.66, vmean:6.79, vmax:7.13, vmin:6.49, 
   srp:-17.24, daylen:17.24, obliqu:97.77, incEqu:82.23, 
   a:19.19126393, e:0.04716771, i:0.76986, Om:74.22988, 
   om:170.96424, ml:313.23218},
-  {name:'Neptune', id:9, m:102.409, radius:24622, gravSurf:11.27, 
-  vesc:23.5, mu:6.8351, Tsid:60189.00, perihel:4471.05, 
+  {name:'Neptune', id:9, m:102.409, CDU:24622, CTU: 1477.789423646780, gravSurf:11.27, 
+  vesc:23.5, mu:6835100, Tsid:60189.00, perihel:4471.05, 
   aphel:4558.86, Tsyn:367.49, vmean:5.45, vmax:5.47, vmin:5.37, 
   srp:16.11, daylen:16.11, obliqu:28.32, incEqu:28.32, 
   a:30.06896348, e:0.00858587, i:1.76917, Om:131.72169, 
@@ -321,6 +374,8 @@ const handleMainButtons = function(button){
   rvElements.style.display = 'none';
   numericalElements.style.display = 'none';
   prefsElements.style.display = 'none';
+  inertialVectorsElements.style.display = 'none';
+  orbitFixedVectorsElements.style.display = 'none';
 
   switch (button){
     case 'mu':
@@ -474,6 +529,7 @@ aSlider.onpointerup = function(){
   }
 
   rp = a*(1-e);
+  handlePeriapseCheck();
   sliderEshouldChange = false;
   doNuSliderOnInput(nuDegrees);
   replaceAerovisualizerData('semimajor-axis',+this.value);
@@ -502,6 +558,7 @@ eSlider.onpointerup = function(){
   }
 
   rp = a*(1-e);
+  handlePeriapseCheck();
   sliderAshouldChange = false;
   doNuSliderOnInput(nuDegrees);
   replaceAerovisualizerData('eccentricity',+this.value);
@@ -735,23 +792,16 @@ zeroNuButton.addEventListener('click', () => {
 const handleMuChange = function(){
   const theCB = centralBodyData.find(x => x.name === centralBody);
   const cbIndex = Number(theCB.id);
-
-  muDisplay.innerHTML = +theCB.mu*1e6;//GM
-  aCBDisplay.innerHTML = theCB.a;//semimajor axis
-  eCBDisplay.innerHTML = theCB.e;//orbital eccentricity
-  iDisplay.innerHTML = theCB.i;//orbital inclination
-  OmegaDisplay.innerHTML = theCB.Om;//longitude of ascending node
-  omegaDisplay.innerHTML = theCB.om;//longitude of perihelion
-  radiusDisplay.innerHTML = theCB.radius;//volumetric mean radius
-  vescDisplay.innerHTML = theCB.vesc;//escape velocity
-  muUnitsDisplay.innerHTML = ' km&sup3;/s&sup2;';
-  aUnitsDisplay.innerHTML = ' AU';
-  eUnitsDisplay.innerHTML = ' nd';
-  iUnitsDisplay.innerHTML = ' &deg;';
-  OmegaUnitsDisplay.innerHTML = ' &deg;';
-  omegaUnitsDisplay.innerHTML = ' &deg;';
-  radiusUnitsDisplay.innerHTML = ' km';
-  vescUnitsDisplay.innerHTML = ' km/s';
+  console.log('cbRadius=',cbRadius, ' kmPerCDU=',kmPerCDU);
+  // cbRadius = theCB.CDU/kmPerCDU;
+  muDisplay.innerHTML = `${+theCB.mu*1e6} km&sup3;/s&sup2;`;//+theCB.mu*1e6;//GM
+  aCBDisplay.innerHTML = `${theCB.a} AU`;//semimajor axis
+  eCBDisplay.innerHTML = `${theCB.e}`;//orbital eccentricity
+  iDisplay.innerHTML = `${theCB.i}&deg;`;//orbital inclination
+  OmegaDisplay.innerHTML = `${theCB.Om}&deg;`;//longitude of ascending node
+  omegaDisplay.innerHTML = `${theCB.om}&deg;`;//longitude of perihelion
+  radiusDisplay.innerHTML = `${theCB.CDU} km`;//canonical distance unit (radius)
+  vescDisplay.innerHTML = `${theCB.vesc} km/s`;//escape velocity
   omt.setMuIndex(cbIndex);
 }
 
@@ -762,35 +812,85 @@ muMenu.addEventListener('change', () => {
   saveToLocalStorage();
 });
 
-coordinateFrameMenu.addEventListener('change', () => {
-  coordinateFrameChoice = coordinateFrameMenu.value;
+const handleMainPrefs = function(opt){
+  inertialVectorsElements.style.display = 'none';
+  orbitFixedVectorsElements.style.display = 'none';
 
-  switch (coordinateFrameChoice){
-    case 'hOnly':
+  switch (opt){
+    case 'inertial-vectors':
+      inertialVectorsElements.style.display = 'grid';
+      break;
+
+    case 'orbit-fixed-vectors':
+      orbitFixedVectorsElements.style.display = 'grid';
+      break;
+
+    case 'units':
+      break;
+  }
+}
+
+mainPrefsMenu.addEventListener('change', () => {
+  handleMainPrefs(mainPrefsMenu.value);
+});
+
+inertialVectorsMenu.addEventListener('change', () => {
+  inertialVectorsChoice = inertialVectorsMenu.value;
+
+  switch (inertialVectorsChoice){
+    case 'X-Y-Z':
+      omt.showXYZFrame(true);
+      break;
+
+    case 'x-y-z':
+      omt.showXYZFrame(true);
+      break;
+
+    case 'I-J-K':
+      omt.showXYZFrame(true);
+      break;
+    
+    case 'i-j-k':
+      omt.showXYZFrame(true);
+      break;
+
+    case 'no-inertial-vectors':
+      omt.showXYZFrame(false);
+      break;
+  }
+
+  // saveToLocalStorage();
+});
+
+orbitFixedVectorsMenu.addEventListener('change', () => {
+  orbitFixedVectorsChoice = orbitFixedVectorsMenu.value;
+
+  switch (orbitFixedVectorsChoice){
+    case 'h-only':
       omt.showPQWFrame(false);
       omt.showH(true);
       omt.showE(false);
       break;
 
-    case 'eOnly':
+    case 'e-only':
       omt.showPQWFrame(false);
       omt.showH(false);
       omt.showE(true);
       break;
 
-    case 'hAndE':
+    case 'h-and-e':
       omt.showPQWFrame(false);
       omt.showH(true);
       omt.showE(true);
       break;
     
-    case 'pqw':
+    case 'p-q-w':
       omt.showPQWFrame(true);
       omt.showE(false);
       omt.showH(false);
       break;
 
-    case 'none':
+    case 'no-orbit-fixed-vectors':
       omt.showPQWFrame(false);
       omt.showE(false);
       omt.showH(false);
@@ -800,14 +900,14 @@ coordinateFrameMenu.addEventListener('change', () => {
   // saveToLocalStorage();
 });
 
-conicSectionMenu.addEventListener('change', () => {
-  conicSection = conicSectionMenu.value;
-  lockPeriapse = false;
+toggleConicSectionButton.addEventListener('click', () => {
+  conicSection = conicSection === 'ellipse' ? 'hyperbola' : 'ellipse';
   sliderAshouldChange = false;
   sliderEshouldChange = false;
   doASliderOnInput(+aSlider.value);
   doESliderOnInput(+eSlider.value);
   rp = Number(a*(1-e));
+  handlePeriapseCheck();
   replaceAerovisualizerData('conic-section',conicSection);
   saveToLocalStorage();
 });
@@ -816,6 +916,41 @@ conicSectionMenu.addEventListener('change', () => {
 //   localStorage.clear();
 //   location.reload();
 // });
+
+const handlePeriapseCheck = function(){
+  periapseTooSmall = rp < cbRadius ? true : false;
+  console.log('cbRadius=',cbRadius, ' rp=',rp);
+
+  if (periapseTooSmall === false){
+    periapseWarning.innerHTML = '&nbsp';
+    muButton.style.backgroundColor = 'rgb(125,125,255)';
+    aeButton.style.backgroundColor = 'rgb(125,125,255)';
+    orientationButton.style.backgroundColor = 'rgb(125,125,255)';
+    rvButton.style.backgroundColor = 'rgb(125,125,255)';
+    numericalButton.style.backgroundColor = 'rgb(125,125,255)';
+    mainReturnButton.style.backgroundColor = 'rgb(125,125,255)';
+    toggleConicSectionButton.style.backgroundColor = 'rgb(125,125,255)';
+    prefsButton.style.backgroundColor = 'rgb(125,125,255)';
+    infoButton.style.backgroundColor = 'rgb(125,125,255)';
+    defaultAButton.style.backgroundColor = 'rgb(125,125,255)';
+    defaultEButton.style.backgroundColor = 'rgb(125,125,255)';
+    lockPeriapseButton.style.backgroundColor = 'rgb(125,125,255)';
+  }else{
+    periapseWarning.innerHTML = 'PERIAPSE TOO SMALL';
+    muButton.style.backgroundColor = 'red';
+    aeButton.style.backgroundColor = 'red';
+    orientationButton.style.backgroundColor = 'red';
+    rvButton.style.backgroundColor = 'red';
+    numericalButton.style.backgroundColor = 'red';
+    mainReturnButton.style.backgroundColor = 'red';
+    toggleConicSectionButton.style.backgroundColor = 'red';
+    prefsButton.style.backgroundColor = 'red';
+    infoButton.style.backgroundColor = 'red';
+    defaultAButton.style.backgroundColor = 'red';
+    defaultEButton.style.backgroundColor = 'red';
+    lockPeriapseButton.style.backgroundColor = 'red';
+  }
+}
 
 const doWindowResizeOrOrientationChange = function(){
   camera.aspect = 1;
@@ -928,12 +1063,12 @@ const createAndInitialize = function(data, camera){
   muMenu.value = centralBody;
   handleMuChange();
 
-  conicSectionMenu.value = conicSection;
   aSlider.value = +aSl;
   eSlider.value = +eSl;
   doASliderOnInput(+aSl);
   doESliderOnInput(+eSl);
   rp = Number(a*(1-e));//r vector magnitude at periapse
+  handlePeriapseCheck();
 
   lanSlider.value = lanDegrees;
   incSlider.value = incDegrees;
@@ -945,6 +1080,7 @@ const createAndInitialize = function(data, camera){
   nuSlider.value = nuDegrees;
   doNuSliderOnInput(nuDegrees);
 
+  handleMainPrefs(mainPrefsMenu.value);
   // rColorMenu.value = rColor;
 }
 

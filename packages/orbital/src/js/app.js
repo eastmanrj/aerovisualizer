@@ -3,7 +3,6 @@ import OrbitalMechThings from './OrbitalMechThings.js';
 import {OrbitControls} from './OrbitControls.js';
 
 const piOver180 = Math.PI / 180;
-const kmPerCDU = 6378.1;//1.495979E+08;
 let scene, camera, renderer;
 let background = null;
 const cameraRadius = 5;
@@ -30,7 +29,14 @@ const defaultNu = 0;//degrees
 
 const defaultDelta = Math.PI/2;// 90 degrees for "square" hyperbola
 // const defaultVectorSize = 6;
+
+const defaultPQWFrameColor = 'blue';
+const defaultXYZFrameColor = 'blue';
 const defaultRColor = 'blue';
+const defaultVColor = 'blue';
+const defaultHColor = 'blue';
+const defaultEColor = 'blue';
+
 const defaultInertialVectorsChoice = 'X-Y-Z';
 const defaultOrbitFixedVectorsChoice = 'h-and-e';
 //aerovisualizerData is modified and saved to local storage when 
@@ -44,9 +50,14 @@ let aerovisualizerData = [
   {name:'longitude-of-ascending-node', value:defaultLan},
   {name:'inclination', value:defaultInclination},
   {name:'argument-of-periapsis', value:defaultAop},
-  {name:'true-anomaly', value:defaultNu}
+  {name:'true-anomaly', value:defaultNu},
+  {name:'pqwFrameColor', value:defaultPQWFrameColor},
+  {name:'xyzFrameColor', value:defaultXYZFrameColor},
+  {name:'rColor', value:defaultRColor},
+  {name:'vColor', value:defaultVColor},
+  {name:'hColor', value:defaultHColor},
+  {name:'eColor', value:defaultEColor}
   // {name:'vectorSize', value:defaultVectorSize},
-  // {name:'rColor', value:defaultRColor},
 ];
 
 let centralBody = defaultCentralBody;
@@ -62,13 +73,22 @@ let aop = aopDegrees*piOver180;// argument of periapsis
 let nuDegrees = defaultNu;
 let nu = nuDegrees*piOver180;// true anomaly
 
+let pqwFrameColor = defaultPQWFrameColor;
+let xyzFrameColor = defaultXYZFrameColor;
+let rColor = defaultRColor;
+let vColor = defaultVColor;
+let hColor = defaultHColor;
+let eColor = defaultEColor;
+
 let p;//parameter (semi-latus rectum)
 let delta = defaultDelta;//turning angle for hyperbolic orbits
 let rp = Number(a*(1-e));//r vector magnitude at periapse
+let ra = Number(a*(1+e));//r vector magnitude at apoapse
 periapseTooSmall = rp < cbRadius ? true : false;
-let lockPeriapse = false;
-let sliderAshouldChange = false;//required for lockPeriapse
-let sliderEshouldChange = false;//required for lockPeriapse
+let periapseLocked = false;
+let apoapseLocked = false;
+let sliderAshouldChange = false;//required for locking the periapse/apoapse
+let sliderEshouldChange = false;//required for locking the periapse/apoapse
 
 const aMin = 1;
 const aMax = 60;
@@ -85,7 +105,6 @@ const eSliderRange = 150;
 let inertialVectorsChoice = defaultInertialVectorsChoice;
 let orbitFixedVectorsChoice = defaultOrbitFixedVectorsChoice;
 // let vectorSize = defaultVectorSize;
-// let rColor = defaultRColor;
 
 const threeDWorld = document.getElementById('threeD-world');
 
@@ -110,6 +129,7 @@ const eSlider = document.getElementById('e-slider');
 const defaultAButton = document.getElementById('default-a-btn');
 const defaultEButton = document.getElementById('default-e-btn');
 const lockPeriapseButton = document.getElementById('lock-periapse-btn');
+const lockApoapseButton = document.getElementById('lock-apoapse-btn');
 const periapseWarning = document.getElementById('periapse-warning');
 const lanDisplay = document.getElementById('lan-display');    
 const incDisplay = document.getElementById('inc-display');    
@@ -321,6 +341,7 @@ const saveToLocalStorage = function(){
 }
 
 const getFromLocalStorage = function(){
+  // localStorage.clear();
   const data = JSON.parse(localStorage.getItem('aerovisualizerData'));
   return data;
 }
@@ -460,7 +481,6 @@ const doASliderOnInput = function(value){
     a = -a;
   }
 
-  // console.log('A rp=',rp,' e=',e,' a=',a,' value=',value);
   // a = value/aSliderRange*aRange + aMin;
   aDisplay.innerHTML = `a: ${Number(a).toFixed(2).toString()}`;
   computeP();
@@ -490,7 +510,6 @@ const doESliderOnInput = function(value){
       break;
   }
 
-  // console.log('E rp=',rp,' e=',e,' a=',a,' value=',value);
   computeP();
   omt.shapeOrbitCurve(a, e);
 }
@@ -506,29 +525,45 @@ eSlider.oninput = function(){
 }
 
 aSlider.onpointerup = function(){
-  if (lockPeriapse && sliderEshouldChange){
-    let ce;
-    let de;
+  if ((periapseLocked || apoapseLocked) && sliderEshouldChange){
+    const apses = [periapseLocked, apoapseLocked];
 
-    if (conicSection === 'ellipse'){
-      ce = eEllipseRange/(Math.log(eSliderRange+1));
-      de = eMaxEllipse;
-    }else{
-      ce = eHyperbolaRange/(Math.log(eSliderRange+1));
-      de = eMaxHyperbola;
-    }
+    for (apseLocked in apses){
+      if (apseLocked){
+        let ce;
+        let de;
 
-    let etemp = 1 - rp/a;
-    let eS = eSliderRange - (Math.exp((de-etemp)/ce) - 1);
+        if (conicSection === 'ellipse'){
+          ce = eEllipseRange/(Math.log(eSliderRange+1));
+          de = eMaxEllipse;
+        }else{
+          ce = eHyperbolaRange/(Math.log(eSliderRange+1));
+          de = eMaxHyperbola;
+        }
 
-    if (0 < eS && eS < eSliderRange){
-      e = etemp;
-      eSlider.value = +eS;
-      doESliderOnInput(+eS);
+        let etemp;
+
+        // assuming that only periapseLocked
+        // or apoapseLocked but not both
+        if (periapseLocked){
+          etemp = 1 - rp/a;
+        }else{
+          etemp = 1 + ra/a;
+        }
+
+        let eS = eSliderRange - (Math.exp((de-etemp)/ce) - 1);
+
+        if (0 < eS && eS < eSliderRange){
+          e = etemp;
+          eSlider.value = +eS;
+          doESliderOnInput(+eS);
+        }
+      }
     }
   }
 
   rp = a*(1-e);
+  ra = a*(1+e);
   handlePeriapseCheck();
   sliderEshouldChange = false;
   doNuSliderOnInput(nuDegrees);
@@ -537,27 +572,41 @@ aSlider.onpointerup = function(){
 }
 
 eSlider.onpointerup = function(){
-  if (lockPeriapse && sliderAshouldChange){
-    let atemp = rp/(1-e);
+  if ((periapseLocked || apoapseLocked) && sliderAshouldChange){
+    const apses = [periapseLocked, apoapseLocked];
 
-    if (conicSection === 'hyperbola'){
-      // a > 0 for ellipses, a < 0 for hyperbolas
-      atemp = -atemp;
-    }
+    for (apseLocked in apses){
+      if (apseLocked){
+        let atemp;
 
-    let ca = aRange/(Math.log(aSliderRange+1));
-    let da = aMax;
-    let aS = aSliderRange - (Math.exp((da-atemp)/ca) - 1);
+        // assuming that only periapseLocked
+        // or apoapseLocked but not both
+        if (periapseLocked){
+          atemp = rp/(1-e);
+        }else{
+          atemp = ra/(1+e);
+        }
 
-    if (0 < aS && aS < aSliderRange){
-      a = atemp;
-      aSlider.value = +aS;
-      // console.log('E rp=',rp,' e=',e,' a=',a,' atemp=',atemp,' aS=',aS);
-      doASliderOnInput(+aS);
+        if (conicSection === 'hyperbola'){
+          // a > 0 for ellipses, a < 0 for hyperbolas
+          atemp = -atemp;
+        }
+
+        let ca = aRange/(Math.log(aSliderRange+1));
+        let da = aMax;
+        let aS = aSliderRange - (Math.exp((da-atemp)/ca) - 1);
+
+        if (0 < aS && aS < aSliderRange){
+          a = atemp;
+          aSlider.value = +aS;
+          doASliderOnInput(+aS);
+        }
+      }
     }
   }
 
   rp = a*(1-e);
+  ra = a*(1+e);
   handlePeriapseCheck();
   sliderAshouldChange = false;
   doNuSliderOnInput(nuDegrees);
@@ -584,12 +633,50 @@ defaultEButton.addEventListener('click', () => {
 });
 
 lockPeriapseButton.addEventListener('click', () => {
-  if (lockPeriapse){
-    lockPeriapse = false;
+  handlePeriapseCheck();
+
+  if (periapseLocked){
+    periapseLocked = false;
     lockPeriapseButton.innerHTML = 'lock periapse';
+
+    if (!periapseTooSmall){
+      lockPeriapseButton.style.backgroundColor = 'mediumblue';
+    }
   }else{
-    lockPeriapse = true;
-    lockPeriapseButton.innerHTML = 'unlock periapse';
+    periapseLocked = true;
+    lockPeriapseButton.innerHTML = 'PERIAPSE LOCKED';
+    lockPeriapseButton.style.backgroundColor = 'red';
+
+    apoapseLocked = false;
+    lockApoapseButton.innerHTML = 'lock apoapse';
+    
+    if (!periapseTooSmall){
+      lockApoapseButton.style.backgroundColor = 'mediumblue';
+    }
+  }
+});
+
+lockApoapseButton.addEventListener('click', () => {
+  handlePeriapseCheck();
+
+  if (apoapseLocked){
+    apoapseLocked = false;
+    lockApoapseButton.innerHTML = 'lock apoapse';
+
+    if (!periapseTooSmall){
+      lockApoapseButton.style.backgroundColor = 'mediumblue';
+    }
+  }else{
+    apoapseLocked = true;
+    lockApoapseButton.innerHTML = 'APOAPSE LOCKED';
+    lockApoapseButton.style.backgroundColor = 'red';
+
+    periapseLocked = false;
+    lockPeriapseButton.innerHTML = 'lock periapse';
+
+    if (!periapseTooSmall){
+      lockPeriapseButton.style.backgroundColor = 'mediumblue';
+    }
   }
 });
 
@@ -747,13 +834,51 @@ zeroNuButton.addEventListener('click', () => {
 //   saveToLocalStorage();
 // }
 
-// const setRColor = function(color, save=false){
-//   omt.setColor('r', color);
+const setPQWFrameColor = function(color, save=false){
+  omt.setColor('pqwFrame', color);
 
-//   if (save){
-//     replaceAerovisualizerData('rColor',color);
-//   }
-// }
+  if (save){
+    replaceAerovisualizerData('pqwFrameColor',color);
+  }
+}
+
+const setXYZFrameColor = function(color, save=false){
+  omt.setColor('xyzFrame', color);
+
+  if (save){
+    replaceAerovisualizerData('xyzFrameColor',color);
+  }
+}
+
+const setRColor = function(color, save=false){
+  omt.setColor('r', color);
+
+  if (save){
+    replaceAerovisualizerData('rColor',color);
+  }
+}
+const setVColor = function(color, save=false){
+  omt.setColor('v', color);
+
+  if (save){
+    replaceAerovisualizerData('vColor',color);
+  }
+}
+const setHColor = function(color, save=false){
+  omt.setColor('h', color);
+
+  if (save){
+    replaceAerovisualizerData('hColor',color);
+  }
+}
+
+const setEColor = function(color, save=false){
+  omt.setColor('e', color);
+
+  if (save){
+    replaceAerovisualizerData('eColor',color);
+  }
+}
 
 // rColorMenu.addEventListener('change', () => {
 //   rColor = rColorMenu.value;
@@ -792,8 +917,6 @@ zeroNuButton.addEventListener('click', () => {
 const handleMuChange = function(){
   const theCB = centralBodyData.find(x => x.name === centralBody);
   const cbIndex = Number(theCB.id);
-  console.log('cbRadius=',cbRadius, ' kmPerCDU=',kmPerCDU);
-  // cbRadius = theCB.CDU/kmPerCDU;
   muDisplay.innerHTML = `${+theCB.mu*1e6} km&sup3;/s&sup2;`;//+theCB.mu*1e6;//GM
   aCBDisplay.innerHTML = `${theCB.a} AU`;//semimajor axis
   eCBDisplay.innerHTML = `${theCB.e}`;//orbital eccentricity
@@ -907,6 +1030,7 @@ toggleConicSectionButton.addEventListener('click', () => {
   doASliderOnInput(+aSlider.value);
   doESliderOnInput(+eSlider.value);
   rp = Number(a*(1-e));
+  ra = Number(a*(1+e));
   handlePeriapseCheck();
   replaceAerovisualizerData('conic-section',conicSection);
   saveToLocalStorage();
@@ -919,22 +1043,28 @@ toggleConicSectionButton.addEventListener('click', () => {
 
 const handlePeriapseCheck = function(){
   periapseTooSmall = rp < cbRadius ? true : false;
-  console.log('cbRadius=',cbRadius, ' rp=',rp);
 
   if (periapseTooSmall === false){
     periapseWarning.innerHTML = '&nbsp';
-    muButton.style.backgroundColor = 'rgb(125,125,255)';
-    aeButton.style.backgroundColor = 'rgb(125,125,255)';
-    orientationButton.style.backgroundColor = 'rgb(125,125,255)';
-    rvButton.style.backgroundColor = 'rgb(125,125,255)';
-    numericalButton.style.backgroundColor = 'rgb(125,125,255)';
-    mainReturnButton.style.backgroundColor = 'rgb(125,125,255)';
-    toggleConicSectionButton.style.backgroundColor = 'rgb(125,125,255)';
-    prefsButton.style.backgroundColor = 'rgb(125,125,255)';
-    infoButton.style.backgroundColor = 'rgb(125,125,255)';
-    defaultAButton.style.backgroundColor = 'rgb(125,125,255)';
-    defaultEButton.style.backgroundColor = 'rgb(125,125,255)';
-    lockPeriapseButton.style.backgroundColor = 'rgb(125,125,255)';
+    muButton.style.backgroundColor = 'mediumblue';
+    aeButton.style.backgroundColor = 'mediumblue';
+    orientationButton.style.backgroundColor = 'mediumblue';
+    rvButton.style.backgroundColor = 'mediumblue';
+    numericalButton.style.backgroundColor = 'mediumblue';
+    mainReturnButton.style.backgroundColor = 'mediumblue';
+    toggleConicSectionButton.style.backgroundColor = 'mediumblue';
+    prefsButton.style.backgroundColor = 'mediumblue';
+    infoButton.style.backgroundColor = 'mediumblue';
+    defaultAButton.style.backgroundColor = 'mediumblue';
+    defaultEButton.style.backgroundColor = 'mediumblue';
+
+    if (!periapseLocked){
+      lockPeriapseButton.style.backgroundColor = 'mediumblue';
+    }
+
+    if (!apoapseLocked){
+      lockApoapseButton.style.backgroundColor = 'mediumblue';
+    }
   }else{
     periapseWarning.innerHTML = 'PERIAPSE TOO SMALL';
     muButton.style.backgroundColor = 'red';
@@ -949,6 +1079,7 @@ const handlePeriapseCheck = function(){
     defaultAButton.style.backgroundColor = 'red';
     defaultEButton.style.backgroundColor = 'red';
     lockPeriapseButton.style.backgroundColor = 'red';
+    lockApoapseButton.style.backgroundColor = 'red';
   }
 }
 
@@ -1046,9 +1177,24 @@ const createAndInitialize = function(data, camera){
           case 'true-anomaly':
             nuDegrees  = o.value;
             break;
-          // case 'rColor':
-          //   rColor  = o.value;
-          //   break;
+          case 'pqwFrameColor':
+            pqwFrameColor  = o.value;
+            break;
+          case 'xyzFrameColor':
+            xyzFrameColor  = o.value;
+            break;
+          case 'rColor':
+            rColor  = o.value;
+            break;
+          case 'vColor':
+            vColor  = o.value;
+            break;
+          case 'hColor':
+            hColor  = o.value;
+            break;
+          case 'eColor':
+            eColor  = o.value;
+            break;
           // case 'vectorSize':
           //   vectorSize  = o.value;
           //   break;
@@ -1067,7 +1213,8 @@ const createAndInitialize = function(data, camera){
   eSlider.value = +eSl;
   doASliderOnInput(+aSl);
   doESliderOnInput(+eSl);
-  rp = Number(a*(1-e));//r vector magnitude at periapse
+  rp = Number(a*(1-e));
+  ra = Number(a*(1+e));
   handlePeriapseCheck();
 
   lanSlider.value = lanDegrees;
@@ -1081,7 +1228,6 @@ const createAndInitialize = function(data, camera){
   doNuSliderOnInput(nuDegrees);
 
   handleMainPrefs(mainPrefsMenu.value);
-  // rColorMenu.value = rColor;
 }
 
 const completeInitialization = function(continueAnimation = true) {
@@ -1116,16 +1262,15 @@ const completeInitialization = function(continueAnimation = true) {
     // handleInfoMenuChoice(infoMenu.value);
     loadBackground();
     omt.showR(true);
-    // setRColor(rColor);
+
+    setPQWFrameColor(pqwFrameColor);
+    setXYZFrameColor(xyzFrameColor);
+    setRColor(rColor);
+    setVColor(vColor);
+    setHColor(hColor);
+    setEColor(eColor);
+    
     // omt.setVectorSize(vectorSize);
-
-    omt.setColor('pqwFrame','yellow');
-    omt.setColor('xyzFrame','red');
-    omt.setColor('r','yellow');
-    omt.setColor('v','blue');
-    omt.setColor('h','red');
-    omt.setColor('e','green');
-
     // omt.setMuIndex(0);
     // omt.computeRotation(lan, inc, aop);
     // computeP();

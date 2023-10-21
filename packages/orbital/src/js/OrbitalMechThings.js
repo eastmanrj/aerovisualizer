@@ -332,7 +332,7 @@ class OrbitalMechThings {
         theColor = 0x00ff00;//0x55ff55;//light green
         break;
       case 'blue':
-        theColor = 0x0000ff;//0x5555ff;//light blue
+        theColor = 0x5555ff;//light blue //blue 0x0000ff
         break;
       case 'yellow':
         theColor = 0xffff00;//0xffff55;//light yellow
@@ -351,7 +351,7 @@ class OrbitalMechThings {
   setColor(thing, color){
     this.needsRefresh = true;
     const theColor = this._colorForName(color);
-    
+    console.log(thing, color, theColor);
     switch (thing){
       case 'pqwFrame':
         this._pqwFrameColor = theColor;

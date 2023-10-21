@@ -106,8 +106,8 @@ label {
 
 .menu {
   display: block;
-  background-color: rgb(125, 125, 255);
-  color: rgb(225, 225, 255);
+  background-color:mediumblue;
+  color: rgb(235, 235, 255);
   font-family: inherit;
   font-size: 1.5rem;
   font-weight: 600;
@@ -123,7 +123,7 @@ label {
 .btn:link,
 .btn:visited {
   display: block;
-  background-color: rgb(125, 125, 255);
+  background-color:mediumblue;
   color: rgb(225, 225, 255);
   font-family: inherit;
   font-weight: 600;
@@ -141,8 +141,8 @@ label {
 .btn[disabled],
 .btn.disabled:hover,
 .btn.disabled:active {
-  background-color: #aaa;
-  color: #555;
+  color:orange;
+  border-color:orange;
 }
 
 .btn-with-icon {

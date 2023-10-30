@@ -853,7 +853,7 @@ const computeTimeAfterPeriapse = function(){
   meanMotion = Math.sqrt(muCanonical/aCubed);
   timeAfterPeriapse = meanAnomaly/meanMotion;
   universalArrayIndex0 = universalArray.findIndex((e) => e.t >= timeAfterPeriapse);
-  console.log(timeAfterPeriapse, universalArrayIndex0);
+  // console.log(timeAfterPeriapse, universalArrayIndex0);
 }
 
 const doNuSliderOnInput = function(value){
@@ -923,7 +923,7 @@ const computeUniversal = function(){
   let f;
   let g;
   let i;
-  console.log('f = ',f);
+  // console.log('f = ',f);
 
   needToComputeUniversal = false;
   // set needToComputeUniversal to true whenever a or e changes

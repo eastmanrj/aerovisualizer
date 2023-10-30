@@ -3,6 +3,8 @@ import OrbitalMechThings from './OrbitalMechThings.js';
 import {OrbitControls} from './OrbitControls.js';
 
 const piOver180 = Math.PI / 180;
+const twoPi = 2*Math.PI;
+
 let scene, camera, renderer;
 let background = null;
 const cameraRadius = 5;
@@ -16,6 +18,9 @@ let omt = null;//"vectors object" (handles all of the vectors)
 let orbitControls = null;//in this context, "orbit" refers to the camera
 let playing = false;
 let cbRadius = 1;
+const muCanonical = 1;//mu is 1 for canonical units of distance (DU)
+//and time (TU), do not change this
+const sqrtMuCanonical = Math.sqrt(muCanonical);//this should be 1 also
 let periapseTooSmall = false;
 
 const defaultCentralBody = 'Earth';
@@ -63,6 +68,7 @@ let aerovisualizerData = [
 let centralBody = defaultCentralBody;
 let conicSection = defaultConicSection;
 let a = Number(defaultA);
+let tp = twoPi*Math.pow(a,1.5)/muCanonical;//orbital period
 let e = Number(defaultE);
 let lanDegrees = defaultLan;
 let lan = lanDegrees*piOver180; // longitude of the ascending node
@@ -72,31 +78,46 @@ let aopDegrees = defaultAop;
 let aop = aopDegrees*piOver180;// argument of periapsis
 let nuDegrees = defaultNu;
 let nu = nuDegrees*piOver180;// true anomaly
+let eccentricAnomaly;
+let hyperbolicAnomaly;
+let meanAnomaly;
+let meanMotion;
+let timeAfterPeriapse;
+
+let universalArray = [];
+const universalArraySize = 60;
+let universalArrayIndex0 = 0;
+let universalArrayIndex = universalArrayIndex0;
+let needToComputeUniversal = true;
+let animationPeriod = tp;
 
 let pqwFrameColor = defaultPQWFrameColor;
 let xyzFrameColor = defaultXYZFrameColor;
-let rColor = defaultRColor;
-let vColor = defaultVColor;
-let hColor = defaultHColor;
-let eColor = defaultEColor;
+let rColor = 'yellow';//defaultRColor;  temporary
+let vColor = 'yellow';//defaultVColor;  temporary
+let hColor = 'yellow';//defaultHColor;  temporary
+let eColor = 'yellow';//defaultEColor;  temporary
 
+let rVector = new THREE.Vector3(1, 1, 1);
+let vVector = new THREE.Vector3(1, 1, 1);
 let p;//parameter (semi-latus rectum)
+let sqrtMuOverP;
 let delta = defaultDelta;//turning angle for hyperbolic orbits
 let rp = Number(a*(1-e));//r vector magnitude at periapse
 let ra = Number(a*(1+e));//r vector magnitude at apoapse
 periapseTooSmall = rp < cbRadius ? true : false;
 let periapseLocked = false;
 let apoapseLocked = false;
-let sliderAshouldChange = false;//required for locking the periapse/apoapse
-let sliderEshouldChange = false;//required for locking the periapse/apoapse
+let sliderAcanChange = false;//required for locking the periapse/apoapse
+let sliderEcanChange = false;//required for locking the periapse/apoapse
 
 const aMin = 1;
 const aMax = 60;
 const aRange = aMax - aMin;
 const eMinEllipse = 0;
-const eMaxEllipse = 0.95;
+const eMaxEllipse = 0.98;
 const eEllipseRange = eMaxEllipse - eMinEllipse;
-const eMinHyperbola = 1.05;
+const eMinHyperbola = 1.02;
 const eMaxHyperbola = 5;
 const eHyperbolaRange = eMaxHyperbola - eMinHyperbola;
 const aSliderRange = 150;
@@ -142,8 +163,9 @@ const zeroIncButton = document.getElementById('zero-inc-btn');
 const zeroAopButton = document.getElementById('zero-aop-btn');
 
 const nuSlider = document.getElementById('nu-slider');
-const nuDisplay = document.getElementById('nu-display');    
+const nuDisplay = document.getElementById('nu-display');
 const zeroNuButton = document.getElementById('zero-nu-btn');
+const timeAfterPeriapseDisplay = document.getElementById('tap-display');
 const playPauseButton = document.getElementById('play-pause-btn');
 const resetButton = document.getElementById('reset-btn');
 
@@ -346,42 +368,6 @@ const getFromLocalStorage = function(){
   return data;
 }
 
-// const setVector = function(opt, mag, x, y, z){
-//   const xyz = new THREE.Vector3(x, y, z);
-//   xyz.normalize();
-//   xyz.multiplyScalar(mag);
-
-//   switch (opt){
-//     case 1:
-//       r.copy(xyz);
-//       omt.setR(xyz.x, xyz.y, xyz.z);
-//       break;
-//     case 2:
-//       h.copy(xyz);
-//       omt.setH(xyz.x, xyz.y, xyz.z);
-//       break;
-//     case 3:
-//       e.copy(xyz);
-//       omt.setE(xyz.x, xyz.y, xyz.z);
-//       break;
-//   }
-// }
-
-// const sendVectorData = function(){
-//   return [this._r, this._h, this._h, this._quat];
-// }
-
-const haltPlay = function(){
-  if (playing){
-    playing = false;
-    playPauseButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-    <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" stroke-width="0" fill="currentColor"></path>
- </svg>`;
-    clock.getDelta();
-  }
-}
-
 const handleMainButtons = function(button){
   muButton.disabled = false;
   aeButton.disabled = false;
@@ -457,6 +443,7 @@ const computeP = function(){
   // a < 0 and e > 1 for hyperbolas
   // thus p is always positive
   p = a*(1 - e*e);
+  sqrtMuOverP = Math.sqrt(muCanonical/p);//needed for computing velocity
 }
 
 const computeDelta = function(){
@@ -476,11 +463,36 @@ const doASliderOnInput = function(value){
   value = aSliderRange - value;
   a = d - c*Math.log(value+1);
   
-  if (conicSection === 'hyperbola'){
-    // a > 0 for ellipses, a < 0 for hyperbolas
+  // a > 0 for ellipses, a < 0 for hyperbolas
+  if (conicSection === 'ellipse'){
+    tp = twoPi*Math.pow(a,1.5)/muCanonical;//orbital period
+    animationPeriod = tp;
+  }else{
     a = -a;
+    tp = null;//orbital period is not defined for hyperbolic orbits
+
+    // set animationPeriod equal to the time period of the flyby.  Since
+    // the time is infinite to reach the delta angle, we reduce this
+    // angle by a small amount (th) to make the animation time reasonable.
+    // nu1 and nu2 are true anomalies at the extremes of the flyby
+
+    const th = Math.PI/100;
+    const nu1 = -(Math.PI + delta)/2 + th;
+    const nu2 = (Math.PI + delta)/2 - th;
+    const cosnu1 = Math.cos(nu1);
+    const cosnu2 = Math.cos(nu2);
+    const coshF1 = (e + cosnu1)/(1 + e*cosnu1);
+    const coshF2 = (e + cosnu2)/(1 + e*cosnu2);
+    const F1 = -Math.log(coshF1 + Math.sqrt(coshF1*coshF1 - 1));
+    const F2 = Math.log(coshF2 + Math.sqrt(coshF2*coshF2 - 1));
+    const M1 = e*Math.sinh(F1) - F1;
+    const M2 = e*Math.sinh(F2) - F2;
+    const n = Math.sqrt(muCanonical/(-a*a*a));
+    animationPeriod = (M2 - M1)/n;
   }
 
+  needToComputeUniversal = true;
+  meanMotion = Math.sqrt(1/(a*a*a));
   // a = value/aSliderRange*aRange + aMin;
   aDisplay.innerHTML = `a: ${Number(a).toFixed(2).toString()}`;
   computeP();
@@ -510,22 +522,23 @@ const doESliderOnInput = function(value){
       break;
   }
 
+  needToComputeUniversal = true;
   computeP();
   omt.shapeOrbitCurve(a, e);
 }
 
 aSlider.oninput = function(){
   doASliderOnInput(+this.value);
-  sliderEshouldChange = true;
+  sliderEcanChange = true;//needed for locking the periapse/apoapse
 }
 
 eSlider.oninput = function(){
   doESliderOnInput(+this.value);
-  sliderAshouldChange = true;
+  sliderAcanChange = true;//needed for locking the periapse/apoapse
 }
 
 aSlider.onpointerup = function(){
-  if ((periapseLocked || apoapseLocked) && sliderEshouldChange){
+  if ((periapseLocked || apoapseLocked) && sliderEcanChange){
     const apses = [periapseLocked, apoapseLocked];
 
     for (apseLocked in apses){
@@ -554,9 +567,8 @@ aSlider.onpointerup = function(){
         let eS = eSliderRange - (Math.exp((de-etemp)/ce) - 1);
 
         if (0 < eS && eS < eSliderRange){
-          e = etemp;
           eSlider.value = +eS;
-          doESliderOnInput(+eS);
+          doESliderOnInput(+eS);// sets the value of 'e'
         }
       }
     }
@@ -565,14 +577,14 @@ aSlider.onpointerup = function(){
   rp = a*(1-e);
   ra = a*(1+e);
   handlePeriapseCheck();
-  sliderEshouldChange = false;
+  sliderEcanChange = false;
   doNuSliderOnInput(nuDegrees);
   replaceAerovisualizerData('semimajor-axis',+this.value);
   saveToLocalStorage();
 }
 
 eSlider.onpointerup = function(){
-  if ((periapseLocked || apoapseLocked) && sliderAshouldChange){
+  if ((periapseLocked || apoapseLocked) && sliderAcanChange){
     const apses = [periapseLocked, apoapseLocked];
 
     for (apseLocked in apses){
@@ -597,9 +609,8 @@ eSlider.onpointerup = function(){
         let aS = aSliderRange - (Math.exp((da-atemp)/ca) - 1);
 
         if (0 < aS && aS < aSliderRange){
-          a = atemp;
           aSlider.value = +aS;
-          doASliderOnInput(+aS);
+          doASliderOnInput(+aS);// sets the value of 'a'
         }
       }
     }
@@ -608,7 +619,7 @@ eSlider.onpointerup = function(){
   rp = a*(1-e);
   ra = a*(1+e);
   handlePeriapseCheck();
-  sliderAshouldChange = false;
+  sliderAcanChange = false;
   doNuSliderOnInput(nuDegrees);
   replaceAerovisualizerData('eccentricity',+this.value);
   saveToLocalStorage();
@@ -769,7 +780,10 @@ zeroAopButton.addEventListener('click', () => {
 
 const computeREllipse = function(){
   const r = p/(1 + e*Math.cos(nu));
-  omt.setR(r*Math.cos(nu), r*Math.sin(nu), 0, a);
+  const x = r*Math.cos(nu);
+  const y = r*Math.sin(nu);
+  rVector.set(x, y, 0);
+  omt.setR(x, y, 0, a);
 }
 
 const computeRHyperbola = function(){
@@ -786,23 +800,87 @@ const computeRHyperbola = function(){
 
   omt.setRVisible(true);
   const r = p/(1 + e*Math.cos(nu));
-  omt.setR(r*Math.cos(nu), r*Math.sin(nu), 0, -a);
+  const x = r*Math.cos(nu);
+  const y = r*Math.sin(nu);
+  rVector.set(x, y, 0);
+  omt.setR(x, y, 0, -a);
+}
+
+const computeVEllipse = function(){
+  const x = -sqrtMuOverP*Math.sin(nu);
+  const y = sqrtMuOverP*(e + Math.cos(nu));
+  vVector.set(x, y, 0);
+  omt.setV(x, y, 0, a);
+}
+
+const computeVHyperbola = function(){
+  // see the comment for computeRHyperbola
+
+  if (nu > (Math.PI + delta)/2 || nu < -(Math.PI + delta)/2){
+    omt.setVVisible(false);
+    return;
+  }
+
+  omt.setVVisible(true);
+  const x = -sqrtMuOverP*Math.sin(nu);
+  const y = sqrtMuOverP*(e + Math.cos(nu));
+  vVector.set(x, y, 0);
+  omt.setV(x, y, 0, -a);
+}
+
+const computeTimeAfterPeriapse = function(){
+  // see Bate Mueller White pp. 182-188
+  const cosnu = Math.cos(nu);
+
+  if (e<1){
+    let E = Math.acos((e + cosnu)/(1 + e*cosnu));//acos is 0 to pi
+    eccentricAnomaly = nu < 0 ? -E : E;
+    meanAnomaly = eccentricAnomaly - e*Math.sin(eccentricAnomaly);
+  }else{
+    if (!(nu > (Math.PI + delta)/2 || nu < -(Math.PI + delta)/2)){
+      const coshF = (e + cosnu)/(1 + e*cosnu);
+      let F = Math.log(coshF + Math.sqrt(coshF*coshF - 1));
+      hyperbolicAnomaly = nu < 0 ? -F : F;
+      meanAnomaly = e*Math.sinh(hyperbolicAnomaly) - hyperbolicAnomaly;
+    }else{
+      hyperbolicAnomaly = null;
+      meanAnomaly = null;
+      return;
+    }
+  }
+
+  const aCubed = a < 0 ? -a*a*a : a*a*a;
+  meanMotion = Math.sqrt(muCanonical/aCubed);
+  timeAfterPeriapse = meanAnomaly/meanMotion;
+  universalArrayIndex0 = universalArray.findIndex((e) => e.t >= timeAfterPeriapse);
+  console.log(timeAfterPeriapse, universalArrayIndex0);
 }
 
 const doNuSliderOnInput = function(value){
   nuDegrees = value;
   nu = nuDegrees*piOver180;
-  nuDisplay.innerHTML = `&nu;: ${Number(nuDegrees)}`;
+  nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees)}`;
+  computeTimeAfterPeriapse();
+
+  if (meanAnomaly !== null){
+    timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapse).toFixed(3).toString()}`;
+  }else{
+    timeAfterPeriapseDisplay.innerHTML = 'time after periapse: INFINITY';
+  }
 
   switch (conicSection){
     case 'ellipse':
       computeREllipse();
+      computeVEllipse();
       break;
       
     case 'hyperbola':
       computeRHyperbola();
+      computeVHyperbola();
       break;
   }
+
+  omt.refresh();
 }
 
 nuSlider.oninput = function(){
@@ -821,11 +899,10 @@ zeroNuButton.addEventListener('click', () => {
   nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees)}`;
   // omt.needsRefresh = true;
 
-  localStorage.clear();//temporary
-  location.reload();//temporary
-  // temporary, add these back in!!!
-  // replaceAerovisualizerData('true-anomaly',nuDegrees);
-  // saveToLocalStorage();
+  // localStorage.clear();//temporary
+  // location.reload();//temporary
+  replaceAerovisualizerData('true-anomaly',nuDegrees);
+  saveToLocalStorage();
 });
 
 // vectorSizeSlider.onpointerup = function(){
@@ -833,6 +910,133 @@ zeroNuButton.addEventListener('click', () => {
 //   replaceAerovisualizerData('vectorSize',this.value);
 //   saveToLocalStorage();
 // }
+
+const computeUniversal = function(){
+  let tn;
+  let dtdx;
+  let xFirstGuess;
+  let x;
+  let z;
+  let c;
+  let s;
+  let r;
+  let f;
+  let g;
+  let i;
+  console.log('f = ',f);
+
+  needToComputeUniversal = false;
+  // set needToComputeUniversal to true whenever a or e changes
+  // but don't make the computations until the user hits the play
+  // button
+
+  const t0 = 0;
+    // we use the periapse for r0, so t0 = timeAfterPeriapse = 0.
+    // Generally, set t0 equal to timeAfterPeriapse
+
+  const r0 = rp;
+  // we use the periapse for r0, so we set it to rp, which
+  // was set equal to a*(1-e) in either aSlider.onpointerup
+  // or eSlider.onpointerup.  Generally, set r0 to rVector.length()
+
+  const r0DotV0 = 0;
+  // we use the periapse for r0 and v0, so their dot product
+  // is 0.  Generally, set r0DotV0 equal to rVector.dot(vVector),
+  // where rVector is set from r = p/(1 + e*cos(nu)),
+  // rVector.x equals r*cos(nu), rVector.y equals r*sin(nu),
+  // vVector.x equals -sqrtMuOverP*sin(nu), and
+  // vVector.y equals sqrtMuOverP*(e + cos(nu)) from Bate p. 72
+
+  const sqrtA = Math.sqrt(Math.abs(a));
+
+  // clear the universalArray of any entries that exist
+  while (universalArray.length){
+    universalArray.pop();
+  }
+
+  let univPoint;  
+  // make sure that universalArraySize is an even fraction or
+  // multiple of 360 such as 60, 90, 120, 180, 360, or 720
+
+  for (let t=-animationPeriod/2; t<animationPeriod/2; t+=animationPeriod/universalArraySize){
+    // t is the time in canonical time units.  For elliptical orbits, an 
+    // orbital period (tp) equals twoPi canonical time units (TU or CTU)
+    // equals animationPeriod.  For a hyperbolic flyby, animationPeriod equals the
+    // time span computed in doASliderOnInput()
+
+    // see Bate p. 206 for first guess of x
+    if (e < 1){
+      // ellipse
+      xFirstGuess = Math.sqrt(muCanonical)*(t - t0)/a;
+    }else{
+      // hyperbola
+      if (t !== t0){
+        xFirstGuess = Math.sign(t - t0)*sqrtA*Math.log(-2*muCanonical*(t - t0)
+        / (a*(r0DotV0 + Math.sign(t - t0)*sqrtMuCanonical*sqrtA*
+        (1 - r0/a))));
+      }else{
+        xFirstGuess = 0;
+      }
+    }
+
+    x = xFirstGuess;
+
+    // iterate to find x at time t.  The loop limit is arbitrary
+    // but is designed to handle extreme cases.  It should
+    // break out of the loop before i reaches its max.  If not,
+    // set the maximum i to be a higher value
+    for (i=0; i<15; i++){
+      // Bate p. 195
+      z = x*x/a;
+      
+      // Bate p. 208
+      if (z > 0){
+        let sqrtZ;
+
+        sqrtZ = Math.sqrt(z);
+        c = (1 - Math.cos(sqrtZ))/z;
+        s = (sqrtZ - Math.sin(sqrtZ))/(sqrtZ*sqrtZ*sqrtZ);
+      }else if (z < 0){
+        let sqrtMinusZ;
+
+        sqrtMinusZ = Math.sqrt(-z);
+        c = (1 - Math.cosh(sqrtMinusZ))/z;
+        s = (Math.sinh(sqrtMinusZ) - sqrtMinusZ)/(sqrtMinusZ*sqrtMinusZ*sqrtMinusZ);
+      }
+
+      // Bate pp. 197-8, use equations 4.4-14 and 4.4-17
+      tn = (r0DotV0*x*x*c/sqrtMuCanonical +
+       (1 - r0/a)*x*x*x*s + r0*x)/sqrtMuCanonical;
+      dtdx = (x*x*c + r0DotV0*x*(1 - z*s)/sqrtMuCanonical +
+       r0*(1 - z*c))/sqrtMuCanonical;      
+      x = x + (t - tn)/dtdx;
+
+      // break out of the loop if "close enough"
+      if (Math.abs(t - tn) < 0.001){
+        // console.log(x);
+        break;
+      }
+    }
+    
+    // Bate pp. 201-2
+    univPoint = new Object();
+    univPoint.t = t;
+    f = 1 - x*x*c/r0;
+    g = t - x*x*x*s/sqrtMuCanonical;
+    univPoint.f = f;
+    univPoint.g = g;
+    r = Math.sqrt(f*f*rp*rp + g*g*sqrtMuOverP*sqrtMuOverP*(e + 1)*(e + 1));
+    univPoint.fdot = sqrtMuCanonical*x*(z*s - 1)/(r0*r);
+    univPoint.gdot = 1 - x*x*c/r;
+    
+    //(f*univPoint.gdot - 1)/g;
+    universalArray.push(univPoint);
+    // console.log(univPoint);
+    // console.log(f*univPoint.gdot - g*univPoint.fdot);
+  }
+  
+  // console.log(animationPeriod, tp, timeAfterPeriapse);
+}
 
 const setPQWFrameColor = function(color, save=false){
   omt.setColor('pqwFrame', color);
@@ -1025,8 +1229,8 @@ orbitFixedVectorsMenu.addEventListener('change', () => {
 
 toggleConicSectionButton.addEventListener('click', () => {
   conicSection = conicSection === 'ellipse' ? 'hyperbola' : 'ellipse';
-  sliderAshouldChange = false;
-  sliderEshouldChange = false;
+  sliderAcanChange = false;
+  sliderEcanChange = false;
   doASliderOnInput(+aSlider.value);
   doESliderOnInput(+eSlider.value);
   rp = Number(a*(1-e));
@@ -1184,10 +1388,10 @@ const createAndInitialize = function(data, camera){
             xyzFrameColor  = o.value;
             break;
           case 'rColor':
-            rColor  = o.value;
+            rColor  = 'yellow'; //temporary//o.value;
             break;
           case 'vColor':
-            vColor  = o.value;
+            vColor  = 'orange'; //temporary//o.value;
             break;
           case 'hColor':
             hColor  = o.value;
@@ -1242,7 +1446,7 @@ const completeInitialization = function(continueAnimation = true) {
   }
   
   if (omt.constructionComplete){
-    handleMainButtons('aeP');//'mu' <-- set back to this
+    handleMainButtons('rv');//'mu' <-- set back to this
     
     camera.aspect = 1;
     camera.updateProjectionMatrix();
@@ -1262,6 +1466,7 @@ const completeInitialization = function(continueAnimation = true) {
     // handleInfoMenuChoice(infoMenu.value);
     loadBackground();
     omt.showR(true);
+    omt.showV(true);
 
     setPQWFrameColor(pqwFrameColor);
     setXYZFrameColor(xyzFrameColor);
@@ -1283,6 +1488,11 @@ const completeInitialization = function(continueAnimation = true) {
 const doPlayPause = function(){
   //icons came from tabler-icons.io
   playing = playing ? false : true;
+
+  if (playing && needToComputeUniversal){
+    computeUniversal();
+  }
+
   playPauseButton.innerHTML = playing ? `<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-pause-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
   <path d="M9 4h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h2a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2z" stroke-width="0" fill="currentColor"></path>
@@ -1291,6 +1501,8 @@ const doPlayPause = function(){
   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
   <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" stroke-width="0" fill="currentColor"></path>
 </svg>`;
+  // sdo.realTime = 0;
+  // sdo.simulationTime = 0;
   clock.getDelta();
 }
 
@@ -1298,8 +1510,33 @@ playPauseButton.addEventListener('click', () => {
   doPlayPause();
 });
 
-// resetButton.addEventListener('click', () => {
-// });
+resetButton.addEventListener('click', () => {
+});
+
+const haltPlay = function(){
+  if (playing){
+    playing = false;
+    playPauseButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+    <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" stroke-width="0" fill="currentColor"></path>
+ </svg>`;
+    // sdo.realTime = 0;
+    // sdo.simulationTime = 0;
+    clock.getDelta();
+  }
+}
+
+// simulate(dt){
+//   let safetyCounter = 0;
+//   const maxTicks = _maxTicksPerFrame;
+//   realTime += dt;
+  
+//   while (simulationTime < realTime && safetyCounter < maxTicks){
+//     tickDynamic();
+//     simulationTime += _h;
+//     safetyCounter++;
+//   }
+// }
 
 const animate = function(continueAnimation = true) {
   if (continueAnimation) {
@@ -1317,11 +1554,21 @@ const animate = function(continueAnimation = true) {
 
   renderer.clear();
   renderer.render(scene, camera);
-  
+ 
   if (playing){
+    // console.log('playing');
+    universalArrayIndex++; 
+    // console.log(universalArray[universalArrayIndex%universalArraySize]);
+    let x = universalArray[universalArrayIndex%universalArraySize].f*rp;
+    let y = universalArray[universalArrayIndex%universalArraySize].g*sqrtMuOverP*(e + 1);
+    omt.setR(x, y, 0, a);
+    x = universalArray[universalArrayIndex%universalArraySize].fdot*rp;
+    y = universalArray[universalArrayIndex%universalArraySize].gdot*sqrtMuOverP*(e + 1);
+    omt.setV(x, y, 0);
+
     const dt = clock.getDelta();// dt for 60 fps is 0.01666
+    // simulate(dt);
     omt.needsRefresh = true;
-    doPlayPause();
   }
 
   omt.refresh();

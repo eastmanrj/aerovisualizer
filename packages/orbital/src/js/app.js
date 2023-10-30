@@ -100,8 +100,8 @@ let eColor = 'yellow';//defaultEColor;  temporary
 
 let rVector = new THREE.Vector3(1, 1, 1);
 let vVector = new THREE.Vector3(1, 1, 1);
-let p;//parameter (semi-latus rectum)
-let sqrtMuOverP;
+let p = a*(1 - e*e);//parameter (semi-latus rectum)
+let sqrtMuOverP = Math.sqrt(muCanonical/p);//needed for computing velocity
 let delta = defaultDelta;//turning angle for hyperbolic orbits
 let rp = Number(a*(1-e));//r vector magnitude at periapse
 let ra = Number(a*(1+e));//r vector magnitude at apoapse
@@ -439,9 +439,6 @@ prefsButton.addEventListener('click', () => {
 });
 
 const computeP = function(){
-  // a > 0 and e < 1 for ellipses
-  // a < 0 and e > 1 for hyperbolas
-  // thus p is always positive
   p = a*(1 - e*e);
   sqrtMuOverP = Math.sqrt(muCanonical/p);//needed for computing velocity
 }

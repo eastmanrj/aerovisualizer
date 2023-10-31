@@ -7,7 +7,7 @@ const twoPi = 2*Math.PI;
 
 let scene, camera, renderer;
 let background = null;
-const cameraRadius = 5;
+const cameraRadius = 4;
 let nominalCameraPos = new THREE.Vector3(cameraRadius/4, -cameraRadius, cameraRadius/2);
 nominalCameraPos.normalize();
 nominalCameraPos.multiplyScalar(cameraRadius);
@@ -1226,6 +1226,13 @@ orbitFixedVectorsMenu.addEventListener('change', () => {
 
 toggleConicSectionButton.addEventListener('click', () => {
   conicSection = conicSection === 'ellipse' ? 'hyperbola' : 'ellipse';
+
+  if (conicSection === 'ellipse'){
+    toggleConicSectionButton.innerHTML = 'ELLIPSE&nbsp;/&nbsp;hyperbola';
+  }else{
+    toggleConicSectionButton.innerHTML = 'ellipse&nbsp;/&nbsp;HYPERBOLA';
+  }
+
   sliderAcanChange = false;
   sliderEcanChange = false;
   doASliderOnInput(+aSlider.value);
@@ -1428,6 +1435,12 @@ const createAndInitialize = function(data, camera){
   nuSlider.value = nuDegrees;
   doNuSliderOnInput(nuDegrees);
 
+  if (conicSection === 'ellipse'){
+    toggleConicSectionButton.innerHTML = 'ELLIPSE&nbsp;/&nbsp;hyperbola';
+  }else{
+    toggleConicSectionButton.innerHTML = 'ellipse&nbsp;/&nbsp;HYPERBOLA';
+  }
+  
   handleMainPrefs(mainPrefsMenu.value);
 }
 

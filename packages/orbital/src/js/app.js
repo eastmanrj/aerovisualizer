@@ -66,6 +66,9 @@ let aerovisualizerData = [
 ];
 
 let centralBody = defaultCentralBody;
+let theCB = null;
+let ctu = 0;
+let cdu = 0;
 let conicSection = defaultConicSection;
 let a = Number(defaultA);
 let tp = twoPi*Math.pow(a,1.5)/muCanonical;//orbital period
@@ -82,14 +85,42 @@ let eccentricAnomaly;
 let hyperbolicAnomaly;
 let meanAnomaly;
 let meanMotion;
-let timeAfterPeriapse;
+let timeAfterPeriapse;// in canonical time units (CTU)
+let timeAfterPeriapseInSeconds;
 
 let universalArray = [];
 const universalArraySize = 60;
-let universalArrayIndex0 = 0;
-let universalArrayIndex = universalArrayIndex0;
+let universalArrayIndex0;// this is
+// the index of universalArray that corresponds to just before
+// where the time is during animation
+let universalArrayIndex1 = universalArrayIndex0; // this is
+// the index of universalArray that corresponds to just after
+// where the time is during animation
+let timeAfterPeriapseInSeconds0;// time corresponding
+// to universalArray[universalArrayIndex0]
+let timeAfterPeriapseInSeconds1;// time corresponding
+// to universalArray[universalArrayIndex1]
+
+// initial positions and velocities for interpolation for animation
+let x0;
+let y0;
+let vx0;
+let vy0;
+// positions and velocities for animation
+let px;
+let py;
+let vx;
+let vy;
+// slopes for interpolation for animation
+let dpxdt;
+let dpydt;
+let dvxdt;
+let dvydt;
 let needToComputeUniversal = true;
 let animationPeriod = tp;
+let timeScale = 1;
+let displayTimeScale = 1;
+let timeScaleMenuValue = '&nbsp;';
 
 let pqwFrameColor = defaultPQWFrameColor;
 let xyzFrameColor = defaultXYZFrameColor;
@@ -166,6 +197,7 @@ const nuSlider = document.getElementById('nu-slider');
 const nuDisplay = document.getElementById('nu-display');
 const zeroNuButton = document.getElementById('zero-nu-btn');
 const timeAfterPeriapseDisplay = document.getElementById('tap-display');
+const timeScaleMenu = document.getElementById('time-scale-menu');
 const playPauseButton = document.getElementById('play-pause-btn');
 const resetButton = document.getElementById('reset-btn');
 
@@ -849,8 +881,35 @@ const computeTimeAfterPeriapse = function(){
   const aCubed = a < 0 ? -a*a*a : a*a*a;
   meanMotion = Math.sqrt(muCanonical/aCubed);
   timeAfterPeriapse = meanAnomaly/meanMotion;
+  timeAfterPeriapseInSeconds = timeAfterPeriapse*ctu;
   universalArrayIndex0 = universalArray.findIndex((e) => e.t >= timeAfterPeriapse);
-  // console.log(timeAfterPeriapse, universalArrayIndex0);
+  universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
+  timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
+  timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
+}
+
+const doTimeScaleDisplay = function(){
+  if (meanAnomaly !== null){
+    switch (timeScaleMenuValue){
+      case 'sec-equals-1sec':
+        timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(0).toString()} seconds`;
+        break;
+      case 'sec-equals-1minute':
+        timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
+        break;
+      case 'sec-equals-5minutes':
+        timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
+        break;
+      case 'sec-equals-1hour':
+        timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(2).toString()} hours`;
+        break;
+      case 'sec-equals-1day':
+        timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(3).toString()} days`;
+        break;
+    }
+  }else{
+    timeAfterPeriapseDisplay.innerHTML = 'time after periapse: INFINITY';
+  }
 }
 
 const doNuSliderOnInput = function(value){
@@ -858,12 +917,7 @@ const doNuSliderOnInput = function(value){
   nu = nuDegrees*piOver180;
   nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees)}`;
   computeTimeAfterPeriapse();
-
-  if (meanAnomaly !== null){
-    timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapse).toFixed(3).toString()}`;
-  }else{
-    timeAfterPeriapseDisplay.innerHTML = 'time after periapse: INFINITY';
-  }
+  doTimeScaleDisplay();
 
   switch (conicSection){
     case 'ellipse':
@@ -894,6 +948,7 @@ zeroNuButton.addEventListener('click', () => {
   nuDegrees = 0;
   nuSlider.value = nuDegrees;
   nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees)}`;
+  doTimeScaleDisplay();
   // omt.needsRefresh = true;
 
   // localStorage.clear();//temporary
@@ -920,7 +975,6 @@ const computeUniversal = function(){
   let f;
   let g;
   let i;
-  // console.log('f = ',f);
 
   needToComputeUniversal = false;
   // set needToComputeUniversal to true whenever a or e changes
@@ -1010,7 +1064,6 @@ const computeUniversal = function(){
 
       // break out of the loop if "close enough"
       if (Math.abs(t - tn) < 0.001){
-        // console.log(x);
         break;
       }
     }
@@ -1028,11 +1081,8 @@ const computeUniversal = function(){
     
     //(f*univPoint.gdot - 1)/g;
     universalArray.push(univPoint);
-    // console.log(univPoint);
     // console.log(f*univPoint.gdot - g*univPoint.fdot);
   }
-  
-  // console.log(animationPeriod, tp, timeAfterPeriapse);
 }
 
 const setPQWFrameColor = function(color, save=false){
@@ -1116,7 +1166,9 @@ const setEColor = function(color, save=false){
 // });
 
 const handleMuChange = function(){
-  const theCB = centralBodyData.find(x => x.name === centralBody);
+  theCB = centralBodyData.find(x => x.name === centralBody);
+  ctu = theCB.CTU;
+  cdu = theCB.CDU;
   const cbIndex = Number(theCB.id);
   muDisplay.innerHTML = `${+theCB.mu*1e6} km&sup3;/s&sup2;`;//+theCB.mu*1e6;//GM
   aCBDisplay.innerHTML = `${theCB.a} AU`;//semimajor axis
@@ -1134,6 +1186,41 @@ muMenu.addEventListener('change', () => {
   handleMuChange();
   replaceAerovisualizerData('central-body',centralBody);
   saveToLocalStorage();
+});
+
+const doTimeScaleMenu = function(){
+  timeScaleMenuValue = timeScaleMenu.value;
+
+  switch (timeScaleMenuValue){
+    case 'sec-equals-1sec':
+      timeScale = 1;
+      displayTimeScale = 1;
+      break;
+    case 'sec-equals-1minute':
+      timeScale = 60;
+      displayTimeScale = 60;
+      break;
+    case 'sec-equals-5minutes':
+      timeScale = 300;
+      displayTimeScale = 60;
+      break;
+    case 'sec-equals-1hour':
+      timeScale = 3600;
+      displayTimeScale = 3600;
+      break;
+    case 'sec-equals-1day':
+      timeScale = 3600*24;
+      displayTimeScale = 3600*24;
+      break;
+  }
+}
+
+timeScaleMenu.addEventListener('change', () => {
+  doTimeScaleMenu();
+  doTimeScaleDisplay();
+
+  // replaceAerovisualizerData('time-scale',timeScale);
+  // saveToLocalStorage();
 });
 
 const handleMainPrefs = function(opt){
@@ -1233,10 +1320,10 @@ toggleConicSectionButton.addEventListener('click', () => {
     toggleConicSectionButton.innerHTML = 'ellipse&nbsp;/&nbsp;HYPERBOLA';
   }
 
-  sliderAcanChange = false;
   sliderEcanChange = false;
-  doASliderOnInput(+aSlider.value);
+  sliderAcanChange = false;
   doESliderOnInput(+eSlider.value);
+  doASliderOnInput(+aSlider.value);
   rp = Number(a*(1-e));
   ra = Number(a*(1+e));
   handlePeriapseCheck();
@@ -1417,10 +1504,10 @@ const createAndInitialize = function(data, camera){
   muMenu.value = centralBody;
   handleMuChange();
 
-  aSlider.value = +aSl;
   eSlider.value = +eSl;
-  doASliderOnInput(+aSl);
+  aSlider.value = +aSl;
   doESliderOnInput(+eSl);
+  doASliderOnInput(+aSl);
   rp = Number(a*(1-e));
   ra = Number(a*(1+e));
   handlePeriapseCheck();
@@ -1432,15 +1519,20 @@ const createAndInitialize = function(data, camera){
   handleOrientationOnInput('inc',true);
   handleOrientationOnInput('aop');
 
+  timeScaleMenu.value = 'sec-equals-1sec';//save this eventually and choose it here
+  doTimeScaleMenu();
   nuSlider.value = nuDegrees;
+
+  computeUniversal();
   doNuSliderOnInput(nuDegrees);
+  doNextUniversalPointStuff(1);
 
   if (conicSection === 'ellipse'){
     toggleConicSectionButton.innerHTML = 'ELLIPSE&nbsp;/&nbsp;hyperbola';
   }else{
     toggleConicSectionButton.innerHTML = 'ellipse&nbsp;/&nbsp;HYPERBOLA';
   }
-  
+
   handleMainPrefs(mainPrefsMenu.value);
 }
 
@@ -1501,6 +1593,7 @@ const doPlayPause = function(){
 
   if (playing && needToComputeUniversal){
     computeUniversal();
+    doNextUniversalPointStuff(1);
   }
 
   playPauseButton.innerHTML = playing ? `<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-pause-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -1536,17 +1629,39 @@ const haltPlay = function(){
   }
 }
 
-// simulate(dt){
-//   let safetyCounter = 0;
-//   const maxTicks = _maxTicksPerFrame;
-//   realTime += dt;
-  
-//   while (simulationTime < realTime && safetyCounter < maxTicks){
-//     tickDynamic();
-//     simulationTime += _h;
-//     safetyCounter++;
-//   }
-// }
+const doNextUniversalPointStuff = function(opt=0){
+  // option 0: set the current values to the next ones and
+  // then compute the next ones
+  // option 1: compute both the current values and the next ones 
+  if (opt === 0){
+    universalArrayIndex0 = universalArrayIndex1;
+    universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
+    timeAfterPeriapseInSeconds0 = timeAfterPeriapseInSeconds1;
+    timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
+    timeAfterPeriapseInSeconds = timeAfterPeriapseInSeconds0;
+    timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
+    x0 = px;
+    y0 = py;
+    vx0 = vx;
+    vy0 = vy;
+  }else{
+    computeTimeAfterPeriapse();
+    x0 = universalArray[universalArrayIndex0%universalArraySize].f*rp;
+    y0 = universalArray[universalArrayIndex0%universalArraySize].g*sqrtMuOverP*(e + 1);
+    vx0 = universalArray[universalArrayIndex0%universalArraySize].fdot*rp;
+    vy0 = universalArray[universalArrayIndex0%universalArraySize].gdot*sqrtMuOverP*(e + 1);
+  }
+
+  let x1 = universalArray[universalArrayIndex1%universalArraySize].f*rp;
+  let y1 = universalArray[universalArrayIndex1%universalArraySize].g*sqrtMuOverP*(e + 1);
+  let vx1 = universalArray[universalArrayIndex1%universalArraySize].fdot*rp;
+  let vy1 = universalArray[universalArrayIndex1%universalArraySize].gdot*sqrtMuOverP*(e + 1);
+  let deltaTime = timeAfterPeriapseInSeconds1 - timeAfterPeriapseInSeconds0;
+  dpxdt = (x1 - x0)/deltaTime;
+  dpydt = (y1 - y0)/deltaTime;
+  dvxdt = (vx1 - vx0)/deltaTime;
+  dvydt = (vy1 - vy0)/deltaTime;
+}
 
 const animate = function(continueAnimation = true) {
   if (continueAnimation) {
@@ -1564,24 +1679,30 @@ const animate = function(continueAnimation = true) {
 
   renderer.clear();
   renderer.render(scene, camera);
- 
-  if (playing){
-    // console.log('playing');
-    universalArrayIndex++; 
-    // console.log(universalArray[universalArrayIndex%universalArraySize]);
-    let x = universalArray[universalArrayIndex%universalArraySize].f*rp;
-    let y = universalArray[universalArrayIndex%universalArraySize].g*sqrtMuOverP*(e + 1);
-    omt.setR(x, y, 0, a);
-    x = universalArray[universalArrayIndex%universalArraySize].fdot*rp;
-    y = universalArray[universalArrayIndex%universalArraySize].gdot*sqrtMuOverP*(e + 1);
-    omt.setV(x, y, 0);
 
-    const dt = clock.getDelta();// dt for 60 fps is 0.01666
-    // simulate(dt);
+  if (playing){
+    const deltaT = timeScale*clock.getDelta();
+    timeAfterPeriapseInSeconds += deltaT;// deltaT for 60 fps is 0.01666
+    timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
+    let safetyCounter = 0;//prevents infinite loops if ever they happen (which they shouldn't)
+    //whenever the if block below changes to a while loop
+
+    if (timeAfterPeriapseInSeconds > timeAfterPeriapseInSeconds1 && safetyCounter < 10){
+      safetyCounter++;
+      doNextUniversalPointStuff();
+    }
+
+    //do the interpolation between computed points on the ellipse
+    px = x0 + dpxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
+    py = y0 + dpydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
+    vx = vx0 + dvxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
+    vy = vy0 + dvydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
+    omt.setR(px, py, 0, a);
+    omt.setV(vx, vy, 0);
     omt.needsRefresh = true;
   }
 
-  omt.refresh();
+  omt.refresh();// refresh only happens if needsRefresh === true
 };
 
 const data = getFromLocalStorage();

@@ -96,7 +96,14 @@
           <input class="slider span3" type="range" min="-180" max="179" value="0" id="nu-slider">
           <button id="zero-nu-btn" class="btn center-grid-item">zero</button>
           <p class="span4 center-grid-item"><span id="nu-display">0</span>&deg;</p>
-          <p class="span4 center-grid-item"><span id="tap-display">0</span>&nbsp;TU</p>
+          <p class="span4 center-grid-item"><span id="tap-display">0</span></p>
+          <select id="time-scale-menu" class="menu span4" name="time-scale-menu">
+            <option value="sec-equals-1sec">1&nbsp;second&nbsp;=&nbsp;1&nbsp;second</option>
+            <option value="sec-equals-1minute">1&nbsp;second&nbsp;=&nbsp;1&nbsp;minute</option>
+            <option value="sec-equals-5minutes">1&nbsp;second&nbsp;=&nbsp;5&nbsp;minutes</option>
+            <option value="sec-equals-1hour">1&nbsp;second&nbsp;=&nbsp;1&nbsp;hour</option>
+            <option value="sec-equals-1day">1&nbsp;second&nbsp;=&nbsp;1&nbsp;day</option>
+          </select>
           <div class="btn-group">
             <button id="reset-btn" class="btn btn-with-icon">
               <!-- <i class="material-icons">skip_previous</i> -->

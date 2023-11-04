@@ -393,6 +393,7 @@ const replaceAerovisualizerData = function(name, value){
 const saveToLocalStorage = function(){
   localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
 }
+saveToLocalStorage();
 
 const getFromLocalStorage = function(){
   // localStorage.clear();
@@ -487,13 +488,11 @@ const computeDelta = function(){
 }
 
 const doASliderOnInput = function(value){
-  // console.log(aSliderRange);
   let c = aRange/(Math.log(aSliderRange+1));
   let d = aMax;
   value = aSliderRange - value;
-  // console.log(value);
   a = d - c*Math.log(value+1);
-  
+
   // a > 0 for ellipses, a < 0 for hyperbolas
   if (conicSection === 'ellipse'){
     tp = twoPi*Math.pow(a,1.5)/muCanonical;//orbital period
@@ -516,7 +515,6 @@ const doASliderOnInput = function(value){
     const coshF2 = (e + cosnu2)/(1 + e*cosnu2);
     const F1 = -Math.log(coshF1 + Math.sqrt(coshF1*coshF1 - 1));
     const F2 = Math.log(coshF2 + Math.sqrt(coshF2*coshF2 - 1));
-    // console.log(F1, F2);
     const M1 = e*Math.sinh(F1) - F1;
     const M2 = e*Math.sinh(F2) - F2;
     const n = Math.sqrt(muCanonical/(-a*a*a));
@@ -538,19 +536,15 @@ const doESliderOnInput = function(value){
 
   switch (conicSection){
     case 'ellipse':
-      // console.log(eSliderRange);
       c = eEllipseRange/(Math.log(eSliderRange+1));
       d = eMaxEllipse;
-      // console.log(value);
       e = d - c*Math.log(value+1);
       eDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
       break;
 
     case 'hyperbola':
-      // console.log(eSliderRange);
       c = eHyperbolaRange/(Math.log(eSliderRange+1));
       d = eMaxHyperbola;
-      // console.log(value);
       e = d - c*Math.log(value+1);
 
       computeDelta();//hypberbolic turning angle
@@ -893,8 +887,6 @@ const computeTimeAfterPeriapse = function(){
   universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
   timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
   timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
-  // console.log(a,e, meanMotion, timeAfterPeriapse, timeAfterPeriapseInSeconds);
-  // console.log(universalArrayIndex0,universalArrayIndex1, universalArray, timeAfterPeriapseInSeconds0, timeAfterPeriapseInSeconds1);
 }
 
 const doTimeScaleDisplay = function(){
@@ -1017,7 +1009,7 @@ const computeUniversal = function(){
   let univPoint;  
   // make sure that universalArraySize is an even fraction or
   // multiple of 360 such as 60, 90, 120, 180, 360, or 720
-  // console.log(animationPeriod);
+
   for (let t=-animationPeriod/2; t<animationPeriod/2; t+=animationPeriod/universalArraySize){
     // t is the time in canonical time units.  For elliptical orbits, an 
     // orbital period (tp) equals twoPi canonical time units (TU or CTU)
@@ -1464,22 +1456,22 @@ const createAndInitialize = function(data, camera){
             conicSection  = o.value;
             break;
           case 'semimajor-axis':
-            aSl  = o.value;
+            aSl  = Number(o.value);
             break;
           case 'eccentricity':
-            eSl  = o.value;
+            eSl  = Number(o.value);
             break;
           case 'longitude-of-ascending-node':
-            lanDegrees  = o.value;
+            lanDegrees  = Number(o.value);
             break;
           case 'inclination':
-            incDegrees  = o.value;
+            incDegrees  = Number(o.value);
             break;
           case 'argument-of-periapsis':
-            aopDegrees  = o.value;
+            aopDegrees  = Number(o.value);
             break;
           case 'true-anomaly':
-            nuDegrees  = o.value;
+            nuDegrees  = Number(o.value);
             break;
           case 'pqwFrameColor':
             pqwFrameColor  = o.value;
@@ -1509,14 +1501,15 @@ const createAndInitialize = function(data, camera){
   if (omt === null){
     omt = new OrbitalMechThings(scene, camera);
   }
-  
+  // console.log(+aSl, eColor, hColor, nuDegrees, lanDegrees, centralBody);
+  // console.log(data);
   muMenu.value = centralBody;
   handleMuChange();
 
   eSlider.value = +eSl;
   aSlider.value = +aSl;
-  doESliderOnInput(+eSl);
   doASliderOnInput(+aSl);
+  doESliderOnInput(+eSl);
   rp = Number(a*(1-e));
   ra = Number(a*(1+e));
   handlePeriapseCheck();
@@ -1698,7 +1691,6 @@ const animate = function(continueAnimation = true) {
 
     if (timeAfterPeriapseInSeconds > timeAfterPeriapseInSeconds1 && safetyCounter < 10){
       safetyCounter++;
-      // console.log('blah1');
       doNextUniversalPointStuff();
     }
 
@@ -1710,10 +1702,6 @@ const animate = function(continueAnimation = true) {
     omt.setR(px, py, 0, a);
     omt.setV(vx, vy, 0);
     omt.needsRefresh = true;
-    // console.log('blah2');
-    // console.log(a,e, meanMotion, timeAfterPeriapse, timeAfterPeriapseInSeconds);
-    // console.log(universalArrayIndex0,universalArrayIndex1, universalArray, timeAfterPeriapseInSeconds0, timeAfterPeriapseInSeconds1);  
-    // console.log(px,py, vx, vy, timeAfterPeriapseInSeconds1);  
     omt.refresh();// refresh only happens if needsRefresh === true
   }
 };

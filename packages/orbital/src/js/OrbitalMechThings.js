@@ -126,8 +126,8 @@ class OrbitalMechThings {
     this._vOpacity = 1;
     this._hOpacity = 1;
     this._eOpacity = 1;
-    this._pqwFrameColor = 0xffff00;//0xffff55;//light yellow
-    this._xyzFrameColor = 0x0000ff;//0x5555ff;//light blue
+    this._orbitFixedVectorColor = 0xffff00;//0xffff55;//light yellow
+    this._inertialVectorColor = 0x0000ff;//0x5555ff;//light blue
     this._rColor = 0x00ff00;//0x55ff55;//light green
     this._vColor = 0x800080;
     this._hColor = 0x800080;//0xcbc3e3;//light purple, 0x800080;//purple
@@ -270,7 +270,7 @@ class OrbitalMechThings {
       this._v1.copy(this._v0);
       this._vQuat.setFromUnitVectors(this._yunit, this._v0);
       this._q1.multiplyQuaternions(this._quat,this._vQuat);
-      this._v0.multiplyScalar(this._vVectorScale.y*0.5*this._fractionForShaft);
+      this._v0.multiplyScalar(this._vVectorScale.y*0.5);
       this._v1.multiplyScalar(this._vVectorScale.y*0.5);
       this._v1.add(this._v0);
       this._v0.add(this._v2);
@@ -279,7 +279,7 @@ class OrbitalMechThings {
       this._v1.applyQuaternion(this._quat);
 
       this._vVectorShaftMesh.matrix.compose(this._v0, this._q1, this._vVectorScale);
-      this._vVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scale);
+      this._vVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._vVectorScale);
       this._v1.multiplyScalar(1.1);
       this._vVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
     }
@@ -363,7 +363,7 @@ class OrbitalMechThings {
 
     switch (thing){
       case 'pqwFrame':
-        this._pqwFrameColor = theColor;
+        this._orbitFixedVectorColor = theColor;
         this._pVectorShaftMesh.material.color.set(theColor);
         this._qVectorShaftMesh.material.color.set(theColor);
         this._wVectorShaftMesh.material.color.set(theColor);
@@ -379,7 +379,7 @@ class OrbitalMechThings {
         break;
 
       case 'xyzFrame':
-        this._xyzFrameColor = theColor;
+        this._inertialVectorColor = theColor;
         this._xVectorShaftMesh.material.color.set(theColor);
         this._yVectorShaftMesh.material.color.set(theColor);
         this._zVectorShaftMesh.material.color.set(theColor);
@@ -573,7 +573,7 @@ class OrbitalMechThings {
     const arrowheadGeometry = new THREE.ConeGeometry(3*shaftRadius, 
       length*(1-fractionForShaft), 32, 1, true);
     const mats = new Array(6).fill(null);
-    const colors = [this._pqwFrameColor, this._xyzFrameColor,
+    const colors = [this._orbitFixedVectorColor, this._inertialVectorColor,
       this._rColor, this._vColor, this._hColor, this._eColor];
     const opacities = [this._pqwFrameOpacity, this._xyzFrameOpacity,
       this._rOpacity, this._vOpacity, this._hOpacity,
@@ -689,13 +689,13 @@ class OrbitalMechThings {
       const bevelEnabled = false;
   
       let materials1 = [
-        new THREE.MeshBasicMaterial({color: this._pqwFrameColor, transparent: true, opacity: this._pqwFrameOpacity}), // front
-        new THREE.MeshBasicMaterial({color: this._pqwFrameColor, transparent: true, opacity: this._pqwFrameOpacity}) // side
+        new THREE.MeshBasicMaterial({color: this._orbitFixedVectorColor, transparent: true, opacity: this._pqwFrameOpacity}), // front
+        new THREE.MeshBasicMaterial({color: this._orbitFixedVectorColor, transparent: true, opacity: this._pqwFrameOpacity}) // side
       ];
 
       let materials2 = [
-        new THREE.MeshBasicMaterial({color: this._xyzFrameColor, transparent: true, opacity: this._xyzFrameOpacity}), // front
-        new THREE.MeshBasicMaterial({color: this._xyzFrameColor, transparent: true, opacity: this._xyzFrameOpacity}) // side
+        new THREE.MeshBasicMaterial({color: this._inertialVectorColor, transparent: true, opacity: this._xyzFrameOpacity}), // front
+        new THREE.MeshBasicMaterial({color: this._inertialVectorColor, transparent: true, opacity: this._xyzFrameOpacity}) // side
       ];
 
       let materials3 = [

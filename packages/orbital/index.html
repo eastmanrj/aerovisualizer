@@ -75,8 +75,6 @@
           <p>&nbsp;</p><button id="lock-periapse-btn" class="btn center-grid-item">lock periapse</button>
           <button id="lock-apoapse-btn" class="btn center-grid-item">lock apoapse</button><p>&nbsp;</p>
           <p id="periapse-warning" class="span4 center-grid-item warning">warning message</p>
-          <p class="span2 center-grid-item">a&nbsp;=&nbsp;semi-major axis</p>
-          <p class="span2 center-grid-item">e&nbsp;=&nbsp;eccentricity</p>
         </div>
         <div class="elements" id="orientation-elements">
           <p class="center-grid-item">&Omega;: <span id="lan-display">0</span>&deg;</p>
@@ -104,31 +102,32 @@
             <option value="sec-equals-1hour">1&nbsp;second&nbsp;=&nbsp;1&nbsp;hour</option>
             <option value="sec-equals-1day">1&nbsp;second&nbsp;=&nbsp;1&nbsp;day</option>
           </select>
-          <div class="btn-group">
-            <button id="reset-btn" class="btn btn-with-icon">
-              <!-- <i class="material-icons">skip_previous</i> -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-skip-back-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <path d="M19.496 4.136l-12 7a1 1 0 0 0 0 1.728l12 7a1 1 0 0 0 1.504 -.864v-14a1 1 0 0 0 -1.504 -.864z" stroke-width="0" fill="currentColor"></path>
-                <path d="M4 4a1 1 0 0 1 .993 .883l.007 .117v14a1 1 0 0 1 -1.993 .117l-.007 -.117v-14a1 1 0 0 1 1 -1z" stroke-width="0" fill="currentColor"></path>
-              </svg>
-            </button>
-            <button id="play-pause-btn" class="btn btn-with-icon">
-              <!-- <i class="material-icons">play_arrow</i> -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" stroke-width="0" fill="currentColor"></path>
-              </svg>
-            </button>
-          </div>
         </div>
         <div class="elements numerical" id="numerical-elements">
+        </div>
+        <div class="elements btn-group" id="play-reset-buttons-elements">
+          <button id="reset-btn" class="btn btn-with-icon">
+            <!-- <i class="material-icons">skip_previous</i> -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-skip-back-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M19.496 4.136l-12 7a1 1 0 0 0 0 1.728l12 7a1 1 0 0 0 1.504 -.864v-14a1 1 0 0 0 -1.504 -.864z" stroke-width="0" fill="currentColor"></path>
+              <path d="M4 4a1 1 0 0 1 .993 .883l.007 .117v14a1 1 0 0 1 -1.993 .117l-.007 -.117v-14a1 1 0 0 1 1 -1z" stroke-width="0" fill="currentColor"></path>
+            </svg>
+          </button>
+          <button id="play-pause-btn" class="btn btn-with-icon">
+            <!-- <i class="material-icons">play_arrow</i> -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" stroke-width="0" fill="currentColor"></path>
+            </svg>
+          </button>
         </div>
         <div class="elements" id="prefs-elements">
           <select id="main-prefs-menu" class="menu span4" name="main-prefs-menu">
             <option value="main-preferences">choose preferences</option>
             <option value="inertial-vectors">inertial vectors</option>
             <option value="orbit-fixed-vectors">orbit-fixed vectors</option>
+            <option value="orbiting-body-vectors">orbiting body vectors</option>
             <option value="units">units</option>
           </select>
         </div>
@@ -140,14 +139,50 @@
             <option value="i-j-k">i j k</option>
             <option value="no-inertial-vectors">no vectors</option>
           </select>
+          <select id="inertial-vector-color-menu" class="menu" name="inertial-vector-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
         </div>
         <div class="elements" id="orbit-fixed-vectors-elements">
           <select id="orbit-fixed-vectors-menu" class="menu span4" name="orbit-fixed-vectors-menu">
+            <option value="h-and-e">both h and e</option>
             <option value="h-only">h only</option>
             <option value="e-only">e only</option>
-            <option value="h-and-e">both h and e</option>
             <option value="p-q-w">perifocal frame</option>
             <option value="no-orbit-fixed-vectors">no vectors</option>
+          </select>
+          <select id="orbit-fixed-vector-color-menu" class="menu" name="orbit-fixed-vector-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+        </div>
+        <div class="elements" id="orbiting-body-vectors-elements">
+          <select id="orbiting-body-vectors-menu" class="menu span4" name="orbiting-body-vectors-menu">
+            <option value="r-and-v">both r and v</option>
+            <option value="r-only">r only</option>
+            <option value="v-only">v only</option>
+            <option value="u-v-w">UVW frame</option>
+            <option value="no-orbiting-body-vectors">no vectors</option>
+          </select>
+          <select id="orbiting-body-vector-color-menu" class="menu" name="orbiting-body-vector-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
           </select>
         </div>
       </div>

@@ -35,15 +35,14 @@ const defaultNu = 0;//degrees
 const defaultDelta = Math.PI/2;// 90 degrees for "square" hyperbola
 // const defaultVectorSize = 6;
 
-const defaultPQWFrameColor = 'blue';
-const defaultXYZFrameColor = 'blue';
-const defaultRColor = 'blue';
-const defaultVColor = 'blue';
-const defaultHColor = 'blue';
-const defaultEColor = 'blue';
-
 const defaultInertialVectorsChoice = 'X-Y-Z';
 const defaultOrbitFixedVectorsChoice = 'h-and-e';
+const defaultOrbitingBodyVectorsChoice = 'r-and-v';
+
+const defaultInertialVectorColor = 'orange';
+const defaultOrbitFixedVectorColor = 'blue';
+const defaultOrbitingBodyVectorColor = 'yellow';
+
 //aerovisualizerData is modified and saved to local storage when 
 // values and preferences are changed and is retrieved from local 
 // storage at startup
@@ -56,12 +55,12 @@ let aerovisualizerData = [
   {name:'inclination', value:defaultInclination},
   {name:'argument-of-periapsis', value:defaultAop},
   {name:'true-anomaly', value:defaultNu},
-  {name:'pqwFrameColor', value:defaultPQWFrameColor},
-  {name:'xyzFrameColor', value:defaultXYZFrameColor},
-  {name:'rColor', value:defaultRColor},
-  {name:'vColor', value:defaultVColor},
-  {name:'hColor', value:defaultHColor},
-  {name:'eColor', value:defaultEColor}
+  {name:'inertialVectorsChoice', value:defaultInertialVectorsChoice},
+  {name:'orbitFixedVectorsChoice', value:defaultOrbitFixedVectorsChoice},
+  {name:'orbitingBodyVectorsChoice', value:defaultOrbitingBodyVectorsChoice},
+  {name:'inertialVectorColor', value:defaultInertialVectorColor},
+  {name:'orbitFixedVectorColor', value:defaultOrbitFixedVectorColor},
+  {name:'orbitingBodyVectorColor', value:defaultOrbitingBodyVectorColor}
   // {name:'vectorSize', value:defaultVectorSize},
 ];
 
@@ -122,12 +121,13 @@ let timeScale = 1;
 let displayTimeScale = 1;
 let timeScaleMenuValue = '&nbsp;';
 
-let pqwFrameColor = defaultPQWFrameColor;
-let xyzFrameColor = defaultXYZFrameColor;
-let rColor = 'yellow';//defaultRColor;  temporary
-let vColor = 'yellow';//defaultVColor;  temporary
-let hColor = 'yellow';//defaultHColor;  temporary
-let eColor = 'yellow';//defaultEColor;  temporary
+let inertialVectorsChoice = defaultInertialVectorsChoice;
+let orbitFixedVectorsChoice = defaultOrbitFixedVectorsChoice;
+let orbitingBodyVectorsChoice = defaultOrbitingBodyVectorsChoice;
+
+let inertialVectorColor = defaultInertialVectorColor;
+let orbitFixedVectorColor = defaultOrbitFixedVectorColor;
+let orbitingBodyVectorColor = defaultOrbitingBodyVectorColor;
 
 let rVector = new THREE.Vector3(1, 1, 1);
 let vVector = new THREE.Vector3(1, 1, 1);
@@ -154,8 +154,6 @@ const eHyperbolaRange = eMaxHyperbola - eMinHyperbola;
 const aSliderRange = 150;
 const eSliderRange = 150;
 
-let inertialVectorsChoice = defaultInertialVectorsChoice;
-let orbitFixedVectorsChoice = defaultOrbitFixedVectorsChoice;
 // let vectorSize = defaultVectorSize;
 
 const threeDWorld = document.getElementById('threeD-world');
@@ -211,6 +209,7 @@ const orientationElements = document.getElementById('orientation-elements');
 const rvElements = document.getElementById('r-v-elements');
 const numericalElements = document.getElementById('numerical-elements');
 const prefsElements = document.getElementById('prefs-elements');
+const playResetButtonsElements = document.getElementById('play-reset-buttons-elements');
 
 const muDisplay = document.getElementById('mu');
 const aCBDisplay = document.getElementById('a');
@@ -227,8 +226,19 @@ const inertialVectorsMenu = document.getElementById('inertial-vectors-menu');
 inertialVectorsMenu.value = inertialVectorsChoice;
 const orbitFixedVectorsMenu = document.getElementById('orbit-fixed-vectors-menu');
 orbitFixedVectorsMenu.value = orbitFixedVectorsChoice;
+const orbitingBodyVectorsMenu = document.getElementById('orbiting-body-vectors-menu');
+orbitingBodyVectorsMenu.value = orbitingBodyVectorsChoice;
+
+const inertialVectorColorMenu = document.getElementById('inertial-vector-color-menu');
+inertialVectorColorMenu.value = inertialVectorColor;
+const orbitFixedVectorColorMenu = document.getElementById('orbit-fixed-vector-color-menu');
+orbitFixedVectorColorMenu.value = orbitFixedVectorColor;
+const orbitingBodyVectorColorMenu = document.getElementById('orbiting-body-vector-color-menu');
+orbitingBodyVectorColorMenu.value = orbitingBodyVectorColor;
+
 const inertialVectorsElements = document.getElementById('inertial-vectors-elements');
 const orbitFixedVectorsElements = document.getElementById('orbit-fixed-vectors-elements');
+const orbitingBodyVectorsElements = document.getElementById('orbiting-body-vectors-elements');
 
 // const generalElements = document.getElementById('general-elements');
 // const defaultElements = document.getElementById('default-elements');
@@ -393,10 +403,10 @@ const replaceAerovisualizerData = function(name, value){
 const saveToLocalStorage = function(){
   localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
 }
+localStorage.clear();
 saveToLocalStorage();
 
 const getFromLocalStorage = function(){
-  // localStorage.clear();
   const data = JSON.parse(localStorage.getItem('aerovisualizerData'));
   return data;
 }
@@ -414,8 +424,10 @@ const handleMainButtons = function(button){
   rvElements.style.display = 'none';
   numericalElements.style.display = 'none';
   prefsElements.style.display = 'none';
+  playResetButtonsElements.display = 'none';
   inertialVectorsElements.style.display = 'none';
   orbitFixedVectorsElements.style.display = 'none';
+  orbitingBodyVectorsElements.style.display = 'none';
 
   switch (button){
     case 'mu':
@@ -424,18 +436,22 @@ const handleMainButtons = function(button){
       break;
     case 'aeP':
       aeElements.style.display = 'grid';
+      playResetButtonsElements.display = 'grid';
       aeButton.disabled = true;
       break;
     case 'orientation':
       orientationElements.style.display = 'grid';
+      playResetButtonsElements.display = 'grid';
       orientationButton.disabled = true;
       break;
     case 'rv':
       rvElements.style.display = 'grid';
+      playResetButtonsElements.display = 'grid';
       rvButton.disabled = true;
       break;
     case 'numerical':
       numericalElements.style.display = 'grid';
+      playResetButtonsElements.display = 'grid';
       numericalButton.disabled = true;
       break;
     case 'prefs':
@@ -889,8 +905,10 @@ const computeTimeAfterPeriapse = function(){
   timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
 }
 
-const doTimeScaleDisplay = function(){
+const doNuAndTimeDisplay = function(){
   if (meanAnomaly !== null){
+    nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees)}`;
+
     switch (timeScaleMenuValue){
       case 'sec-equals-1sec':
         timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(0).toString()} seconds`;
@@ -916,9 +934,8 @@ const doTimeScaleDisplay = function(){
 const doNuSliderOnInput = function(value){
   nuDegrees = value;
   nu = nuDegrees*piOver180;
-  nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees)}`;
   computeTimeAfterPeriapse();
-  doTimeScaleDisplay();
+  doNuAndTimeDisplay();
 
   switch (conicSection){
     case 'ellipse':
@@ -947,9 +964,8 @@ nuSlider.onpointerup = function(){
 zeroNuButton.addEventListener('click', () => {
   nu = 0;
   nuDegrees = 0;
-  nuSlider.value = nuDegrees;
-  nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees)}`;
-  doTimeScaleDisplay();
+  nuSlider.value = nuDegrees;  
+  doNuAndTimeDisplay();
   // omt.needsRefresh = true;
 
   // localStorage.clear();//temporary
@@ -1014,7 +1030,10 @@ const computeUniversal = function(){
     // t is the time in canonical time units.  For elliptical orbits, an 
     // orbital period (tp) equals twoPi canonical time units (TU or CTU)
     // equals animationPeriod.  For a hyperbolic flyby, animationPeriod equals the
-    // time span computed in doASliderOnInput()
+    // time span computed in doASliderOnInput().
+    // CURRENTLY t IS INCREMENTED EVENLY.  A BETTER WAY WOULD BE TO HAVE
+    // MORE DATA POINTS WHEN THE TRUE ANOMALY CHANGES THE FASTEST (I.E.,
+    // NEAR PERIAPSE)
 
     // see Bate p. 206 for first guess of x
     if (e < 1){
@@ -1035,8 +1054,9 @@ const computeUniversal = function(){
 
     // iterate to find x at time t.  The loop limit is arbitrary
     // but is designed to handle extreme cases.  It should
-    // break out of the loop before i reaches its max.  If not,
-    // set the maximum i to be a higher value
+    // break out of the loop before i reaches its max.  If this,
+    // should ever occur, which it shouldn't, set the maximum i 
+    // to be a higher value
     for (i=0; i<15; i++){
       // Bate p. 195
       z = x*x/a;
@@ -1076,6 +1096,8 @@ const computeUniversal = function(){
     g = t - x*x*x*s/sqrtMuCanonical;
     univPoint.f = f;
     univPoint.g = g;
+    // below, r is computed under the assumption that r0 and v0 are
+    // at the periapse, which is mentioned earlier
     r = Math.sqrt(f*f*rp*rp + g*g*sqrtMuOverP*sqrtMuOverP*(e + 1)*(e + 1));
     univPoint.fdot = sqrtMuCanonical*x*(z*s - 1)/(r0*r);
     univPoint.gdot = 1 - x*x*c/r;
@@ -1086,57 +1108,51 @@ const computeUniversal = function(){
   }
 }
 
-const setPQWFrameColor = function(color, save=false){
-  omt.setColor('pqwFrame', color);
-
-  if (save){
-    replaceAerovisualizerData('pqwFrameColor',color);
-  }
-}
-
-const setXYZFrameColor = function(color, save=false){
+const setInertialVectorColor = function(color, save=false){
   omt.setColor('xyzFrame', color);
 
   if (save){
-    replaceAerovisualizerData('xyzFrameColor',color);
+    replaceAerovisualizerData('inertialVectorColor',color);
   }
 }
 
-const setRColor = function(color, save=false){
-  omt.setColor('r', color);
-
-  if (save){
-    replaceAerovisualizerData('rColor',color);
-  }
-}
-const setVColor = function(color, save=false){
-  omt.setColor('v', color);
-
-  if (save){
-    replaceAerovisualizerData('vColor',color);
-  }
-}
-const setHColor = function(color, save=false){
+const setOrbitFixedVectorColor = function(color, save=false){
   omt.setColor('h', color);
-
-  if (save){
-    replaceAerovisualizerData('hColor',color);
-  }
-}
-
-const setEColor = function(color, save=false){
   omt.setColor('e', color);
+  omt.setColor('pqwFrame', color);
 
   if (save){
-    replaceAerovisualizerData('eColor',color);
+    replaceAerovisualizerData('orbitFixedVectorColor',color);
   }
 }
 
-// rColorMenu.addEventListener('change', () => {
-//   rColor = rColorMenu.value;
-//   setRColor(rColor, true);
-//   saveToLocalStorage();
-// });
+const setOrbitingBodyVectorColor = function(color, save=false){
+  omt.setColor('r', color);
+  omt.setColor('v', color);
+  // omt.setColor('uvwFrame', color);
+
+  if (save){
+    replaceAerovisualizerData('orbitingBodyVectorColor',color);
+  }
+}
+
+inertialVectorColorMenu.addEventListener('change', () => {
+  inertialVectorColor = inertialVectorColorMenu.value;
+  setInertialVectorColor(inertialVectorColor, true);
+  saveToLocalStorage();
+});
+
+orbitFixedVectorColorMenu.addEventListener('change', () => {
+  orbitFixedVectorColor = orbitFixedVectorColorMenu.value;
+  setOrbitFixedVectorColor(orbitFixedVectorColor, true);
+  saveToLocalStorage();
+});
+
+orbitingBodyVectorColorMenu.addEventListener('change', () => {
+  orbitingBodyVectorColor = orbitingBodyVectorColorMenu.value;
+  setOrbitingBodyVectorColor(orbitingBodyVectorColor, true);
+  saveToLocalStorage();
+});
 
 // const toggleShowInfo = function(){
 //   if (threeDWorld.style.display === 'none'){
@@ -1218,7 +1234,7 @@ const doTimeScaleMenu = function(){
 
 timeScaleMenu.addEventListener('change', () => {
   doTimeScaleMenu();
-  doTimeScaleDisplay();
+  doNuAndTimeDisplay();
 
   // replaceAerovisualizerData('time-scale',timeScale);
   // saveToLocalStorage();
@@ -1227,6 +1243,7 @@ timeScaleMenu.addEventListener('change', () => {
 const handleMainPrefs = function(opt){
   inertialVectorsElements.style.display = 'none';
   orbitFixedVectorsElements.style.display = 'none';
+  orbitingBodyVectorsElements.style.display = 'none';
 
   switch (opt){
     case 'inertial-vectors':
@@ -1235,6 +1252,10 @@ const handleMainPrefs = function(opt){
 
     case 'orbit-fixed-vectors':
       orbitFixedVectorsElements.style.display = 'grid';
+      break;
+
+    case 'orbiting-body-vectors':
+      orbitingBodyVectorsElements.style.display = 'grid';
       break;
 
     case 'units':
@@ -1246,9 +1267,7 @@ mainPrefsMenu.addEventListener('change', () => {
   handleMainPrefs(mainPrefsMenu.value);
 });
 
-inertialVectorsMenu.addEventListener('change', () => {
-  inertialVectorsChoice = inertialVectorsMenu.value;
-
+const doInertialVectorsChoice = function(){
   switch (inertialVectorsChoice){
     case 'X-Y-Z':
       omt.showXYZFrame(true);
@@ -1270,14 +1289,16 @@ inertialVectorsMenu.addEventListener('change', () => {
       omt.showXYZFrame(false);
       break;
   }
+}
 
-  // saveToLocalStorage();
-});
-
-orbitFixedVectorsMenu.addEventListener('change', () => {
-  orbitFixedVectorsChoice = orbitFixedVectorsMenu.value;
-
+const doOrbitFixedVectorsChoice = function(){
   switch (orbitFixedVectorsChoice){
+    case 'h-and-e':
+      omt.showPQWFrame(false);
+      omt.showH(true);
+      omt.showE(true);
+      break;
+    
     case 'h-only':
       omt.showPQWFrame(false);
       omt.showH(true);
@@ -1290,12 +1311,6 @@ orbitFixedVectorsMenu.addEventListener('change', () => {
       omt.showE(true);
       break;
 
-    case 'h-and-e':
-      omt.showPQWFrame(false);
-      omt.showH(true);
-      omt.showE(true);
-      break;
-    
     case 'p-q-w':
       omt.showPQWFrame(true);
       omt.showE(false);
@@ -1308,8 +1323,61 @@ orbitFixedVectorsMenu.addEventListener('change', () => {
       omt.showH(false);
       break;
   }
+}
 
-  // saveToLocalStorage();
+const doOrbitingBodyVectorsChoice = function(){
+  switch (orbitingBodyVectorsChoice){
+    case 'r-and-v':
+      // omt.showUVWFrame(false);
+      omt.showR(true);
+      omt.showV(true);
+      break;
+    
+    case 'r-only':
+      // omt.showUVWFrame(false);
+      omt.showR(true);
+      omt.showV(false);
+      break;
+
+    case 'v-only':
+      // omt.showUVWFrame(false);
+      omt.showR(false);
+      omt.showV(true);
+      break;
+
+    case 'u-v-w':
+      // omt.showUVWFrame(true);
+      omt.showR(false);
+      omt.showV(false);
+      break;
+
+    case 'no-orbiting-body-vectors':
+      // omt.showUVWFrame(false);
+      omt.showR(false);
+      omt.showV(false);
+      break;
+  }
+}
+
+inertialVectorsMenu.addEventListener('change', () => {
+  inertialVectorsChoice = inertialVectorsMenu.value;
+  doInertialVectorsChoice();
+  replaceAerovisualizerData('inertialVectorsChoice',inertialVectorsChoice);
+  saveToLocalStorage();
+});
+
+orbitFixedVectorsMenu.addEventListener('change', () => {
+  orbitFixedVectorsChoice = orbitFixedVectorsMenu.value;
+  doOrbitFixedVectorsChoice();
+  replaceAerovisualizerData('orbitFixedVectorsChoice',orbitFixedVectorsChoice);
+  saveToLocalStorage();
+});
+
+orbitingBodyVectorsMenu.addEventListener('change', () => {
+  orbitingBodyVectorsChoice = orbitingBodyVectorsMenu.value;
+  doOrbitingBodyVectorsChoice();
+  replaceAerovisualizerData('orbitingBodyVectorsChoice',orbitingBodyVectorsChoice);
+  saveToLocalStorage();
 });
 
 toggleConicSectionButton.addEventListener('click', () => {
@@ -1440,7 +1508,7 @@ const initTHREE = function() {
   orbitControls.enableZoom = false;
 };
 
-const createAndInitialize = function(data, camera){
+const initialize = function(data, camera){
   let aSl;
   let eSl;
 
@@ -1473,23 +1541,23 @@ const createAndInitialize = function(data, camera){
           case 'true-anomaly':
             nuDegrees  = Number(o.value);
             break;
-          case 'pqwFrameColor':
-            pqwFrameColor  = o.value;
+          case 'inertialVectorsChoice':
+            inertialVectorsChoice  = o.value;
             break;
-          case 'xyzFrameColor':
-            xyzFrameColor  = o.value;
+          case 'orbitFixedVectorsChoice':
+            orbitFixedVectorsChoice  = o.value;
             break;
-          case 'rColor':
-            rColor  = 'yellow'; //temporary//o.value;
+          case 'orbitingBodyVectorsChoice':
+            orbitingBodyVectorsChoice  = o.value;
             break;
-          case 'vColor':
-            vColor  = 'orange'; //temporary//o.value;
+          case 'inertialVectorColor':
+            inertialVectorColor  = o.value;
             break;
-          case 'hColor':
-            hColor  = o.value;
+          case 'orbitFixedVectorColor':
+            orbitFixedVectorColor  = o.value;
             break;
-          case 'eColor':
-            eColor  = o.value;
+          case 'orbitingBodyVectorColor':
+            orbitingBodyVectorColor  = o.value;
             break;
           // case 'vectorSize':
           //   vectorSize  = o.value;
@@ -1569,15 +1637,14 @@ const completeInitialization = function(continueAnimation = true) {
     // infoMenu.value = 'info-intro';
     // handleInfoMenuChoice(infoMenu.value);
     loadBackground();
-    omt.showR(true);
-    omt.showV(true);
 
-    setPQWFrameColor(pqwFrameColor);
-    setXYZFrameColor(xyzFrameColor);
-    setRColor(rColor);
-    setVColor(vColor);
-    setHColor(hColor);
-    setEColor(eColor);
+    doInertialVectorsChoice();
+    doOrbitFixedVectorsChoice();
+    doOrbitingBodyVectorsChoice();
+
+    setInertialVectorColor(inertialVectorColor);
+    setOrbitFixedVectorColor(orbitFixedVectorColor);
+    setOrbitingBodyVectorColor(orbitingBodyVectorColor);
     
     // omt.setVectorSize(vectorSize);
     // omt.setMuIndex(0);
@@ -1687,32 +1754,46 @@ const animate = function(continueAnimation = true) {
     timeAfterPeriapseInSeconds += deltaT;// deltaT for 60 fps is 0.01666
     timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
     let safetyCounter = 0;//prevents infinite loops if ever they happen (which they shouldn't)
-    //whenever the if block below changes to a while loop
+    //whenever I decide to change the if block below to a while loop to
+    //account for larger time intervals than between data points
 
     if (timeAfterPeriapseInSeconds > timeAfterPeriapseInSeconds1 && safetyCounter < 10){
       safetyCounter++;
       doNextUniversalPointStuff();
     }
 
-    //do the interpolation between computed points on the ellipse
+    //do the linear interpolation between computed points on the ellipse or
+    //hyperbola.  The conic sections are approximated as multi-sided
+    //polygons, and thus positions and velocities affected by this.  To
+    //reduce the error, increase the universalArraySize variable
     px = x0 + dpxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     py = y0 + dpydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     vx = vx0 + dvxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     vy = vy0 + dvydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     omt.setR(px, py, 0, a);
     omt.setV(vx, vy, 0);
+    doNuAndTimeDisplay();
     omt.needsRefresh = true;
-    omt.refresh();// refresh only happens if needsRefresh === true
   }
+
+  omt.refresh();// refresh only happens if needsRefresh === true
 };
 
 const data = getFromLocalStorage();
-initTHREE();
-createAndInitialize(data, camera);
-completeInitialization();
-animate();
 
+if (!data){
+  // console.log('blah');
+  localStorage.clear();
+  saveToLocalStorage();
+  data = getFromLocalStorage();
+}
 
+if (data){
+  initTHREE();
+  initialize(data, camera);
+  completeInitialization();
+  animate();
+}
 
 /*
 orbitalCurveMesh = null;

@@ -1779,7 +1779,7 @@ const animate = function(continueAnimation = true) {
   omt.refresh();// refresh only happens if needsRefresh === true
 };
 
-const data = getFromLocalStorage();
+let data = getFromLocalStorage();
 
 if (!data){
   // console.log('blah');

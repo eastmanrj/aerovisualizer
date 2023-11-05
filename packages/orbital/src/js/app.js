@@ -403,8 +403,8 @@ const replaceAerovisualizerData = function(name, value){
 const saveToLocalStorage = function(){
   localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
 }
-// localStorage.clear();
-// saveToLocalStorage();
+localStorage.clear();
+saveToLocalStorage();
 
 const getFromLocalStorage = function(){
   const data = JSON.parse(localStorage.getItem('aerovisualizerData'));

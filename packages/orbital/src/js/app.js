@@ -394,10 +394,12 @@ let centralBodyData = [
 ];
 
 const replaceAerovisualizerData = function(name, value){
-  aerovisualizerData.forEach(o => {
-    if (o.name === name){
-      o.value = value;
-    }});
+  if (aerovisualizerData){
+    aerovisualizerData.forEach(o => {
+      if (o.name === name){
+        o.value = value;
+      }});
+  }
 }
 
 const saveToLocalStorage = function(){
@@ -412,6 +414,7 @@ const getFromLocalStorage = function(){
 }
 
 const handleMainButtons = function(button){
+  haltPlay();
   muButton.disabled = false;
   aeButton.disabled = false;
   orientationButton.disabled = false;
@@ -504,6 +507,7 @@ const computeDelta = function(){
 }
 
 const doASliderOnInput = function(value){
+  haltPlay();
   let c = aRange/(Math.log(aSliderRange+1));
   let d = aMax;
   value = aSliderRange - value;
@@ -546,6 +550,7 @@ const doASliderOnInput = function(value){
 }
 
 const doESliderOnInput = function(value){
+  haltPlay();
   let c;
   let d;
   value = eSliderRange - value;
@@ -672,6 +677,7 @@ eSlider.onpointerup = function(){
 }
 
 defaultAButton.addEventListener('click', () => {
+  haltPlay();
   aSlider.value = 0;
   doASliderOnInput(+aSlider.value);
   aDisplay.innerHTML = `a: ${a}`;
@@ -681,6 +687,7 @@ defaultAButton.addEventListener('click', () => {
 });
 
 defaultEButton.addEventListener('click', () => {
+  haltPlay();
   eSlider.value = 0;
   doESliderOnInput(+eSlider.value);
   eDisplay.innerHTML = `e: ${e}`;
@@ -759,6 +766,7 @@ const handleOrientationOnInput = function(opt, setValuesOnly = false){
   }
 
   if (!setValuesOnly){
+    haltPlay();
     omt.computeRotation(lan, inc, aop);
     omt.shapeOrbitCurve(a, e);
   }
@@ -792,6 +800,7 @@ aopSlider.onpointerup = function(){
 }
 
 zeroLanButton.addEventListener('click', () => {
+  haltPlay();
   lan = 0;
   lanDegrees = 0;
   lanSlider.value = lanDegrees;
@@ -803,6 +812,7 @@ zeroLanButton.addEventListener('click', () => {
 });
 
 zeroIncButton.addEventListener('click', () => {
+  haltPlay();
   inc = 0;
   incDegrees = 0;
   incSlider.value = incDegrees;
@@ -814,6 +824,7 @@ zeroIncButton.addEventListener('click', () => {
 });
 
 zeroAopButton.addEventListener('click', () => {
+  haltPlay();
   aop = 0;
   aopDegrees = 0;
   aopSlider.value = aopDegrees;
@@ -932,6 +943,7 @@ const doNuAndTimeDisplay = function(){
 }
 
 const doNuSliderOnInput = function(value){
+  haltPlay();
   nuDegrees = value;
   nu = nuDegrees*piOver180;
   computeTimeAfterPeriapse();
@@ -1183,6 +1195,7 @@ orbitingBodyVectorColorMenu.addEventListener('change', () => {
 // });
 
 const handleMuChange = function(){
+  haltPlay();
   theCB = centralBodyData.find(x => x.name === centralBody);
   ctu = theCB.CTU;
   cdu = theCB.CDU;
@@ -1206,6 +1219,7 @@ muMenu.addEventListener('change', () => {
 });
 
 const doTimeScaleMenu = function(){
+  haltPlay();
   timeScaleMenuValue = timeScaleMenu.value;
 
   switch (timeScaleMenuValue){
@@ -1595,7 +1609,7 @@ const initialize = function(data, camera){
 
   computeUniversal();
   doNuSliderOnInput(nuDegrees);
-  doNextUniversalPointStuff(1);
+  doUniversalPointCalculations(1);
 
   if (conicSection === 'ellipse'){
     toggleConicSectionButton.innerHTML = 'ELLIPSE&nbsp;/&nbsp;hyperbola';
@@ -1662,7 +1676,7 @@ const doPlayPause = function(){
 
   if (playing && needToComputeUniversal){
     computeUniversal();
-    doNextUniversalPointStuff(1);
+    doUniversalPointCalculations(1);
   }
 
   playPauseButton.innerHTML = playing ? `<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-pause-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -1682,9 +1696,6 @@ playPauseButton.addEventListener('click', () => {
   doPlayPause();
 });
 
-resetButton.addEventListener('click', () => {
-});
-
 const haltPlay = function(){
   if (playing){
     playing = false;
@@ -1698,7 +1709,15 @@ const haltPlay = function(){
   }
 }
 
-const doNextUniversalPointStuff = function(opt=0){
+resetButton.addEventListener('click', () => {
+  doNuSliderOnInput(+(nuSlider.value));
+});
+
+const doUniversalPointCalculations = function(opt=0){
+  if (!universalArray){
+    return;
+  }
+
   // option 0: set the current values to the next ones and
   // then compute the next ones
   // option 1: compute both the current values and the next ones 
@@ -1759,7 +1778,7 @@ const animate = function(continueAnimation = true) {
 
     if (timeAfterPeriapseInSeconds > timeAfterPeriapseInSeconds1 && safetyCounter < 10){
       safetyCounter++;
-      doNextUniversalPointStuff();
+      doUniversalPointCalculations();
     }
 
     //do the linear interpolation between computed points on the ellipse or
@@ -1782,7 +1801,6 @@ const animate = function(continueAnimation = true) {
 let data = getFromLocalStorage();
 
 if (!data){
-  // console.log('blah');
   localStorage.clear();
   saveToLocalStorage();
   data = getFromLocalStorage();
@@ -1794,34 +1812,3 @@ if (data){
   completeInitialization();
   animate();
 }
-
-/*
-orbitalCurveMesh = null;
-
-if (orbitalCurveMesh != null){
-  quat.set(0, 0, 0, 1);
-  orbitalCurveMesh.matrix.compose(origin, quat, scale);
-}
-
-initializeOrbitalCurve();
-
-initializeOrbitalCurve(){
-  const hMag = h.length();
-  refresh();
-}
-
-refresh(){
-  if (!constructionComplete){
-    return;
-  }
-
-  if (needsRefresh === false){
-    return;
-  }
-
-  needsRefresh = false;
-
-  if (orbitalCurveMesh != null){
-    orbitalCurveMesh.matrix.compose(origin, quat, scale);
-  }
-*/

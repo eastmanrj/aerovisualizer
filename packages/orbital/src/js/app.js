@@ -19,8 +19,9 @@ let orbitControls = null;//in this context, "orbit" refers to the camera
 let playing = false;
 let cbRadius = 1;
 const muCanonical = 1;//mu is 1 for canonical units of distance (DU)
-//and time (TU), do not change this
-const sqrtMuCanonical = Math.sqrt(muCanonical);//this should be 1 also
+//and time (TU). This is included in the code rather than 1 to
+//maintain clarity
+const sqrtMuCanonical = Math.sqrt(muCanonical);//this also should be 1
 let periapseTooSmall = false;
 
 const defaultCentralBody = 'Earth';
@@ -43,6 +44,13 @@ const defaultInertialVectorColor = 'orange';
 const defaultOrbitFixedVectorColor = 'blue';
 const defaultOrbitingBodyVectorColor = 'yellow';
 
+const defaultInertialVectorScale = 50;
+const defaultOrbitFixedVectorScale = 50;
+const defaultVelocityVectorScale = 50;
+
+const defaultTimeScale = 1;
+const defaultTimeScaleMenuChoice = 'sec-equals-1sec';
+
 //aerovisualizerData is modified and saved to local storage when 
 // values and preferences are changed and is retrieved from local 
 // storage at startup
@@ -60,8 +68,11 @@ let aerovisualizerData = [
   {name:'orbitingBodyVectorsChoice', value:defaultOrbitingBodyVectorsChoice},
   {name:'inertialVectorColor', value:defaultInertialVectorColor},
   {name:'orbitFixedVectorColor', value:defaultOrbitFixedVectorColor},
-  {name:'orbitingBodyVectorColor', value:defaultOrbitingBodyVectorColor}
-  // {name:'vectorSize', value:defaultVectorSize},
+  {name:'orbitingBodyVectorColor', value:defaultOrbitingBodyVectorColor},
+  {name:'inertialVectorScale', value:defaultInertialVectorScale},
+  {name:'orbitFixedVectorScale', value:defaultOrbitFixedVectorScale},
+  {name:'velocityVectorScale', value:defaultVelocityVectorScale},
+  {name:'timeScaleMenuChoice', value:defaultTimeScaleMenuChoice}
 ];
 
 let centralBody = defaultCentralBody;
@@ -88,7 +99,7 @@ let timeAfterPeriapse;// in canonical time units (CTU)
 let timeAfterPeriapseInSeconds;
 
 let universalArray = [];
-const universalArraySize = 60;
+const universalArraySize = 360;
 let universalArrayIndex0;// this is
 // the index of universalArray that corresponds to just before
 // where the time is during animation
@@ -117,9 +128,6 @@ let dvxdt;
 let dvydt;
 let needToComputeUniversal = true;
 let animationPeriod = tp;
-let timeScale = 1;
-let displayTimeScale = 1;
-let timeScaleMenuValue = '&nbsp;';
 
 let inertialVectorsChoice = defaultInertialVectorsChoice;
 let orbitFixedVectorsChoice = defaultOrbitFixedVectorsChoice;
@@ -128,6 +136,14 @@ let orbitingBodyVectorsChoice = defaultOrbitingBodyVectorsChoice;
 let inertialVectorColor = defaultInertialVectorColor;
 let orbitFixedVectorColor = defaultOrbitFixedVectorColor;
 let orbitingBodyVectorColor = defaultOrbitingBodyVectorColor;
+
+let inertialVectorScale = defaultInertialVectorScale;
+let orbitFixedVectorScale = defaultOrbitFixedVectorScale;
+let velocityVectorScale = defaultVelocityVectorScale;
+
+let timeScale = defaultTimeScale;
+let displayTimeScale = defaultTimeScale;
+let timeScaleMenuChoice = defaultTimeScaleMenuChoice;
 
 let rVector = new THREE.Vector3(1, 1, 1);
 let vVector = new THREE.Vector3(1, 1, 1);
@@ -221,7 +237,10 @@ const radiusDisplay = document.getElementById('radius');
 const vescDisplay = document.getElementById('vesc');
 
 const mainPrefsMenu = document.getElementById('main-prefs-menu');
-mainPrefsMenu.value = 'main-preferences';
+mainPrefsMenu.value = 'general-preferences';
+
+const centralBodyTransparencySlider = document.getElementById('central-body-transparency-slider');
+
 const inertialVectorsMenu = document.getElementById('inertial-vectors-menu');
 inertialVectorsMenu.value = inertialVectorsChoice;
 const orbitFixedVectorsMenu = document.getElementById('orbit-fixed-vectors-menu');
@@ -236,6 +255,14 @@ orbitFixedVectorColorMenu.value = orbitFixedVectorColor;
 const orbitingBodyVectorColorMenu = document.getElementById('orbiting-body-vector-color-menu');
 orbitingBodyVectorColorMenu.value = orbitingBodyVectorColor;
 
+const inertialVectorScaleSlider = document.getElementById('inertial-vector-scale-slider');
+inertialVectorScaleSlider.value = inertialVectorScale;
+const orbitFixedVectorScaleSlider = document.getElementById('orbit-fixed-vector-scale-slider');
+orbitFixedVectorScaleSlider.value = orbitFixedVectorScale;
+const velocityVectorScaleSlider = document.getElementById('velocity-vector-scale-slider');
+velocityVectorScaleSlider.value = velocityVectorScale;
+
+const generalPrefsElements = document.getElementById('general-prefs-elements');
 const inertialVectorsElements = document.getElementById('inertial-vectors-elements');
 const orbitFixedVectorsElements = document.getElementById('orbit-fixed-vectors-elements');
 const orbitingBodyVectorsElements = document.getElementById('orbiting-body-vectors-elements');
@@ -405,8 +432,9 @@ const replaceAerovisualizerData = function(name, value){
 const saveToLocalStorage = function(){
   localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
 }
-// localStorage.clear();
-// saveToLocalStorage();
+localStorage.clear();//temp
+saveToLocalStorage();//temp blah
+// location.reload();//temp
 
 const getFromLocalStorage = function(){
   const data = JSON.parse(localStorage.getItem('aerovisualizerData'));
@@ -428,6 +456,7 @@ const handleMainButtons = function(button){
   numericalElements.style.display = 'none';
   prefsElements.style.display = 'none';
   playResetButtonsElements.display = 'none';
+  generalPrefsElements.style.display = 'none';
   inertialVectorsElements.style.display = 'none';
   orbitFixedVectorsElements.style.display = 'none';
   orbitingBodyVectorsElements.style.display = 'none';
@@ -460,6 +489,7 @@ const handleMainButtons = function(button){
     case 'prefs':
       prefsElements.style.display = 'grid';
       prefsButton.disabled = true;
+      handleMainPrefs(mainPrefsMenu.value);
       break;
     case 'none':
       break;
@@ -521,16 +551,21 @@ const doASliderOnInput = function(value){
     a = -a;
     tp = null;//orbital period is not defined for hyperbolic orbits
 
-    // set animationPeriod equal to the time period of the flyby.  Since
-    // the time is infinite to reach the delta angle, we reduce this
-    // angle by a small amount (th) to make the animation time reasonable.
-    // nu1 and nu2 are true anomalies at the extremes of the flyby
+    // set animationPeriod equal to the time period of the flyby.  
+    // Since the time is infinite to reach the delta angle, we reduce 
+    // this angle by a small amount ("th") to make the animation time
+    // reasonable.  nu1 and nu2 are true anomalies at the extremes of
+    // the flyby.  One possible program enhancement might be to let the
+    // user determine the value of "th"
 
-    const th = Math.PI/100;
+    const th = Math.PI/10;
     const nu1 = -(Math.PI + delta)/2 + th;
     const nu2 = (Math.PI + delta)/2 - th;
     const cosnu1 = Math.cos(nu1);
     const cosnu2 = Math.cos(nu2);
+    //make sure to compute e before this function, otherwise
+    //coshF1 and coshF2 can be such that we compute a square
+    //root of a negative number below
     const coshF1 = (e + cosnu1)/(1 + e*cosnu1);
     const coshF2 = (e + cosnu2)/(1 + e*cosnu2);
     const F1 = -Math.log(coshF1 + Math.sqrt(coshF1*coshF1 - 1));
@@ -539,6 +574,7 @@ const doASliderOnInput = function(value){
     const M2 = e*Math.sinh(F2) - F2;
     const n = Math.sqrt(muCanonical/(-a*a*a));
     animationPeriod = (M2 - M1)/n;
+    // console.log('e: ',e,'nu1: ',nu1,'nu2: ',nu2,'coshF1: ',coshF1,'coshF2: ',coshF2,'coshF2*coshF2 - 1: ',coshF2*coshF2 - 1,'coshF1*coshF1 - 1: ',coshF1*coshF1 - 1);
   }
 
   needToComputeUniversal = true;
@@ -920,7 +956,7 @@ const doNuAndTimeDisplay = function(){
   if (meanAnomaly !== null){
     nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees)}`;
 
-    switch (timeScaleMenuValue){
+    switch (timeScaleMenuChoice){
       case 'sec-equals-1sec':
         timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(0).toString()} seconds`;
         break;
@@ -969,6 +1005,7 @@ nuSlider.oninput = function(){
 }
 
 nuSlider.onpointerup = function(){
+  doUniversalPointCalculations(1);
   replaceAerovisualizerData('true-anomaly',nuDegrees);
   saveToLocalStorage();
 }
@@ -1022,10 +1059,11 @@ const computeUniversal = function(){
   const r0DotV0 = 0;
   // we use the periapse for r0 and v0, so their dot product
   // is 0.  Generally, set r0DotV0 equal to rVector.dot(vVector),
-  // where rVector is set from r = p/(1 + e*cos(nu)),
+  // where rVector is set from r = p/(1 + e*cos(nu)), and
   // rVector.x equals r*cos(nu), rVector.y equals r*sin(nu),
   // vVector.x equals -sqrtMuOverP*sin(nu), and
   // vVector.y equals sqrtMuOverP*(e + cos(nu)) from Bate p. 72
+  // VELOCITY COMMENT MIGHT BE FOR PERIAPSE, NOT GENERAL
 
   const sqrtA = Math.sqrt(Math.abs(a));
 
@@ -1036,16 +1074,18 @@ const computeUniversal = function(){
 
   let univPoint;  
   // make sure that universalArraySize is an even fraction or
-  // multiple of 360 such as 60, 90, 120, 180, 360, or 720
-
+  // multiple of 360 such as 60, 90, 120, 180, 360, or 720.
+  // 360 seems to be good enough. lower numbers cause the animation
+  // to look segmented around periapse and the numbers to be
+  // too inaccurate
+  // console.log('animationPeriod: ',animationPeriod);
   for (let t=-animationPeriod/2; t<animationPeriod/2; t+=animationPeriod/universalArraySize){
     // t is the time in canonical time units.  For elliptical orbits, an 
     // orbital period (tp) equals twoPi canonical time units (TU or CTU)
-    // equals animationPeriod.  For a hyperbolic flyby, animationPeriod equals the
-    // time span computed in doASliderOnInput().
-    // CURRENTLY t IS INCREMENTED EVENLY.  A BETTER WAY WOULD BE TO HAVE
-    // MORE DATA POINTS WHEN THE TRUE ANOMALY CHANGES THE FASTEST (I.E.,
-    // NEAR PERIAPSE)
+    // which equals animationPeriod.  For a hyperbolic flyby, animationPeriod
+    // equals the time span computed in doASliderOnInput(). t is incremented
+    // evenly.  Another way might be to have more data points where nu changes
+    // the fastest around periapse
 
     // see Bate p. 206 for first guess of x
     if (e < 1){
@@ -1064,12 +1104,16 @@ const computeUniversal = function(){
 
     x = xFirstGuess;
 
-    // iterate to find x at time t.  The loop limit is arbitrary
-    // but is designed to handle extreme cases.  It should
-    // break out of the loop before i reaches its max.  If this,
-    // should ever occur, which it shouldn't, set the maximum i 
-    // to be a higher value
-    for (i=0; i<15; i++){
+    // iterate to find x at time t.  The loop count limit is arbitrary
+    // but is designed to handle extreme cases.  It should usually
+    // break out of the loop way before i reaches its maximum.  Tests of
+    // this have shown that i can get up to around 30 for eccentricities
+    // near 1 (parabolic).  The variable eMinHyperbola is the
+    // extreme lower limit for hyperbolic orbits and its value for the
+    // tests was set to 1.02.  If you reduce eMinHyperbola, you will 
+    // certainly need to increase the maximum iterations for i but
+    // at the expense of computer performance
+    for (i=0; i<50; i++){
       // Bate p. 195
       z = x*x/a;
       
@@ -1099,6 +1143,10 @@ const computeUniversal = function(){
       if (Math.abs(t - tn) < 0.001){
         break;
       }
+
+      // if (i>7){
+      //   console.log('i: ',i,'x: ',x, 'z: ',z, 'c: ',c, 's: ',s, 'tn: ',tn, 'dtdx: ',dtdx);
+      // }
     }
     
     // Bate pp. 201-2
@@ -1220,9 +1268,9 @@ muMenu.addEventListener('change', () => {
 
 const doTimeScaleMenu = function(){
   haltPlay();
-  timeScaleMenuValue = timeScaleMenu.value;
+  timeScaleMenuChoice = timeScaleMenu.value;
 
-  switch (timeScaleMenuValue){
+  switch (timeScaleMenuChoice){
     case 'sec-equals-1sec':
       timeScale = 1;
       displayTimeScale = 1;
@@ -1249,27 +1297,37 @@ const doTimeScaleMenu = function(){
 timeScaleMenu.addEventListener('change', () => {
   doTimeScaleMenu();
   doNuAndTimeDisplay();
-
-  // replaceAerovisualizerData('time-scale',timeScale);
-  // saveToLocalStorage();
+  replaceAerovisualizerData('timeScaleMenuChoice',timeScaleMenuChoice);
+  saveToLocalStorage();
 });
 
 const handleMainPrefs = function(opt){
+  generalPrefsElements.style.display = 'none';
   inertialVectorsElements.style.display = 'none';
   orbitFixedVectorsElements.style.display = 'none';
   orbitingBodyVectorsElements.style.display = 'none';
 
   switch (opt){
+    case 'general-preferences':
+      generalPrefsElements.style.display = 'grid';
+      break;
+
     case 'inertial-vectors':
       inertialVectorsElements.style.display = 'grid';
+      inertialVectorsMenu.value = inertialVectorsChoice;
+      doInertialVectorsChoice();
       break;
 
     case 'orbit-fixed-vectors':
       orbitFixedVectorsElements.style.display = 'grid';
+      orbitFixedVectorsMenu.value = orbitFixedVectorsChoice;
+      doOrbitFixedVectorsChoice();
       break;
 
     case 'orbiting-body-vectors':
       orbitingBodyVectorsElements.style.display = 'grid';
+      orbitingBodyVectorsMenu.value = orbitingBodyVectorsChoice
+      doOrbitingBodyVectorsChoice();
       break;
 
     case 'units':
@@ -1394,6 +1452,55 @@ orbitingBodyVectorsMenu.addEventListener('change', () => {
   saveToLocalStorage();
 });
 
+const doVectorScaleSliderOnInput = function(opt, value){
+  switch (opt){
+    case 'inertial':
+      inertialVectorScale = value;
+      break;
+
+    case 'orbit-fixed':
+      orbitFixedVectorScale = value;
+      break;
+
+    case 'velocity':
+      velocityVectorScale = value;
+      break;
+  }
+}
+
+inertialVectorScaleSlider.oninput = function(){
+  doVectorScaleSliderOnInput('inertial', +this.value);
+}
+
+orbitFixedVectorScaleSlider.oninput = function(){
+  doVectorScaleSliderOnInput('orbit-fixed', +this.value);
+}
+
+velocityVectorScaleSlider.oninput = function(){
+  doVectorScaleSliderOnInput('velocity', +this.value);
+}
+
+inertialVectorScaleSlider.onpointerup = function(){
+  omt.setInertialVectorScale(inertialVectorScale);
+  replaceAerovisualizerData('inertialVectorScale',inertialVectorScale);
+  saveToLocalStorage();
+  needsRefresh = true;
+}
+
+orbitFixedVectorScaleSlider.onpointerup = function(){
+  omt.setOrbitFixedVectorScale(orbitFixedVectorScale);
+  replaceAerovisualizerData('orbitFixedVectorScale',orbitFixedVectorScale);
+  saveToLocalStorage();
+  needsRefresh = true;
+}
+
+velocityVectorScaleSlider.onpointerup = function(){
+  omt.setVelocityVectorScale(velocityVectorScale);
+  replaceAerovisualizerData('velocityVectorScale',velocityVectorScale);
+  saveToLocalStorage();
+  needsRefresh = true;
+}
+
 toggleConicSectionButton.addEventListener('click', () => {
   conicSection = conicSection === 'ellipse' ? 'hyperbola' : 'ellipse';
 
@@ -1413,11 +1520,6 @@ toggleConicSectionButton.addEventListener('click', () => {
   replaceAerovisualizerData('conic-section',conicSection);
   saveToLocalStorage();
 });
-
-// defaultDoResetButton.addEventListener('click', () => {
-//   localStorage.clear();
-//   location.reload();
-// });
 
 const handlePeriapseCheck = function(){
   periapseTooSmall = rp < cbRadius ? true : false;
@@ -1573,9 +1675,18 @@ const initialize = function(data, camera){
           case 'orbitingBodyVectorColor':
             orbitingBodyVectorColor  = o.value;
             break;
-          // case 'vectorSize':
-          //   vectorSize  = o.value;
-          //   break;
+          case 'inertialVectorScale':
+            inertialVectorScale  = o.value;
+            break;
+          case 'orbitFixedVectorScale':
+            orbitFixedVectorScale  = o.value;
+            break;
+          case 'velocityVectorScale':
+            velocityVectorScale  = o.value;
+            break;
+          case 'timeScaleMenuChoice':
+            timeScaleMenuChoice  = o.value;
+            break;
       }
     }
   }
@@ -1583,15 +1694,14 @@ const initialize = function(data, camera){
   if (omt === null){
     omt = new OrbitalMechThings(scene, camera);
   }
-  // console.log(+aSl, eColor, hColor, nuDegrees, lanDegrees, centralBody);
-  // console.log(data);
+
   muMenu.value = centralBody;
   handleMuChange();
 
   eSlider.value = +eSl;
   aSlider.value = +aSl;
-  doASliderOnInput(+aSl);
   doESliderOnInput(+eSl);
+  doASliderOnInput(+aSl);
   rp = Number(a*(1-e));
   ra = Number(a*(1+e));
   handlePeriapseCheck();
@@ -1603,10 +1713,10 @@ const initialize = function(data, camera){
   handleOrientationOnInput('inc',true);
   handleOrientationOnInput('aop');
 
-  timeScaleMenu.value = 'sec-equals-1sec';//save this eventually and choose it here
+  timeScaleMenu.value = timeScaleMenuChoice;
   doTimeScaleMenu();
-  nuSlider.value = nuDegrees;
 
+  nuSlider.value = nuDegrees;
   computeUniversal();
   doNuSliderOnInput(nuDegrees);
   doUniversalPointCalculations(1);
@@ -1624,7 +1734,7 @@ const completeInitialization = function(continueAnimation = true) {
   // the reason for this is that the OrbitalMechThings.js file contains
   // the function _constructLabels() which contains a FontLoader 
   // object called loader that creates code that runs asynchronously.
-  // Once omt.constructionComplete is true, we can finish
+  // Once omt.constructionComplete is true, we can complete
   // our initialization
 
   if (continueAnimation && !(omt.constructionComplete)) {
@@ -1660,13 +1770,13 @@ const completeInitialization = function(continueAnimation = true) {
     setOrbitFixedVectorColor(orbitFixedVectorColor);
     setOrbitingBodyVectorColor(orbitingBodyVectorColor);
     
-    // omt.setVectorSize(vectorSize);
-    // omt.setMuIndex(0);
-    // omt.computeRotation(lan, inc, aop);
-    // computeP();
-    // omt.shapeOrbitCurve(a, e);
-    // vectorSizeSlider.value = Number(vectorSize);
-  // }
+    doVectorScaleSliderOnInput('inertial',inertialVectorScale);
+    doVectorScaleSliderOnInput('orbit-fixed',orbitFixedVectorScale);
+    doVectorScaleSliderOnInput('velocity',velocityVectorScale);
+    omt.setInertialVectorScale(inertialVectorScale);
+    omt.setOrbitFixedVectorScale(orbitFixedVectorScale);
+    omt.setVelocityVectorScale(velocityVectorScale);
+    needsRefresh = true;
   }
 };
 
@@ -1711,6 +1821,7 @@ const haltPlay = function(){
 
 resetButton.addEventListener('click', () => {
   doNuSliderOnInput(+(nuSlider.value));
+  doUniversalPointCalculations(1);
 });
 
 const doUniversalPointCalculations = function(opt=0){
@@ -1803,6 +1914,7 @@ let data = getFromLocalStorage();
 if (!data){
   localStorage.clear();
   saveToLocalStorage();
+  location.reload();
   data = getFromLocalStorage();
 }
 

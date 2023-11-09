@@ -1484,21 +1484,21 @@ inertialVectorScaleSlider.onpointerup = function(){
   omt.setInertialVectorScale(inertialVectorScale);
   replaceAerovisualizerData('inertialVectorScale',inertialVectorScale);
   saveToLocalStorage();
-  needsRefresh = true;
+  omt.needsRefresh = true;
 }
 
 orbitFixedVectorScaleSlider.onpointerup = function(){
   omt.setOrbitFixedVectorScale(orbitFixedVectorScale);
   replaceAerovisualizerData('orbitFixedVectorScale',orbitFixedVectorScale);
   saveToLocalStorage();
-  needsRefresh = true;
+  omt.needsRefresh = true;
 }
 
 velocityVectorScaleSlider.onpointerup = function(){
   omt.setVelocityVectorScale(velocityVectorScale);
   replaceAerovisualizerData('velocityVectorScale',velocityVectorScale);
   saveToLocalStorage();
-  needsRefresh = true;
+  omt.needsRefresh = true;
 }
 
 toggleConicSectionButton.addEventListener('click', () => {
@@ -1776,7 +1776,7 @@ const completeInitialization = function(continueAnimation = true) {
     omt.setInertialVectorScale(inertialVectorScale);
     omt.setOrbitFixedVectorScale(orbitFixedVectorScale);
     omt.setVelocityVectorScale(velocityVectorScale);
-    needsRefresh = true;
+    omt.needsRefresh = true;
   }
 };
 

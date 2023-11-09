@@ -26,6 +26,7 @@ body {
   -webkit-user-select: none;
   -ms-user-select: none;
   justify-content:space-between;
+  touch-action: manipulation;
 }
 
 #threeD-world {

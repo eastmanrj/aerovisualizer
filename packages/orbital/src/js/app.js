@@ -432,8 +432,8 @@ const replaceAerovisualizerData = function(name, value){
 const saveToLocalStorage = function(){
   localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
 }
-localStorage.clear();//temp
-saveToLocalStorage();//temp blah
+// localStorage.clear();//temp
+// saveToLocalStorage();//temp blah
 // location.reload();//temp
 
 const getFromLocalStorage = function(){

@@ -126,6 +126,11 @@ let dpxdt;
 let dpydt;
 let dvxdt;
 let dvydt;
+let dnudt;
+// true anomaly for interpolation for animation
+let nu0;
+let nu1;
+
 let needToComputeUniversal = true;
 let animationPeriod = tp;
 
@@ -335,12 +340,12 @@ TU=58.132821 days
 avg dist=149599650
 AU/TU=29.784852 km/s
 
-cb,m (x1e24) kg,mu km^3/s^2,radius (CDU) km,CTU s,CDU/CTU km/s,
 Avg Dist from Sun (AU),Avg Dist from Sun (km),TU s,TU min,TU hrs,TU days,AU/TU km/s,2pi * TU days
 
 sun,1988470,132712440018,696000.0,1593.888886079390,
 436.66782928137800
 
+cb,m (x1e24) kg,mu km^3/s^2,radius (CDU) km,CTU s,CDU/CTU km/s,
 moon,0.0734767309,4904.8695,1079.6,506.501324477232,2.13148504816700
 
 Mercury,0.3301,22032,2439.7,811.853519657804,3.00509875356374,
@@ -367,9 +372,20 @@ Uranus,86.811,5794000,25362.0,1677.976993115500,15.11462916598780,
 Neptune,102.409,6835100,24622.0,1477.789423646780,16.66137245673320,
 30.10,4502895908.07,829434402.04,13823906.70,230398.45,9599.94,5.43,60318.17
 */
+
 let centralBodyData = [
-  {name:'sun', id:0},
-  {name:'moon', id:1},
+  {name:'sun', id:0, m:1988470, CDU:696000, CTU:1593.888886079390, gravSurf:'NA?', 
+  vesc:'NA?', mu:132712440018, Tsid:'NA?', perihel:'NA', 
+  aphel:'NA', Tsyn:'NA?', vmean:'NA', vmax:'NA', vmin:'NA', 
+  srp:'NA?', daylen:'NA?', obliqu:'NA', incEqu:'NA', 
+  a:'NA', e:'NA', i:'NA', Om:'NA', 
+  om:'NA', ml:'NA?'},
+  {name:'moon', id:1, m:0.0734767309, CDU:1079.6, CTU:506.501324477232, gravSurf:'NA?', 
+  vesc:'NA?', mu:4904.8695, Tsid:'NA?', perihel:'NA', 
+  aphel:'NA', Tsyn:'NA?', vmean:'NA', vmax:'NA', vmin:'NA', 
+  srp:'NA?', daylen:'NA?', obliqu:'NA', incEqu:'NA', 
+  a:'NA', e:'NA', i:'NA', Om:'NA', 
+  om:'NA', ml:'NA?'},
   {name:'Mercury', id:2, m:0.3301, CDU:2439.7, CTU: 811.853519657804, gravSurf:3.7, 
   vesc:4.3, mu:22032., Tsid:87.969, perihel:46., 
   aphel:69.818, Tsyn:115.88, vmean:47.36, vmax:58.97, vmin:38.86, 
@@ -433,7 +449,7 @@ const saveToLocalStorage = function(){
   localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
 }
 // localStorage.clear();//temp
-// saveToLocalStorage();//temp blah
+// saveToLocalStorage();//temp blh
 // location.reload();//temp
 
 const getFromLocalStorage = function(){
@@ -559,10 +575,10 @@ const doASliderOnInput = function(value){
     // user determine the value of "th"
 
     const th = Math.PI/10;
-    const nu1 = -(Math.PI + delta)/2 + th;
-    const nu2 = (Math.PI + delta)/2 - th;
-    const cosnu1 = Math.cos(nu1);
-    const cosnu2 = Math.cos(nu2);
+    const trueAnomaly1 = -(Math.PI + delta)/2 + th;
+    const trueAnomaly2 = (Math.PI + delta)/2 - th;
+    const cosnu1 = Math.cos(trueAnomaly1);
+    const cosnu2 = Math.cos(trueAnomaly2);
     //make sure to compute e before this function, otherwise
     //coshF1 and coshF2 can be such that we compute a square
     //root of a negative number below
@@ -575,6 +591,7 @@ const doASliderOnInput = function(value){
     const n = Math.sqrt(muCanonical/(-a*a*a));
     animationPeriod = (M2 - M1)/n;
     // console.log('e: ',e,'nu1: ',nu1,'nu2: ',nu2,'coshF1: ',coshF1,'coshF2: ',coshF2,'coshF2*coshF2 - 1: ',coshF2*coshF2 - 1,'coshF1*coshF1 - 1: ',coshF1*coshF1 - 1);
+    // console.log('animationPeriod: ',animationPeriod,);
   }
 
   needToComputeUniversal = true;
@@ -947,14 +964,19 @@ const computeTimeAfterPeriapse = function(){
   timeAfterPeriapse = meanAnomaly/meanMotion;
   timeAfterPeriapseInSeconds = timeAfterPeriapse*ctu;
   universalArrayIndex0 = universalArray.findIndex((e) => e.t >= timeAfterPeriapse);
+  
+  if (universalArrayIndex0 === -1){
+    universalArrayIndex0 = 0;
+    // console.log(universalArraySize, universalArrayIndex0, universalArrayIndex1);
+  }
+  
   universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
   timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
   timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
 }
-
 const doNuAndTimeDisplay = function(){
   if (meanAnomaly !== null){
-    nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees)}`;
+    nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees).toFixed(2).toString()}`;
 
     switch (timeScaleMenuChoice){
       case 'sec-equals-1sec':
@@ -1041,6 +1063,8 @@ const computeUniversal = function(){
   let f;
   let g;
   let i;
+  let rx;
+  let ry;
 
   needToComputeUniversal = false;
   // set needToComputeUniversal to true whenever a or e changes
@@ -1078,7 +1102,6 @@ const computeUniversal = function(){
   // 360 seems to be good enough. lower numbers cause the animation
   // to look segmented around periapse and the numbers to be
   // too inaccurate
-  // console.log('animationPeriod: ',animationPeriod);
   for (let t=-animationPeriod/2; t<animationPeriod/2; t+=animationPeriod/universalArraySize){
     // t is the time in canonical time units.  For elliptical orbits, an 
     // orbital period (tp) equals twoPi canonical time units (TU or CTU)
@@ -1158,7 +1181,10 @@ const computeUniversal = function(){
     univPoint.g = g;
     // below, r is computed under the assumption that r0 and v0 are
     // at the periapse, which is mentioned earlier
-    r = Math.sqrt(f*f*rp*rp + g*g*sqrtMuOverP*sqrtMuOverP*(e + 1)*(e + 1));
+    rx = f*rp;
+    ry = g*sqrtMuOverP*(e + 1);
+    r = Math.sqrt(rx*rx + ry*ry);
+    univPoint.nu = Math.atan2(ry, rx)/piOver180;
     univPoint.fdot = sqrtMuCanonical*x*(z*s - 1)/(r0*r);
     univPoint.gdot = 1 - x*x*c/r;
     
@@ -1516,6 +1542,7 @@ toggleConicSectionButton.addEventListener('click', () => {
   doASliderOnInput(+aSlider.value);
   rp = Number(a*(1-e));
   ra = Number(a*(1+e));
+  doNuSliderOnInput(nuDegrees);
   handlePeriapseCheck();
   replaceAerovisualizerData('conic-section',conicSection);
   saveToLocalStorage();
@@ -1833,12 +1860,25 @@ const doUniversalPointCalculations = function(opt=0){
   // then compute the next ones
   // option 1: compute both the current values and the next ones 
   if (opt === 0){
-    universalArrayIndex0 = universalArrayIndex1;
-    universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
-    timeAfterPeriapseInSeconds0 = timeAfterPeriapseInSeconds1;
-    timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
-    timeAfterPeriapseInSeconds = timeAfterPeriapseInSeconds0;
-    timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
+    let safety = 0;
+
+    while (timeAfterPeriapseInSeconds > timeAfterPeriapseInSeconds1 && safety<10){
+      safety++;
+      // console.log('safety: ',safety, 'i0: ',universalArrayIndex0, 'i1: ',universalArrayIndex1, 't0: ',timeAfterPeriapseInSeconds0, 't: ',timeAfterPeriapseInSeconds, 't1: ',timeAfterPeriapseInSeconds1);
+      universalArrayIndex0 = universalArrayIndex1;
+      universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
+      timeAfterPeriapseInSeconds0 = timeAfterPeriapseInSeconds1;
+      timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
+
+      if (timeAfterPeriapseInSeconds0 > timeAfterPeriapseInSeconds1){
+        timeAfterPeriapseInSeconds -= animationPeriod*ctu;
+        timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
+      }
+    }
+
+    // timeAfterPeriapseInSeconds = timeAfterPeriapseInSeconds0;
+    // timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
+    doUniversalPointCalculations
     x0 = px;
     y0 = py;
     vx0 = vx;
@@ -1856,10 +1896,14 @@ const doUniversalPointCalculations = function(opt=0){
   let vx1 = universalArray[universalArrayIndex1%universalArraySize].fdot*rp;
   let vy1 = universalArray[universalArrayIndex1%universalArraySize].gdot*sqrtMuOverP*(e + 1);
   let deltaTime = timeAfterPeriapseInSeconds1 - timeAfterPeriapseInSeconds0;
+  nu0 = universalArray[universalArrayIndex0%universalArraySize].nu;
+  nu1 = universalArray[universalArrayIndex1%universalArraySize].nu;
+
   dpxdt = (x1 - x0)/deltaTime;
   dpydt = (y1 - y0)/deltaTime;
   dvxdt = (vx1 - vx0)/deltaTime;
   dvydt = (vy1 - vy0)/deltaTime;
+  dnudt = (nu1 - nu0)/deltaTime;
 }
 
 const animate = function(continueAnimation = true) {
@@ -1900,6 +1944,7 @@ const animate = function(continueAnimation = true) {
     py = y0 + dpydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     vx = vx0 + dvxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     vy = vy0 + dvydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
+    nuDegrees = nu0 + dnudt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     omt.setR(px, py, 0, a);
     omt.setV(vx, vy, 0);
     doNuAndTimeDisplay();

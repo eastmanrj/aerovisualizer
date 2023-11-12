@@ -99,7 +99,7 @@ label {
 .btn-group-fixed{
   position: absolute;
   right: 0%;
-  bottom: 3%;
+  bottom: 3.5%;
   width: 100%;
 }
 
@@ -184,20 +184,12 @@ label {
   justify-self: center;
 }
 
-.span6{
-  grid-column: span 6;
-  text-align: center;
-  justify-self: center;
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-}
-
 .span8{
   grid-column: span 8;
   text-align: center;
   justify-self: center;
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 
 .special-span{
@@ -389,11 +381,11 @@ input[type="range"]:focus::-webkit-slider-thumb {
   }
 
   .elements{
-    padding-top: 2%;
+    padding-top: 0.25%;
   }
 
   .numerical{
-    font-size: small;
+    font-size: x-small;
   }
 }
 

@@ -51,6 +51,8 @@ const defaultVelocityVectorScale = 50;
 const defaultTimeScale = 1;
 const defaultTimeScaleMenuChoice = 'sec-equals-1sec';
 
+const defaultCentralBodyTransparency = 0;//0=completely opaque, 100=completely transparent
+
 //aerovisualizerData is modified and saved to local storage when 
 // values and preferences are changed and is retrieved from local 
 // storage at startup
@@ -72,7 +74,8 @@ let aerovisualizerData = [
   {name:'inertialVectorScale', value:defaultInertialVectorScale},
   {name:'orbitFixedVectorScale', value:defaultOrbitFixedVectorScale},
   {name:'velocityVectorScale', value:defaultVelocityVectorScale},
-  {name:'timeScaleMenuChoice', value:defaultTimeScaleMenuChoice}
+  {name:'timeScaleMenuChoice', value:defaultTimeScaleMenuChoice},
+  {name:'centralBodyTransparency', value:defaultCentralBodyTransparency}
 ];
 
 let centralBody = defaultCentralBody;
@@ -149,6 +152,8 @@ let velocityVectorScale = defaultVelocityVectorScale;
 let timeScale = defaultTimeScale;
 let displayTimeScale = defaultTimeScale;
 let timeScaleMenuChoice = defaultTimeScaleMenuChoice;
+
+let centralBodyTransparency = defaultCentralBodyTransparency;
 
 let rVector = new THREE.Vector3(1, 1, 1);
 let vVector = new THREE.Vector3(1, 1, 1);
@@ -240,6 +245,54 @@ const OmegaDisplay = document.getElementById('Omega');
 const omegaDisplay = document.getElementById('omega');
 const radiusDisplay = document.getElementById('radius');
 const vescDisplay = document.getElementById('vesc');
+
+const numRX = document.getElementById('num-rx');
+const numRY = document.getElementById('num-ry');
+const numRZ = document.getElementById('num-rz');
+const numVX = document.getElementById('num-vx');
+const numVY = document.getElementById('num-vy');
+const numVZ = document.getElementById('num-vz');
+const numRP = document.getElementById('num-rp');
+const numRQ = document.getElementById('num-rq');
+const numRW1 = document.getElementById('num-rw1');
+const numVP = document.getElementById('num-vp');
+const numVQ = document.getElementById('num-vq');
+const numVW1 = document.getElementById('num-vw1');
+const numRU = document.getElementById('num-ru');
+const numRV = document.getElementById('num-rv');
+const numRW2 = document.getElementById('num-rw2');
+const numVU = document.getElementById('num-vu');
+const numVV = document.getElementById('num-vv');
+const numVVW2 = document.getElementById('num-vw2');
+const numNu = document.getElementById('num-nu');
+const numT = document.getElementById('num-t');
+const numH = document.getElementById('num-h');
+const numEnergy = document.getElementById('num-E');
+const numQ = document.getElementById('num-Q');
+const numA = document.getElementById('num-a');
+const numE = document.getElementById('num-e');
+const numOm = document.getElementById('num-Om');
+const numI = document.getElementById('num-i');
+const numom = document.getElementById('num-om');
+
+const dcm11pqw2xyz = document.getElementById('dcm11-pqw-to-xyz');
+const dcm12pqw2xyz = document.getElementById('dcm12-pqw-to-xyz');
+const dcm13pqw2xyz = document.getElementById('dcm13-pqw-to-xyz');
+const dcm21pqw2xyz = document.getElementById('dcm21-pqw-to-xyz');
+const dcm22pqw2xyz = document.getElementById('dcm22-pqw-to-xyz');
+const dcm23pqw2xyz = document.getElementById('dcm23-pqw-to-xyz');
+const dcm31pqw2xyz = document.getElementById('dcm31-pqw-to-xyz');
+const dcm32pqw2xyz = document.getElementById('dcm32-pqw-to-xyz');
+const dcm33pqw2xyz = document.getElementById('dcm33-pqw-to-xyz');
+const dcm11uvw2pqw = document.getElementById('dcm11-uvw-to-pqw');
+const dcm12uvw2pqw = document.getElementById('dcm12-uvw-to-pqw');
+const dcm13uvw2pqw = document.getElementById('dcm13-uvw-to-pqw');
+const dcm21uvw2pqw = document.getElementById('dcm21-uvw-to-pqw');
+const dcm22uvw2pqw = document.getElementById('dcm22-uvw-to-pqw');
+const dcm23uvw2pqw = document.getElementById('dcm23-uvw-to-pqw');
+const dcm31uvw2pqw = document.getElementById('dcm31-uvw-to-pqw');
+const dcm32uvw2pqw = document.getElementById('dcm32-uvw-to-pqw');
+const dcm33uvw2pqw = document.getElementById('dcm33-uvw-to-pqw');
 
 const mainPrefsMenu = document.getElementById('main-prefs-menu');
 mainPrefsMenu.value = 'general-preferences';
@@ -448,13 +501,63 @@ const replaceAerovisualizerData = function(name, value){
 const saveToLocalStorage = function(){
   localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
 }
-// localStorage.clear();//temp
-// saveToLocalStorage();//temp blh
+localStorage.clear();//temp
+saveToLocalStorage();//temp blah
 // location.reload();//temp
 
 const getFromLocalStorage = function(){
   const data = JSON.parse(localStorage.getItem('aerovisualizerData'));
   return data;
+}
+
+const displayNumerical = function(){
+  numRX.innerHTML = 'x';
+  numRY.innerHTML = 'x';
+  numRZ.innerHTML = 'x';
+  numVX.innerHTML = 'x';
+  numVY.innerHTML = 'x';
+  numVZ.innerHTML = 'x';
+  numRP.innerHTML = 'x';
+  numRQ.innerHTML = 'x';
+  numRW1.innerHTML = 'x';
+  numVP.innerHTML = 'x';
+  numVQ.innerHTML = 'x';
+  numVW1.innerHTML = 'x';
+  numRU.innerHTML = 'x';
+  numRV.innerHTML = 'x';
+  numRW2.innerHTML = 'x';
+  numVU.innerHTML = 'x';
+  numVV.innerHTML = 'x';
+  numVVW2.innerHTML = 'x';
+  numNu.innerHTML = 'x';
+  numT.innerHTML = 'x';
+  numH.innerHTML = 'x';
+  numEnergy.innerHTML = 'x';
+  numQ.innerHTML = 'x';
+  numA.innerHTML = 'x';
+  numE.innerHTML = 'x';
+  numOm.innerHTML = 'x';
+  numI.innerHTML = 'x';
+  numom.innerHTML = 'x';
+
+  dcm11pqw2xyz.innerHTML = 'x';
+  dcm12pqw2xyz.innerHTML = 'x';
+  dcm13pqw2xyz.innerHTML = 'x';
+  dcm21pqw2xyz.innerHTML = 'x';
+  dcm22pqw2xyz.innerHTML = 'x';
+  dcm23pqw2xyz.innerHTML = 'x';
+  dcm31pqw2xyz.innerHTML = 'x';
+  dcm32pqw2xyz.innerHTML = 'x';
+  dcm33pqw2xyz.innerHTML = 'x';
+  dcm11uvw2pqw.innerHTML = 'x';
+  dcm12uvw2pqw.innerHTML = 'x';
+  dcm13uvw2pqw.innerHTML = 'x';
+  dcm21uvw2pqw.innerHTML = 'x';
+  dcm22uvw2pqw.innerHTML = 'x';
+  dcm23uvw2pqw.innerHTML = 'x';
+  dcm31uvw2pqw.innerHTML = 'x';
+  dcm32uvw2pqw.innerHTML = 'x';
+  dcm33uvw2pqw.innerHTML = 'x';
 }
 
 const handleMainButtons = function(button){
@@ -501,6 +604,7 @@ const handleMainButtons = function(button){
       numericalElements.style.display = 'grid';
       playResetButtonsElements.display = 'grid';
       numericalButton.disabled = true;
+      displayNumerical();
       break;
     case 'prefs':
       prefsElements.style.display = 'grid';
@@ -1045,12 +1149,6 @@ zeroNuButton.addEventListener('click', () => {
   saveToLocalStorage();
 });
 
-// vectorSizeSlider.onpointerup = function(){
-//   omt.setVectorSize(this.value);
-//   replaceAerovisualizerData('vectorSize',this.value);
-//   saveToLocalStorage();
-// }
-
 const computeUniversal = function(){
   let tn;
   let dtdx;
@@ -1527,6 +1625,21 @@ velocityVectorScaleSlider.onpointerup = function(){
   omt.needsRefresh = true;
 }
 
+const setCentralBodyTransparency = function(transparency){
+  const opacity = (100 - transparency)/100;
+  omt.setPlanetOpacity(opacity);
+}
+
+centralBodyTransparencySlider.oninput = function(){
+  setCentralBodyTransparency(this.value);
+}
+
+centralBodyTransparencySlider.onpointerup = function(){
+  setCentralBodyTransparency(this.value);
+  replaceAerovisualizerData('centralBodyTransparency',this.value);
+  saveToLocalStorage();
+}
+
 toggleConicSectionButton.addEventListener('click', () => {
   conicSection = conicSection === 'ellipse' ? 'hyperbola' : 'ellipse';
 
@@ -1649,6 +1762,7 @@ const initTHREE = function() {
   // orbitControls.enableDamping;
 
   orbitControls.enableZoom = false;
+  orbitControls.enablePan = false;
 };
 
 const initialize = function(data, camera){
@@ -1714,6 +1828,9 @@ const initialize = function(data, camera){
           case 'timeScaleMenuChoice':
             timeScaleMenuChoice  = o.value;
             break;
+          case 'centralBodyTransparency':
+            centralBodyTransparency  = o.value;
+            break;
       }
     }
   }
@@ -1747,6 +1864,8 @@ const initialize = function(data, camera){
   computeUniversal();
   doNuSliderOnInput(nuDegrees);
   doUniversalPointCalculations(1);
+  centralBodyTransparencySlider.value = centralBodyTransparency;
+  setCentralBodyTransparency(centralBodyTransparency);
 
   if (conicSection === 'ellipse'){
     toggleConicSectionButton.innerHTML = 'ELLIPSE&nbsp;/&nbsp;hyperbola';
@@ -1769,7 +1888,7 @@ const completeInitialization = function(continueAnimation = true) {
   }
   
   if (omt.constructionComplete){
-    handleMainButtons('rv');//'mu' <-- set back to this
+    handleMainButtons('numerical');//'mu' <-- set back to this
     
     camera.aspect = 1;
     camera.updateProjectionMatrix();

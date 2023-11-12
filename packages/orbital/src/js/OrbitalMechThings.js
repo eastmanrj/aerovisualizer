@@ -107,6 +107,7 @@ class OrbitalMechThings {
     this._eVectorArrowheadMesh = null;
     
     this._planetMeshArray = new Array(10).fill(null);
+    this._planetOpacity = 1;
     this._planetMeshArrayIndex = 0;
 
     this._xQuat = new THREE.Quaternion();
@@ -710,8 +711,8 @@ class OrbitalMechThings {
     // IMPORTANT: The FontLoader.load function generates a Javascript promise
     // which results in asynchronous code execution.  The variable
     // constructionComplete is initialized to false but is set to true once
-    // the asynchronous code is complete.  Until then, the refresh function
-    // should not be allowed to execute.
+    // the asynchronous code is complete.  Until then, do not allow the 
+    // refresh function and most other things to execute.
 
     THREE.Cache.enabled = true;
     let font = undefined;
@@ -1037,13 +1038,23 @@ class OrbitalMechThings {
 
     for (let i=0; i<10; i++){
       this._planetMeshArray[i].matrixAutoUpdate = false;
-      this._planetMeshArray[i].material.opacity = 1;
+      this._planetMeshArray[i].material.opacity = this._planetOpacity;
+      this._planetMeshArray[i].material.transparent = true;
       this._planetMeshArray[i].matrix.compose(this._origin, this._turn90Quat, this._planetScale);
     }
-
+    
     this._planetMeshArrayIndex = 0;
     this._scene.add(this._planetMeshArray[this._planetMeshArrayIndex]);
     //https://www.solarsystemscope.com/textures/
+  }
+
+  setPlanetOpacity(opacity){  
+    this.needsRefresh = true;
+    this._planetOpacity = opacity;
+  
+    for (let i=0; i<10; i++){
+      this._planetMeshArray[i].material.opacity = opacity;
+    }
   }
 }
 

@@ -101,9 +101,16 @@ label {
   right: 0%;
   bottom: 3%;
   width: 100%;
+}
+
+/* .btn-group-fixed{
+  position: absolute;
+  right: 0%;
+  bottom: 3%;
+  width: 100%;
   grid-template-columns: 1fr 1fr;
   margin-bottom: 0;
-}
+} */
 
 .menu {
   display: block;
@@ -179,6 +186,14 @@ label {
 
 .span6{
   grid-column: span 6;
+  text-align: center;
+  justify-self: center;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.span8{
+  grid-column: span 8;
   text-align: center;
   justify-self: center;
   padding-top: 1.5rem;
@@ -311,7 +326,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
 }
 
 .numerical{
-  grid-template-columns: 3fr 2fr 1fr 2fr 1fr 2fr 1fr 2fr;
+  grid-template-columns: 1fr 3fr 3fr 3fr 1fr 3fr 3fr 3fr;
   text-align: right;
   font-family: monospace;
   font-variant-numeric: tabular-nums;

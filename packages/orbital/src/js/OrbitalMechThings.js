@@ -28,8 +28,8 @@ class OrbitalMechThings {
     this._scaleInertialVectors.copy(this._unitScale);
     this._scaleOrbitFixedVectors = new THREE.Vector3();
     this._scaleOrbitFixedVectors.copy(this._unitScale);
-    this._scaleVelocityVector = new THREE.Vector3();
-    this._scaleVelocityVector.copy(this._unitScale);
+    this._scaleOrbitingBodyVectors = new THREE.Vector3();
+    this._scaleOrbitingBodyVectors.copy(this._unitScale);
     this._rVectorScale = new THREE.Vector3();
     this._rVectorScale.copy(this._scale);
     this._vVectorScale = new THREE.Vector3();
@@ -41,7 +41,7 @@ class OrbitalMechThings {
     this._planetScale.copy(this._unitScale);
     this._inertialVectorScale = 1;
     this._orbitFixedVectorScale = 1;
-    this._velocityVectorScale = 1;
+    this._orbitingBodyVectorScale = 1;
 
     this._null = new THREE.Vector3(0,0,0);
     this._xunit = new THREE.Vector3(1,0,0);
@@ -63,9 +63,9 @@ class OrbitalMechThings {
     this._origin = new THREE.Vector3(0,0,0);
     this._flip180quat = new THREE.Quaternion();
     this._flip180quat.setFromAxisAngle(new THREE.Vector3(0,0,1),Math.PI);
-    this._xVectorPos = new THREE.Vector3(0.5, 0, 0);
-    this._yVectorPos = new THREE.Vector3(0, 0.5, 0);
-    this._zVectorPos = new THREE.Vector3(0, 0, 0.5);
+    this._iVectorPos = new THREE.Vector3(0.5, 0, 0);
+    this._jVectorPos = new THREE.Vector3(0, 0.5, 0);
+    this._kVectorPos = new THREE.Vector3(0, 0, 0.5);
     this._q1 = new THREE.Quaternion();
     this._qn = new THREE.Quaternion();
     this._nullQuat = new THREE.Quaternion();
@@ -90,9 +90,9 @@ class OrbitalMechThings {
     this._pVectorShaftMesh = null;
     this._qVectorShaftMesh = null;
     this._wVectorShaftMesh = null;
-    this._xVectorShaftMesh = null;
-    this._yVectorShaftMesh = null;
-    this._zVectorShaftMesh = null;
+    this._iVectorShaftMesh = null;
+    this._jVectorShaftMesh = null;
+    this._kVectorShaftMesh = null;
     this._UVectorShaftMesh = null;
     this._VVectorShaftMesh = null;
     this._WVectorShaftMesh = null;
@@ -104,9 +104,9 @@ class OrbitalMechThings {
     this._pVectorArrowheadMesh = null;
     this._qVectorArrowheadMesh = null;
     this._wVectorArrowheadMesh = null;
-    this._xVectorArrowheadMesh = null;
-    this._yVectorArrowheadMesh = null;
-    this._zVectorArrowheadMesh = null;
+    this._iVectorArrowheadMesh = null;
+    this._jVectorArrowheadMesh = null;
+    this._kVectorArrowheadMesh = null;
     this._UVectorArrowheadMesh = null;
     this._VVectorArrowheadMesh = null;
     this._WVectorArrowheadMesh = null;
@@ -131,9 +131,9 @@ class OrbitalMechThings {
     this._pVectorLabel = null;
     this._qVectorLabel = null;
     this._wVectorLabel = null;
-    this._xVectorLabel = null;
-    this._yVectorLabel = null;
-    this._zVectorLabel = null;
+    this._iVectorLabel = null;
+    this._jVectorLabel = null;
+    this._kVectorLabel = null;
     this._UVectorLabel = null;
     this._VVectorLabel = null;
     this._WVectorLabel = null;
@@ -142,38 +142,31 @@ class OrbitalMechThings {
     this._hVectorLabel = null;
     this._eVectorLabel = null;
         
-    this._pqwFrameOpacity = 1;
-    this._xyzFrameOpacity = 1;
-    this._rOpacity = 1;
-    this._vOpacity = 1;
-    this._hOpacity = 1;
-    this._eOpacity = 1;
-    this._orbitFixedVectorColor = 0xffff00;//0xffff55;//light yellow
-    this._inertialVectorColor = 0x0000ff;//0x5555ff;//light blue
-    this._rColor = 0x00ff00;//0x55ff55;//light green
-    this._vColor = 0x800080;
-    this._hColor = 0x800080;//0xcbc3e3;//light purple, 0x800080;//purple
-    this._eColor = 0xff0000;//0xff5555;//light red
+    this._vectorOpacity = 1;
+
+    this._orbitFixedVectorColor = 0xffa500;//orange
+    this._inertialVectorColor = 0x0000ff;//blue
+    this._orbitingBodyVectorColor = 0xffff00;//yellow
 
     this._constructOrbitCurves();
     this._constructVectors();
     this._constructVectorLabels();
 
     this._showPQWFrame = false;
-    this._showXYZFrame = false;
+    this._showIJKFrame = false;
     this._showUVWFrame = false;
     this._showR = false;
     this._showV = false;
     this._showH = false;
     this._showE = false;
 
-    this._addRemoveVectorsAndLabels('pqwFrame',false);
-    this._addRemoveVectorsAndLabels('xyzFrame',true);
-    this._addRemoveVectorsAndLabels('uvwFrame',true);
-    this._addRemoveVectorsAndLabels('r',true);
-    this._addRemoveVectorsAndLabels('v',true);
+    this._addRemoveVectorsAndLabels('ijkFrame',true);
     this._addRemoveVectorsAndLabels('h',true);
     this._addRemoveVectorsAndLabels('e',true);
+    this._addRemoveVectorsAndLabels('pqwFrame',false);
+    this._addRemoveVectorsAndLabels('r',true);
+    this._addRemoveVectorsAndLabels('v',true);
+    this._addRemoveVectorsAndLabels('uvwFrame',true);
     this._constructPlanets();
   }
 
@@ -189,13 +182,13 @@ class OrbitalMechThings {
 
     if (this._showPQWFrame){
       this._q1.multiplyQuaternions(this._quat,this._xQuat);
-      this._v0.copy(this._xVectorPos);
+      this._v0.copy(this._iVectorPos);
       this._v0.x *= this._fractionForShaft;
       this._v1.copy(this._v0);
       this._v0.x *= this._orbitFixedVectorScale;
       this._v0.applyQuaternion(this._quat);
       this._q1.multiplyQuaternions(this._q1,this._flip180quat);
-      this._v1.add(this._xVectorPos);
+      this._v1.add(this._iVectorPos);
       this._v1.x *= this._orbitFixedVectorScale;
       this._v1.applyQuaternion(this._quat);
       this._pVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitFixedVectors);
@@ -204,12 +197,12 @@ class OrbitalMechThings {
       this._pVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
       
       this._q1.multiplyQuaternions(this._quat,this._yQuat);
-      this._v0.copy(this._yVectorPos);
+      this._v0.copy(this._jVectorPos);
       this._v0.y *= this._fractionForShaft;
       this._v1.copy(this._v0);
       this._v0.y *= this._orbitFixedVectorScale;
       this._v0.applyQuaternion(this._quat);
-      this._v1.add(this._yVectorPos);
+      this._v1.add(this._jVectorPos);
       this._v1.y *= this._orbitFixedVectorScale;
       this._v1.applyQuaternion(this._quat);
       this._qVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitFixedVectors);
@@ -218,12 +211,12 @@ class OrbitalMechThings {
       this._qVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
 
       this._q1.multiplyQuaternions(this._quat,this._zQuat);
-      this._v0.copy(this._zVectorPos);
+      this._v0.copy(this._kVectorPos);
       this._v0.z *= this._fractionForShaft;
       this._v1.copy(this._v0);
       this._v0.z *= this._orbitFixedVectorScale;
       this._v0.applyQuaternion(this._quat);
-      this._v1.add(this._zVectorPos);
+      this._v1.add(this._kVectorPos);
       this._v1.z *= this._orbitFixedVectorScale;
       this._v1.applyQuaternion(this._quat);
       this._wVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitFixedVectors);
@@ -238,45 +231,45 @@ class OrbitalMechThings {
       this._hyperbolicCurveMesh.matrix.compose(this._curveCenter, this._quat, this._orbitCurveScale);
     }
     // this._orbitFixedVectorScale
-    // this._velocityVectorScale
+    // this._orbitingBodyVectorScale
 
-    if (this._showXYZFrame){
+    if (this._showIJKFrame){
       this._q1.copy(this._xQuat);
-      this._v0.copy(this._xVectorPos);
+      this._v0.copy(this._iVectorPos);
       this._v0.x *= this._fractionForShaft;
       this._v1.copy(this._v0);
-      this._v1.add(this._xVectorPos);
+      this._v1.add(this._iVectorPos);
       this._v0.x *= this._inertialVectorScale;
       this._v1.x *= this._inertialVectorScale;
       this._q1.multiply(this._flip180quat);
-      this._xVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleInertialVectors);
-      this._xVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleInertialVectors);
+      this._iVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleInertialVectors);
+      this._iVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleInertialVectors);
       this._v1.multiplyScalar(1.1);
-      this._xVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+      this._iVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
 
       this._q1.copy(this._yQuat);
-      this._v0.copy(this._yVectorPos);
+      this._v0.copy(this._jVectorPos);
       this._v0.y *= this._fractionForShaft;
       this._v1.copy(this._v0);
-      this._v1.add(this._yVectorPos);
+      this._v1.add(this._jVectorPos);
       this._v0.y *= this._inertialVectorScale;
       this._v1.y *= this._inertialVectorScale;
-      this._yVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleInertialVectors);
-      this._yVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleInertialVectors);
+      this._jVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleInertialVectors);
+      this._jVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleInertialVectors);
       this._v1.multiplyScalar(1.1);
-      this._yVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+      this._jVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
 
       this._q1.copy(this._zQuat);
-      this._v0.copy(this._zVectorPos);
+      this._v0.copy(this._kVectorPos);
       this._v0.z *= this._fractionForShaft;
       this._v1.copy(this._v0);
-      this._v1.add(this._zVectorPos);
+      this._v1.add(this._kVectorPos);
       this._v0.z *= this._inertialVectorScale;
       this._v1.z *= this._inertialVectorScale;
-      this._zVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleInertialVectors);
-      this._zVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleInertialVectors);
+      this._kVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleInertialVectors);
+      this._kVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleInertialVectors);
       this._v1.multiplyScalar(1.1);
-      this._zVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+      this._kVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
     }
 
     if (this._showR || this._showV || this._showUVWFrame){
@@ -285,7 +278,8 @@ class OrbitalMechThings {
       this._v2.copy(this._v0);
       this._v2.multiplyScalar(this._rVectorScale.y);
       //_v2 is the tip of the r vector, which is the base of 
-      // the velocity vector and is required for that
+      // the velocity vector and is required for that and
+      // the UVW frame
       this._rQuat.setFromUnitVectors(this._yunit, this._v0);
 
       if (this._showR){
@@ -312,8 +306,8 @@ class OrbitalMechThings {
       this._v1.copy(this._v0);
       this._vQuat.setFromUnitVectors(this._yunit, this._v0);
       this._q1.multiplyQuaternions(this._quat,this._vQuat);
-      this._v0.multiplyScalar(0.5*this._vVectorScale.y*this._velocityVectorScale);
-      this._v1.multiplyScalar(0.5*this._vVectorScale.y*this._velocityVectorScale);
+      this._v0.multiplyScalar(0.5*this._vVectorScale.y*this._orbitingBodyVectorScale);
+      this._v1.multiplyScalar(0.5*this._vVectorScale.y*this._orbitingBodyVectorScale);
       this._v1.add(this._v0);
       this._v0.add(this._v2);
       this._v1.add(this._v2);
@@ -363,9 +357,9 @@ class OrbitalMechThings {
       this._v0.copy(this._r);
       this._v0.normalize();
       this._v1.copy(this._v0);
-      this._v0.multiplyScalar(this._scaleInertialVectors.y*0.5*this._fractionForShaft);
+      this._v0.multiplyScalar(this._scaleOrbitingBodyVectors.y*0.5*this._fractionForShaft);
       //_v0 is the location of the center of the shaft portion of the vector
-      this._v1.multiplyScalar(this._scaleInertialVectors.y*0.5);
+      this._v1.multiplyScalar(this._scaleOrbitingBodyVectors.y*0.5);
       this._v1.add(this._v2);
       this._v1.add(this._v0);
       this._v0.add(this._v2);
@@ -373,8 +367,8 @@ class OrbitalMechThings {
       this._v0.applyQuaternion(this._quat);
       this._v1.applyQuaternion(this._quat);
 
-      this._UVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleInertialVectors);
-      this._UVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleInertialVectors);
+      this._UVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitingBodyVectors);
+      this._UVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleOrbitingBodyVectors);
       this._v1.multiplyScalar(1.1);
       this._UVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
 
@@ -384,22 +378,21 @@ class OrbitalMechThings {
       this._q1.multiplyQuaternions(this._quat,this._hQuat);
 
       this._v1.copy(this._v0);
-      this._v0.multiplyScalar(this._scaleInertialVectors.y*0.5*this._fractionForShaft);
-      this._v1.multiplyScalar(this._scaleInertialVectors.y*0.5);
+      this._v0.multiplyScalar(this._scaleOrbitingBodyVectors.y*0.5*this._fractionForShaft);
+      this._v1.multiplyScalar(this._scaleOrbitingBodyVectors.y*0.5);
       this._v1.add(this._v2);
       this._v1.add(this._v0);
       this._v0.add(this._v2);
       this._v0.applyQuaternion(this._quat);
       this._v1.applyQuaternion(this._quat);
 
-      this._WVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleInertialVectors);
-      this._WVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleInertialVectors);
+      this._WVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitingBodyVectors);
+      this._WVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleOrbitingBodyVectors);
       this._v1.multiplyScalar(1.1);
       this._WVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
 
       this._q1.multiplyQuaternions(this._rQuat,this._turn90Quat2);
       this._q1.multiplyQuaternions(this._quat,this._q1);
-
       this._v0.copy(this._r);
       this._v0.normalize();
       this._v1.copy(this._h);
@@ -407,21 +400,16 @@ class OrbitalMechThings {
       this._v3.crossVectors(this._v1,this._v0);
       this._v0.copy(this._v3);
       this._v1.copy(this._v3);
-      this._v0.multiplyScalar(this._scaleInertialVectors.y*0.5*this._fractionForShaft);
-      this._v1.multiplyScalar(this._scaleInertialVectors.y*0.5);
+      this._v0.multiplyScalar(this._scaleOrbitingBodyVectors.y*0.5*this._fractionForShaft);
+      this._v1.multiplyScalar(this._scaleOrbitingBodyVectors.y*0.5);
       this._v1.add(this._v2);
       this._v1.add(this._v0);
       this._v0.add(this._v2);
-      // this._v0.multiplyScalar(this._scaleInertialVectors.y*0.5*this._fractionForShaft);
-      // this._v1.multiplyScalar(this._scaleInertialVectors.y*0.5);
-      // this._v1.add(this._v2);
-      // this._v1.add(this._v0);
-      // this._v0.add(this._v2);
-      // this._v0.applyQuaternion(this._quat);
-      // this._v1.applyQuaternion(this._quat);
+      this._v0.applyQuaternion(this._quat);
+      this._v1.applyQuaternion(this._quat);
 
-      this._VVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleInertialVectors);
-      this._VVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleInertialVectors);
+      this._VVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitingBodyVectors);
+      this._VVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleOrbitingBodyVectors);
       this._v1.multiplyScalar(1.1);
       this._VVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
     }
@@ -472,8 +460,36 @@ class OrbitalMechThings {
     const theColor = this._colorForName(color);
 
     switch (thing){
-      case 'pqwFrame':
+      case 'inertialVectors':
+        this._inertialVectorColor = theColor;
+
+        this._iVectorShaftMesh.material.color.set(theColor);
+        this._jVectorShaftMesh.material.color.set(theColor);
+        this._kVectorShaftMesh.material.color.set(theColor);
+        this._iVectorArrowheadMesh.material.color.set(theColor);
+        this._jVectorArrowheadMesh.material.color.set(theColor);
+        this._kVectorArrowheadMesh.material.color.set(theColor);
+        this._iVectorLabel.material[0].color.set(theColor);
+        this._iVectorLabel.material[1].color.set(theColor);
+        this._jVectorLabel.material[0].color.set(theColor);
+        this._jVectorLabel.material[1].color.set(theColor);
+        this._kVectorLabel.material[0].color.set(theColor);
+        this._kVectorLabel.material[1].color.set(theColor);
+        break;
+
+      case 'orbitFixedVectors':
         this._orbitFixedVectorColor = theColor;
+
+        this._hVectorShaftMesh.material.color.set(theColor);
+        this._hVectorArrowheadMesh.material.color.set(theColor);
+        this._hVectorLabel.material[0].color.set(theColor);
+        this._hVectorLabel.material[1].color.set(theColor);
+
+        this._eVectorShaftMesh.material.color.set(theColor);
+        this._eVectorArrowheadMesh.material.color.set(theColor);
+        this._eVectorLabel.material[0].color.set(theColor);
+        this._eVectorLabel.material[1].color.set(theColor);
+
         this._pVectorShaftMesh.material.color.set(theColor);
         this._qVectorShaftMesh.material.color.set(theColor);
         this._wVectorShaftMesh.material.color.set(theColor);
@@ -488,23 +504,19 @@ class OrbitalMechThings {
         this._wVectorLabel.material[1].color.set(theColor);
         break;
 
-      case 'xyzFrame':
-        this._inertialVectorColor = theColor;
-        this._xVectorShaftMesh.material.color.set(theColor);
-        this._yVectorShaftMesh.material.color.set(theColor);
-        this._zVectorShaftMesh.material.color.set(theColor);
-        this._xVectorArrowheadMesh.material.color.set(theColor);
-        this._yVectorArrowheadMesh.material.color.set(theColor);
-        this._zVectorArrowheadMesh.material.color.set(theColor);
-        this._xVectorLabel.material[0].color.set(theColor);
-        this._xVectorLabel.material[1].color.set(theColor);
-        this._yVectorLabel.material[0].color.set(theColor);
-        this._yVectorLabel.material[1].color.set(theColor);
-        this._zVectorLabel.material[0].color.set(theColor);
-        this._zVectorLabel.material[1].color.set(theColor);
-        break;
+      case 'orbitingBodyVectors':
+        this._orbitingBodyVectorColor = theColor;
 
-      case 'uvwFrame':
+        this._rVectorShaftMesh.material.color.set(theColor);
+        this._rVectorArrowheadMesh.material.color.set(theColor);
+        this._rVectorLabel.material[0].color.set(theColor);
+        this._rVectorLabel.material[1].color.set(theColor);
+
+        this._vVectorShaftMesh.material.color.set(theColor);
+        this._vVectorArrowheadMesh.material.color.set(theColor);
+        this._vVectorLabel.material[0].color.set(theColor);
+        this._vVectorLabel.material[1].color.set(theColor);
+
         this._UVectorShaftMesh.material.color.set(theColor);
         this._VVectorShaftMesh.material.color.set(theColor);
         this._WVectorShaftMesh.material.color.set(theColor);
@@ -517,38 +529,6 @@ class OrbitalMechThings {
         this._VVectorLabel.material[1].color.set(theColor);
         this._WVectorLabel.material[0].color.set(theColor);
         this._WVectorLabel.material[1].color.set(theColor);
-        break;
-
-      case 'r':
-        this._rColor = theColor;
-        this._rVectorShaftMesh.material.color.set(theColor);
-        this._rVectorArrowheadMesh.material.color.set(theColor);
-        this._rVectorLabel.material[0].color.set(theColor);
-        this._rVectorLabel.material[1].color.set(theColor);
-        break;
-
-      case 'v':
-        this._vColor = theColor;
-        this._vVectorShaftMesh.material.color.set(theColor);
-        this._vVectorArrowheadMesh.material.color.set(theColor);
-        this._vVectorLabel.material[0].color.set(theColor);
-        this._vVectorLabel.material[1].color.set(theColor);
-        break;
-
-      case 'h':
-        this._hColor = theColor;
-        this._hVectorShaftMesh.material.color.set(theColor);
-        this._hVectorArrowheadMesh.material.color.set(theColor);
-        this._hVectorLabel.material[0].color.set(theColor);
-        this._hVectorLabel.material[1].color.set(theColor);
-        break;
-
-      case 'e':
-        this._eColor = theColor;
-        this._eVectorShaftMesh.material.color.set(theColor);
-        this._eVectorArrowheadMesh.material.color.set(theColor);
-        this._eVectorLabel.material[0].color.set(theColor);
-        this._eVectorLabel.material[1].color.set(theColor);
         break;
     }
   }
@@ -563,9 +543,9 @@ class OrbitalMechThings {
     this._scaleOrbitFixedVectors.y = this._orbitFixedVectorScale;
   }
   
-  setVelocityVectorScale(value){
-    this._velocityVectorScale = 1 + (value - 50)/100;
-    this._scaleVelocityVector.y = this._velocityVectorScale;
+  setOrbitingBodyVectorScale(value){
+    this._orbitingBodyVectorScale = 1 + (value - 50)/100;
+    this._scaleOrbitingBodyVectors.y = this._orbitingBodyVectorScale;
     this.setV(this._v.x, this._v.y, this._v.z);
   }
 
@@ -679,7 +659,7 @@ class OrbitalMechThings {
   }
 
   setV(x, y, z){
-    this._vVectorScale.setY(1.75*Math.sqrt(x*x + y*y + z*z)*this._velocityVectorScale);
+    this._vVectorScale.setY(1.75*Math.sqrt(x*x + y*y + z*z)*this._orbitingBodyVectorScale);
     this._v.set(x, y, z);
     this.needsRefresh = true;
   }
@@ -693,18 +673,15 @@ class OrbitalMechThings {
       shaftRadius, length*fractionForShaft, 32, 1, true);
     const arrowheadGeometry = new THREE.ConeGeometry(3*shaftRadius, 
       length*(1-fractionForShaft), 32, 1, true);
-    const mats = new Array(6).fill(null);
-    const colors = [this._orbitFixedVectorColor, this._inertialVectorColor,
-      this._rColor, this._vColor, this._hColor, this._eColor];
-    const opacities = [this._pqwFrameOpacity, this._xyzFrameOpacity,
-      this._rOpacity, this._vOpacity, this._hOpacity,
-      this._eOpacity];
+    const mats = new Array(3).fill(null);
+    const colors = [this._inertialVectorColor, this._orbitFixedVectorColor,
+      this._orbitingBodyVectorColor];
 
-    for (let i=0; i<6; i++){
+    for (let i=0; i<3; i++){
       mats[i] = new THREE.MeshBasicMaterial({
         color: colors[i],
         transparent: true,
-        opacity: opacities[i],
+        opacity: this._vectorOpacity,
       });
 
       mats[i].blending = THREE.CustomBlending;
@@ -713,76 +690,88 @@ class OrbitalMechThings {
       mats[i].blendEquation = THREE.AddEquation;
     }
 
-    this._pVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[0]);
-    this._pVectorShaftMesh.matrixAutoUpdate = false;
-    this._pVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[0]);
-    this._pVectorArrowheadMesh.matrixAutoUpdate = false;
-
-    this._qVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[0]);
-    this._qVectorShaftMesh.matrixAutoUpdate = false;
-    this._qVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[0]);
-    this._qVectorArrowheadMesh.matrixAutoUpdate = false;
-
-    this._wVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[0]);
-    this._wVectorShaftMesh.matrixAutoUpdate = false;
-    this._wVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[0]);
-    this._wVectorArrowheadMesh.matrixAutoUpdate = false;
-
     this._xQuat.set(0, 0, oneOverSqrt2, oneOverSqrt2);
     this._yQuat.set(0, 0, 0, 1);
     this._zQuat.set(oneOverSqrt2, 0, 0, oneOverSqrt2);
 
-    this._xVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[1]);
-    this._xVectorShaftMesh.matrixAutoUpdate = false;
-    this._xVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[1]);
-    this._xVectorArrowheadMesh.matrixAutoUpdate = false;
+    // inertial vectors
+    this._iVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[0]);
+    this._iVectorShaftMesh.matrixAutoUpdate = false;
+    this._iVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[0]);
+    this._iVectorArrowheadMesh.matrixAutoUpdate = false;
 
-    this._yVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[1]);
-    this._yVectorShaftMesh.matrixAutoUpdate = false;
-    this._yVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[1]);
-    this._yVectorArrowheadMesh.matrixAutoUpdate = false;
+    this._jVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[0]);
+    this._jVectorShaftMesh.matrixAutoUpdate = false;
+    this._jVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[0]);
+    this._jVectorArrowheadMesh.matrixAutoUpdate = false;
     
-    this._zVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[1]);
-    this._zVectorShaftMesh.matrixAutoUpdate = false;
-    this._zVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[1]);
-    this._zVectorArrowheadMesh.matrixAutoUpdate = false;
+    this._kVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[0]);
+    this._kVectorShaftMesh.matrixAutoUpdate = false;
+    this._kVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[0]);
+    this._kVectorArrowheadMesh.matrixAutoUpdate = false;
 
-    this._UVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[1]);
-    this._UVectorShaftMesh.matrixAutoUpdate = false;
-    this._UVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[1]);
-    this._UVectorArrowheadMesh.matrixAutoUpdate = false;
+    // orbit-fixed vectors
+    // specific angular momentum
+    this._hVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[1]);
+    this._hVectorShaftMesh.matrixAutoUpdate = false;
+    this._hVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[1]);
+    this._hVectorArrowheadMesh.matrixAutoUpdate = false;
 
-    this._VVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[1]);
-    this._VVectorShaftMesh.matrixAutoUpdate = false;
-    this._VVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[1]);
-    this._VVectorArrowheadMesh.matrixAutoUpdate = false;
-    
-    this._WVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[1]);
-    this._WVectorShaftMesh.matrixAutoUpdate = false;
-    this._WVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[1]);
-    this._WVectorArrowheadMesh.matrixAutoUpdate = false;
+    // eccentricity vector
+    this._eVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[1]);
+    this._eVectorShaftMesh.matrixAutoUpdate = false;
+    this._eVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[1]);
+    this._eVectorArrowheadMesh.matrixAutoUpdate = false;
 
+    // perifocal frame
+    this._pVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[1]);
+    this._pVectorShaftMesh.matrixAutoUpdate = false;
+    this._pVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[1]);
+    this._pVectorArrowheadMesh.matrixAutoUpdate = false;
+
+    this._qVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[1]);
+    this._qVectorShaftMesh.matrixAutoUpdate = false;
+    this._qVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[1]);
+    this._qVectorArrowheadMesh.matrixAutoUpdate = false;
+
+    this._wVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[1]);
+    this._wVectorShaftMesh.matrixAutoUpdate = false;
+    this._wVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[1]);
+    this._wVectorArrowheadMesh.matrixAutoUpdate = false;
+
+    // orbiting body vectors
+    // radial vector to orbiting body
     this._rVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[2]);
     this._rVectorShaftMesh.matrixAutoUpdate = false;
     this._rVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[2]);
     this._rVectorArrowheadMesh.matrixAutoUpdate = false;
 
-    this._vVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[3]);
+    // velocity vector of orbiting body
+    this._vVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[2]);
     this._vVectorShaftMesh.matrixAutoUpdate = false;
-    this._vVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[3]);
+    this._vVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[2]);
     this._vVectorArrowheadMesh.matrixAutoUpdate = false;
 
-    this._hVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[4]);
-    this._hVectorShaftMesh.matrixAutoUpdate = false;
-    this._hVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[4]);
-    this._hVectorArrowheadMesh.matrixAutoUpdate = false;
+    // UVW frame
+    this._UVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[2]);
+    this._UVectorShaftMesh.matrixAutoUpdate = false;
+    this._UVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[2]);
+    this._UVectorArrowheadMesh.matrixAutoUpdate = false;
 
-    this._eVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[5]);
-    this._eVectorShaftMesh.matrixAutoUpdate = false;
-    this._eVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[5]);
-    this._eVectorArrowheadMesh.matrixAutoUpdate = false;
+    this._VVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[2]);
+    this._VVectorShaftMesh.matrixAutoUpdate = false;
+    this._VVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[2]);
+    this._VVectorArrowheadMesh.matrixAutoUpdate = false;
+    
+    this._WVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[2]);
+    this._WVectorShaftMesh.matrixAutoUpdate = false;
+    this._WVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[2]);
+    this._WVectorArrowheadMesh.matrixAutoUpdate = false;
   }
 
+  // required to prevent the rendering of the radius vector
+  // for hyperbolic orbits when the true anomaly is such that
+  // the vector points in the wrong direction
   setRVisible(visible){
     this._rVectorShaftMesh.material.visible = visible;
     this._rVectorArrowheadMesh.material.visible = visible;
@@ -791,6 +780,7 @@ class OrbitalMechThings {
     this._rVectorLabel.material[1].visible = visible;
   }
 
+  // similar comment to setRVisible
   setVVisible(visible){
     this._vVectorShaftMesh.material.visible = visible;
     this._vVectorArrowheadMesh.material.visible = visible;
@@ -809,7 +799,7 @@ class OrbitalMechThings {
     THREE.Cache.enabled = true;
     let font = undefined;
     // rotating frame, space frame, r, h, e
-    let lettersArray = ['P', 'Q', 'W', 'i', 'j', 'k', 'U', 'V', 'W', 'r', 'v', 'h', 'e'];
+    let lettersArray = ['i', 'j', 'k', 'h', 'e', 'P', 'Q', 'W', 'r', 'v', 'U', 'V', 'W'];
     //fontName = helvetiker
     //fontWeight = normal bold
     const loader = new FontLoader();
@@ -824,29 +814,19 @@ class OrbitalMechThings {
       const curveSegments = 4;
       const bevelEnabled = false;
   
-      let materials1 = [
-        new THREE.MeshBasicMaterial({color: this._orbitFixedVectorColor, transparent: true, opacity: this._pqwFrameOpacity}), // front
-        new THREE.MeshBasicMaterial({color: this._orbitFixedVectorColor, transparent: true, opacity: this._pqwFrameOpacity}) // side
+      let material1 = [
+        new THREE.MeshBasicMaterial({color: this._inertialVectorColor, transparent: true, opacity: this._vectorOpacity}), // front
+        new THREE.MeshBasicMaterial({color: this._inertialVectorColor, transparent: true, opacity: this._vectorOpacity}) // side
       ];
 
-      let materials2 = [
-        new THREE.MeshBasicMaterial({color: this._inertialVectorColor, transparent: true, opacity: this._xyzFrameOpacity}), // front
-        new THREE.MeshBasicMaterial({color: this._inertialVectorColor, transparent: true, opacity: this._xyzFrameOpacity}) // side
+      let material2 = [
+        new THREE.MeshBasicMaterial({color: this._orbitFixedVectorColor, transparent: true, opacity: this._vectorOpacity}), // front
+        new THREE.MeshBasicMaterial({color: this._orbitFixedVectorColor, transparent: true, opacity: this._vectorOpacity}) // side
       ];
 
-      let materials3 = [
-        new THREE.MeshBasicMaterial({color: this._rColor, transparent: true, opacity: this._rOpacity}), // front
-        new THREE.MeshBasicMaterial({color: this._rColor, transparent: true, opacity: this._rOpacity}) // side
-      ];
-
-      let materials4 = [
-        new THREE.MeshBasicMaterial({color: this._hColor, transparent: true, opacity: this._hOpacity}), // front
-        new THREE.MeshBasicMaterial({color: this._hColor, transparent: true, opacity: this._hOpacity}) // side
-      ];
-
-      let materials5 = [
-        new THREE.MeshBasicMaterial({color: this._eColor, transparent: true, opacity: this._eOpacity}), // front
-        new THREE.MeshBasicMaterial({color: this._eColor, transparent: true, opacity: this._eOpacity}) // side
+      let material3 = [
+        new THREE.MeshBasicMaterial({color: this._orbitingBodyVectorColor, transparent: true, opacity: this._vectorOpacity}), // front
+        new THREE.MeshBasicMaterial({color: this._orbitingBodyVectorColor, transparent: true, opacity: this._vectorOpacity}) // side
       ];
 
       for (let i=0; i<lettersArray.length; i++) {
@@ -861,56 +841,56 @@ class OrbitalMechThings {
 
         switch (i){
           case 0:
-            this._pVectorLabel = new THREE.Mesh(textGeo, materials1);
-            this._pVectorLabel.matrixAutoUpdate = false;
+            this._iVectorLabel = new THREE.Mesh(textGeo, material1);
+            this._iVectorLabel.matrixAutoUpdate = false;
             break;
           case 1:
-            this._qVectorLabel = new THREE.Mesh(textGeo, materials1);
-            this._qVectorLabel.matrixAutoUpdate = false;
+            this._jVectorLabel = new THREE.Mesh(textGeo, material1);
+            this._jVectorLabel.matrixAutoUpdate = false;
             break;
           case 2:
-            this._wVectorLabel = new THREE.Mesh(textGeo, materials1);
-            this._wVectorLabel.matrixAutoUpdate = false;
+            this._kVectorLabel  = new THREE.Mesh(textGeo, material1);
+            this._kVectorLabel.matrixAutoUpdate = false;
             break;
           case 3:
-            this._xVectorLabel = new THREE.Mesh(textGeo, materials2);
-            this._xVectorLabel.matrixAutoUpdate = false;
-            break;
-          case 4:
-            this._yVectorLabel = new THREE.Mesh(textGeo, materials2);
-            this._yVectorLabel.matrixAutoUpdate = false;
-            break;
-          case 5:
-            this._zVectorLabel  = new THREE.Mesh(textGeo, materials2);
-            this._zVectorLabel.matrixAutoUpdate = false;
-            break;
-          case 6:
-            this._UVectorLabel = new THREE.Mesh(textGeo, materials4);
-            this._UVectorLabel.matrixAutoUpdate = false;
-            break;
-          case 7:
-            this._VVectorLabel = new THREE.Mesh(textGeo, materials4);
-            this._VVectorLabel.matrixAutoUpdate = false;
-            break;
-          case 8:
-            this._WVectorLabel  = new THREE.Mesh(textGeo, materials4);
-            this._WVectorLabel.matrixAutoUpdate = false;
-            break;
-          case 9:
-            this._rVectorLabel = new THREE.Mesh(textGeo, materials3);
-            this._rVectorLabel.matrixAutoUpdate = false;
-            break;
-          case 10:
-            this._vVectorLabel = new THREE.Mesh(textGeo, materials3);
-            this._vVectorLabel.matrixAutoUpdate = false;
-            break;
-          case 11:
-            this._hVectorLabel = new THREE.Mesh(textGeo, materials4);
+            this._hVectorLabel = new THREE.Mesh(textGeo, material2);
             this._hVectorLabel.matrixAutoUpdate = false;
             break;
-          case 12:
-            this._eVectorLabel = new THREE.Mesh(textGeo, materials5);
+          case 4:
+            this._eVectorLabel = new THREE.Mesh(textGeo, material2);
             this._eVectorLabel.matrixAutoUpdate = false;
+            break;
+          case 5:
+            this._pVectorLabel = new THREE.Mesh(textGeo, material2);
+            this._pVectorLabel.matrixAutoUpdate = false;
+            break;
+          case 6:
+            this._qVectorLabel = new THREE.Mesh(textGeo, material2);
+            this._qVectorLabel.matrixAutoUpdate = false;
+            break;
+          case 7:
+            this._wVectorLabel = new THREE.Mesh(textGeo, material2);
+            this._wVectorLabel.matrixAutoUpdate = false;
+            break;
+          case 8:
+            this._rVectorLabel = new THREE.Mesh(textGeo, material3);
+            this._rVectorLabel.matrixAutoUpdate = false;
+            break;
+          case 9:
+            this._vVectorLabel = new THREE.Mesh(textGeo, material3);
+            this._vVectorLabel.matrixAutoUpdate = false;
+            break;
+          case 10:
+            this._UVectorLabel = new THREE.Mesh(textGeo, material3);
+            this._UVectorLabel.matrixAutoUpdate = false;
+            break;
+          case 11:
+            this._VVectorLabel = new THREE.Mesh(textGeo, material3);
+            this._VVectorLabel.matrixAutoUpdate = false;
+            break;
+          case 12:
+            this._WVectorLabel  = new THREE.Mesh(textGeo, material3);
+            this._WVectorLabel.matrixAutoUpdate = false;
             break;
         }
       }
@@ -926,6 +906,36 @@ class OrbitalMechThings {
     let remove;
 
     switch (opt){
+      case 'ijkFrame':
+        add = show && !(this._showIJKFrame);
+        remove = !show && this._showIJKFrame;
+        this._showIJKFrame = show;
+
+        if (add){
+          scene.add(this._iVectorShaftMesh);
+          scene.add(this._iVectorArrowheadMesh);
+          scene.add(this._jVectorShaftMesh);
+          scene.add(this._jVectorArrowheadMesh);
+          scene.add(this._kVectorShaftMesh);
+          scene.add(this._kVectorArrowheadMesh);
+          scene.add(this._iVectorLabel);
+          scene.add(this._jVectorLabel);
+          scene.add(this._kVectorLabel);
+        }
+
+        if (remove){
+          scene.remove(this._iVectorShaftMesh);
+          scene.remove(this._iVectorArrowheadMesh);
+          scene.remove(this._jVectorShaftMesh);
+          scene.remove(this._jVectorArrowheadMesh);
+          scene.remove(this._kVectorShaftMesh);
+          scene.remove(this._kVectorArrowheadMesh);
+          scene.remove(this._iVectorLabel);
+          scene.remove(this._jVectorLabel);
+          scene.remove(this._kVectorLabel);
+        }
+        break;
+
       case 'pqwFrame':
         add = show && !(this._showPQWFrame);
         remove = !show && this._showPQWFrame;
@@ -953,36 +963,6 @@ class OrbitalMechThings {
           scene.remove(this._pVectorLabel);
           scene.remove(this._qVectorLabel);
           scene.remove(this._wVectorLabel);
-        }
-        break;
-
-      case 'xyzFrame':
-        add = show && !(this._showXYZFrame);
-        remove = !show && this._showXYZFrame;
-        this._showXYZFrame = show;
-
-        if (add){
-          scene.add(this._xVectorShaftMesh);
-          scene.add(this._xVectorArrowheadMesh);
-          scene.add(this._yVectorShaftMesh);
-          scene.add(this._yVectorArrowheadMesh);
-          scene.add(this._zVectorShaftMesh);
-          scene.add(this._zVectorArrowheadMesh);
-          scene.add(this._xVectorLabel);
-          scene.add(this._yVectorLabel);
-          scene.add(this._zVectorLabel);
-        }
-
-        if (remove){
-          scene.remove(this._xVectorShaftMesh);
-          scene.remove(this._xVectorArrowheadMesh);
-          scene.remove(this._yVectorShaftMesh);
-          scene.remove(this._yVectorArrowheadMesh);
-          scene.remove(this._zVectorShaftMesh);
-          scene.remove(this._zVectorArrowheadMesh);
-          scene.remove(this._xVectorLabel);
-          scene.remove(this._yVectorLabel);
-          scene.remove(this._zVectorLabel);
         }
         break;
 
@@ -1094,8 +1074,8 @@ class OrbitalMechThings {
     this._addRemoveVectorsAndLabels('pqwFrame',value);
   }
 
-  showXYZFrame(value) {
-    this._addRemoveVectorsAndLabels('xyzFrame',value);
+  showIJKFrame(value) {
+    this._addRemoveVectorsAndLabels('ijkFrame',value);
   }
 
   showUVWFrame(value) {

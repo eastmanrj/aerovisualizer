@@ -46,7 +46,7 @@ const defaultOrbitingBodyVectorColor = 'yellow';
 
 const defaultInertialVectorScale = 50;
 const defaultOrbitFixedVectorScale = 50;
-const defaultVelocityVectorScale = 50;
+const defaultOrbitingBodyVectorScale = 50;
 
 const defaultTimeScale = 1;
 const defaultTimeScaleMenuChoice = 'sec-equals-1sec';
@@ -73,7 +73,7 @@ let aerovisualizerData = [
   {name:'orbitingBodyVectorColor', value:defaultOrbitingBodyVectorColor},
   {name:'inertialVectorScale', value:defaultInertialVectorScale},
   {name:'orbitFixedVectorScale', value:defaultOrbitFixedVectorScale},
-  {name:'velocityVectorScale', value:defaultVelocityVectorScale},
+  {name:'orbitingBodyVectorScale', value:defaultOrbitingBodyVectorScale},
   {name:'timeScaleMenuChoice', value:defaultTimeScaleMenuChoice},
   {name:'centralBodyTransparency', value:defaultCentralBodyTransparency}
 ];
@@ -92,7 +92,8 @@ let incDegrees = defaultInclination;
 let inc = incDegrees*piOver180;// inclination
 let aopDegrees = defaultAop;
 let aop = aopDegrees*piOver180;// argument of periapsis
-let dcm = new THREE.Matrix3();
+let dcmPQW2IJK = new THREE.Matrix3();
+let dcmUVW2PQW = new THREE.Matrix3();
 let nuDegrees = defaultNu;
 let nu = nuDegrees*piOver180;// true anomaly
 let eccentricAnomaly;
@@ -148,7 +149,7 @@ let orbitingBodyVectorColor = defaultOrbitingBodyVectorColor;
 
 let inertialVectorScale = defaultInertialVectorScale;
 let orbitFixedVectorScale = defaultOrbitFixedVectorScale;
-let velocityVectorScale = defaultVelocityVectorScale;
+let orbitingBodyVectorScale = defaultOrbitingBodyVectorScale;
 
 let timeScale = defaultTimeScale;
 let displayTimeScale = defaultTimeScale;
@@ -158,10 +159,10 @@ let centralBodyTransparency = defaultCentralBodyTransparency;
 
 let rVector = new THREE.Vector3(1, 1, 1);
 let rPQW = new THREE.Vector3(1, 1, 1);
-let rXYZ = new THREE.Vector3(1, 1, 1);
+let rIJK = new THREE.Vector3(1, 1, 1);
 let vVector = new THREE.Vector3(1, 1, 1);
 let vPQW = new THREE.Vector3(1, 1, 1);
-let vXYZ = new THREE.Vector3(1, 1, 1);
+let vIJK = new THREE.Vector3(1, 1, 1);
 let p = a*(1 - e*e);//parameter (semi-latus rectum)
 let sqrtMuOverP = Math.sqrt(muCanonical/p);//needed for computing velocity
 let delta = defaultDelta;//turning angle for hyperbolic orbits
@@ -253,12 +254,12 @@ const vescDisplay = document.getElementById('vesc');
 
 let numericalDisplayIsOccurring = false;
 
-const numRX = document.getElementById('num-rx');
-const numRY = document.getElementById('num-ry');
-const numRZ = document.getElementById('num-rz');
-const numVX = document.getElementById('num-vx');
-const numVY = document.getElementById('num-vy');
-const numVZ = document.getElementById('num-vz');
+const numRI = document.getElementById('num-ri');
+const numRJ = document.getElementById('num-rj');
+const numRK = document.getElementById('num-rk');
+const numVI = document.getElementById('num-vi');
+const numVJ = document.getElementById('num-vj');
+const numVK = document.getElementById('num-vk');
 const numRP = document.getElementById('num-rp');
 const numRQ = document.getElementById('num-rq');
 const numRW1 = document.getElementById('num-rw1');
@@ -282,15 +283,15 @@ const numOm = document.getElementById('num-Om');
 const numI = document.getElementById('num-i');
 const numom = document.getElementById('num-om');
 
-const dcm11pqw2xyz = document.getElementById('dcm11-pqw-to-xyz');
-const dcm12pqw2xyz = document.getElementById('dcm12-pqw-to-xyz');
-const dcm13pqw2xyz = document.getElementById('dcm13-pqw-to-xyz');
-const dcm21pqw2xyz = document.getElementById('dcm21-pqw-to-xyz');
-const dcm22pqw2xyz = document.getElementById('dcm22-pqw-to-xyz');
-const dcm23pqw2xyz = document.getElementById('dcm23-pqw-to-xyz');
-const dcm31pqw2xyz = document.getElementById('dcm31-pqw-to-xyz');
-const dcm32pqw2xyz = document.getElementById('dcm32-pqw-to-xyz');
-const dcm33pqw2xyz = document.getElementById('dcm33-pqw-to-xyz');
+const dcm11pqw2ijk = document.getElementById('dcm11-pqw-to-ijk');
+const dcm12pqw2ijk = document.getElementById('dcm12-pqw-to-ijk');
+const dcm13pqw2ijk = document.getElementById('dcm13-pqw-to-ijk');
+const dcm21pqw2ijk = document.getElementById('dcm21-pqw-to-ijk');
+const dcm22pqw2ijk = document.getElementById('dcm22-pqw-to-ijk');
+const dcm23pqw2ijk = document.getElementById('dcm23-pqw-to-ijk');
+const dcm31pqw2ijk = document.getElementById('dcm31-pqw-to-ijk');
+const dcm32pqw2ijk = document.getElementById('dcm32-pqw-to-ijk');
+const dcm33pqw2ijk = document.getElementById('dcm33-pqw-to-ijk');
 const dcm11uvw2pqw = document.getElementById('dcm11-uvw-to-pqw');
 const dcm12uvw2pqw = document.getElementById('dcm12-uvw-to-pqw');
 const dcm13uvw2pqw = document.getElementById('dcm13-uvw-to-pqw');
@@ -324,8 +325,8 @@ const inertialVectorScaleSlider = document.getElementById('inertial-vector-scale
 inertialVectorScaleSlider.value = inertialVectorScale;
 const orbitFixedVectorScaleSlider = document.getElementById('orbit-fixed-vector-scale-slider');
 orbitFixedVectorScaleSlider.value = orbitFixedVectorScale;
-const velocityVectorScaleSlider = document.getElementById('velocity-vector-scale-slider');
-velocityVectorScaleSlider.value = velocityVectorScale;
+const orbitingBodyVectorScaleSlider = document.getElementById('orbiting-body-vector-scale-slider');
+orbitingBodyVectorScaleSlider.value = orbitingBodyVectorScale;
 
 const generalPrefsElements = document.getElementById('general-prefs-elements');
 const inertialVectorsElements = document.getElementById('inertial-vectors-elements');
@@ -518,12 +519,12 @@ const getFromLocalStorage = function(){
 }
 
 const displayNumerical = function(){
-  numRX.innerHTML = 'x';
-  numRY.innerHTML = 'x';
-  numRZ.innerHTML = 'x';
-  numVX.innerHTML = 'x';
-  numVY.innerHTML = 'x';
-  numVZ.innerHTML = 'x';
+  numRI.innerHTML = 'x';
+  numRJ.innerHTML = 'x';
+  numRK.innerHTML = 'x';
+  numVI.innerHTML = 'x';
+  numVJ.innerHTML = 'x';
+  numVK.innerHTML = 'x';
   numRW1.innerHTML = '0.000';
   numVW1.innerHTML = '0.000';
   numRU.innerHTML = 'x';
@@ -565,25 +566,25 @@ const displayNumerical = function(){
   numOm.innerHTML = lanDegrees;
   numI.innerHTML = incDegrees;
   numom.innerHTML = aopDegrees;
-//blah
-  dcm11pqw2xyz.innerHTML = `${Number(dcm.elements[0]).toFixed(4).toString()}`;
-  dcm12pqw2xyz.innerHTML = `${Number(dcm.elements[3]).toFixed(4).toString()}`;
-  dcm13pqw2xyz.innerHTML = `${Number(dcm.elements[6]).toFixed(4).toString()}`;
-  dcm21pqw2xyz.innerHTML = `${Number(dcm.elements[1]).toFixed(4).toString()}`;
-  dcm22pqw2xyz.innerHTML = `${Number(dcm.elements[4]).toFixed(4).toString()}`;
-  dcm23pqw2xyz.innerHTML = `${Number(dcm.elements[7]).toFixed(4).toString()}`;
-  dcm31pqw2xyz.innerHTML = `${Number(dcm.elements[2]).toFixed(4).toString()}`;
-  dcm32pqw2xyz.innerHTML = `${Number(dcm.elements[5]).toFixed(4).toString()}`;
-  dcm33pqw2xyz.innerHTML = `${Number(dcm.elements[8]).toFixed(4).toString()}`;
-  dcm11uvw2pqw.innerHTML = 'x';
-  dcm12uvw2pqw.innerHTML = 'x';
-  dcm13uvw2pqw.innerHTML = 'x';
-  dcm21uvw2pqw.innerHTML = 'x';
-  dcm22uvw2pqw.innerHTML = 'x';
-  dcm23uvw2pqw.innerHTML = 'x';
-  dcm31uvw2pqw.innerHTML = 'x';
-  dcm32uvw2pqw.innerHTML = 'x';
-  dcm33uvw2pqw.innerHTML = 'x';
+
+  dcm11pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[0]).toFixed(4).toString()}`;
+  dcm12pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[3]).toFixed(4).toString()}`;
+  dcm13pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[6]).toFixed(4).toString()}`;
+  dcm21pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[1]).toFixed(4).toString()}`;
+  dcm22pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[4]).toFixed(4).toString()}`;
+  dcm23pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[7]).toFixed(4).toString()}`;
+  dcm31pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[2]).toFixed(4).toString()}`;
+  dcm32pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[5]).toFixed(4).toString()}`;
+  dcm33pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[8]).toFixed(4).toString()}`;
+  dcm11uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[0]).toFixed(4).toString()}`;
+  dcm12uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[3]).toFixed(4).toString()}`;
+  dcm13uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[6]).toFixed(4).toString()}`;
+  dcm21uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[1]).toFixed(4).toString()}`;
+  dcm22uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[4]).toFixed(4).toString()}`;
+  dcm23uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[7]).toFixed(4).toString()}`;
+  dcm31uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[2]).toFixed(4).toString()}`;
+  dcm32uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[5]).toFixed(4).toString()}`;
+  dcm33uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[8]).toFixed(4).toString()}`;
 }
 
 const handleMainButtons = function(button){
@@ -933,7 +934,7 @@ lockApoapseButton.addEventListener('click', () => {
   }
 });
 
-const computeRotation = function(){
+const computePQW2IJKRotation = function(){
   // compute the direction cosine matrix from the perifocal frame
   // to the geocentric equatorial frame (or other inertial frames)
   // from Fundamentals of Astrodynamics (Bate, Mueller, White), 
@@ -954,8 +955,16 @@ const computeRotation = function(){
   const r31 =  saop*sinc;
   const r32 =  caop*sinc;
   const r33 =  cinc;
-  dcm.set(r11, r12, r13, r21, r22, r23, r31, r32, r33);
+  dcmPQW2IJK.set(r11, r12, r13, r21, r22, r23, r31, r32, r33);
   omt.setQuatFromDCMElements(r11, r12, r13, r21, r22, r23, r31, r32, r33);
+}
+
+const computeUVW2PQWRotation = function(){
+  // compute the direction cosine matrix from the UVW frame
+  // to the perifocal frame
+  const cnu = Math.cos(nu);
+  const snu = Math.sin(nu);
+  dcmUVW2PQW.set(cnu, -snu, 0, snu, cnu, 0, 0, 0, 1);// opposite snu?
 }
 
 const handleOrientationOnInput = function(opt, setValuesOnly = false){
@@ -981,7 +990,7 @@ const handleOrientationOnInput = function(opt, setValuesOnly = false){
 
   if (!setValuesOnly){
     haltPlay();
-    computeRotation();
+    computePQW2IJKRotation();
     omt.shapeOrbitCurve(a, e);
   }
 }
@@ -1019,7 +1028,7 @@ zeroLanButton.addEventListener('click', () => {
   lanDegrees = 0;
   lanSlider.value = lanDegrees;
   lanDisplay.innerHTML = lanDegrees;
-  computeRotation();
+  computePQW2IJKRotation();
   replaceAerovisualizerData('longitude-of-ascending-node',0);
   saveToLocalStorage();
 });
@@ -1030,7 +1039,7 @@ zeroIncButton.addEventListener('click', () => {
   incDegrees = 0;
   incSlider.value = incDegrees;
   incDisplay.innerHTML = incDegrees;
-  computeRotation();
+  computePQW2IJKRotation();
   replaceAerovisualizerData('inclination',0);
   saveToLocalStorage();
 });
@@ -1041,7 +1050,7 @@ zeroAopButton.addEventListener('click', () => {
   aopDegrees = 0;
   aopSlider.value = aopDegrees;
   aopDisplay.innerHTML = aopDegrees;
-  computeRotation();
+  computePQW2IJKRotation();
   replaceAerovisualizerData('argument-of-periapsis',0);
   saveToLocalStorage();
 });
@@ -1135,6 +1144,7 @@ const computeTimeAfterPeriapse = function(){
 const doNuAndTimeDisplay = function(){
   if (meanAnomaly !== null){
     nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees).toFixed(2).toString()}`;
+    computeUVW2PQWRotation();
 
     switch (timeScaleMenuChoice){
       case 'sec-equals-1sec':
@@ -1347,7 +1357,7 @@ const computeUniversal = function(){
 }
 
 const setInertialVectorColor = function(color, save=false){
-  omt.setColor('xyzFrame', color);
+  omt.setColor('inertialVectors', color);
 
   if (save){
     replaceAerovisualizerData('inertialVectorColor',color);
@@ -1355,9 +1365,7 @@ const setInertialVectorColor = function(color, save=false){
 }
 
 const setOrbitFixedVectorColor = function(color, save=false){
-  omt.setColor('h', color);
-  omt.setColor('e', color);
-  omt.setColor('pqwFrame', color);
+  omt.setColor('orbitFixedVectors', color);
 
   if (save){
     replaceAerovisualizerData('orbitFixedVectorColor',color);
@@ -1365,9 +1373,7 @@ const setOrbitFixedVectorColor = function(color, save=false){
 }
 
 const setOrbitingBodyVectorColor = function(color, save=false){
-  omt.setColor('r', color);
-  omt.setColor('v', color);
-  omt.setColor('uvwFrame', color);
+  omt.setColor('orbitingBodyVectors', color);
 
   if (save){
     replaceAerovisualizerData('orbitingBodyVectorColor',color);
@@ -1520,23 +1526,23 @@ mainPrefsMenu.addEventListener('change', () => {
 const doInertialVectorsChoice = function(){
   switch (inertialVectorsChoice){
     case 'X-Y-Z':
-      omt.showXYZFrame(true);
+      omt.showIJKFrame(true);
       break;
 
     case 'x-y-z':
-      omt.showXYZFrame(true);
+      omt.showIJKFrame(true);
       break;
 
     case 'I-J-K':
-      omt.showXYZFrame(true);
+      omt.showIJKFrame(true);
       break;
     
     case 'i-j-k':
-      omt.showXYZFrame(true);
+      omt.showIJKFrame(true);
       break;
 
     case 'no-inertial-vectors':
-      omt.showXYZFrame(false);
+      omt.showIJKFrame(false);
       break;
   }
 }
@@ -1577,34 +1583,52 @@ const doOrbitFixedVectorsChoice = function(){
 
 const doOrbitingBodyVectorsChoice = function(){
   switch (orbitingBodyVectorsChoice){
-    case 'r-and-v':
+    case 'no-orbiting-body-vectors':
+      omt.showR(false);
+      omt.showV(false);
       omt.showUVWFrame(false);
-      omt.showR(true);
-      omt.showV(true);
       break;
-    
+
     case 'r-only':
-      omt.showUVWFrame(false);
       omt.showR(true);
       omt.showV(false);
+      omt.showUVWFrame(false);
       break;
 
     case 'v-only':
-      omt.showUVWFrame(false);
       omt.showR(false);
       omt.showV(true);
-      break;
-
-    case 'u-v-w':
-      omt.showUVWFrame(true);
-      omt.showR(false);
-      omt.showV(false);
-      break;
-
-    case 'no-orbiting-body-vectors':
       omt.showUVWFrame(false);
+      break;
+
+    case 'uvw-only':
       omt.showR(false);
       omt.showV(false);
+      omt.showUVWFrame(true);
+      break;
+
+    case 'r-and-v':
+      omt.showR(true);
+      omt.showV(true);
+      omt.showUVWFrame(false);
+      break;
+    
+    case 'r-and-uvw':
+      omt.showR(true);
+      omt.showV(false);
+      omt.showUVWFrame(true);
+      break;
+
+    case 'v-and-uvw':
+      omt.showR(false);
+      omt.showV(true);
+      omt.showUVWFrame(true);
+      break;
+
+    case 'r-v-and-uvw':
+      omt.showR(true);
+      omt.showV(true);
+      omt.showUVWFrame(true);
       break;
   }
 }
@@ -1640,8 +1664,8 @@ const doVectorScaleSliderOnInput = function(opt, value){
       orbitFixedVectorScale = value;
       break;
 
-    case 'velocity':
-      velocityVectorScale = value;
+    case 'orbitingBody':
+      orbitingBodyVectorScale = value;
       break;
   }
 }
@@ -1654,8 +1678,8 @@ orbitFixedVectorScaleSlider.oninput = function(){
   doVectorScaleSliderOnInput('orbit-fixed', +this.value);
 }
 
-velocityVectorScaleSlider.oninput = function(){
-  doVectorScaleSliderOnInput('velocity', +this.value);
+orbitingBodyVectorScaleSlider.oninput = function(){
+  doVectorScaleSliderOnInput('orbitingBody', +this.value);
 }
 
 inertialVectorScaleSlider.onpointerup = function(){
@@ -1672,9 +1696,9 @@ orbitFixedVectorScaleSlider.onpointerup = function(){
   omt.needsRefresh = true;
 }
 
-velocityVectorScaleSlider.onpointerup = function(){
-  omt.setVelocityVectorScale(velocityVectorScale);
-  replaceAerovisualizerData('velocityVectorScale',velocityVectorScale);
+orbitingBodyVectorScaleSlider.onpointerup = function(){
+  omt.setOrbitingBodyVectorScale(orbitingBodyVectorScale);
+  replaceAerovisualizerData('orbitingBodyVectorScale',orbitingBodyVectorScale);
   saveToLocalStorage();
   omt.needsRefresh = true;
 }
@@ -1876,8 +1900,8 @@ const initialize = function(data, camera){
           case 'orbitFixedVectorScale':
             orbitFixedVectorScale  = o.value;
             break;
-          case 'velocityVectorScale':
-            velocityVectorScale  = o.value;
+          case 'orbitingBodyVectorScale':
+            orbitingBodyVectorScale  = o.value;
             break;
           case 'timeScaleMenuChoice':
             timeScaleMenuChoice  = o.value;
@@ -1972,10 +1996,10 @@ const completeInitialization = function(continueAnimation = true) {
     
     doVectorScaleSliderOnInput('inertial',inertialVectorScale);
     doVectorScaleSliderOnInput('orbit-fixed',orbitFixedVectorScale);
-    doVectorScaleSliderOnInput('velocity',velocityVectorScale);
+    doVectorScaleSliderOnInput('orbitingBody',orbitingBodyVectorScale);
     omt.setInertialVectorScale(inertialVectorScale);
     omt.setOrbitFixedVectorScale(orbitFixedVectorScale);
-    omt.setVelocityVectorScale(velocityVectorScale);
+    omt.setOrbitingBodyVectorScale(orbitingBodyVectorScale);
     omt.needsRefresh = true;
   }
 };
@@ -2118,29 +2142,32 @@ const animate = function(continueAnimation = true) {
     vx = vx0 + dvxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     vy = vy0 + dvydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     nuDegrees = nu0 + dnudt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
+    nu = nuDegrees*piOver180;
+
     omt.setR(px, py, 0, a);
     omt.setV(vx, vy, 0);
     doNuAndTimeDisplay();
 
     if (numericalDisplayIsOccurring){
-      computeRotation();
+      computePQW2IJKRotation();
+      computeUVW2PQWRotation();
       displayNumerical();
       rPQW.set(px, py, 0);
-      rXYZ.copy(rPQW);
-      rXYZ.applyMatrix3(dcm);
+      rIJK.copy(rPQW);
+      rIJK.applyMatrix3(dcmPQW2IJK);
       vPQW.set(vx, vy, 0);
-      vXYZ.copy(vPQW);
-      vXYZ.applyMatrix3(dcm);
+      vIJK.copy(vPQW);
+      vIJK.applyMatrix3(dcmPQW2IJK);
       numRP.innerHTML = `${Number(px).toFixed(3).toString()}`;
       numRQ.innerHTML = `${Number(py).toFixed(3).toString()}`;
       numVP.innerHTML = `${Number(vx).toFixed(3).toString()}`;
       numVQ.innerHTML = `${Number(vy).toFixed(3).toString()}`;
-      numRX.innerHTML = `${Number(rXYZ.x).toFixed(3).toString()}`;
-      numRY.innerHTML = `${Number(rXYZ.y).toFixed(3).toString()}`;
-      numRZ.innerHTML = `${Number(rXYZ.z).toFixed(3).toString()}`;
-      numVX.innerHTML = `${Number(vXYZ.x).toFixed(3).toString()}`;
-      numVY.innerHTML = `${Number(vXYZ.y).toFixed(3).toString()}`;
-      numVZ.innerHTML = `${Number(vXYZ.z).toFixed(3).toString()}`;
+      numRI.innerHTML = `${Number(rIJK.x).toFixed(3).toString()}`;
+      numRJ.innerHTML = `${Number(rIJK.y).toFixed(3).toString()}`;
+      numRK.innerHTML = `${Number(rIJK.z).toFixed(3).toString()}`;
+      numVI.innerHTML = `${Number(vIJK.x).toFixed(3).toString()}`;
+      numVJ.innerHTML = `${Number(vIJK.y).toFixed(3).toString()}`;
+      numVK.innerHTML = `${Number(vIJK.z).toFixed(3).toString()}`;
     }
 
     omt.needsRefresh = true;

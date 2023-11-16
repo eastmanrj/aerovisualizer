@@ -99,6 +99,7 @@
             <option value="sec-equals-1sec">1&nbsp;second&nbsp;=&nbsp;1&nbsp;second</option>
             <option value="sec-equals-1minute">1&nbsp;second&nbsp;=&nbsp;1&nbsp;minute</option>
             <option value="sec-equals-5minutes">1&nbsp;second&nbsp;=&nbsp;5&nbsp;minutes</option>
+            <option value="sec-equals-15minutes">1&nbsp;second&nbsp;=&nbsp;15&nbsp;minutes</option>
             <option value="sec-equals-1hour">1&nbsp;second&nbsp;=&nbsp;1&nbsp;hour</option>
             <option value="sec-equals-1day">1&nbsp;second&nbsp;=&nbsp;1&nbsp;day</option>
           </select>
@@ -106,7 +107,7 @@
         <div class="elements numerical" id="numerical-elements">
           <p class="span8 center-grid-item">Aerovisualizer - Orbital Mechanics</p>
           <p class="top-border"></p><p class="top-border left-border">IJK</p><p class="top-border left-border">PQW</p>
-          <p class="top-border left-border">UVW</p><p class="span2 top-border left-border">dynamics</p><p class="span2 top-border left-border">elements</p>
+          <p class="top-border left-border">UVW</p><p class="span4 top-border left-border">data</p>
           <p>&nbsp;</p><pre class="left-border"><span id="num-ri">0</span></pre>
           <pre class="left-border"><span id="num-rp">0</span></pre>
           <pre class="left-border"><span id="num-ru">0</span></pre>
@@ -122,8 +123,8 @@
           <pre class="left-border"><span>e</span></pre>
           <pre><span id="num-e">0</span></pre>
           <p>&nbsp;</p><pre class="left-border"><span id="num-rk">0</span></pre>
-          <pre class="left-border"><span id="num-rw1">0</span></pre>
-          <pre class="left-border"><span id="num-rw2">0</span></pre>
+          <pre class="left-border"><span>0.000</span></pre>
+          <pre class="left-border"><span>0.000</span></pre>
           <pre class="left-border"><span>h</span></pre>
           <pre><span id="num-h">0</span></pre>
           <pre class="left-border"><span>&Omega;</span></pre>
@@ -139,31 +140,41 @@
           <p>v</p><pre class="left-border"><span id="num-vj">0</span></pre>
           <pre class="left-border"><span id="num-vq">0</span></pre>
           <pre class="left-border"><span id="num-vv">0</span></pre>
-          <pre class="left-border"><span>Q</span></pre>
-          <pre><span id="num-Q">0</span></pre>
+          <pre class="left-border"><span>vcs</span></pre>
+          <pre><span id="num-vcs">0.000</span></pre>
           <pre class="left-border"><span>&omega;</span></pre>
           <pre><span id="num-om">0</span></pre>
           <p>&nbsp;</p><pre class="left-border"><span id="num-vk">0</span></pre>
-          <pre class="left-border"><span id="num-vw1">0</span></pre>
-          <pre class="left-border"><span id="num-vw2">0</span></pre>
-          <pre class="left-border"><span>&nbsp;</span></pre>
-          <pre><span>&nbsp;</span></pre>
-          <pre class="left-border"><span>&nbsp;</span></pre>
-          <pre><span>&nbsp;</span></pre>
+          <pre class="left-border"><span>0.000</span></pre>
+          <pre class="left-border"><span>0.000</span></pre>
+          <pre class="left-border"><span>vesc</span></pre>
+          <pre><span id="num-vesc">0.000</span></pre>
+          <pre class="left-border"><span>P</span></pre>
+          <pre><span id="num-p">0.000</span></pre>
+
+          <p>&nbsp;</p><pre class="left-border"><span id="blah1">&nbsp;</span></pre>
+          <pre class="left-border"><span id="blah2">&nbsp;</span></pre>
+          <pre class="left-border"><span id="blah3">&nbsp;</span></pre>
+          <pre class="left-border"><span>Q</span></pre>
+          <pre><span id="num-Q">0.000</span></pre>
+          <pre class="left-border"><span>blah</span></pre>
+          <pre><span>blah</span></pre>
+
+
           <p class="span4 top-border">DCM PQW->IJK</p>
-          <p class="span4 top-border left-border">DCM UVW->PQW</p>
+          <p class="span4 top-border left-border">DCM UVW->PQW</p><!-- matrix inverse is displayed -->
           <p></p><pre class="left-border"><span id="dcm11-pqw-to-ijk">0</span></pre>
           <pre><span id="dcm12-pqw-to-ijk">0</span></pre><pre><span id="dcm13-pqw-to-ijk">0</span></pre>
-          <p class="left-border"></p><pre><span id="dcm11-uvw-to-pqw">0</span></pre>
-          <pre><span id="dcm12-uvw-to-pqw">0</span></pre><pre><span id="dcm13-uvw-to-pqw">0</span></pre>
+          <p class="left-border"></p><pre><span id="dcm11-pqw-to-uvw">0</span></pre>
+          <pre><span id="dcm21-pqw-to-uvw">0</span></pre><pre><span id="dcm31-pqw-to-uvw">0</span></pre>
           <p></p><pre class="left-border"><span id="dcm21-pqw-to-ijk">0</span></pre>
           <pre><span id="dcm22-pqw-to-ijk">0</span></pre><pre><span id="dcm23-pqw-to-ijk">0</span></pre>
-          <p class="left-border"></p><pre><span id="dcm21-uvw-to-pqw">0</span></pre>
-          <pre><span id="dcm22-uvw-to-pqw">0</span></pre><pre><span id="dcm23-uvw-to-pqw">0</span></pre>
+          <p class="left-border"></p><pre><span id="dcm12-pqw-to-uvw">0</span></pre>
+          <pre><span id="dcm22-pqw-to-uvw">0</span></pre><pre><span id="dcm32-pqw-to-uvw">0</span></pre>
           <p></p><pre class="left-border"><span id="dcm31-pqw-to-ijk">0</span></pre>
           <pre><span id="dcm32-pqw-to-ijk">0</span></pre><pre><span id="dcm33-pqw-to-ijk">0</span></pre>
-          <p class="left-border"></p><pre><span id="dcm31-uvw-to-pqw">0</span></pre>
-          <pre><span id="dcm32-uvw-to-pqw">0</span></pre><pre><span id="dcm33-uvw-to-pqw">0</span></pre>
+          <p class="left-border"></p><pre><span id="dcm13-pqw-to-uvw">0</span></pre>
+          <pre><span id="dcm23-pqw-to-uvw">0</span></pre><pre><span id="dcm33-pqw-to-uvw">0</span></pre>
         </div>
         <div class="btn-group btn-group-fixed" id="play-reset-buttons-elements">
           <button id="reset-btn" class="btn btn-with-icon">
@@ -194,6 +205,10 @@
         <div class="elements" id="general-prefs-elements">
           <p class="center-grid-item span4">central body transparency</p>
           <input class="slider span4" type="range" min="0" max="100" value="100" id="central-body-transparency-slider">
+          <div class="grid-item span4 checkbox center-grid-item">
+            <input type="checkbox" id="show-out-of-plane" name="show-out-of-plane-checkbox" value="yes">
+            <label for="show-out-of-plane">show out of plane (W) vectors</label>
+          </div>
         </div>
         <div class="elements" id="inertial-vectors-elements">
           <select id="inertial-vectors-menu" class="menu span4" name="inertial-vectors-menu">

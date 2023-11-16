@@ -52,6 +52,7 @@ const defaultTimeScale = 1;
 const defaultTimeScaleMenuChoice = 'sec-equals-1sec';
 
 const defaultCentralBodyTransparency = 0;//0=completely opaque, 100=completely transparent
+const defaultShowOutOfPlaneVectors = true;
 
 //aerovisualizerData is modified and saved to local storage when 
 // values and preferences are changed and is retrieved from local 
@@ -75,7 +76,8 @@ let aerovisualizerData = [
   {name:'orbitFixedVectorScale', value:defaultOrbitFixedVectorScale},
   {name:'orbitingBodyVectorScale', value:defaultOrbitingBodyVectorScale},
   {name:'timeScaleMenuChoice', value:defaultTimeScaleMenuChoice},
-  {name:'centralBodyTransparency', value:defaultCentralBodyTransparency}
+  {name:'centralBodyTransparency', value:defaultCentralBodyTransparency},
+  {name:'showOutOfPlaneVectors', value:defaultShowOutOfPlaneVectors}
 ];
 
 let centralBody = defaultCentralBody;
@@ -93,7 +95,7 @@ let inc = incDegrees*piOver180;// inclination
 let aopDegrees = defaultAop;
 let aop = aopDegrees*piOver180;// argument of periapsis
 let dcmPQW2IJK = new THREE.Matrix3();
-let dcmUVW2PQW = new THREE.Matrix3();
+let dcmPQW2UVW = new THREE.Matrix3();
 let nuDegrees = defaultNu;
 let nu = nuDegrees*piOver180;// true anomaly
 let eccentricAnomaly;
@@ -156,18 +158,25 @@ let displayTimeScale = defaultTimeScale;
 let timeScaleMenuChoice = defaultTimeScaleMenuChoice;
 
 let centralBodyTransparency = defaultCentralBodyTransparency;
+let showOutOfPlaneVectors = defaultShowOutOfPlaneVectors;
 
 let rVector = new THREE.Vector3(1, 1, 1);
 let rPQW = new THREE.Vector3(1, 1, 1);
 let rIJK = new THREE.Vector3(1, 1, 1);
+let rUVW = new THREE.Vector3(1, 1, 1);
 let vVector = new THREE.Vector3(1, 1, 1);
 let vPQW = new THREE.Vector3(1, 1, 1);
 let vIJK = new THREE.Vector3(1, 1, 1);
+let vUVW = new THREE.Vector3(1, 1, 1);
+
 let p = a*(1 - e*e);//parameter (semi-latus rectum)
 let sqrtMuOverP = Math.sqrt(muCanonical/p);//needed for computing velocity
 let delta = defaultDelta;//turning angle for hyperbolic orbits
 let rp = Number(a*(1-e));//r vector magnitude at periapse
 let ra = Number(a*(1+e));//r vector magnitude at apoapse
+let specificEnergy = -muCanonical/(2*a);
+let vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));//v vector magnitude at periapse
+let h = rp*vp;
 periapseTooSmall = rp < cbRadius ? true : false;
 let periapseLocked = false;
 let apoapseLocked = false;
@@ -262,26 +271,25 @@ const numVJ = document.getElementById('num-vj');
 const numVK = document.getElementById('num-vk');
 const numRP = document.getElementById('num-rp');
 const numRQ = document.getElementById('num-rq');
-const numRW1 = document.getElementById('num-rw1');
 const numVP = document.getElementById('num-vp');
 const numVQ = document.getElementById('num-vq');
-const numVW1 = document.getElementById('num-vw1');
 const numRU = document.getElementById('num-ru');
 const numRV = document.getElementById('num-rv');
-const numRW2 = document.getElementById('num-rw2');
 const numVU = document.getElementById('num-vu');
 const numVV = document.getElementById('num-vv');
-const numVVW2 = document.getElementById('num-vw2');
 const numNu = document.getElementById('num-nu');
 const numT = document.getElementById('num-t');
 const numH = document.getElementById('num-h');
 const numEnergy = document.getElementById('num-E');
+const numVcs = document.getElementById('num-vcs');
+const numVesc = document.getElementById('num-vesc');
 const numQ = document.getElementById('num-Q');
 const numA = document.getElementById('num-a');
 const numE = document.getElementById('num-e');
 const numOm = document.getElementById('num-Om');
 const numI = document.getElementById('num-i');
 const numom = document.getElementById('num-om');
+const numP = document.getElementById('num-p');
 
 const dcm11pqw2ijk = document.getElementById('dcm11-pqw-to-ijk');
 const dcm12pqw2ijk = document.getElementById('dcm12-pqw-to-ijk');
@@ -292,20 +300,21 @@ const dcm23pqw2ijk = document.getElementById('dcm23-pqw-to-ijk');
 const dcm31pqw2ijk = document.getElementById('dcm31-pqw-to-ijk');
 const dcm32pqw2ijk = document.getElementById('dcm32-pqw-to-ijk');
 const dcm33pqw2ijk = document.getElementById('dcm33-pqw-to-ijk');
-const dcm11uvw2pqw = document.getElementById('dcm11-uvw-to-pqw');
-const dcm12uvw2pqw = document.getElementById('dcm12-uvw-to-pqw');
-const dcm13uvw2pqw = document.getElementById('dcm13-uvw-to-pqw');
-const dcm21uvw2pqw = document.getElementById('dcm21-uvw-to-pqw');
-const dcm22uvw2pqw = document.getElementById('dcm22-uvw-to-pqw');
-const dcm23uvw2pqw = document.getElementById('dcm23-uvw-to-pqw');
-const dcm31uvw2pqw = document.getElementById('dcm31-uvw-to-pqw');
-const dcm32uvw2pqw = document.getElementById('dcm32-uvw-to-pqw');
-const dcm33uvw2pqw = document.getElementById('dcm33-uvw-to-pqw');
+const dcm11pqw2uvw = document.getElementById('dcm11-pqw-to-uvw');
+const dcm12pqw2uvw = document.getElementById('dcm12-pqw-to-uvw');
+const dcm13pqw2uvw = document.getElementById('dcm13-pqw-to-uvw');
+const dcm21pqw2uvw = document.getElementById('dcm21-pqw-to-uvw');
+const dcm22pqw2uvw = document.getElementById('dcm22-pqw-to-uvw');
+const dcm23pqw2uvw = document.getElementById('dcm23-pqw-to-uvw');
+const dcm31pqw2uvw = document.getElementById('dcm31-pqw-to-uvw');
+const dcm32pqw2uvw = document.getElementById('dcm32-pqw-to-uvw');
+const dcm33pqw2uvw = document.getElementById('dcm33-pqw-to-uvw');
 
 const mainPrefsMenu = document.getElementById('main-prefs-menu');
 mainPrefsMenu.value = 'general-preferences';
 
 const centralBodyTransparencySlider = document.getElementById('central-body-transparency-slider');
+const showOutOfPlaneVectorsCheckbox = document.getElementById('show-out-of-plane');
 
 const inertialVectorsMenu = document.getElementById('inertial-vectors-menu');
 inertialVectorsMenu.value = inertialVectorsChoice;
@@ -509,8 +518,8 @@ const replaceAerovisualizerData = function(name, value){
 const saveToLocalStorage = function(){
   localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
 }
-// localStorage.clear();//temp
-// saveToLocalStorage();//temp blah
+localStorage.clear();//temp
+saveToLocalStorage();//temp blah
 // location.reload();//temp
 
 const getFromLocalStorage = function(){
@@ -519,22 +528,9 @@ const getFromLocalStorage = function(){
 }
 
 const displayNumerical = function(){
-  numRI.innerHTML = 'x';
-  numRJ.innerHTML = 'x';
-  numRK.innerHTML = 'x';
-  numVI.innerHTML = 'x';
-  numVJ.innerHTML = 'x';
-  numVK.innerHTML = 'x';
-  numRW1.innerHTML = '0.000';
-  numVW1.innerHTML = '0.000';
-  numRU.innerHTML = 'x';
-  numRV.innerHTML = 'x';
-  numRW2.innerHTML = 'x';
-  numVU.innerHTML = 'x';
-  numVV.innerHTML = 'x';
-  numVVW2.innerHTML = 'x';
-
   if (meanAnomaly !== null){
+    computePQW2IJKRotation();
+    computePQW2UVWRotation();
     numNu.innerHTML = `${Number(nuDegrees).toFixed(2).toString()}`;
 
     switch (timeScaleMenuChoice){
@@ -547,6 +543,9 @@ const displayNumerical = function(){
       case 'sec-equals-5minutes':
         numT.innerHTML = `${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()}`;
         break;
+      case 'sec-equals-15minutes':
+        numT.innerHTML = `${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()}`;
+        break;
       case 'sec-equals-1hour':
         numT.innerHTML = `${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(2).toString()}`;
         break;
@@ -557,15 +556,15 @@ const displayNumerical = function(){
   }else{
     numT.innerHTML = 'INF';
   }
-
-  numH.innerHTML = 'x';
-  numEnergy.innerHTML = 'x';
-  numQ.innerHTML = 'x';
+  
+  numH.innerHTML = `${Number(h).toFixed(4).toString()}`;
+  numEnergy.innerHTML = `${Number(specificEnergy).toFixed(4).toString()}`;
   numA.innerHTML = `${Number(a).toFixed(2).toString()}`;
   numE.innerHTML = `${Number(e).toFixed(3).toString()}`;
   numOm.innerHTML = lanDegrees;
   numI.innerHTML = incDegrees;
   numom.innerHTML = aopDegrees;
+  numP.innerHTML = `${Number(p).toFixed(2).toString()}`;
 
   dcm11pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[0]).toFixed(4).toString()}`;
   dcm12pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[3]).toFixed(4).toString()}`;
@@ -576,15 +575,48 @@ const displayNumerical = function(){
   dcm31pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[2]).toFixed(4).toString()}`;
   dcm32pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[5]).toFixed(4).toString()}`;
   dcm33pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[8]).toFixed(4).toString()}`;
-  dcm11uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[0]).toFixed(4).toString()}`;
-  dcm12uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[3]).toFixed(4).toString()}`;
-  dcm13uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[6]).toFixed(4).toString()}`;
-  dcm21uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[1]).toFixed(4).toString()}`;
-  dcm22uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[4]).toFixed(4).toString()}`;
-  dcm23uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[7]).toFixed(4).toString()}`;
-  dcm31uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[2]).toFixed(4).toString()}`;
-  dcm32uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[5]).toFixed(4).toString()}`;
-  dcm33uvw2pqw.innerHTML = `${Number(dcmUVW2PQW.elements[8]).toFixed(4).toString()}`;
+  dcm11pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[0]).toFixed(4).toString()}`;
+  dcm12pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[3]).toFixed(4).toString()}`;
+  dcm13pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[6]).toFixed(4).toString()}`;
+  dcm21pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[1]).toFixed(4).toString()}`;
+  dcm22pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[4]).toFixed(4).toString()}`;
+  dcm23pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[7]).toFixed(4).toString()}`;
+  dcm31pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[2]).toFixed(4).toString()}`;
+  dcm32pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[5]).toFixed(4).toString()}`;
+  dcm33pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[8]).toFixed(4).toString()}`;
+
+  rPQW.set(px, py, 0);
+  rIJK.copy(rPQW);
+  rUVW.copy(rPQW);
+  rIJK.applyMatrix3(dcmPQW2IJK);
+  rUVW.applyMatrix3(dcmPQW2UVW);
+  vPQW.set(vx, vy, 0);
+  vIJK.copy(vPQW);
+  vUVW.copy(vPQW);
+  vIJK.applyMatrix3(dcmPQW2IJK);
+  vUVW.applyMatrix3(dcmPQW2UVW);
+  numRP.innerHTML = `${Number(px).toFixed(3).toString()}`;
+  numRQ.innerHTML = `${Number(py).toFixed(3).toString()}`;
+  numVP.innerHTML = `${Number(vx).toFixed(3).toString()}`;
+  numVQ.innerHTML = `${Number(vy).toFixed(3).toString()}`;
+  numRI.innerHTML = `${Number(rIJK.x).toFixed(3).toString()}`;
+  numRJ.innerHTML = `${Number(rIJK.y).toFixed(3).toString()}`;
+  numRK.innerHTML = `${Number(rIJK.z).toFixed(3).toString()}`;
+  numVI.innerHTML = `${Number(vIJK.x).toFixed(3).toString()}`;
+  numVJ.innerHTML = `${Number(vIJK.y).toFixed(3).toString()}`;
+  numVK.innerHTML = `${Number(vIJK.z).toFixed(3).toString()}`;
+  numRU.innerHTML = `${Number(rUVW.x).toFixed(3).toString()}`;
+  numRV.innerHTML = '0.000';
+  numVU.innerHTML = `${Number(vUVW.x).toFixed(3).toString()}`;
+  numVV.innerHTML = `${Number(vUVW.y).toFixed(3).toString()}`;
+
+  const rcs = rPQW.length();
+  const vcs = Math.sqrt(muCanonical/rcs);
+  numVcs.innerHTML = `${Number(vcs).toFixed(4).toString()}`;
+  const vesc = Math.SQRT2*vcs;
+  numVesc.innerHTML = `${Number(vesc).toFixed(4).toString()}`;
+  const vsq = vPQW.lengthSq();
+  numQ.innerHTML = `${Number(vsq/vcs/vcs).toFixed(4).toString()}`;
 }
 
 const handleMainButtons = function(button){
@@ -734,6 +766,7 @@ const doASliderOnInput = function(value){
   needToComputeUniversal = true;
   meanMotion = Math.sqrt(1/(a*a*a));
   // a = value/aSliderRange*aRange + aMin;
+  specificEnergy = -muCanonical/(2*a);
   aDisplay.innerHTML = `a: ${Number(a).toFixed(2).toString()}`;
   computeP();
   omt.shapeOrbitCurve(a, e);
@@ -817,6 +850,9 @@ aSlider.onpointerup = function(){
 
   rp = a*(1-e);
   ra = a*(1+e);
+  vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
+  h = rp*vp;
+
   handlePeriapseCheck();
   sliderEcanChange = false;
   doNuSliderOnInput(nuDegrees);
@@ -859,6 +895,8 @@ eSlider.onpointerup = function(){
 
   rp = a*(1-e);
   ra = a*(1+e);
+  vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
+  h = rp*vp;
   handlePeriapseCheck();
   sliderAcanChange = false;
   doNuSliderOnInput(nuDegrees);
@@ -959,12 +997,12 @@ const computePQW2IJKRotation = function(){
   omt.setQuatFromDCMElements(r11, r12, r13, r21, r22, r23, r31, r32, r33);
 }
 
-const computeUVW2PQWRotation = function(){
+const computePQW2UVWRotation = function(){
   // compute the direction cosine matrix from the UVW frame
   // to the perifocal frame
   const cnu = Math.cos(nu);
   const snu = Math.sin(nu);
-  dcmUVW2PQW.set(cnu, -snu, 0, snu, cnu, 0, 0, 0, 1);// opposite snu?
+  dcmPQW2UVW.set(cnu, snu, 0, -snu, cnu, 0, 0, 0, 1);
 }
 
 const handleOrientationOnInput = function(opt, setValuesOnly = false){
@@ -1144,7 +1182,7 @@ const computeTimeAfterPeriapse = function(){
 const doNuAndTimeDisplay = function(){
   if (meanAnomaly !== null){
     nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees).toFixed(2).toString()}`;
-    computeUVW2PQWRotation();
+    computePQW2UVWRotation();
 
     switch (timeScaleMenuChoice){
       case 'sec-equals-1sec':
@@ -1154,6 +1192,9 @@ const doNuAndTimeDisplay = function(){
         timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
         break;
       case 'sec-equals-5minutes':
+        timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
+        break;
+      case 'sec-equals-15minutes':
         timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
         break;
       case 'sec-equals-1hour':
@@ -1441,6 +1482,7 @@ const handleMuChange = function(){
   radiusDisplay.innerHTML = `${theCB.CDU} km`;//canonical distance unit (radius)
   vescDisplay.innerHTML = `${theCB.vesc} km/s`;//escape velocity
   omt.setMuIndex(cbIndex);
+  omt.shapeOrbitCurve(a, e);
 }
 
 muMenu.addEventListener('change', () => {
@@ -1465,6 +1507,10 @@ const doTimeScaleMenu = function(){
       break;
     case 'sec-equals-5minutes':
       timeScale = 300;
+      displayTimeScale = 60;
+      break;
+    case 'sec-equals-15minutes':
+      timeScale = 900;
       displayTimeScale = 60;
       break;
     case 'sec-equals-1hour':
@@ -1718,6 +1764,19 @@ centralBodyTransparencySlider.onpointerup = function(){
   saveToLocalStorage();
 }
 
+const doWVectors = function(){
+  showOutOfPlaneVectors = showOutOfPlaneVectorsCheckbox.checked;
+  omt.showWVectors(showOutOfPlaneVectors);
+  renderer.clear();
+  renderer.render(scene, camera);
+}
+
+showOutOfPlaneVectorsCheckbox.addEventListener('change', () => {
+  doWVectors();
+  replaceAerovisualizerData('showOutOfPlaneVectors',showOutOfPlaneVectors);
+  saveToLocalStorage();
+});
+
 toggleConicSectionButton.addEventListener('click', () => {
   conicSection = conicSection === 'ellipse' ? 'hyperbola' : 'ellipse';
 
@@ -1733,6 +1792,8 @@ toggleConicSectionButton.addEventListener('click', () => {
   doASliderOnInput(+aSlider.value);
   rp = Number(a*(1-e));
   ra = Number(a*(1+e));
+  vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
+  h = rp*vp;
   doNuSliderOnInput(nuDegrees);
   handlePeriapseCheck();
   replaceAerovisualizerData('conic-section',conicSection);
@@ -1806,9 +1867,7 @@ const loadBackground = function(){
     let stars = new URL('../../static/img/stars.jpg', import.meta.url);
     // background = new THREE.CubeTextureLoader().load(['./img/stars.jpg','./img/stars.jpg','./img/stars.jpg','./img/stars.jpg','./img/stars.jpg','./img/stars.jpg']);
     background = new THREE.CubeTextureLoader().load([stars.pathname,stars.pathname,stars.pathname,stars.pathname,stars.pathname,stars.pathname]);
-
     scene.background = background;
-    // const tl = new THREE.TextureLoader();
 }
 
 const initTHREE = function() {
@@ -1909,6 +1968,9 @@ const initialize = function(data, camera){
           case 'centralBodyTransparency':
             centralBodyTransparency  = o.value;
             break;
+          case 'showOutOfPlaneVectors':
+            showOutOfPlaneVectors  = o.value;
+            break;
       }
     }
   }
@@ -1926,6 +1988,8 @@ const initialize = function(data, camera){
   doASliderOnInput(+aSl);
   rp = Number(a*(1-e));
   ra = Number(a*(1+e));
+  vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
+  h = rp*vp;
   handlePeriapseCheck();
 
   lanSlider.value = lanDegrees;
@@ -1997,9 +2061,20 @@ const completeInitialization = function(continueAnimation = true) {
     doVectorScaleSliderOnInput('inertial',inertialVectorScale);
     doVectorScaleSliderOnInput('orbit-fixed',orbitFixedVectorScale);
     doVectorScaleSliderOnInput('orbitingBody',orbitingBodyVectorScale);
+
+    px = x0 + dpxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
+    py = y0 + dpydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
+    vx = vx0 + dvxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
+    vy = vy0 + dvydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
+    displayNumerical();
+
     omt.setInertialVectorScale(inertialVectorScale);
     omt.setOrbitFixedVectorScale(orbitFixedVectorScale);
     omt.setOrbitingBodyVectorScale(orbitingBodyVectorScale);
+
+    showOutOfPlaneVectorsCheckbox.checked = showOutOfPlaneVectors;
+    doWVectors();
+
     omt.needsRefresh = true;
   }
 };
@@ -2149,25 +2224,7 @@ const animate = function(continueAnimation = true) {
     doNuAndTimeDisplay();
 
     if (numericalDisplayIsOccurring){
-      computePQW2IJKRotation();
-      computeUVW2PQWRotation();
       displayNumerical();
-      rPQW.set(px, py, 0);
-      rIJK.copy(rPQW);
-      rIJK.applyMatrix3(dcmPQW2IJK);
-      vPQW.set(vx, vy, 0);
-      vIJK.copy(vPQW);
-      vIJK.applyMatrix3(dcmPQW2IJK);
-      numRP.innerHTML = `${Number(px).toFixed(3).toString()}`;
-      numRQ.innerHTML = `${Number(py).toFixed(3).toString()}`;
-      numVP.innerHTML = `${Number(vx).toFixed(3).toString()}`;
-      numVQ.innerHTML = `${Number(vy).toFixed(3).toString()}`;
-      numRI.innerHTML = `${Number(rIJK.x).toFixed(3).toString()}`;
-      numRJ.innerHTML = `${Number(rIJK.y).toFixed(3).toString()}`;
-      numRK.innerHTML = `${Number(rIJK.z).toFixed(3).toString()}`;
-      numVI.innerHTML = `${Number(vIJK.x).toFixed(3).toString()}`;
-      numVJ.innerHTML = `${Number(vIJK.y).toFixed(3).toString()}`;
-      numVK.innerHTML = `${Number(vIJK.z).toFixed(3).toString()}`;
     }
 
     omt.needsRefresh = true;

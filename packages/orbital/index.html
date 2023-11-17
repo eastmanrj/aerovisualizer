@@ -43,9 +43,10 @@
           <button id="info-btn" class="btn center-grid-item">&nbsp;?&nbsp;</button>
         </div>
         <div class="elements" id="central-body-elements">
-          <p class="span2">Central Body: </p>
-          <select id="central-body-menu" class="menu span2" name="central-body-menu">
-            <option value="sun">sun</option>
+          <p class="span4">Central Body: </p>
+          <select id="central-body-menu" class="menu span4" name="central-body-menu">
+            <option value="sun1">sun (CDU = sun radius)</option>
+            <option value="sun2">sun (CDU = 1 AU)</option>
             <option value="Mercury">Mercury</option>
             <option value="Venus">Venus</option>
             <option value="Earth">Earth</option>
@@ -104,8 +105,9 @@
             <option value="sec-equals-1day">1&nbsp;second&nbsp;=&nbsp;1&nbsp;day</option>
           </select>
         </div>
-        <div class="elements numerical" id="numerical-elements">
-          <p class="span8 center-grid-item">Aerovisualizer - Orbital Mechanics</p>
+        <div class="elements numerical1" id="numerical-elements1">
+          <p class="span4 center-grid-item">Aerovisualizer - Orbital Mechanics</p>
+          <button id="toggle-numerical-btn1" class="btn no-uppercase span4 center-grid-item">data 1</button>
           <p class="top-border"></p><p class="top-border left-border">IJK</p><p class="top-border left-border">PQW</p>
           <p class="top-border left-border">UVW</p><p class="span4 top-border left-border">data</p>
           <p>&nbsp;</p><pre class="left-border"><span id="num-ri">0</span></pre>
@@ -133,7 +135,7 @@
           <pre class="top-border left-border"><span id="num-vi">0</span></pre>
           <pre class="top-border left-border"><span id="num-vp">0</span></pre>
           <pre class="top-border left-border"><span id="num-vu">0</span></pre>
-          <pre class="left-border"><span>E</span></pre>
+          <pre class="left-border"><span>energy</span></pre>
           <pre><span id="num-E">0</span></pre>
           <pre class="left-border"><span>i</span></pre>
           <pre><span id="num-i">0</span></pre>
@@ -159,8 +161,10 @@
           <pre><span id="num-Q">0.000</span></pre>
           <pre class="left-border"><span>blah</span></pre>
           <pre><span>blah</span></pre>
-
-
+        </div>
+        <div class="elements numerical2" id="numerical-elements2">
+          <p class="span4 center-grid-item">Aerovisualizer - Orbital Mechanics</p>
+          <button id="toggle-numerical-btn2" class="btn no-uppercase span4 center-grid-item">data 2</button>
           <p class="span4 top-border">DCM PQW->IJK</p>
           <p class="span4 top-border left-border">DCM UVW->PQW</p><!-- matrix inverse is displayed -->
           <p></p><pre class="left-border"><span id="dcm11-pqw-to-ijk">0</span></pre>
@@ -251,7 +255,8 @@
           <input class="slider span4" type="range" min="0" max="100" value="50" id="orbit-fixed-vector-scale-slider">
         </div>
         <div class="elements" id="orbiting-body-vectors-elements">
-          <select id="orbiting-body-vectors-menu" class="menu span4" name="orbiting-body-vectors-menu">
+          <p class="center-grid-item span2">vector options:</p>
+          <select id="orbiting-body-vectors-menu" class="menu span2" name="orbiting-body-vectors-menu">
             <option value="no-orbiting-body-vectors">no vectors</option>
             <option value="r-only">r only</option>
             <option value="v-only">v only</option>
@@ -261,7 +266,28 @@
             <option value="v-and-uvw">v and UVW frame</option>
             <option value="r-v-and-uvw">r, v, and UVW frame</option>
           </select>
-          <select id="orbiting-body-vector-color-menu" class="menu" name="orbiting-body-vector-color-menu">
+          <p class="center-grid-item span2">UVW frame color:</p>
+          <select id="uvw-vector-color-menu" class="menu span2" name="uvw-vector-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+          <p class="center-grid-item span2">r vector color:</p>
+          <select id="r-vector-color-menu" class="menu span2" name="r-vector-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+          <p class="center-grid-item span2">v vector color:</p>
+          <select id="v-vector-color-menu" class="menu span2" name="v-vector-color-menu">
             <option value="select-a-color">select a color</option>
             <option value="red">red</option>
             <option value="yellow">yellow</option>

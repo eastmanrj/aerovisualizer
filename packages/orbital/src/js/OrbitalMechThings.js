@@ -115,7 +115,7 @@ class OrbitalMechThings {
     this._hVectorArrowheadMesh = null;
     this._eVectorArrowheadMesh = null;
     
-    this._planetMeshArray = new Array(10).fill(null);
+    this._planetMeshArray = new Array(11).fill(null);
     this._planetOpacity = 1;
     this._planetMeshArrayIndex = 0;
 
@@ -146,7 +146,9 @@ class OrbitalMechThings {
 
     this._orbitFixedVectorColor = 0xffa500;//orange
     this._inertialVectorColor = 0x0000ff;//blue
-    this._orbitingBodyVectorColor = 0xffff00;//yellow
+    this._UVWVectorColor = 0xffff00;//yellow
+    this._rVectorColor = 0xffff00;//yellow
+    this._vVectorColor = 0x00ff00;//green
 
     this._constructOrbitCurves();
     this._constructVectors();
@@ -511,18 +513,8 @@ class OrbitalMechThings {
         this._wVectorLabel.material[1].color.set(theColor);
         break;
 
-      case 'orbitingBodyVectors':
-        this._orbitingBodyVectorColor = theColor;
-
-        this._rVectorShaftMesh.material.color.set(theColor);
-        this._rVectorArrowheadMesh.material.color.set(theColor);
-        this._rVectorLabel.material[0].color.set(theColor);
-        this._rVectorLabel.material[1].color.set(theColor);
-
-        this._vVectorShaftMesh.material.color.set(theColor);
-        this._vVectorArrowheadMesh.material.color.set(theColor);
-        this._vVectorLabel.material[0].color.set(theColor);
-        this._vVectorLabel.material[1].color.set(theColor);
+      case 'uvwVectors':
+        this._UVWVectorColor = theColor;
 
         this._UVectorShaftMesh.material.color.set(theColor);
         this._VVectorShaftMesh.material.color.set(theColor);
@@ -537,6 +529,23 @@ class OrbitalMechThings {
         this._WVectorLabel.material[0].color.set(theColor);
         this._WVectorLabel.material[1].color.set(theColor);
         break;
+
+      case 'rVector':
+        this._rVectorColor = theColor;
+
+        this._rVectorShaftMesh.material.color.set(theColor);
+        this._rVectorArrowheadMesh.material.color.set(theColor);
+        this._rVectorLabel.material[0].color.set(theColor);
+        this._rVectorLabel.material[1].color.set(theColor);
+        break;
+
+      case 'vVector':
+        this._vVectorColor = theColor;
+
+        this._vVectorShaftMesh.material.color.set(theColor);
+        this._vVectorArrowheadMesh.material.color.set(theColor);
+        this._vVectorLabel.material[0].color.set(theColor);
+        this._vVectorLabel.material[1].color.set(theColor);
     }
   }
 
@@ -680,12 +689,12 @@ class OrbitalMechThings {
       shaftRadius, length*fractionForShaft, 32, 1, true);
     const arrowheadGeometry = new THREE.ConeGeometry(3*shaftRadius, 
       length*(1-fractionForShaft), 32, 1, true);
-    const mats = new Array(5).fill(null);
+    const mats = new Array(7).fill(null);
 
     // the last 2 colors are for the W vectors of PQW and UVW
     const colors = [this._inertialVectorColor, this._orbitFixedVectorColor,
-      this._orbitingBodyVectorColor, this._orbitFixedVectorColor, 
-      this._orbitingBodyVectorColor];
+      this._UVWVectorColor, this._rVectorColor, this._vVectorColor,
+      this._orbitFixedVectorColor, this._UVWVectorColor];
 
     for (let i=0; i<mats.length; i++){
       mats[i] = new THREE.MeshBasicMaterial({
@@ -745,22 +754,22 @@ class OrbitalMechThings {
     this._qVectorArrowheadMesh.matrixAutoUpdate = false;
 
     // requires a different material from P and Q if we want to allow separate transparency
-    this._wVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[3]);
+    this._wVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[5]);
     this._wVectorShaftMesh.matrixAutoUpdate = false;
-    this._wVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[3]);
+    this._wVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[5]);
     this._wVectorArrowheadMesh.matrixAutoUpdate = false;
 
     // orbiting body vectors
     // radial vector to orbiting body
-    this._rVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[2]);
+    this._rVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[3]);
     this._rVectorShaftMesh.matrixAutoUpdate = false;
-    this._rVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[2]);
+    this._rVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[3]);
     this._rVectorArrowheadMesh.matrixAutoUpdate = false;
 
     // velocity vector of orbiting body
-    this._vVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[2]);
+    this._vVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[4]);
     this._vVectorShaftMesh.matrixAutoUpdate = false;
-    this._vVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[2]);
+    this._vVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[4]);
     this._vVectorArrowheadMesh.matrixAutoUpdate = false;
 
     // UVW frame
@@ -775,9 +784,9 @@ class OrbitalMechThings {
     this._VVectorArrowheadMesh.matrixAutoUpdate = false;
     
     // requires a different material from U and V if we want to allow separate transparency
-    this._WVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[4]);
+    this._WVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[6]);
     this._WVectorShaftMesh.matrixAutoUpdate = false;
-    this._WVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[4]);
+    this._WVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[6]);
     this._WVectorArrowheadMesh.matrixAutoUpdate = false;
   }
 
@@ -837,21 +846,31 @@ class OrbitalMechThings {
       ];
 
       let material3 = [
-        new THREE.MeshBasicMaterial({color: this._orbitingBodyVectorColor, transparent: true, opacity: this._vectorOpacity}), // front
-        new THREE.MeshBasicMaterial({color: this._orbitingBodyVectorColor, transparent: true, opacity: this._vectorOpacity}) // side
+        new THREE.MeshBasicMaterial({color: this._UVWVectorColor, transparent: true, opacity: this._vectorOpacity}), // front
+        new THREE.MeshBasicMaterial({color: this._UVWVectorColor, transparent: true, opacity: this._vectorOpacity}) // side
+      ];
+
+      let material4 = [
+        new THREE.MeshBasicMaterial({color: this._rVectorColor, transparent: true, opacity: this._vectorOpacity}), // front
+        new THREE.MeshBasicMaterial({color: this._rVectorColor, transparent: true, opacity: this._vectorOpacity}) // side
+      ];
+
+      let material5 = [
+        new THREE.MeshBasicMaterial({color: this._vVectorColor, transparent: true, opacity: this._vectorOpacity}), // front
+        new THREE.MeshBasicMaterial({color: this._vVectorColor, transparent: true, opacity: this._vectorOpacity}) // side
       ];
 
       // material4 and material5 are for the W vectors of PQW and UVW
       // which must be distinguished from the others if we allow the
       // user to choose whether or not to display them
-      let material4 = [
+      let material6 = [
         new THREE.MeshBasicMaterial({color: this._orbitFixedVectorColor, transparent: true, opacity: this._vectorOpacity}), // front
         new THREE.MeshBasicMaterial({color: this._orbitFixedVectorColor, transparent: true, opacity: this._vectorOpacity}) // side
       ];
 
-      let material5 = [
-        new THREE.MeshBasicMaterial({color: this._orbitingBodyVectorColor, transparent: true, opacity: this._vectorOpacity}), // front
-        new THREE.MeshBasicMaterial({color: this._orbitingBodyVectorColor, transparent: true, opacity: this._vectorOpacity}) // side
+      let material7 = [
+        new THREE.MeshBasicMaterial({color: this._UVWVectorColor, transparent: true, opacity: this._vectorOpacity}), // front
+        new THREE.MeshBasicMaterial({color: this._UVWVectorColor, transparent: true, opacity: this._vectorOpacity}) // side
       ];
 
       for (let i=0; i<lettersArray.length; i++) {
@@ -894,15 +913,15 @@ class OrbitalMechThings {
             this._qVectorLabel.matrixAutoUpdate = false;
             break;
           case 7:
-            this._wVectorLabel = new THREE.Mesh(textGeo, material4);
+            this._wVectorLabel = new THREE.Mesh(textGeo, material6);
             this._wVectorLabel.matrixAutoUpdate = false;
             break;
           case 8:
-            this._rVectorLabel = new THREE.Mesh(textGeo, material3);
+            this._rVectorLabel = new THREE.Mesh(textGeo, material4);
             this._rVectorLabel.matrixAutoUpdate = false;
             break;
           case 9:
-            this._vVectorLabel = new THREE.Mesh(textGeo, material3);
+            this._vVectorLabel = new THREE.Mesh(textGeo, material5);
             this._vVectorLabel.matrixAutoUpdate = false;
             break;
           case 10:
@@ -914,7 +933,7 @@ class OrbitalMechThings {
             this._VVectorLabel.matrixAutoUpdate = false;
             break;
           case 12:
-            this._WVectorLabel  = new THREE.Mesh(textGeo, material5);
+            this._WVectorLabel  = new THREE.Mesh(textGeo, material7);
             this._WVectorLabel.matrixAutoUpdate = false;
             break;
         }
@@ -1168,9 +1187,9 @@ class OrbitalMechThings {
     texture = new THREE.TextureLoader().load(sun.pathname);
     material = new THREE.MeshPhongMaterial({map: texture});
     this._planetMeshArray[0] = new THREE.Mesh(geometry, material);
-    texture = new THREE.TextureLoader().load(moon.pathname);
-    material = new THREE.MeshPhongMaterial({map: texture});
-    this._planetMeshArray[1] = new THREE.Mesh(geometry, material);
+    //sun twice, once for CDU = sun radius, once for CDU = 1 AU,
+    //although for the second one the sun is actually too small to see
+    this._planetMeshArray[1] = this._planetMeshArray[0];
     texture = new THREE.TextureLoader().load(mercury.pathname);
     material = new THREE.MeshPhongMaterial({map: texture});
     this._planetMeshArray[2] = new THREE.Mesh(geometry, material);
@@ -1180,23 +1199,26 @@ class OrbitalMechThings {
     texture = new THREE.TextureLoader().load(earth.pathname);
     material = new THREE.MeshPhongMaterial({map: texture});
     this._planetMeshArray[4] = new THREE.Mesh(geometry, material);
-    texture = new THREE.TextureLoader().load(mars.pathname);
+    texture = new THREE.TextureLoader().load(moon.pathname);
     material = new THREE.MeshPhongMaterial({map: texture});
     this._planetMeshArray[5] = new THREE.Mesh(geometry, material);
-    texture = new THREE.TextureLoader().load(jupiter.pathname);
+    texture = new THREE.TextureLoader().load(mars.pathname);
     material = new THREE.MeshPhongMaterial({map: texture});
     this._planetMeshArray[6] = new THREE.Mesh(geometry, material);
-    texture = new THREE.TextureLoader().load(saturn.pathname);
+    texture = new THREE.TextureLoader().load(jupiter.pathname);
     material = new THREE.MeshPhongMaterial({map: texture});
     this._planetMeshArray[7] = new THREE.Mesh(geometry, material);
-    texture = new THREE.TextureLoader().load(uranus.pathname);
+    texture = new THREE.TextureLoader().load(saturn.pathname);
     material = new THREE.MeshPhongMaterial({map: texture});
     this._planetMeshArray[8] = new THREE.Mesh(geometry, material);
-    texture = new THREE.TextureLoader().load(neptune.pathname);
+    texture = new THREE.TextureLoader().load(uranus.pathname);
     material = new THREE.MeshPhongMaterial({map: texture});
     this._planetMeshArray[9] = new THREE.Mesh(geometry, material);
+    texture = new THREE.TextureLoader().load(neptune.pathname);
+    material = new THREE.MeshPhongMaterial({map: texture});
+    this._planetMeshArray[10] = new THREE.Mesh(geometry, material);
 
-    for (let i=0; i<10; i++){
+    for (let i=0; i<this._planetMeshArray.length; i++){
       this._planetMeshArray[i].matrixAutoUpdate = false;
       this._planetMeshArray[i].material.opacity = this._planetOpacity;
       this._planetMeshArray[i].material.transparent = true;
@@ -1206,13 +1228,14 @@ class OrbitalMechThings {
     this._planetMeshArrayIndex = 0;
     this._scene.add(this._planetMeshArray[this._planetMeshArrayIndex]);
     //https://www.solarsystemscope.com/textures/
+    //nothing against Pluto, but the web site didn't have the texture!
   }
 
   setPlanetOpacity(opacity){  
     this.needsRefresh = true;
     this._planetOpacity = opacity;
   
-    for (let i=0; i<10; i++){
+    for (let i=0; i<this._planetMeshArray.length; i++){
       this._planetMeshArray[i].material.opacity = opacity;
     }
   }

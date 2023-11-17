@@ -42,7 +42,9 @@ const defaultOrbitingBodyVectorsChoice = 'r-and-v';
 
 const defaultInertialVectorColor = 'orange';
 const defaultOrbitFixedVectorColor = 'blue';
-const defaultOrbitingBodyVectorColor = 'yellow';
+const defaultUVWVectorColor = 'yellow';
+const defaultRVectorColor = 'yellow';
+const defaultVVectorColor = 'green';
 
 const defaultInertialVectorScale = 50;
 const defaultOrbitFixedVectorScale = 50;
@@ -71,7 +73,9 @@ let aerovisualizerData = [
   {name:'orbitingBodyVectorsChoice', value:defaultOrbitingBodyVectorsChoice},
   {name:'inertialVectorColor', value:defaultInertialVectorColor},
   {name:'orbitFixedVectorColor', value:defaultOrbitFixedVectorColor},
-  {name:'orbitingBodyVectorColor', value:defaultOrbitingBodyVectorColor},
+  {name:'uvwVectorColor', value:defaultUVWVectorColor},
+  {name:'rVectorColor', value:defaultRVectorColor},
+  {name:'vVectorColor', value:defaultVVectorColor},
   {name:'inertialVectorScale', value:defaultInertialVectorScale},
   {name:'orbitFixedVectorScale', value:defaultOrbitFixedVectorScale},
   {name:'orbitingBodyVectorScale', value:defaultOrbitingBodyVectorScale},
@@ -147,7 +151,9 @@ let orbitingBodyVectorsChoice = defaultOrbitingBodyVectorsChoice;
 
 let inertialVectorColor = defaultInertialVectorColor;
 let orbitFixedVectorColor = defaultOrbitFixedVectorColor;
-let orbitingBodyVectorColor = defaultOrbitingBodyVectorColor;
+let uvwVectorColor = defaultUVWVectorColor;
+let rVectorColor = defaultRVectorColor;
+let vVectorColor = defaultVVectorColor;
 
 let inertialVectorScale = defaultInertialVectorScale;
 let orbitFixedVectorScale = defaultOrbitFixedVectorScale;
@@ -248,7 +254,8 @@ const muElements = document.getElementById('central-body-elements');
 const aeElements = document.getElementById('a-e-elements');
 const orientationElements = document.getElementById('orientation-elements');
 const rvElements = document.getElementById('r-v-elements');
-const numericalElements = document.getElementById('numerical-elements');
+const numericalElements1 = document.getElementById('numerical-elements1');
+const numericalElements2 = document.getElementById('numerical-elements2');
 const prefsElements = document.getElementById('prefs-elements');
 const playResetButtonsElements = document.getElementById('play-reset-buttons-elements');
 
@@ -262,6 +269,9 @@ const radiusDisplay = document.getElementById('radius');
 const vescDisplay = document.getElementById('vesc');
 
 let numericalDisplayIsOccurring = false;
+let numericalDisplayOption = 1;
+const toggleNumericalDisplayButton1 = document.getElementById('toggle-numerical-btn1');
+const toggleNumericalDisplayButton2 = document.getElementById('toggle-numerical-btn2');
 
 const numRI = document.getElementById('num-ri');
 const numRJ = document.getElementById('num-rj');
@@ -327,8 +337,12 @@ const inertialVectorColorMenu = document.getElementById('inertial-vector-color-m
 inertialVectorColorMenu.value = inertialVectorColor;
 const orbitFixedVectorColorMenu = document.getElementById('orbit-fixed-vector-color-menu');
 orbitFixedVectorColorMenu.value = orbitFixedVectorColor;
-const orbitingBodyVectorColorMenu = document.getElementById('orbiting-body-vector-color-menu');
-orbitingBodyVectorColorMenu.value = orbitingBodyVectorColor;
+const uvwVectorColorMenu = document.getElementById('uvw-vector-color-menu');
+uvwVectorColorMenu.value = uvwVectorColor;
+const rVectorColorMenu = document.getElementById('r-vector-color-menu');
+rVectorColorMenu.value = rVectorColor;
+const vVectorColorMenu = document.getElementById('v-vector-color-menu');
+vVectorColorMenu.value = vVectorColor;
 
 const inertialVectorScaleSlider = document.getElementById('inertial-vector-scale-slider');
 inertialVectorScaleSlider.value = inertialVectorScale;
@@ -342,16 +356,10 @@ const inertialVectorsElements = document.getElementById('inertial-vectors-elemen
 const orbitFixedVectorsElements = document.getElementById('orbit-fixed-vectors-elements');
 const orbitingBodyVectorsElements = document.getElementById('orbiting-body-vectors-elements');
 
-// const generalElements = document.getElementById('general-elements');
-// const defaultElements = document.getElementById('default-elements');
-
-// const vectorSizeSlider = document.getElementById('vector-size');
-// const rColorMenu = document.getElementById('r-color-menu');
-
 /*
 name     = name
 m        = mass (x1e24 kg)
-CDU      = canonical distance unit (CDU), radius (km)
+CDU      = canonical distance unit (CDU), radius or 1 AU (km)
 CTU      = canonical time unit (s)
 gravSurf = Surface gravity (mean) (m/s^2)
 vesc     = Escape velocity (km/s)
@@ -444,13 +452,19 @@ Neptune,102.409,6835100,24622.0,1477.789423646780,16.66137245673320,
 */
 
 let centralBodyData = [
-  {name:'sun', id:0, m:1988470, CDU:696000, CTU:1593.888886079390, gravSurf:'NA?', 
+  {name:'sun1', id:0, m:1988470, CDU:696000, CTU:1593.888886079390, gravSurf:'NA?', 
   vesc:'NA?', mu:132712440018, Tsid:'NA?', perihel:'NA', 
   aphel:'NA', Tsyn:'NA?', vmean:'NA', vmax:'NA', vmin:'NA', 
   srp:'NA?', daylen:'NA?', obliqu:'NA', incEqu:'NA', 
   a:'NA', e:'NA', i:'NA', Om:'NA', 
   om:'NA', ml:'NA?'},
-  {name:'moon', id:1, m:0.0734767309, CDU:1079.6, CTU:506.501324477232, gravSurf:'NA?', 
+  {name:'sun2', id:1, m:1988470, CDU:149597870.70, CTU:5022675.7344, gravSurf:'NA?', 
+  vesc:'NA?', mu:132712440018, Tsid:'NA?', perihel:'NA', 
+  aphel:'NA', Tsyn:'NA?', vmean:'NA', vmax:'NA', vmin:'NA', 
+  srp:'NA?', daylen:'NA?', obliqu:'NA', incEqu:'NA', 
+  a:'NA', e:'NA', i:'NA', Om:'NA', 
+  om:'NA', ml:'NA?'},
+  {name:'moon', id:5, m:0.0734767309, CDU:1079.6, CTU:506.501324477232, gravSurf:'NA?', 
   vesc:'NA?', mu:4904.8695, Tsid:'NA?', perihel:'NA', 
   aphel:'NA', Tsyn:'NA?', vmean:'NA', vmax:'NA', vmin:'NA', 
   srp:'NA?', daylen:'NA?', obliqu:'NA', incEqu:'NA', 
@@ -474,31 +488,31 @@ let centralBodyData = [
   srp:23.9345, daylen:24., obliqu:23.44, incEqu:23.44, 
   a:1.00000011, e:0.01671022, i:0.00005, Om:-11.26064, 
   om:102.94719, ml:100.46435},
-  {name:'Mars', id:5, m:0.64169, CDU:3389.5, CTU: 953.541414862714, gravSurf:3.73, 
+  {name:'Mars', id:6, m:0.64169, CDU:3389.5, CTU: 953.541414862714, gravSurf:3.73, 
   vesc:5.03, mu:42828, Tsid:686.98, perihel:206.65, 
   aphel:249.261, Tsyn:779.94, vmean:24.08, vmax:26.5, vmin:21.97, 
   srp:24.6229, daylen:24.6597, obliqu:25.19, incEqu:25.19, 
   a:1.52366231, e:0.09341233, i:1.85061, Om:49.57854, 
   om:336.04084, ml:355.45332},
-  {name:'Jupiter', id:6, m:1898.13, CDU:69911, CTU: 1642.299064209990, gravSurf:25.92, 
+  {name:'Jupiter', id:7, m:1898.13, CDU:69911, CTU: 1642.299064209990, gravSurf:25.92, 
   vesc:59.5, mu:126687000, Tsid:4332.59, perihel:740.595, 
   aphel:816.363, Tsyn:398.88, vmean:13.06, vmax:13.72, vmin:12.44, 
   srp:9.925, daylen:9.9259, obliqu:3.13, incEqu:3.13, 
   a:5.20336301, e:0.04839266, i:1.3053, Om:100.55615, 
   om:14.75385, ml:34.40438},
-  {name:'Saturn', id:7, m:568.32, CDU:58232, CTU: 2281.631023447120, gravSurf:11.19, 
+  {name:'Saturn', id:8, m:568.32, CDU:58232, CTU: 2281.631023447120, gravSurf:11.19, 
   vesc:35.5, mu:37931000, Tsid:10759.22, perihel:1357.55, 
   aphel:1506.53, Tsyn:378.09, vmean:9.67, vmax:10.14, vmin:9.14, 
   srp:10.656, daylen:10.656, obliqu:26.73, incEqu:undefined, 
   a:9.53707032, e:0.0541506, i:2.48446, Om:113.71504, 
   om:92.43194, ml:49.94432},
-  {name:'Uranus', id:8, m:86.811, CDU:25362, CTU: 1677.976993115500, gravSurf:9.01, 
+  {name:'Uranus', id:9, m:86.811, CDU:25362, CTU: 1677.976993115500, gravSurf:9.01, 
   vesc:21.3, mu:5794000, Tsid:30685.40, perihel:2732.70, 
   aphel:3001.39, Tsyn:369.66, vmean:6.79, vmax:7.13, vmin:6.49, 
   srp:-17.24, daylen:17.24, obliqu:97.77, incEqu:82.23, 
   a:19.19126393, e:0.04716771, i:0.76986, Om:74.22988, 
   om:170.96424, ml:313.23218},
-  {name:'Neptune', id:9, m:102.409, CDU:24622, CTU: 1477.789423646780, gravSurf:11.27, 
+  {name:'Neptune', id:10, m:102.409, CDU:24622, CTU: 1477.789423646780, gravSurf:11.27, 
   vesc:23.5, mu:6835100, Tsid:60189.00, perihel:4471.05, 
   aphel:4558.86, Tsyn:367.49, vmean:5.45, vmax:5.47, vmin:5.37, 
   srp:16.11, daylen:16.11, obliqu:28.32, incEqu:28.32, 
@@ -526,6 +540,16 @@ const getFromLocalStorage = function(){
   const data = JSON.parse(localStorage.getItem('aerovisualizerData'));
   return data;
 }
+
+toggleNumericalDisplayButton1.addEventListener('click', () => {
+  numericalDisplayOption = 2;
+  handleMainButtons('numerical');
+});
+
+toggleNumericalDisplayButton2.addEventListener('click', () => {
+  numericalDisplayOption = 1;
+  handleMainButtons('numerical');
+});
 
 const displayNumerical = function(){
   if (meanAnomaly !== null){
@@ -630,7 +654,8 @@ const handleMainButtons = function(button){
   aeElements.style.display = 'none';
   orientationElements.style.display = 'none';
   rvElements.style.display = 'none';
-  numericalElements.style.display = 'none';
+  numericalElements1.style.display = 'none';
+  numericalElements2.style.display = 'none';
   prefsElements.style.display = 'none';
   playResetButtonsElements.display = 'none';
   generalPrefsElements.style.display = 'none';
@@ -664,7 +689,12 @@ const handleMainButtons = function(button){
       rvButton.disabled = true;
       break;
     case 'numerical':
-      numericalElements.style.display = 'grid';
+      if (numericalDisplayOption === 1){
+        numericalElements1.style.display = 'grid';
+      }else{
+        numericalElements2.style.display = 'grid';
+      }
+
       playResetButtonsElements.display = 'grid';
       numericalButton.disabled = true;
       numericalDisplayIsOccurring = true;
@@ -769,7 +799,16 @@ const doASliderOnInput = function(value){
   specificEnergy = -muCanonical/(2*a);
   aDisplay.innerHTML = `a: ${Number(a).toFixed(2).toString()}`;
   computeP();
-  omt.shapeOrbitCurve(a, e);
+
+  // 'sun2' is sun with 1 AU being the canonical distance unit.
+  // We want to scale the size of the sun additionally by a factor of
+  // the ratio of 1 AU to the radius of the sun.  Make sure that
+  // the centralBodyData id for 'sun2' is 1
+  if (theCB.id !== 1){
+    omt.shapeOrbitCurve(a, e);
+  }else{
+    omt.shapeOrbitCurve(214.939469396551724*a, e);
+  }
 }
 
 const doESliderOnInput = function(value){
@@ -798,7 +837,12 @@ const doESliderOnInput = function(value){
 
   needToComputeUniversal = true;
   computeP();
-  omt.shapeOrbitCurve(a, e);
+
+  if (theCB.id !== 1){
+    omt.shapeOrbitCurve(a, e);
+  }else{
+    omt.shapeOrbitCurve(214.939469396551724*a, e);
+  }
 }
 
 aSlider.oninput = function(){
@@ -1029,7 +1073,12 @@ const handleOrientationOnInput = function(opt, setValuesOnly = false){
   if (!setValuesOnly){
     haltPlay();
     computePQW2IJKRotation();
-    omt.shapeOrbitCurve(a, e);
+
+    if (theCB.id !== 1){
+      omt.shapeOrbitCurve(a, e);
+    }else{
+      omt.shapeOrbitCurve(214.939469396551724*a, e);
+    }
   }
 }
 
@@ -1413,11 +1462,27 @@ const setOrbitFixedVectorColor = function(color, save=false){
   }
 }
 
-const setOrbitingBodyVectorColor = function(color, save=false){
-  omt.setColor('orbitingBodyVectors', color);
+const setUVWVectorColor = function(color, save=false){
+  omt.setColor('uvwVectors', color);
 
   if (save){
-    replaceAerovisualizerData('orbitingBodyVectorColor',color);
+    replaceAerovisualizerData('uvwVectorColor',color);
+  }
+}
+
+const setRVectorColor = function(color, save=false){
+  omt.setColor('rVector', color);
+
+  if (save){
+    replaceAerovisualizerData('rVectorColor',color);
+  }
+}
+
+const setVVectorColor = function(color, save=false){
+  omt.setColor('vVector', color);
+
+  if (save){
+    replaceAerovisualizerData('vVectorColor',color);
   }
 }
 
@@ -1433,9 +1498,21 @@ orbitFixedVectorColorMenu.addEventListener('change', () => {
   saveToLocalStorage();
 });
 
-orbitingBodyVectorColorMenu.addEventListener('change', () => {
-  orbitingBodyVectorColor = orbitingBodyVectorColorMenu.value;
-  setOrbitingBodyVectorColor(orbitingBodyVectorColor, true);
+uvwVectorColorMenu.addEventListener('change', () => {
+  uvwVectorColor = uvwVectorColorMenu.value;
+  setUVWVectorColor(uvwVectorColor, true);
+  saveToLocalStorage();
+});
+
+rVectorColorMenu.addEventListener('change', () => {
+  rVectorColor = rVectorColorMenu.value;
+  setRVectorColor(rVectorColor, true);
+  saveToLocalStorage();
+});
+
+vVectorColorMenu.addEventListener('change', () => {
+  vVectorColor = vVectorColorMenu.value;
+  setVVectorColor(vVectorColor, true);
   saveToLocalStorage();
 });
 
@@ -1482,7 +1559,12 @@ const handleMuChange = function(){
   radiusDisplay.innerHTML = `${theCB.CDU} km`;//canonical distance unit (radius)
   vescDisplay.innerHTML = `${theCB.vesc} km/s`;//escape velocity
   omt.setMuIndex(cbIndex);
-  omt.shapeOrbitCurve(a, e);
+
+  if (theCB.id !== 1){
+    omt.shapeOrbitCurve(a, e);
+  }else{
+    omt.shapeOrbitCurve(214.939469396551724*a, e);
+  }
 }
 
 muMenu.addEventListener('change', () => {
@@ -1950,8 +2032,14 @@ const initialize = function(data, camera){
           case 'orbitFixedVectorColor':
             orbitFixedVectorColor  = o.value;
             break;
-          case 'orbitingBodyVectorColor':
-            orbitingBodyVectorColor  = o.value;
+          case 'uvwVectorColor':
+            uvwVectorColor  = o.value;
+            break;
+          case 'rVectorColor':
+            rVectorColor  = o.value;
+            break;
+          case 'vVectorColor':
+            vVectorColor  = o.value;
             break;
           case 'inertialVectorScale':
             inertialVectorScale  = o.value;
@@ -2056,7 +2144,9 @@ const completeInitialization = function(continueAnimation = true) {
 
     setInertialVectorColor(inertialVectorColor);
     setOrbitFixedVectorColor(orbitFixedVectorColor);
-    setOrbitingBodyVectorColor(orbitingBodyVectorColor);
+    setUVWVectorColor(uvwVectorColor);
+    setRVectorColor(rVectorColor);   
+    setVVectorColor(vVectorColor);   
     
     doVectorScaleSliderOnInput('inertial',inertialVectorScale);
     doVectorScaleSliderOnInput('orbit-fixed',orbitFixedVectorScale);

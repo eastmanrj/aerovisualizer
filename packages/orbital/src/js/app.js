@@ -256,6 +256,7 @@ const orientationElements = document.getElementById('orientation-elements');
 const rvElements = document.getElementById('r-v-elements');
 const numericalElements1 = document.getElementById('numerical-elements1');
 const numericalElements2 = document.getElementById('numerical-elements2');
+const numericalElements3 = document.getElementById('numerical-elements3');
 const prefsElements = document.getElementById('prefs-elements');
 const playResetButtonsElements = document.getElementById('play-reset-buttons-elements');
 
@@ -270,8 +271,12 @@ const vescDisplay = document.getElementById('vesc');
 
 let numericalDisplayIsOccurring = false;
 let numericalDisplayOption = 1;
-const toggleNumericalDisplayButton1 = document.getElementById('toggle-numerical-btn1');
-const toggleNumericalDisplayButton2 = document.getElementById('toggle-numerical-btn2');
+let displayUnits = 1;
+const cycleNumericalDisplayButton1 = document.getElementById('cycle-numerical-btn1');
+const cycleNumericalDisplayButton2 = document.getElementById('cycle-numerical-btn2');
+const cycleNumericalDisplayButton3 = document.getElementById('cycle-numerical-btn3');
+const toggleNumericalDisplayUnitsButton1 = document.getElementById('toggle-units-btn1');
+const toggleNumericalDisplayUnitsButton2 = document.getElementById('toggle-units-btn2');
 
 const numRI = document.getElementById('num-ri');
 const numRJ = document.getElementById('num-rj');
@@ -290,7 +295,7 @@ const numVV = document.getElementById('num-vv');
 const numNu = document.getElementById('num-nu');
 const numT = document.getElementById('num-t');
 const numH = document.getElementById('num-h');
-const numEnergy = document.getElementById('num-E');
+const numEnergy = document.getElementById('num-sp-energy');
 const numVcs = document.getElementById('num-vcs');
 const numVesc = document.getElementById('num-vesc');
 const numQ = document.getElementById('num-Q');
@@ -300,6 +305,11 @@ const numOm = document.getElementById('num-Om');
 const numI = document.getElementById('num-i');
 const numom = document.getElementById('num-om');
 const numP = document.getElementById('num-p');
+const numTotalPeriod = document.getElementById('num-period');
+const numEccenAnom = document.getElementById('num-E');
+const numHyperAnom = document.getElementById('num-F');
+const numMeanAnom = document.getElementById('num-M');
+const numMeanMotion = document.getElementById('num-n');
 
 const dcm11pqw2ijk = document.getElementById('dcm11-pqw-to-ijk');
 const dcm12pqw2ijk = document.getElementById('dcm12-pqw-to-ijk');
@@ -532,8 +542,8 @@ const replaceAerovisualizerData = function(name, value){
 const saveToLocalStorage = function(){
   localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
 }
-localStorage.clear();//temp
-saveToLocalStorage();//temp blah
+// localStorage.clear();//temp
+// saveToLocalStorage();//temp blah
 // location.reload();//temp
 
 const getFromLocalStorage = function(){
@@ -541,15 +551,21 @@ const getFromLocalStorage = function(){
   return data;
 }
 
-toggleNumericalDisplayButton1.addEventListener('click', () => {
+cycleNumericalDisplayButton1.addEventListener('click', () => {
   numericalDisplayOption = 2;
   handleMainButtons('numerical');
 });
 
-toggleNumericalDisplayButton2.addEventListener('click', () => {
+cycleNumericalDisplayButton2.addEventListener('click', () => {
+  numericalDisplayOption = 3;
+  handleMainButtons('numerical');
+});
+
+cycleNumericalDisplayButton3.addEventListener('click', () => {
   numericalDisplayOption = 1;
   handleMainButtons('numerical');
 });
+
 
 const displayNumerical = function(){
   if (meanAnomaly !== null){
@@ -557,38 +573,57 @@ const displayNumerical = function(){
     computePQW2UVWRotation();
     numNu.innerHTML = `${Number(nuDegrees).toFixed(2).toString()}`;
 
+    let tap = displayUnits === 1 ? timeAfterPeriapse : timeAfterPeriapseInSeconds/displayTimeScale;
+
     switch (timeScaleMenuChoice){
       case 'sec-equals-1sec':
-        numT.innerHTML = `${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(0).toString()}`;
+        numT.innerHTML = `${Number(tap).toFixed(0).toString()}`;
         break;
       case 'sec-equals-1minute':
-        numT.innerHTML = `${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()}`;
+        numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
         break;
       case 'sec-equals-5minutes':
-        numT.innerHTML = `${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()}`;
+        numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
         break;
       case 'sec-equals-15minutes':
-        numT.innerHTML = `${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()}`;
+        numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
         break;
       case 'sec-equals-1hour':
-        numT.innerHTML = `${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(2).toString()}`;
+        numT.innerHTML = `${Number(tap).toFixed(2).toString()}`;
         break;
       case 'sec-equals-1day':
-        numT.innerHTML = `${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(3).toString()}`;
+        numT.innerHTML = `${Number(tap).toFixed(3).toString()}`;
         break;
     }
   }else{
     numT.innerHTML = 'INF';
   }
-  
-  numH.innerHTML = `${Number(h).toFixed(4).toString()}`;
-  numEnergy.innerHTML = `${Number(specificEnergy).toFixed(4).toString()}`;
-  numA.innerHTML = `${Number(a).toFixed(2).toString()}`;
+
+  let spAngMom = h;
+  let spEnergy = specificEnergy;
+  let aDisp = a;
+  let pDisp = p;
+  let tpDisp = tp;
+  let mm = meanMotion;
+
+  if (displayUnits === 2){
+    tap = timeAfterPeriapseInSeconds/displayTimeScale;
+    spAngMom *= cdu*cdu/ctu;
+    spEnergy *= cdu*cdu/ctu/ctu;
+    aDisp *= cdu;
+    pDisp *= cdu;
+    tpDisp *= ctu/displayTimeScale;
+    mm /= ctu;
+  }
+
+  numH.innerHTML = `${Number(spAngMom).toFixed(1).toString()}`;
+  numEnergy.innerHTML = `${Number(spEnergy).toFixed(4).toString()}`;
+  numA.innerHTML = `${Number(aDisp).toFixed(2).toString()}`;
   numE.innerHTML = `${Number(e).toFixed(3).toString()}`;
   numOm.innerHTML = lanDegrees;
   numI.innerHTML = incDegrees;
   numom.innerHTML = aopDegrees;
-  numP.innerHTML = `${Number(p).toFixed(2).toString()}`;
+  numP.innerHTML = `${Number(pDisp).toFixed(2).toString()}`;
 
   dcm11pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[0]).toFixed(4).toString()}`;
   dcm12pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[3]).toFixed(4).toString()}`;
@@ -634,14 +669,37 @@ const displayNumerical = function(){
   numVU.innerHTML = `${Number(vUVW.x).toFixed(3).toString()}`;
   numVV.innerHTML = `${Number(vUVW.y).toFixed(3).toString()}`;
 
-  const rcs = rPQW.length();
-  const vcs = Math.sqrt(muCanonical/rcs);
+  let rcs = rPQW.length();
+  let vcs = Math.sqrt(muCanonical/rcs);
+  let vesc = Math.SQRT2*vcs;
+  let Q = vPQW.lengthSq()/vcs/vcs;
+
+  if (displayUnits === 2){
+    vcs *= cdu/ctu;
+    vesc *= cdu/ctu;
+  }
+
   numVcs.innerHTML = `${Number(vcs).toFixed(4).toString()}`;
-  const vesc = Math.SQRT2*vcs;
   numVesc.innerHTML = `${Number(vesc).toFixed(4).toString()}`;
-  const vsq = vPQW.lengthSq();
-  numQ.innerHTML = `${Number(vsq/vcs/vcs).toFixed(4).toString()}`;
+  numQ.innerHTML = `${Number(Q).toFixed(4).toString()}`;
+  numTotalPeriod.innerHTML = `${Number(tpDisp).toFixed(4).toString()}`;
+
+  computeKeplerStuff();
+  numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
+  numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180).toFixed(2).toString()}`;
+  numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180).toFixed(2).toString()}`;
+  numMeanMotion.innerHTML = `${Number(mm).toFixed(4).toString()}`;
 }
+
+toggleNumericalDisplayUnitsButton1.addEventListener('click', () => {
+  displayUnits = displayUnits === 1 ? 2 : 1;
+  displayNumerical();
+});
+
+toggleNumericalDisplayUnitsButton2.addEventListener('click', () => {
+  displayUnits = displayUnits === 1 ? 2 : 1;
+  displayNumerical();
+});
 
 const handleMainButtons = function(button){
   muButton.disabled = false;
@@ -656,6 +714,7 @@ const handleMainButtons = function(button){
   rvElements.style.display = 'none';
   numericalElements1.style.display = 'none';
   numericalElements2.style.display = 'none';
+  numericalElements3.style.display = 'none';
   prefsElements.style.display = 'none';
   playResetButtonsElements.display = 'none';
   generalPrefsElements.style.display = 'none';
@@ -689,10 +748,16 @@ const handleMainButtons = function(button){
       rvButton.disabled = true;
       break;
     case 'numerical':
-      if (numericalDisplayOption === 1){
-        numericalElements1.style.display = 'grid';
-      }else{
-        numericalElements2.style.display = 'grid';
+      switch (numericalDisplayOption){
+        case 1:
+          numericalElements1.style.display = 'grid';
+          break;
+        case 2:
+          numericalElements2.style.display = 'grid';
+          break;
+        case 3:
+          numericalElements3.style.display = 'grid';
+          break;
       }
 
       playResetButtonsElements.display = 'grid';
@@ -1154,7 +1219,7 @@ const computeRHyperbola = function(){
   // don't render the r vector when the true anomaly
   // is in a range such that r would point to the
   // wrong branch of the hyperbola.
-  // do this if going from 0 to 360 -->
+  // if going from 0 to 360, do this -->
   // if (nu > (Math.PI + delta)/2 && nu < 1.5*Math.PI - delta/2){
 
   if (nu > (Math.PI + delta)/2 || nu < -(Math.PI + delta)/2){
@@ -1192,7 +1257,7 @@ const computeVHyperbola = function(){
   omt.setV(x, y, 0, -a);
 }
 
-const computeTimeAfterPeriapse = function(){
+const computeKeplerStuff = function(){
   // see Bate Mueller White pp. 182-188
   const cosnu = Math.cos(nu);
 
@@ -1217,6 +1282,10 @@ const computeTimeAfterPeriapse = function(){
   meanMotion = Math.sqrt(muCanonical/aCubed);
   timeAfterPeriapse = meanAnomaly/meanMotion;
   timeAfterPeriapseInSeconds = timeAfterPeriapse*ctu;
+}
+
+const computeKeplerAndTimeAfterPeriapse = function(){
+  computeKeplerStuff();
   universalArrayIndex0 = universalArray.findIndex((e) => e.t >= timeAfterPeriapse);
   
   if (universalArrayIndex0 === -1){
@@ -1228,6 +1297,7 @@ const computeTimeAfterPeriapse = function(){
   timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
   timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
 }
+
 const doNuAndTimeDisplay = function(){
   if (meanAnomaly !== null){
     nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees).toFixed(2).toString()}`;
@@ -1262,7 +1332,7 @@ const doNuSliderOnInput = function(value){
   haltPlay();
   nuDegrees = value;
   nu = nuDegrees*piOver180;
-  computeTimeAfterPeriapse();
+  computeKeplerAndTimeAfterPeriapse();
   doNuAndTimeDisplay();
 
   switch (conicSection){
@@ -1560,6 +1630,22 @@ const handleMuChange = function(){
   vescDisplay.innerHTML = `${theCB.vesc} km/s`;//escape velocity
   omt.setMuIndex(cbIndex);
 
+  //blah
+  // START OF UNCERTAIN SECTION
+  const temp1 = sliderEcanChange;
+  const temp2 = sliderAcanChange;
+  doESliderOnInput(+eSlider.value);
+  doASliderOnInput(+aSlider.value);
+  sliderEcanChange = temp1;
+  sliderAcanChange = temp2;
+  rp = Number(a*(1-e));
+  ra = Number(a*(1+e));
+  vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
+  h = rp*vp;
+  // doNuSliderOnInput(nuDegrees);
+  // handlePeriapseCheck();
+  // END Of UNCERTAIN SECTION
+
   if (theCB.id !== 1){
     omt.shapeOrbitCurve(a, e);
   }else{
@@ -1640,9 +1726,6 @@ const handleMainPrefs = function(opt){
       orbitingBodyVectorsElements.style.display = 'grid';
       orbitingBodyVectorsMenu.value = orbitingBodyVectorsChoice
       doOrbitingBodyVectorsChoice();
-      break;
-
-    case 'units':
       break;
   }
 }
@@ -2246,7 +2329,7 @@ const doUniversalPointCalculations = function(opt=0){
     vx0 = vx;
     vy0 = vy;
   }else{
-    computeTimeAfterPeriapse();
+    computeKeplerAndTimeAfterPeriapse();
     x0 = universalArray[universalArrayIndex0%universalArraySize].f*rp;
     y0 = universalArray[universalArrayIndex0%universalArraySize].g*sqrtMuOverP*(e + 1);
     vx0 = universalArray[universalArrayIndex0%universalArraySize].fdot*rp;

@@ -184,6 +184,14 @@ label {
   justify-self: center;
 }
 
+.span6{
+  grid-column: span 6;
+  text-align: center;
+  justify-self: center;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
 .span8{
   grid-column: span 8;
   text-align: center;
@@ -308,8 +316,8 @@ input[type="range"]:focus::-webkit-slider-thumb {
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr ;
 }
 
-.special-span{
-  grid-template-columns: 2fr 5fr 2fr;
+.large-font{
+  font-size:2rem;
 }
 
 .warning{
@@ -317,15 +325,8 @@ input[type="range"]:focus::-webkit-slider-thumb {
   color:red;
 }
 
-.numerical1{
-  grid-template-columns: 1fr 3fr 3fr 3fr 1fr 3fr 1fr 3fr;
-  text-align: right;
-  font-family: monospace;
-  font-variant-numeric: tabular-nums;
-}
-
-.numerical2{
-  grid-template-columns: 1fr 3fr 3fr 3fr 1fr 3fr 3fr 3fr;
+.numerical{
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   text-align: right;
   font-family: monospace;
   font-variant-numeric: tabular-nums;

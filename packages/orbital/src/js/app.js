@@ -366,6 +366,9 @@ const inertialVectorsElements = document.getElementById('inertial-vectors-elemen
 const orbitFixedVectorsElements = document.getElementById('orbit-fixed-vectors-elements');
 const orbitingBodyVectorsElements = document.getElementById('orbiting-body-vectors-elements');
 
+
+const numXXX = document.getElementById('num-xxx');
+
 /*
 name     = name
 m        = mass (x1e24 kg)
@@ -689,6 +692,7 @@ const displayNumerical = function(){
   numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180).toFixed(2).toString()}`;
   numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180).toFixed(2).toString()}`;
   numMeanMotion.innerHTML = `${Number(mm).toFixed(4).toString()}`;
+  numXXX.innerHTML = `${Number(displayUnits).toFixed(4).toString()}`;
 }
 
 toggleNumericalDisplayUnitsButton1.addEventListener('click', () => {

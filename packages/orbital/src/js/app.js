@@ -571,63 +571,64 @@ cycleNumericalDisplayButton3.addEventListener('click', () => {
 
 
 const displayNumerical = function(){
-  numXXX.innerHTML = `${Number(displayUnits).toFixed(4).toString()}`;
-  // if (meanAnomaly !== null){
-  //   computePQW2IJKRotation();
-  //   computePQW2UVWRotation();
-  //   numNu.innerHTML = `${Number(nuDegrees).toFixed(2).toString()}`;
+  if (meanAnomaly !== null){
+    computePQW2IJKRotation();
+    computePQW2UVWRotation();
+    numNu.innerHTML = `${Number(nuDegrees).toFixed(2).toString()}`;
 
-  //   let tap = displayUnits === 1 ? timeAfterPeriapse : timeAfterPeriapseInSeconds/displayTimeScale;
+    let tap = displayUnits === 1 ? timeAfterPeriapse : timeAfterPeriapseInSeconds/displayTimeScale;
 
-  //   switch (timeScaleMenuChoice){
-  //     case 'sec-equals-1sec':
-  //       numT.innerHTML = `${Number(tap).toFixed(0).toString()}`;
-  //       break;
-  //     case 'sec-equals-1minute':
-  //       numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
-  //       break;
-  //     case 'sec-equals-5minutes':
-  //       numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
-  //       break;
-  //     case 'sec-equals-15minutes':
-  //       numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
-  //       break;
-  //     case 'sec-equals-1hour':
-  //       numT.innerHTML = `${Number(tap).toFixed(2).toString()}`;
-  //       break;
-  //     case 'sec-equals-1day':
-  //       numT.innerHTML = `${Number(tap).toFixed(3).toString()}`;
-  //       break;
-  //   }
-  // }else{
-  //   numT.innerHTML = 'INF';
-  // }
+    switch (timeScaleMenuChoice){
+      case 'sec-equals-1sec':
+        numT.innerHTML = `${Number(tap).toFixed(0).toString()}`;
+        break;
+      case 'sec-equals-1minute':
+        numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
+        break;
+      case 'sec-equals-5minutes':
+        numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
+        break;
+      case 'sec-equals-15minutes':
+        numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
+        break;
+      case 'sec-equals-1hour':
+        numT.innerHTML = `${Number(tap).toFixed(2).toString()}`;
+        break;
+      case 'sec-equals-1day':
+        numT.innerHTML = `${Number(tap).toFixed(3).toString()}`;
+        break;
+    }
+  }else{
+    numT.innerHTML = 'INF';
+  }
 
-  // let spAngMom = h;
-  // let spEnergy = specificEnergy;
-  // let aDisp = a;
-  // let pDisp = p;
-  // let tpDisp = tp;
-  // let mm = meanMotion;
+  let spAngMom = h;
+  let spEnergy = specificEnergy;
+  let aDisp = a;
+  let pDisp = p;
+  let tpDisp = tp;
+  let mm = meanMotion;
 
-  // if (displayUnits === 2){
-  //   tap = timeAfterPeriapseInSeconds/displayTimeScale;
-  //   spAngMom *= cdu*cdu/ctu;
-  //   spEnergy *= cdu*cdu/ctu/ctu;
-  //   aDisp *= cdu;
-  //   pDisp *= cdu;
-  //   tpDisp *= ctu/displayTimeScale;
-  //   mm /= ctu;
-  // }
+  if (displayUnits === 2){
+    tap = timeAfterPeriapseInSeconds/displayTimeScale;
+    spAngMom *= cdu*cdu/ctu;
+    spEnergy *= cdu*cdu/ctu/ctu;
+    aDisp *= cdu;
+    pDisp *= cdu;
+    tpDisp *= ctu/displayTimeScale;
+    mm /= ctu;
+  }
+  numXXX.innerHTML = `${Number(777).toFixed(4).toString()}`;
 
-  // numH.innerHTML = `${Number(spAngMom).toFixed(1).toString()}`;
-  // numEnergy.innerHTML = `${Number(spEnergy).toFixed(4).toString()}`;
-  // numA.innerHTML = `${Number(aDisp).toFixed(2).toString()}`;
+  numH.innerHTML = `${Number(spAngMom).toFixed(1).toString()}`;
+  numEnergy.innerHTML = `${Number(spEnergy).toFixed(4).toString()}`;
+  numA.innerHTML = `${Number(aDisp).toFixed(2).toString()}`;
   // numE.innerHTML = `${Number(e).toFixed(3).toString()}`;
   // numOm.innerHTML = lanDegrees;
   // numI.innerHTML = incDegrees;
   // numom.innerHTML = aopDegrees;
-  // numP.innerHTML = `${Number(pDisp).toFixed(2).toString()}`;
+  numP.innerHTML = `${Number(pDisp).toFixed(2).toString()}`;
+  numTotalPeriod.innerHTML = `${Number(tpDisp).toFixed(4).toString()}`;
 
   // dcm11pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[0]).toFixed(4).toString()}`;
   // dcm12pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[3]).toFixed(4).toString()}`;
@@ -686,7 +687,6 @@ const displayNumerical = function(){
   // numVcs.innerHTML = `${Number(vcs).toFixed(4).toString()}`;
   // numVesc.innerHTML = `${Number(vesc).toFixed(4).toString()}`;
   // numQ.innerHTML = `${Number(Q).toFixed(4).toString()}`;
-  // numTotalPeriod.innerHTML = `${Number(tpDisp).toFixed(4).toString()}`;
 
   // computeKeplerStuff();
   // numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;

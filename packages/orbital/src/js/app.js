@@ -571,12 +571,12 @@ cycleNumericalDisplayButton3.addEventListener('click', () => {
 
 
 const displayNumerical = function(){
+  let tap = displayUnits === 1 ? timeAfterPeriapse : timeAfterPeriapseInSeconds/displayTimeScale;
+
   if (meanAnomaly !== null){
     computePQW2IJKRotation();
     computePQW2UVWRotation();
     numNu.innerHTML = `${Number(nuDegrees).toFixed(2).toString()}`;
-
-    let tap = displayUnits === 1 ? timeAfterPeriapse : timeAfterPeriapseInSeconds/displayTimeScale;
 
     switch (timeScaleMenuChoice){
       case 'sec-equals-1sec':
@@ -618,7 +618,7 @@ const displayNumerical = function(){
     tpDisp *= ctu/displayTimeScale;
     mm /= ctu;
   }
-  numXXX.innerHTML = `${Number(777).toFixed(4).toString()}`;
+  numXXX.innerHTML = `${Number(displayUnits).toFixed(4).toString()}`;
 
   numH.innerHTML = `${Number(spAngMom).toFixed(1).toString()}`;
   numEnergy.innerHTML = `${Number(spEnergy).toFixed(4).toString()}`;

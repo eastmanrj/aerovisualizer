@@ -571,137 +571,137 @@ cycleNumericalDisplayButton3.addEventListener('click', () => {
 
 
 const displayNumerical = function(){
-  if (meanAnomaly !== null){
-    computePQW2IJKRotation();
-    computePQW2UVWRotation();
-    numNu.innerHTML = `${Number(nuDegrees).toFixed(2).toString()}`;
-
-    let tap = displayUnits === 1 ? timeAfterPeriapse : timeAfterPeriapseInSeconds/displayTimeScale;
-
-    switch (timeScaleMenuChoice){
-      case 'sec-equals-1sec':
-        numT.innerHTML = `${Number(tap).toFixed(0).toString()}`;
-        break;
-      case 'sec-equals-1minute':
-        numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
-        break;
-      case 'sec-equals-5minutes':
-        numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
-        break;
-      case 'sec-equals-15minutes':
-        numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
-        break;
-      case 'sec-equals-1hour':
-        numT.innerHTML = `${Number(tap).toFixed(2).toString()}`;
-        break;
-      case 'sec-equals-1day':
-        numT.innerHTML = `${Number(tap).toFixed(3).toString()}`;
-        break;
-    }
-  }else{
-    numT.innerHTML = 'INF';
-  }
-
-  let spAngMom = h;
-  let spEnergy = specificEnergy;
-  let aDisp = a;
-  let pDisp = p;
-  let tpDisp = tp;
-  let mm = meanMotion;
-
-  if (displayUnits === 2){
-    tap = timeAfterPeriapseInSeconds/displayTimeScale;
-    spAngMom *= cdu*cdu/ctu;
-    spEnergy *= cdu*cdu/ctu/ctu;
-    aDisp *= cdu;
-    pDisp *= cdu;
-    tpDisp *= ctu/displayTimeScale;
-    mm /= ctu;
-  }
-
-  numH.innerHTML = `${Number(spAngMom).toFixed(1).toString()}`;
-  numEnergy.innerHTML = `${Number(spEnergy).toFixed(4).toString()}`;
-  numA.innerHTML = `${Number(aDisp).toFixed(2).toString()}`;
-  numE.innerHTML = `${Number(e).toFixed(3).toString()}`;
-  numOm.innerHTML = lanDegrees;
-  numI.innerHTML = incDegrees;
-  numom.innerHTML = aopDegrees;
-  numP.innerHTML = `${Number(pDisp).toFixed(2).toString()}`;
-
-  dcm11pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[0]).toFixed(4).toString()}`;
-  dcm12pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[3]).toFixed(4).toString()}`;
-  dcm13pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[6]).toFixed(4).toString()}`;
-  dcm21pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[1]).toFixed(4).toString()}`;
-  dcm22pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[4]).toFixed(4).toString()}`;
-  dcm23pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[7]).toFixed(4).toString()}`;
-  dcm31pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[2]).toFixed(4).toString()}`;
-  dcm32pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[5]).toFixed(4).toString()}`;
-  dcm33pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[8]).toFixed(4).toString()}`;
-  dcm11pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[0]).toFixed(4).toString()}`;
-  dcm12pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[3]).toFixed(4).toString()}`;
-  dcm13pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[6]).toFixed(4).toString()}`;
-  dcm21pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[1]).toFixed(4).toString()}`;
-  dcm22pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[4]).toFixed(4).toString()}`;
-  dcm23pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[7]).toFixed(4).toString()}`;
-  dcm31pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[2]).toFixed(4).toString()}`;
-  dcm32pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[5]).toFixed(4).toString()}`;
-  dcm33pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[8]).toFixed(4).toString()}`;
-
-  rPQW.set(px, py, 0);
-  rIJK.copy(rPQW);
-  rUVW.copy(rPQW);
-  rIJK.applyMatrix3(dcmPQW2IJK);
-  rUVW.applyMatrix3(dcmPQW2UVW);
-  vPQW.set(vx, vy, 0);
-  vIJK.copy(vPQW);
-  vUVW.copy(vPQW);
-  vIJK.applyMatrix3(dcmPQW2IJK);
-  vUVW.applyMatrix3(dcmPQW2UVW);
-  numRP.innerHTML = `${Number(px).toFixed(3).toString()}`;
-  numRQ.innerHTML = `${Number(py).toFixed(3).toString()}`;
-  numVP.innerHTML = `${Number(vx).toFixed(3).toString()}`;
-  numVQ.innerHTML = `${Number(vy).toFixed(3).toString()}`;
-  numRI.innerHTML = `${Number(rIJK.x).toFixed(3).toString()}`;
-  numRJ.innerHTML = `${Number(rIJK.y).toFixed(3).toString()}`;
-  numRK.innerHTML = `${Number(rIJK.z).toFixed(3).toString()}`;
-  numVI.innerHTML = `${Number(vIJK.x).toFixed(3).toString()}`;
-  numVJ.innerHTML = `${Number(vIJK.y).toFixed(3).toString()}`;
-  numVK.innerHTML = `${Number(vIJK.z).toFixed(3).toString()}`;
-  numRU.innerHTML = `${Number(rUVW.x).toFixed(3).toString()}`;
-  numRV.innerHTML = '0.000';
-  numVU.innerHTML = `${Number(vUVW.x).toFixed(3).toString()}`;
-  numVV.innerHTML = `${Number(vUVW.y).toFixed(3).toString()}`;
-
-  let rcs = rPQW.length();
-  let vcs = Math.sqrt(muCanonical/rcs);
-  let vesc = Math.SQRT2*vcs;
-  let Q = vPQW.lengthSq()/vcs/vcs;
-
-  if (displayUnits === 2){
-    vcs *= cdu/ctu;
-    vesc *= cdu/ctu;
-  }
-
-  numVcs.innerHTML = `${Number(vcs).toFixed(4).toString()}`;
-  numVesc.innerHTML = `${Number(vesc).toFixed(4).toString()}`;
-  numQ.innerHTML = `${Number(Q).toFixed(4).toString()}`;
-  numTotalPeriod.innerHTML = `${Number(tpDisp).toFixed(4).toString()}`;
-
-  computeKeplerStuff();
-  numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
-  numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180).toFixed(2).toString()}`;
-  numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180).toFixed(2).toString()}`;
-  numMeanMotion.innerHTML = `${Number(mm).toFixed(4).toString()}`;
   numXXX.innerHTML = `${Number(displayUnits).toFixed(4).toString()}`;
+  // if (meanAnomaly !== null){
+  //   computePQW2IJKRotation();
+  //   computePQW2UVWRotation();
+  //   numNu.innerHTML = `${Number(nuDegrees).toFixed(2).toString()}`;
+
+  //   let tap = displayUnits === 1 ? timeAfterPeriapse : timeAfterPeriapseInSeconds/displayTimeScale;
+
+  //   switch (timeScaleMenuChoice){
+  //     case 'sec-equals-1sec':
+  //       numT.innerHTML = `${Number(tap).toFixed(0).toString()}`;
+  //       break;
+  //     case 'sec-equals-1minute':
+  //       numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
+  //       break;
+  //     case 'sec-equals-5minutes':
+  //       numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
+  //       break;
+  //     case 'sec-equals-15minutes':
+  //       numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
+  //       break;
+  //     case 'sec-equals-1hour':
+  //       numT.innerHTML = `${Number(tap).toFixed(2).toString()}`;
+  //       break;
+  //     case 'sec-equals-1day':
+  //       numT.innerHTML = `${Number(tap).toFixed(3).toString()}`;
+  //       break;
+  //   }
+  // }else{
+  //   numT.innerHTML = 'INF';
+  // }
+
+  // let spAngMom = h;
+  // let spEnergy = specificEnergy;
+  // let aDisp = a;
+  // let pDisp = p;
+  // let tpDisp = tp;
+  // let mm = meanMotion;
+
+  // if (displayUnits === 2){
+  //   tap = timeAfterPeriapseInSeconds/displayTimeScale;
+  //   spAngMom *= cdu*cdu/ctu;
+  //   spEnergy *= cdu*cdu/ctu/ctu;
+  //   aDisp *= cdu;
+  //   pDisp *= cdu;
+  //   tpDisp *= ctu/displayTimeScale;
+  //   mm /= ctu;
+  // }
+
+  // numH.innerHTML = `${Number(spAngMom).toFixed(1).toString()}`;
+  // numEnergy.innerHTML = `${Number(spEnergy).toFixed(4).toString()}`;
+  // numA.innerHTML = `${Number(aDisp).toFixed(2).toString()}`;
+  // numE.innerHTML = `${Number(e).toFixed(3).toString()}`;
+  // numOm.innerHTML = lanDegrees;
+  // numI.innerHTML = incDegrees;
+  // numom.innerHTML = aopDegrees;
+  // numP.innerHTML = `${Number(pDisp).toFixed(2).toString()}`;
+
+  // dcm11pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[0]).toFixed(4).toString()}`;
+  // dcm12pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[3]).toFixed(4).toString()}`;
+  // dcm13pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[6]).toFixed(4).toString()}`;
+  // dcm21pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[1]).toFixed(4).toString()}`;
+  // dcm22pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[4]).toFixed(4).toString()}`;
+  // dcm23pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[7]).toFixed(4).toString()}`;
+  // dcm31pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[2]).toFixed(4).toString()}`;
+  // dcm32pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[5]).toFixed(4).toString()}`;
+  // dcm33pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[8]).toFixed(4).toString()}`;
+  // dcm11pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[0]).toFixed(4).toString()}`;
+  // dcm12pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[3]).toFixed(4).toString()}`;
+  // dcm13pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[6]).toFixed(4).toString()}`;
+  // dcm21pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[1]).toFixed(4).toString()}`;
+  // dcm22pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[4]).toFixed(4).toString()}`;
+  // dcm23pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[7]).toFixed(4).toString()}`;
+  // dcm31pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[2]).toFixed(4).toString()}`;
+  // dcm32pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[5]).toFixed(4).toString()}`;
+  // dcm33pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[8]).toFixed(4).toString()}`;
+
+  // rPQW.set(px, py, 0);
+  // rIJK.copy(rPQW);
+  // rUVW.copy(rPQW);
+  // rIJK.applyMatrix3(dcmPQW2IJK);
+  // rUVW.applyMatrix3(dcmPQW2UVW);
+  // vPQW.set(vx, vy, 0);
+  // vIJK.copy(vPQW);
+  // vUVW.copy(vPQW);
+  // vIJK.applyMatrix3(dcmPQW2IJK);
+  // vUVW.applyMatrix3(dcmPQW2UVW);
+  // numRP.innerHTML = `${Number(px).toFixed(3).toString()}`;
+  // numRQ.innerHTML = `${Number(py).toFixed(3).toString()}`;
+  // numVP.innerHTML = `${Number(vx).toFixed(3).toString()}`;
+  // numVQ.innerHTML = `${Number(vy).toFixed(3).toString()}`;
+  // numRI.innerHTML = `${Number(rIJK.x).toFixed(3).toString()}`;
+  // numRJ.innerHTML = `${Number(rIJK.y).toFixed(3).toString()}`;
+  // numRK.innerHTML = `${Number(rIJK.z).toFixed(3).toString()}`;
+  // numVI.innerHTML = `${Number(vIJK.x).toFixed(3).toString()}`;
+  // numVJ.innerHTML = `${Number(vIJK.y).toFixed(3).toString()}`;
+  // numVK.innerHTML = `${Number(vIJK.z).toFixed(3).toString()}`;
+  // numRU.innerHTML = `${Number(rUVW.x).toFixed(3).toString()}`;
+  // numRV.innerHTML = '0.000';
+  // numVU.innerHTML = `${Number(vUVW.x).toFixed(3).toString()}`;
+  // numVV.innerHTML = `${Number(vUVW.y).toFixed(3).toString()}`;
+
+  // let rcs = rPQW.length();
+  // let vcs = Math.sqrt(muCanonical/rcs);
+  // let vesc = Math.SQRT2*vcs;
+  // let Q = vPQW.lengthSq()/vcs/vcs;
+
+  // if (displayUnits === 2){
+  //   vcs *= cdu/ctu;
+  //   vesc *= cdu/ctu;
+  // }
+
+  // numVcs.innerHTML = `${Number(vcs).toFixed(4).toString()}`;
+  // numVesc.innerHTML = `${Number(vesc).toFixed(4).toString()}`;
+  // numQ.innerHTML = `${Number(Q).toFixed(4).toString()}`;
+  // numTotalPeriod.innerHTML = `${Number(tpDisp).toFixed(4).toString()}`;
+
+  // computeKeplerStuff();
+  // numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
+  // numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180).toFixed(2).toString()}`;
+  // numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180).toFixed(2).toString()}`;
+  // numMeanMotion.innerHTML = `${Number(mm).toFixed(4).toString()}`;
 }
 
 toggleNumericalDisplayUnitsButton1.addEventListener('click', () => {
-  displayUnits = displayUnits === 1 ? 2 : 1;
+  displayUnits = (displayUnits === 1) ? 2 : 1;
   displayNumerical();
 });
 
 toggleNumericalDisplayUnitsButton2.addEventListener('click', () => {
-  displayUnits = displayUnits === 1 ? 2 : 1;
+  displayUnits = (displayUnits === 1) ? 2 : 1;
   displayNumerical();
 });
 

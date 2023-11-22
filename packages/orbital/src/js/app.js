@@ -2086,7 +2086,12 @@ const initTHREE = function() {
     alpha: true,
   });
 
-  // console.log(renderer.isWebGLRenderer);
+  if (!renderer.isWebGLRenderer){
+    periapseTooSmall = true;
+    handlePeriapseCheck();
+    handleMainButtons('none');
+    return;
+  }
 
   renderer.setClearColor(0x000000);
   renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);
@@ -2457,7 +2462,10 @@ if (!data){
 
 if (data){
   initTHREE();
-  initialize(data, camera);
-  completeInitialization();
-  animate();
+
+  if (renderer.isWebGLRenderer){
+    initialize(data, camera);
+    completeInitialization();
+    animate();
+  }
 }

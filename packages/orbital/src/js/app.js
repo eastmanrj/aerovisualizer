@@ -620,7 +620,7 @@ const displayNumerical = function(){
     tpDisp *= ctu/displayTimeScale;
     mm /= ctu;
   }
-  numXXX.innerHTML = `${Number(displayUnits).toFixed(4).toString()}`;
+  numXXX.innerHTML = renderer.isWebGLRenderer;
 
   numH.innerHTML = `${Number(spAngMom).toFixed(1).toString()}`;
   numEnergy.innerHTML = `${Number(spEnergy).toFixed(4).toString()}`;
@@ -2081,14 +2081,12 @@ const initTHREE = function() {
   const ambientLight = new THREE.AmbientLight(0xffffff);
   scene.add(ambientLight);
 
-  renderer = new THREE.WebGL1Renderer({
+  renderer = new THREE.WebGLRenderer({
     devicePixelRatio: window.devicePixelRatio,
     alpha: true,
   });
 
-  //WebGL1Renderer.prototype.isWebGL1Renderer
-
-  console.log(renderer.isWebGL1Renderer);
+  // console.log(renderer.isWebGLRenderer);
 
   renderer.setClearColor(0x000000);
   renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);

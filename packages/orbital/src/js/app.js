@@ -277,6 +277,8 @@ const cycleNumericalDisplayButton2 = document.getElementById('cycle-numerical-bt
 const cycleNumericalDisplayButton3 = document.getElementById('cycle-numerical-btn3');
 const toggleNumericalDisplayUnitsButton1 = document.getElementById('toggle-units-btn1');
 const toggleNumericalDisplayUnitsButton2 = document.getElementById('toggle-units-btn2');
+const unitsDisplay1 = document.getElementById('units-display1');
+const unitsDisplay2 = document.getElementById('units-display2');
 
 const numRI = document.getElementById('num-ri');
 const numRJ = document.getElementById('num-rj');
@@ -628,7 +630,12 @@ const displayNumerical = function(){
   numI.innerHTML = incDegrees;
   numom.innerHTML = aopDegrees;
   numP.innerHTML = `${Number(pDisp).toFixed(2).toString()}`;
-  numTotalPeriod.innerHTML = `${Number(tpDisp).toFixed(4).toString()}`;
+
+  if (e < 1){
+    numTotalPeriod.innerHTML = `${Number(tpDisp).toFixed(4).toString()}`;
+  }else{
+    numTotalPeriod.innerHTML = 'x';
+  }
 
   dcm11pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[0]).toFixed(4).toString()}`;
   dcm12pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[3]).toFixed(4).toString()}`;
@@ -659,20 +666,6 @@ const displayNumerical = function(){
   vUVW.copy(vPQW);
   vIJK.applyMatrix3(dcmPQW2IJK);
   vUVW.applyMatrix3(dcmPQW2UVW);
-  numRP.innerHTML = `${Number(px).toFixed(3).toString()}`;
-  numRQ.innerHTML = `${Number(py).toFixed(3).toString()}`;
-  numVP.innerHTML = `${Number(vx).toFixed(3).toString()}`;
-  numVQ.innerHTML = `${Number(vy).toFixed(3).toString()}`;
-  numRI.innerHTML = `${Number(rIJK.x).toFixed(3).toString()}`;
-  numRJ.innerHTML = `${Number(rIJK.y).toFixed(3).toString()}`;
-  numRK.innerHTML = `${Number(rIJK.z).toFixed(3).toString()}`;
-  numVI.innerHTML = `${Number(vIJK.x).toFixed(3).toString()}`;
-  numVJ.innerHTML = `${Number(vIJK.y).toFixed(3).toString()}`;
-  numVK.innerHTML = `${Number(vIJK.z).toFixed(3).toString()}`;
-  numRU.innerHTML = `${Number(rUVW.x).toFixed(3).toString()}`;
-  numRV.innerHTML = '0.000';
-  numVU.innerHTML = `${Number(vUVW.x).toFixed(3).toString()}`;
-  numVV.innerHTML = `${Number(vUVW.y).toFixed(3).toString()}`;
 
   let rcs = rPQW.length();
   let vcs = Math.sqrt(muCanonical/rcs);
@@ -682,6 +675,39 @@ const displayNumerical = function(){
   if (displayUnits === 2){
     vcs *= cdu/ctu;
     vesc *= cdu/ctu;
+    numRP.innerHTML = `${Number(cdu*px).toFixed(0).toString()}`;
+    numRQ.innerHTML = `${Number(cdu*py).toFixed(0).toString()}`;
+    numVP.innerHTML = `${Number(cdu/ctu*vx).toFixed(3).toString()}`;
+    numVQ.innerHTML = `${Number(cdu/ctu*vy).toFixed(3).toString()}`;
+    numRI.innerHTML = `${Number(cdu*rIJK.x).toFixed(0).toString()}`;
+    numRJ.innerHTML = `${Number(cdu*rIJK.y).toFixed(0).toString()}`;
+    numRK.innerHTML = `${Number(cdu*rIJK.z).toFixed(0).toString()}`;
+    numVI.innerHTML = `${Number(cdu/ctu*vIJK.x).toFixed(3).toString()}`;
+    numVJ.innerHTML = `${Number(cdu/ctu*vIJK.y).toFixed(3).toString()}`;
+    numVK.innerHTML = `${Number(cdu/ctu*vIJK.z).toFixed(3).toString()}`;
+    numRU.innerHTML = `${Number(cdu*rUVW.x).toFixed(0).toString()}`;
+    numRV.innerHTML = '0.000';
+    numVU.innerHTML = `${Number(cdu/ctu*vUVW.x).toFixed(3).toString()}`;
+    numVV.innerHTML = `${Number(cdu/ctu*vUVW.y).toFixed(3).toString()}`;
+    unitsDisplay1.innerHTML = 'metric units (km, km/s)'
+    unitsDisplay2.innerHTML = 'metric units (km, km/s)'
+  }else{
+    numRP.innerHTML = `${Number(px).toFixed(3).toString()}`;
+    numRQ.innerHTML = `${Number(py).toFixed(3).toString()}`;
+    numVP.innerHTML = `${Number(vx).toFixed(3).toString()}`;
+    numVQ.innerHTML = `${Number(vy).toFixed(3).toString()}`;
+    numRI.innerHTML = `${Number(rIJK.x).toFixed(3).toString()}`;
+    numRJ.innerHTML = `${Number(rIJK.y).toFixed(3).toString()}`;
+    numRK.innerHTML = `${Number(rIJK.z).toFixed(3).toString()}`;
+    numVI.innerHTML = `${Number(vIJK.x).toFixed(3).toString()}`;
+    numVJ.innerHTML = `${Number(vIJK.y).toFixed(3).toString()}`;
+    numVK.innerHTML = `${Number(vIJK.z).toFixed(3).toString()}`;
+    numRU.innerHTML = `${Number(rUVW.x).toFixed(3).toString()}`;
+    numRV.innerHTML = '0.000';
+    numVU.innerHTML = `${Number(vUVW.x).toFixed(3).toString()}`;
+    numVV.innerHTML = `${Number(vUVW.y).toFixed(3).toString()}`;
+    unitsDisplay1.innerHTML = 'canonical units'
+    unitsDisplay2.innerHTML = 'canonical units'
   }
 
   numVcs.innerHTML = `${Number(vcs).toFixed(4).toString()}`;
@@ -689,8 +715,15 @@ const displayNumerical = function(){
   numQ.innerHTML = `${Number(Q).toFixed(4).toString()}`;
 
   computeKeplerStuff();
-  numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
-  numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180).toFixed(2).toString()}`;
+  
+  if (e < 1){
+    numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
+    numHyperAnom.innerHTML = 'x';
+  }else{
+    numEccenAnom.innerHTML = 'x';
+    numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180).toFixed(2).toString()}`;
+  }
+  
   numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180).toFixed(2).toString()}`;
   numMeanMotion.innerHTML = `${Number(mm).toFixed(4).toString()}`;
 }
@@ -1965,6 +1998,7 @@ toggleConicSectionButton.addEventListener('click', () => {
   h = rp*vp;
   doNuSliderOnInput(nuDegrees);
   handlePeriapseCheck();
+  displayNumerical();
   replaceAerovisualizerData('conic-section',conicSection);
   saveToLocalStorage();
 });
@@ -2047,10 +2081,14 @@ const initTHREE = function() {
   const ambientLight = new THREE.AmbientLight(0xffffff);
   scene.add(ambientLight);
 
-  renderer = new THREE.WebGLRenderer({
+  renderer = new THREE.WebGL1Renderer({
     devicePixelRatio: window.devicePixelRatio,
     alpha: true,
   });
+
+  //WebGL1Renderer.prototype.isWebGL1Renderer
+
+  console.log(renderer.isWebGL1Renderer);
 
   renderer.setClearColor(0x000000);
   renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);

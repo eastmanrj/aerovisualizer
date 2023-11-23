@@ -620,16 +620,14 @@ const displayNumerical = function(){
     tpDisp *= ctu/displayTimeScale;
     mm /= ctu;
   }
-  numXXX.innerHTML = renderer.isWebGLRenderer;
 
-  numH.innerHTML = `${Number(spAngMom).toFixed(1).toString()}`;
+  numXXX.innerHTML = 'xxx';
+
   numEnergy.innerHTML = `${Number(spEnergy).toFixed(4).toString()}`;
-  numA.innerHTML = `${Number(aDisp).toFixed(2).toString()}`;
   numE.innerHTML = `${Number(e).toFixed(3).toString()}`;
   numOm.innerHTML = lanDegrees;
   numI.innerHTML = incDegrees;
   numom.innerHTML = aopDegrees;
-  numP.innerHTML = `${Number(pDisp).toFixed(2).toString()}`;
 
   if (e < 1){
     numTotalPeriod.innerHTML = `${Number(tpDisp).toFixed(4).toString()}`;
@@ -673,6 +671,9 @@ const displayNumerical = function(){
   let Q = vPQW.lengthSq()/vcs/vcs;
 
   if (displayUnits === 2){
+    numH.innerHTML = `${Number(spAngMom).toExponential(3).toString()}`;
+    numA.innerHTML = `${Number(aDisp).toExponential(3).toString()}`;
+    numP.innerHTML = `${Number(pDisp).toExponential(3).toString()}`;
     vcs *= cdu/ctu;
     vesc *= cdu/ctu;
     numRP.innerHTML = `${Number(cdu*px).toFixed(0).toString()}`;
@@ -692,6 +693,9 @@ const displayNumerical = function(){
     unitsDisplay1.innerHTML = 'metric units (km, km/s)'
     unitsDisplay2.innerHTML = 'metric units (km, km/s)'
   }else{
+    numH.innerHTML = `${Number(spAngMom).toFixed(1).toString()}`;
+    numA.innerHTML = `${Number(aDisp).toFixed(2).toString()}`;
+    numP.innerHTML = `${Number(pDisp).toFixed(2).toString()}`;
     numRP.innerHTML = `${Number(px).toFixed(3).toString()}`;
     numRQ.innerHTML = `${Number(py).toFixed(3).toString()}`;
     numVP.innerHTML = `${Number(vx).toFixed(3).toString()}`;
@@ -2081,11 +2085,14 @@ const initTHREE = function() {
   const ambientLight = new THREE.AmbientLight(0xffffff);
   scene.add(ambientLight);
 
-  window.addEventListener('error', function (e) {e.preventDefault();e.stopPropagation();}, false);
-  
-  if (window.stop){
-    window.stop();
-  }
+  // window.addEventListener('error', function (e) {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+
+  //   if (window.stop){
+  //     window.stop();
+  //   }
+  // }, false);
 
   renderer = new THREE.WebGLRenderer({
     devicePixelRatio: window.devicePixelRatio,
@@ -2374,7 +2381,6 @@ const doUniversalPointCalculations = function(opt=0){
 
     // timeAfterPeriapseInSeconds = timeAfterPeriapseInSeconds0;
     // timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
-    doUniversalPointCalculations
     x0 = px;
     y0 = py;
     vx0 = vx;

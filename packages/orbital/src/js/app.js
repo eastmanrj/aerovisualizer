@@ -2405,7 +2405,7 @@ const doUniversalPointCalculations = function(opt=0){
   let vx1 = universalArray[universalArrayIndex1%universalArraySize].fdot*rp;
   let vy1 = universalArray[universalArrayIndex1%universalArraySize].gdot*sqrtMuOverP*(e + 1);
   let deltaTime = timeAfterPeriapseInSeconds1 - timeAfterPeriapseInSeconds0;
-  console.log(deltaTime);
+  // console.log(deltaTime);
   nu0 = universalArray[universalArrayIndex0%universalArraySize].nu;
   nu1 = universalArray[universalArrayIndex1%universalArraySize].nu;
 

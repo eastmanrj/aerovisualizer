@@ -3,11 +3,12 @@ import {FontLoader} from './FontLoader.js';
 import {TextGeometry} from './TextGeometry.js';
 
 /**
- OrbitalMechThings is a class that encapsulates the computation and rendering 
- of central bodies (sun, moon, planets), trajectory curves, and vectors associated
- with orbital mechanics.  The curves and vectors are the ellipse curve, the hyperbola
- curve, the perifocal frame vectors, the inertial frame vectors, and the r, v, h, and
- e vectors.  This class also handles the vector labels.
+ This OrbitalMechThings class encapsulates the computation and rendering of
+ central bodies (sun, moon, planets), trajectory curves, and vectors 
+ associated with orbital mechanics.  The curves and vectors are the ellipse
+ curve, the hyperbola curve, the perifocal frame vectors, the inertial frame
+ vectors, the UVW frame vectors, and the r, v, h, and e vectors.  This class
+ also handles the vector labels.
 **/
 
 const piOver180 = Math.PI / 180;
@@ -69,11 +70,22 @@ class OrbitalMechThings {
     this._q1 = new THREE.Quaternion();
     this._qn = new THREE.Quaternion();
     this._nullQuat = new THREE.Quaternion();
-    this._nullQuat.setFromAxisAngle(new THREE.Vector3(1,0,0),0);
+    this._nullQuat.setFromAxisAngle(this._xunit,0);
+    this._planetQuat0 = new THREE.Quaternion();
+    this._planetQuat0.setFromAxisAngle(this._xunit,Math.PI/2);
+    this._planetQuat1 = new THREE.Quaternion();
+    this._planetQuat1.setFromAxisAngle(this._zunit,0);
+    this._planetQuat = new THREE.Quaternion();
+    this._planetQuat.multiplyQuaternions(this._planetQuat1,this._planetQuat0);
+    // _planetQuat0 is the 90 deg rotation that is required because of 
+    // the way that the planet textures are provided.  _planetQuat1 is
+    // our rotation about the planet's rotational axis, which is assumed
+    // to be the planet's ellipsoidal z-axis (no attempt is made to model
+    // the actual turning axis since it is practically the same for our
+    // purposes).  _planetQuat is the final quaternion used for rendering
+    // and is just the multiplcation of the other two quaternions
     this._turn90Quat = new THREE.Quaternion();
-    this._turn90Quat.setFromAxisAngle(new THREE.Vector3(1,0,0),Math.PI/2);
-    this._turn90Quat2 = new THREE.Quaternion();
-    this._turn90Quat2.setFromAxisAngle(new THREE.Vector3(0,0,1),Math.PI/2);
+    this._turn90Quat.setFromAxisAngle(this._zunit,Math.PI/2);
     this._v0 = new THREE.Vector3();
     this._v1 = new THREE.Vector3();
     this._v2 = new THREE.Vector3();
@@ -171,6 +183,15 @@ class OrbitalMechThings {
     this._addRemoveVectorsAndLabels('v',true);
     this._addRemoveVectorsAndLabels('uvwFrame',true);
     this._constructPlanets();
+
+    this._numApoapsePasses = 0;//used in rotatePlanet2(), needed to 
+    // prevent the planet rotation to reset backwards if the rotating
+    // body passes through apoapse
+    this._previousTime = -1e10;//used in rotatePlanet2(), needed to 
+    // prevent the planet rotation to reset backwards if the rotating
+    // body passes through apoapse, set here to a large negative number
+    // that is assumed to be lower than any time that is passed
+    // into that function
   }
 
   // receiveVectorData(r, h, quat, e){
@@ -400,7 +421,7 @@ class OrbitalMechThings {
         this._WVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
       }
 
-      this._q1.multiplyQuaternions(this._rQuat,this._turn90Quat2);
+      this._q1.multiplyQuaternions(this._rQuat,this._turn90Quat);
       this._q1.multiplyQuaternions(this._quat,this._q1);
       this._v0.copy(this._r);
       this._v0.normalize();
@@ -631,6 +652,34 @@ class OrbitalMechThings {
     }
   }
 
+  resetPlanetRotationParameters(){
+    this._numApoapsePasses = 0;
+    this._previousTime = -1e10;
+  }
+
+  // simple version of rotatePlanet2 to be used in situations except
+  // for animation
+  rotatePlanet(tSeconds, rotationPeriodSeconds){
+    this._planetQuat1.setFromAxisAngle(this._zunit,2*Math.PI*tSeconds/rotationPeriodSeconds);
+    this._planetQuat.multiplyQuaternions(this._planetQuat1,this._planetQuat0);
+    this._planetMeshArray[this._planetMeshArrayIndex].matrix.compose(this._origin, this._planetQuat, this._planetScale);
+  }
+
+  // use this function to rotate the planet during animations
+  rotatePlanet2(tSeconds, rotationPeriodSeconds, orbitalPeriodSeconds){
+    if (tSeconds < this._previousTime){
+      this._numApoapsePasses += 1;
+    }
+
+    this._previousTime = tSeconds;
+
+    // console.log(this._numApoapsePasses, this._numApoapsePasses + tSeconds/rotationPeriodSeconds); //blah
+    this._planetQuat1.setFromAxisAngle(this._zunit,
+      2*Math.PI*(this._numApoapsePasses*orbitalPeriodSeconds/rotationPeriodSeconds + tSeconds/rotationPeriodSeconds));
+    this._planetQuat.multiplyQuaternions(this._planetQuat1,this._planetQuat0);
+    this._planetMeshArray[this._planetMeshArrayIndex].matrix.compose(this._origin, this._planetQuat, this._planetScale);
+  }
+
   shapeOrbitCurve(a, e){
     this._orbitEccentricity = e;
     
@@ -656,7 +705,8 @@ class OrbitalMechThings {
       this._planetScale.set(-1/a, -1/a, -1/a);
     }
 
-    this._planetMeshArray[this._planetMeshArrayIndex].matrix.compose(this._origin, this._turn90Quat, this._planetScale);
+    this._planetMeshArray[this._planetMeshArrayIndex].matrix.compose(this._origin, this._planetQuat, this._planetScale);
+    this.resetPlanetRotationParameters();
     this.needsRefresh = true;
   }
 
@@ -1222,7 +1272,7 @@ class OrbitalMechThings {
       this._planetMeshArray[i].matrixAutoUpdate = false;
       this._planetMeshArray[i].material.opacity = this._planetOpacity;
       this._planetMeshArray[i].material.transparent = true;
-      this._planetMeshArray[i].matrix.compose(this._origin, this._turn90Quat, this._planetScale);
+      this._planetMeshArray[i].matrix.compose(this._origin, this._planetQuat0, this._planetScale);
     }
     
     this._planetMeshArrayIndex = 0;

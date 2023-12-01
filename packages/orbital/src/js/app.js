@@ -16,6 +16,7 @@ const centerOfRotation = [0, 0, 0];
 let clock = null;
 let omt = null;//"vectors object" (handles all of the vectors)
 let orbitControls = null;//in this context, "orbit" refers to the camera
+// OrbitControls is a THREE.js class that has nothing to do with orbital mechanics
 let playing = false;
 let cbRadius = 1;
 const muCanonical = 1;//mu is 1 for canonical units of distance (DU)
@@ -86,8 +87,9 @@ let aerovisualizerData = [
 
 let centralBody = defaultCentralBody;
 let theCB = null;
-let ctu = 0;
-let cdu = 0;
+let ctu = 0;//canonical time unit
+let cdu = 0;//canonical distance unit
+let planetRotationPeriodSeconds = 0;
 let conicSection = defaultConicSection;
 let a = Number(defaultA);
 let tp = twoPi*Math.pow(a,1.5)/muCanonical;//orbital period
@@ -122,23 +124,23 @@ let timeAfterPeriapseInSeconds0;// time corresponding
 let timeAfterPeriapseInSeconds1;// time corresponding
 // to universalArray[universalArrayIndex1]
 
-// initial positions and velocities for interpolation for animation
+// initial position and velocity of interpolation for animation
 let x0;
 let y0;
 let vx0;
 let vy0;
-// positions and velocities for animation
+// position and velocity for animation
 let px;
 let py;
 let vx;
 let vy;
-// slopes for interpolation for animation
+// slopes of interpolation for animation
 let dpxdt;
 let dpydt;
 let dvxdt;
 let dvydt;
 let dnudt;
-// true anomaly for interpolation for animation
+// true anomaly of interpolation for animation
 let nu0;
 let nu1;
 
@@ -470,19 +472,19 @@ let centralBodyData = [
   {name:'sun1', id:0, m:1988470, CDU:696000, CTU:1593.888886079390, gravSurf:'NA?', 
   vesc:'NA?', mu:132712440018, Tsid:'NA?', perihel:'NA', 
   aphel:'NA', Tsyn:'NA?', vmean:'NA', vmax:'NA', vmin:'NA', 
-  srp:'NA?', daylen:'NA?', obliqu:'NA', incEqu:'NA', 
+  srp:0, daylen:'NA?', obliqu:'NA', incEqu:'NA', 
   a:'NA', e:'NA', i:'NA', Om:'NA', 
   om:'NA', ml:'NA?'},
   {name:'sun2', id:1, m:1988470, CDU:149597870.70, CTU:5022675.7344, gravSurf:'NA?', 
   vesc:'NA?', mu:132712440018, Tsid:'NA?', perihel:'NA', 
   aphel:'NA', Tsyn:'NA?', vmean:'NA', vmax:'NA', vmin:'NA', 
-  srp:'NA?', daylen:'NA?', obliqu:'NA', incEqu:'NA', 
+  srp:0, daylen:'NA?', obliqu:'NA', incEqu:'NA', 
   a:'NA', e:'NA', i:'NA', Om:'NA', 
   om:'NA', ml:'NA?'},
   {name:'moon', id:5, m:0.0734767309, CDU:1079.6, CTU:506.501324477232, gravSurf:'NA?', 
   vesc:'NA?', mu:4904.8695, Tsid:'NA?', perihel:'NA', 
   aphel:'NA', Tsyn:'NA?', vmean:'NA', vmax:'NA', vmin:'NA', 
-  srp:'NA?', daylen:'NA?', obliqu:'NA', incEqu:'NA', 
+  srp:0, daylen:'NA?', obliqu:'NA', incEqu:'NA', 
   a:'NA', e:'NA', i:'NA', Om:'NA', 
   om:'NA', ml:'NA?'},
   {name:'Mercury', id:2, m:0.3301, CDU:2439.7, CTU: 811.853519657804, gravSurf:3.7, 
@@ -719,7 +721,7 @@ const displayNumerical = function(){
   numQ.innerHTML = `${Number(Q).toFixed(4).toString()}`;
 
   computeKeplerStuff();
-  
+
   if (e < 1){
     numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
     numHyperAnom.innerHTML = 'x';
@@ -895,8 +897,6 @@ const doASliderOnInput = function(value){
     const M2 = e*Math.sinh(F2) - F2;
     const n = Math.sqrt(muCanonical/(-a*a*a));
     animationPeriod = (M2 - M1)/n;
-    // console.log('e: ',e,'nu1: ',nu1,'nu2: ',nu2,'coshF1: ',coshF1,'coshF2: ',coshF2,'coshF2*coshF2 - 1: ',coshF2*coshF2 - 1,'coshF1*coshF1 - 1: ',coshF1*coshF1 - 1);
-    // console.log('animationPeriod: ',animationPeriod,);
   }
 
   needToComputeUniversal = true;
@@ -1303,9 +1303,13 @@ const computeKeplerStuff = function(){
   const cosnu = Math.cos(nu);
 
   if (e<1){
+    // if (Math.abs((e + cosnu)/(1 + e*cosnu))>1){
+    //   console.log('blah');
+    // }
     let E = Math.acos((e + cosnu)/(1 + e*cosnu));//acos is 0 to pi
     eccentricAnomaly = nu < 0 ? -E : E;
     meanAnomaly = eccentricAnomaly - e*Math.sin(eccentricAnomaly);
+    // console.log(E, eccentricAnomaly, meanAnomaly, cosnu);
   }else{
     if (!(nu > (Math.PI + delta)/2 || nu < -(Math.PI + delta)/2)){
       const coshF = (e + cosnu)/(1 + e*cosnu);
@@ -1323,6 +1327,7 @@ const computeKeplerStuff = function(){
   meanMotion = Math.sqrt(muCanonical/aCubed);
   timeAfterPeriapse = meanAnomaly/meanMotion;
   timeAfterPeriapseInSeconds = timeAfterPeriapse*ctu;
+  // console.log('timeAfterPeriapse: ',timeAfterPeriapse,' meanAnomaly: ',meanAnomaly);
 }
 
 const computeKeplerAndTimeAfterPeriapse = function(){
@@ -1331,7 +1336,6 @@ const computeKeplerAndTimeAfterPeriapse = function(){
   
   if (universalArrayIndex0 === -1){
     universalArrayIndex0 = 0;
-    // console.log(universalArraySize, universalArrayIndex0, universalArrayIndex1);
   }
   
   universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
@@ -1375,6 +1379,8 @@ const doNuSliderOnInput = function(value){
   nu = nuDegrees*piOver180;
   computeKeplerAndTimeAfterPeriapse();
   doNuAndTimeDisplay();
+  // console.log(timeAfterPeriapseInSeconds, planetRotationPeriodSeconds);
+  omt.rotatePlanet(timeAfterPeriapseInSeconds, planetRotationPeriodSeconds);
 
   switch (conicSection){
     case 'ellipse':
@@ -1431,8 +1437,7 @@ const computeUniversal = function(){
 
   needToComputeUniversal = false;
   // set needToComputeUniversal to true whenever a or e changes
-  // but don't make the computations until the user hits the play
-  // button
+  // but don't call this function until the user hits the play button
 
   const t0 = 0;
     // we use the periapse for r0, so t0 = timeAfterPeriapse = 0.
@@ -1525,7 +1530,7 @@ const computeUniversal = function(){
        r0*(1 - z*c))/sqrtMuCanonical;      
       x = x + (t - tn)/dtdx;
 
-      // break out of the loop if "close enough"
+      // break out of the loop if "close enough", i is usually way below its max
       if (Math.abs(t - tn) < 0.001){
         break;
       }
@@ -1655,11 +1660,12 @@ vVectorColorMenu.addEventListener('change', () => {
 //   toggleShowInfo();
 // });
 
-const handleMuChange = function(){
+const handlePlanetChange = function(){
   haltPlay();
   theCB = centralBodyData.find(x => x.name === centralBody);
   ctu = theCB.CTU;
   cdu = theCB.CDU;
+  planetRotationPeriodSeconds = 3600*theCB.srp;
   const cbIndex = Number(theCB.id);
   muDisplay.innerHTML = `${+theCB.mu*1e6} km&sup3;/s&sup2;`;//+theCB.mu*1e6;//GM
   aCBDisplay.innerHTML = `${theCB.a} AU`;//semimajor axis
@@ -1696,7 +1702,7 @@ const handleMuChange = function(){
 
 muMenu.addEventListener('change', () => {
   centralBody = muMenu.value;
-  handleMuChange();
+  handlePlanetChange();
   replaceAerovisualizerData('central-body',centralBody);
   saveToLocalStorage();
 });
@@ -2209,7 +2215,7 @@ const initialize = function(data, camera){
   }
 
   muMenu.value = centralBody;
-  handleMuChange();
+  handlePlanetChange();
 
   eSlider.value = +eSl;
   aSlider.value = +aSl;
@@ -2233,8 +2239,8 @@ const initialize = function(data, camera){
 
   nuSlider.value = nuDegrees;
   computeUniversal();
-  doNuSliderOnInput(nuDegrees);
   doUniversalPointCalculations(1);
+  doNuSliderOnInput(nuDegrees);
   centralBodyTransparencySlider.value = centralBodyTransparency;
   setCentralBodyTransparency(centralBodyTransparency);
 
@@ -2352,6 +2358,7 @@ const haltPlay = function(){
 resetButton.addEventListener('click', () => {
   doNuSliderOnInput(+(nuSlider.value));
   doUniversalPointCalculations(1);
+  omt.resetPlanetRotationParameters();
 });
 
 const doUniversalPointCalculations = function(opt=0){
@@ -2367,7 +2374,6 @@ const doUniversalPointCalculations = function(opt=0){
 
     while (timeAfterPeriapseInSeconds > timeAfterPeriapseInSeconds1 && safety<10){
       safety++;
-      // console.log('safety: ',safety, 'i0: ',universalArrayIndex0, 'i1: ',universalArrayIndex1, 't0: ',timeAfterPeriapseInSeconds0, 't: ',timeAfterPeriapseInSeconds, 't1: ',timeAfterPeriapseInSeconds1);
       universalArrayIndex0 = universalArrayIndex1;
       universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
       timeAfterPeriapseInSeconds0 = timeAfterPeriapseInSeconds1;
@@ -2375,6 +2381,7 @@ const doUniversalPointCalculations = function(opt=0){
 
       if (timeAfterPeriapseInSeconds0 > timeAfterPeriapseInSeconds1){
         timeAfterPeriapseInSeconds -= animationPeriod*ctu;
+        timeAfterPeriapseInSeconds0 -= animationPeriod*ctu;
         timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
       }
     }
@@ -2398,6 +2405,7 @@ const doUniversalPointCalculations = function(opt=0){
   let vx1 = universalArray[universalArrayIndex1%universalArraySize].fdot*rp;
   let vy1 = universalArray[universalArrayIndex1%universalArraySize].gdot*sqrtMuOverP*(e + 1);
   let deltaTime = timeAfterPeriapseInSeconds1 - timeAfterPeriapseInSeconds0;
+  console.log(deltaTime);
   nu0 = universalArray[universalArrayIndex0%universalArraySize].nu;
   nu1 = universalArray[universalArrayIndex1%universalArraySize].nu;
 
@@ -2429,18 +2437,11 @@ const animate = function(continueAnimation = true) {
     const deltaT = timeScale*clock.getDelta();
     timeAfterPeriapseInSeconds += deltaT;// deltaT for 60 fps is 0.01666
     timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
-    let safetyCounter = 0;//prevents infinite loops if ever they happen (which they shouldn't)
-    //whenever I decide to change the if block below to a while loop to
-    //account for larger time intervals than between data points
-
-    if (timeAfterPeriapseInSeconds > timeAfterPeriapseInSeconds1 && safetyCounter < 10){
-      safetyCounter++;
-      doUniversalPointCalculations();
-    }
+    doUniversalPointCalculations();
 
     //do the linear interpolation between computed points on the ellipse or
     //hyperbola.  The conic sections are approximated as multi-sided
-    //polygons, and thus positions and velocities affected by this.  To
+    //polygons, and thus positions and velocities are affected by this.  To
     //reduce the error, increase the universalArraySize variable
     px = x0 + dpxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     py = y0 + dpydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
@@ -2451,6 +2452,7 @@ const animate = function(continueAnimation = true) {
 
     omt.setR(px, py, 0, a);
     omt.setV(vx, vy, 0);
+    omt.rotatePlanet2(timeAfterPeriapseInSeconds, planetRotationPeriodSeconds, animationPeriod*ctu);
     doNuAndTimeDisplay();
 
     if (numericalDisplayIsOccurring){

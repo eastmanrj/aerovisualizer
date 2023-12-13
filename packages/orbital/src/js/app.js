@@ -112,7 +112,7 @@ let timeAfterPeriapse;// in canonical time units (CTU)
 let timeAfterPeriapseInSeconds;
 
 let universalArray = [];
-const universalArraySize = 360;
+const universalArraySize = 361;
 let universalArrayIndex0;// this is
 // the index of universalArray that corresponds to just before
 // where the time is during animation
@@ -217,7 +217,6 @@ const mainReturnButton = document.getElementById('main-return-btn');
 const toggleConicSectionButton = document.getElementById('toggle-conic-btn');
 const prefsButton = document.getElementById('preferences-btn');
 const infoButton = document.getElementById('info-btn');
-const infoReturnButton = document.getElementById('info-return-btn');
 
 const muMenu = document.getElementById('central-body-menu');
 
@@ -225,8 +224,6 @@ const aDisplay = document.getElementById('a-display');
 const eDisplay = document.getElementById('e-display');    
 const aSlider = document.getElementById('a-slider');
 const eSlider = document.getElementById('e-slider');
-const defaultAButton = document.getElementById('default-a-btn');
-const defaultEButton = document.getElementById('default-e-btn');
 const lockPeriapseButton = document.getElementById('lock-periapse-btn');
 const lockApoapseButton = document.getElementById('lock-apoapse-btn');
 const periapseWarning = document.getElementById('periapse-warning');
@@ -248,14 +245,10 @@ const timeScaleMenu = document.getElementById('time-scale-menu');
 const playPauseButton = document.getElementById('play-pause-btn');
 const resetButton = document.getElementById('reset-btn');
 
-// const infoMenu = document.getElementById('info-menu');
-// const infoText = document.getElementById('info-text');
-
-// const infoElements = document.getElementById('info-elements');
 const muElements = document.getElementById('central-body-elements');
 const aeElements = document.getElementById('a-e-elements');
 const orientationElements = document.getElementById('orientation-elements');
-const rvElements = document.getElementById('r-v-elements');
+const nuElements = document.getElementById('nu-elements');
 const numericalElements1 = document.getElementById('numerical-elements1');
 const numericalElements2 = document.getElementById('numerical-elements2');
 const numericalElements3 = document.getElementById('numerical-elements3');
@@ -370,8 +363,11 @@ const inertialVectorsElements = document.getElementById('inertial-vectors-elemen
 const orbitFixedVectorsElements = document.getElementById('orbit-fixed-vectors-elements');
 const orbitingBodyVectorsElements = document.getElementById('orbiting-body-vectors-elements');
 
-
 const numXXX = document.getElementById('num-xxx');
+
+const infoElements = document.getElementById('info-elements');
+const infoMenu = document.getElementById('info-menu');
+const infoText = document.getElementById('info-text');
 
 /*
 name     = name
@@ -721,7 +717,7 @@ const displayNumerical = function(){
   numQ.innerHTML = `${Number(Q).toFixed(4).toString()}`;
 
   computeKeplerStuff();
-
+// console.log('wow');
   if (e < 1){
     numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
     numHyperAnom.innerHTML = 'x';
@@ -751,10 +747,11 @@ const handleMainButtons = function(button){
   rvButton.disabled = false;
   numericalButton.disabled = false;
   prefsButton.disabled = false;
+  infoButton.disabled = false;
   muElements.style.display = 'none';
   aeElements.style.display = 'none';
   orientationElements.style.display = 'none';
-  rvElements.style.display = 'none';
+  nuElements.style.display = 'none';
   numericalElements1.style.display = 'none';
   numericalElements2.style.display = 'none';
   numericalElements3.style.display = 'none';
@@ -764,6 +761,7 @@ const handleMainButtons = function(button){
   inertialVectorsElements.style.display = 'none';
   orbitFixedVectorsElements.style.display = 'none';
   orbitingBodyVectorsElements.style.display = 'none';
+  infoElements.style.display = 'none';
   numericalDisplayIsOccurring = false;
 
   switch (button){
@@ -786,7 +784,7 @@ const handleMainButtons = function(button){
       break;
     case 'rv':
       haltPlay();
-      rvElements.style.display = 'grid';
+      nuElements.style.display = 'grid';
       playResetButtonsElements.display = 'grid';
       rvButton.disabled = true;
       break;
@@ -813,6 +811,10 @@ const handleMainButtons = function(button){
       prefsElements.style.display = 'grid';
       prefsButton.disabled = true;
       handleMainPrefs(mainPrefsMenu.value);
+      break;
+    case 'info':
+      infoElements.style.display = 'grid';
+      infoButton.disabled = true;
       break;
     case 'none':
       break;
@@ -841,6 +843,10 @@ numericalButton.addEventListener('click', () => {
 
 prefsButton.addEventListener('click', () => {
   handleMainButtons('prefs');
+});
+
+infoButton.addEventListener('click', () => {
+  handleMainButtons('info');
 });
 
 const computeP = function(){
@@ -1053,26 +1059,6 @@ eSlider.onpointerup = function(){
   replaceAerovisualizerData('eccentricity',+this.value);
   saveToLocalStorage();
 }
-
-defaultAButton.addEventListener('click', () => {
-  haltPlay();
-  aSlider.value = 0;
-  doASliderOnInput(+aSlider.value);
-  aDisplay.innerHTML = `a: ${a}`;
-  omt.needsRefresh = true;
-  replaceAerovisualizerData('semimajor-axis',+aSlider.value);
-  saveToLocalStorage();
-});
-
-defaultEButton.addEventListener('click', () => {
-  haltPlay();
-  eSlider.value = 0;
-  doESliderOnInput(+eSlider.value);
-  eDisplay.innerHTML = `e: ${e}`;
-  omt.needsRefresh = true;
-  replaceAerovisualizerData('eccentricity',+eSlider.value);
-  saveToLocalStorage();
-});
 
 lockPeriapseButton.addEventListener('click', () => {
   handlePeriapseCheck();
@@ -1297,19 +1283,15 @@ const computeVHyperbola = function(){
   vVector.set(x, y, 0);
   omt.setV(x, y, 0, -a);
 }
-
+//blah
 const computeKeplerStuff = function(){
   // see Bate Mueller White pp. 182-188
   const cosnu = Math.cos(nu);
 
   if (e<1){
-    // if (Math.abs((e + cosnu)/(1 + e*cosnu))>1){
-    //   console.log('blah');
-    // }
     let E = Math.acos((e + cosnu)/(1 + e*cosnu));//acos is 0 to pi
     eccentricAnomaly = nu < 0 ? -E : E;
     meanAnomaly = eccentricAnomaly - e*Math.sin(eccentricAnomaly);
-    // console.log(E, eccentricAnomaly, meanAnomaly, cosnu);
   }else{
     if (!(nu > (Math.PI + delta)/2 || nu < -(Math.PI + delta)/2)){
       const coshF = (e + cosnu)/(1 + e*cosnu);
@@ -1327,17 +1309,15 @@ const computeKeplerStuff = function(){
   meanMotion = Math.sqrt(muCanonical/aCubed);
   timeAfterPeriapse = meanAnomaly/meanMotion;
   timeAfterPeriapseInSeconds = timeAfterPeriapse*ctu;
-  // console.log('timeAfterPeriapse: ',timeAfterPeriapse,' meanAnomaly: ',meanAnomaly);
+  // console.log('hello ',nu, timeAfterPeriapseInSeconds);
+  // console.log('computeKeplerStuff nu0=',nu0,' nuDegrees=',nuDegrees,' nu=',nu,' dnudt=',dnudt);
 }
 
 const computeKeplerAndTimeAfterPeriapse = function(){
   computeKeplerStuff();
+  // console.log('computeKeplerAndTimeAfterPeriapse nu0=',nu0,' nuDegrees=',nuDegrees,' nu1=',nu1,' dnudt=',dnudt,' universalArrayIndex0=',universalArrayIndex0,' universalArrayIndex1=',universalArrayIndex1);
+
   universalArrayIndex0 = universalArray.findIndex((e) => e.t >= timeAfterPeriapse);
-  
-  if (universalArrayIndex0 === -1){
-    universalArrayIndex0 = 0;
-  }
-  
   universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
   timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
   timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
@@ -1345,31 +1325,31 @@ const computeKeplerAndTimeAfterPeriapse = function(){
 
 const doNuAndTimeDisplay = function(){
   if (meanAnomaly !== null){
-    nuDisplay.innerHTML = `true anomaly: ${Number(nuDegrees).toFixed(2).toString()}`;
+    nuDisplay.innerHTML = `&nu;: ${Number(nuDegrees).toFixed(2).toString()}`;
     computePQW2UVWRotation();
 
     switch (timeScaleMenuChoice){
       case 'sec-equals-1sec':
-        timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(0).toString()} seconds`;
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(0).toString()} seconds`;
         break;
       case 'sec-equals-1minute':
-        timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
         break;
       case 'sec-equals-5minutes':
-        timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
         break;
       case 'sec-equals-15minutes':
-        timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
         break;
       case 'sec-equals-1hour':
-        timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(2).toString()} hours`;
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(2).toString()} hours`;
         break;
       case 'sec-equals-1day':
-        timeAfterPeriapseDisplay.innerHTML = `time after periapse: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(3).toString()} days`;
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(3).toString()} days`;
         break;
     }
   }else{
-    timeAfterPeriapseDisplay.innerHTML = 'time after periapse: INFINITY';
+    timeAfterPeriapseDisplay.innerHTML = 't: INFINITY';
   }
 }
 
@@ -1379,7 +1359,6 @@ const doNuSliderOnInput = function(value){
   nu = nuDegrees*piOver180;
   computeKeplerAndTimeAfterPeriapse();
   doNuAndTimeDisplay();
-  // console.log(timeAfterPeriapseInSeconds, planetRotationPeriodSeconds);
   omt.rotatePlanet(timeAfterPeriapseInSeconds, planetRotationPeriodSeconds);
 
   switch (conicSection){
@@ -1466,11 +1445,11 @@ const computeUniversal = function(){
 
   let univPoint;  
   // make sure that universalArraySize is an even fraction or
-  // multiple of 360 such as 60, 90, 120, 180, 360, or 720.
-  // 360 seems to be good enough. lower numbers cause the animation
+  // multiple of 360 PLUS 1 such as 61, 91, 121, 181, 361, or 721.
+  // 361 seems to be good enough. lower numbers cause the animation
   // to look segmented around periapse and the numbers to be
-  // too inaccurate
-  for (let t=-animationPeriod/2; t<animationPeriod/2; t+=animationPeriod/universalArraySize){
+  // too inaccurate.  The last point is the same as the first
+  for (let t=-animationPeriod/2; t<animationPeriod/2; t+=animationPeriod/(universalArraySize-1)){
     // t is the time in canonical time units.  For elliptical orbits, an 
     // orbital period (tp) equals twoPi canonical time units (TU or CTU)
     // which equals animationPeriod.  For a hyperbolic flyby, animationPeriod
@@ -1558,8 +1537,13 @@ const computeUniversal = function(){
     
     //(f*univPoint.gdot - 1)/g;
     universalArray.push(univPoint);
+
     // console.log(f*univPoint.gdot - g*univPoint.fdot);
   }
+
+  universalArray[0].nu = -180;//set the first one to -180 because atan2 makes it +180
+  univPoint = {...universalArray[0]};
+  universalArray.push(univPoint);//make the last one equal the first one
 }
 
 const setInertialVectorColor = function(color, save=false){
@@ -1631,34 +1615,6 @@ vVectorColorMenu.addEventListener('change', () => {
   setVVectorColor(vVectorColor, true);
   saveToLocalStorage();
 });
-
-// const toggleShowInfo = function(){
-//   if (threeDWorld.style.display === 'none'){
-//     threeDWorld.style.display = 'block';
-//     prefsButton.style.display = 'block';
-//     playPauseButton.style.display = 'block';
-//     resetButton.style.display = 'block';
-//     infoElements.style.display = 'none';
-//     doWindowResizeOrOrientationChange();
-//     handleMainButtons('numerical');
-//   }else{
-//     threeDWorld.style.display = 'none';
-//     prefsButton.style.display = 'none';
-//     playPauseButton.style.display = 'none';
-//     resetButton.style.display = 'none';
-//     infoElements.style.display = 'grid';
-//     handleMainButtons('none');
-//   }
-// }
-
-// infoButton.addEventListener('click', () => {
-//   haltPlay();
-//   toggleShowInfo();
-// });
-
-// infoReturnButton.addEventListener('click', () => {
-//   toggleShowInfo();
-// });
 
 const handlePlanetChange = function(){
   haltPlay();
@@ -2027,8 +1983,6 @@ const handlePeriapseCheck = function(){
     toggleConicSectionButton.style.backgroundColor = 'mediumblue';
     prefsButton.style.backgroundColor = 'mediumblue';
     infoButton.style.backgroundColor = 'mediumblue';
-    defaultAButton.style.backgroundColor = 'mediumblue';
-    defaultEButton.style.backgroundColor = 'mediumblue';
 
     if (!periapseLocked){
       lockPeriapseButton.style.backgroundColor = 'mediumblue';
@@ -2048,12 +2002,180 @@ const handlePeriapseCheck = function(){
     toggleConicSectionButton.style.backgroundColor = 'red';
     prefsButton.style.backgroundColor = 'red';
     infoButton.style.backgroundColor = 'red';
-    defaultAButton.style.backgroundColor = 'red';
-    defaultEButton.style.backgroundColor = 'red';
     lockPeriapseButton.style.backgroundColor = 'red';
     lockApoapseButton.style.backgroundColor = 'red';
   }
 }
+
+const handleInfoMenuChoice = function(choice){
+  switch (choice){
+    case 'info-intro': //Introduction
+      infoText.innerHTML = `<p class="p-normal">The purpose of Aerovisualizer is to 
+      assist in teaching or reinforcing concepts in aerospace engineering by presenting 
+      them in interesting and engaging ways.  Subjects are displayed as 2D and 3D 
+      animations to complement the dry equations found in textbooks and online.  Controls
+      are also provided to manipulate the displays.</p>
+      
+      <p class="p-normal"><em>Aerovisualizer - Orbital Mechanics</em> focuses on, well, orbital 
+      mechanics.  Set the values of the orbital elements and click the play button to start 
+      the animation.  It is assumed that you have taken or are currently taking a course in this 
+      topic.</p>`;
+      break;
+
+    case 'info-how-to-use': //how to use aerovisualizer
+      infoText.innerHTML = `
+      <p class="p-normal">1) Click <em>&mu;</em> to set the central body and its gravitational 
+      parameter (&mu;).</p>
+      <p class="p-normal">2) Click <em>a&nbsp;e</em> to set the semi-major axis (a) and the eccentricity 
+      (e).</p>
+      <p class="p-normal">3) Click <em>&Omega;&nbsp;i&nbsp;&omega;</em> to set the longitude of the 
+      ascending node (&Omega;), the orbital inclination (i), and the argument of periapsis (&omega;).</p>
+      <p class="p-normal">4) Click <em>&nu;</em> to set the true anomaly (&nu;) and the time after 
+      periapse.  (&nu; is the greek letter pronounced "nu")</p>
+      <p class="p-normal">5) Click the <em>play</em> button to start things moving.  Click the 
+      <em>reset</em> button to return to the initial state.</p>`;
+      break;
+
+    case 'info-mu':
+      infoText.innerHTML = `
+      <p class="p-normal">Click <em>&mu;</em>. A menu appears allowing you to choose the central body 
+      and its <em>gravitational parameter &mu;</em> (&mu; = Gm).</p>
+      <p class="p-normal">Choose a central body.  The sun/moon/planet changes to reflect your choice. 
+      Data of interest appear, including &mu;.</p>
+      <p class="p-normal">The sun has two menu choices.  One sets the canonical distance unit 
+      (CDU) equal to the sun's radius.  The other sets it equal to 1 astronomical unit (AU) to 
+      allow for greater distances from the sun.</p>
+      `;
+      break;
+
+    case 'info-a-and-e':
+      infoText.innerHTML = `
+      <p class="p-normal">Click <em>a&nbsp;e</em>.  Use the slider controls to set the 
+      <em>semi-major axis (a)</em> and the <em>orbital eccentricity (e)</em>.  The 
+      displayed orbit changes in accordance with the sliders.  If the orbit intersects  
+      the central body, the buttons change to red.</p>
+      <p class="p-normal">The value of 'a' is displayed in canonical 
+      distance units (CDU).  Its range is 1 to 60 for elliptical orbits and -1 to -60 
+      for hyperbolic orbits.</p>
+      <p class="p-normal">The value of 'e' is displayed and ranges from 0 to 0.98 for 
+      elliptical orbits and 1.02 to 5 hyperbolic orbits.  Nearly parabolic orbits (e~=1) 
+      are avoided.</p>
+      <p class="p-normal">If you click the buttons labeled 'lock periapse' or 'lock 
+      apoapse', Aerovisualizer attempts to keep those values constant while you move 
+      the sliders.</p>
+      `;
+      break;
+
+    case 'info-Omega-i-omega':
+      infoText.innerHTML = `
+      <p class="p-normal">Click <em>&Omega;&nbsp;i&nbsp;&omega;</em>.  Use the slider 
+      controls to set the orbital elements the <em>longitude of the ascending node (&Omega;)</em>, the 
+      <em>orbital inclination (i)</em>, and the <em>argument of periapsis (&omega;)</em>.  Their values are displayed in degrees next to their respective 
+      sliders.  The displayed orbit changes in accordance with the sliders.  Use the 
+      buttons to set the values to zero.</p>
+      `;
+      break;
+
+    case 'info-nu':
+      infoText.innerHTML = `
+      <p class="p-normal">Click <em>&nu;</em>.  Use the slider 
+      control to set the <em>true anomaly (&nu;)</em> .  The true anomaly is displayed in 
+      degrees as is the time since periapse passage.  Various vectors change in accordance 
+      with the slider.  Use the button to set &nu; to zero.  Choose the time scale 
+      from the menu.</p>
+      `;
+      break;
+
+    case 'info-numerical-1':
+      infoText.innerHTML = `<p class="p-normal">Click <em>1 2 3</em> and choose display 
+      option <em>1</em> to show the following information:</p>
+      
+      <p class="p-normal">time after periapse (t), orbital period (TP), true anomaly (&nu;), 
+      eccentric anomaly (E), hyperbolic anomaly (F), mean anomaly (M), mean motion (n), 
+      semi-major axis (a), orbital eccentricity (e), longitude of the ascending node 
+      (&Omega;), orbital inclination (i), argument of periapsis (&omega;), semi-latus 
+      rectum (P), specific angular momentum (h), specific energy (energy), velocity of 
+      circular satellite (vcs), escape velocity (vesc), and the Q parameter (Q).
+      </p>
+      <p class="p-normal">Click <em>units</em> to switch between canonical and metric 
+      units.</p>`;
+      break;
+
+    case 'info-numerical-2-3':
+      infoText.innerHTML = `<p class="p-normal">Click <em>1 2 3</em> and choose display 
+      option <em>2</em> to display the <em>r</em> and <em>v</em> vectors in the 
+      IJK, PQW, and UVW coordinate frames.  The IJK frame is an inertial frame such as 
+      the geocentric-equatorial frame or the heliocentric-ecliptic frame.  The 
+      PQW frame is the perifocal frame.  The UVW frame is described in sources such as 
+      "Fundamentals of Astrodynamics" by Bate, Mueller, and White.</p>
+      <p class="p-normal">Click <em>units</em> to switch between canonical and metric 
+      units.</p>
+      <p class="p-normal">Choose display option <em>3</em> to display the direction 
+      cosine matrices from the PQW frame to the IJK frame and from the UVW frame to 
+      the PQW frame.</p>`;
+      break;
+
+    case 'info-ellipse-hyperbola':
+      infoText.innerHTML = `<p class="p-normal">Click <em>ellipse / hyperbola</em> to toggle between the 
+      two types of orbits.  If the buttons suddenly appear red, click the 'a e' button and 
+      adjust the semi-major axis and/or the orbital eccentricity to increase the 
+      periapse.</p>`;
+      break;
+
+    case 'info-prefs-main':
+      infoText.innerHTML = `<p class="p-normal">Click <em>preferences</em>.  Another menu 
+      appears letting you choose from several preferences categories.</p>`;
+      break;
+
+    case 'info-prefs-general':
+      infoText.innerHTML = `<p class="p-normal">Under <em>general preferences</em>, use the slider to set the 
+      transparency of the sun/moon/planet.  Use the checkbox to specify whether or not to show 
+      the out of plane (W) vectors of both the PWQ frame and the UVW frame.</p>`;
+      break;
+
+    case 'info-prefs-inertial-vectors':
+      infoText.innerHTML = `<p class="p-normal">Under <em>inertial vectors</em>, use the first menu to choose 
+      whether or not to display the ijk vector frame.</p>
+      <p class="p-normal">Use the second menu to choose the color of the ijk vectors.</p>
+      <p class="p-normal">Use the slider to set the scale of the ijk vectors.</p>
+      <p class="p-normal">Note: many sources use the letters x, y, and z to represent this frame.</p>
+      `;
+      break;
+
+    case 'info-prefs-orbit-fixed-vectors':
+      infoText.innerHTML = `<p class="p-normal">Under <em>orbit-fixed vectors</em>, use the first menu to choose 
+      from the following options: 1) both h and e, 2) h only, 3) e only, 4) perifocal (PQW) frame, or 5) no 
+      vectors.</p>
+      <p class="p-normal">Use the second menu to choose the color of the vectors.</p>
+      <p class="p-normal">Use the slider to set the scale of the vectors.`;
+      break;
+
+    case 'info-prefs-orbiting-body-vectors':
+      infoText.innerHTML = `<p class="p-normal">Under <em>orbiting body vectors</em>, use the first menu to choose 
+      from the following options: 1) r only, 2) v only, 3) UVW frame only, 4) r and v, 5) r and UVW frame, 6) v 
+      and UVW frame, 7) r, v, and UVW frame, and 8) no vectors.</p>
+      <p class="p-normal">Use the rest of the menus to choose the various vector colors.</p>
+      <p class="p-normal">Use the slider to set the scale of the vectors.`;
+      break;
+
+    case 'info-contact-disclaimer':
+      infoText.innerHTML = `<p class="p-normal">Aerovisualizer is an open source 
+      project.  To report bugs or suggestions or to contribute to its development, 
+      please contact us at github.com/eastmanrj/aerovisualizer.</p>
+
+      <p class="p-normal">We do not take responsibility for missed problems on 
+      quizes, tests, projects, or homework due to software bugs or the 
+      misinterpretation of displays in Aerovisualizer.  Do not use Aerovisualizer 
+      for hardware or software qualification in aerospace or other industries nor 
+      in any other applications.</p>`;
+      break;
+  }
+}
+
+infoMenu.addEventListener('change', () => {
+  const choice = infoMenu.value;
+  handleInfoMenuChoice(choice);
+});
 
 const doWindowResizeOrOrientationChange = function(){
   camera.aspect = 1;
@@ -2279,10 +2401,10 @@ const completeInitialization = function(continueAnimation = true) {
 
     // defaultButton.style.display = 'none';
     // generalPrefButton.style.display = 'none';
-    // prefsReturnButton.style.display = 'none';
     // infoElements.style.display = 'none';
     // infoMenu.value = 'info-intro';
-    // handleInfoMenuChoice(infoMenu.value);
+
+    handleInfoMenuChoice('info-intro');
     loadBackground();
 
     doInertialVectorsChoice();
@@ -2362,6 +2484,8 @@ resetButton.addEventListener('click', () => {
 });
 
 const doUniversalPointCalculations = function(opt=0){
+  let p = false;
+
   if (!universalArray){
     return;
   }
@@ -2373,47 +2497,73 @@ const doUniversalPointCalculations = function(opt=0){
     let safety = 0;
 
     while (timeAfterPeriapseInSeconds > timeAfterPeriapseInSeconds1 && safety<10){
+      p = true;
       safety++;
       universalArrayIndex0 = universalArrayIndex1;
       universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
-      timeAfterPeriapseInSeconds0 = timeAfterPeriapseInSeconds1;
+      timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
       timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
-
-      if (timeAfterPeriapseInSeconds0 > timeAfterPeriapseInSeconds1){
-        timeAfterPeriapseInSeconds -= animationPeriod*ctu;
-        timeAfterPeriapseInSeconds0 -= animationPeriod*ctu;
+      
+      if (universalArrayIndex1 === 0){
+        universalArrayIndex0 = universalArrayIndex1;
+        universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
+        timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
+        timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
+        timeAfterPeriapseInSeconds = timeAfterPeriapseInSeconds0;
         timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
+        nuDegrees = -180;
+        nu = nuDegrees*piOver180;
+        // x0 = universalArray[universalArrayIndex0%universalArraySize].f*rp;
+        // y0 = universalArray[universalArrayIndex0%universalArraySize].g*sqrtMuOverP*(e + 1);
+        // vx0 = universalArray[universalArrayIndex0%universalArraySize].fdot*rp;
+        // vy0 = universalArray[universalArrayIndex0%universalArraySize].gdot*sqrtMuOverP*(e + 1);
+        // timeAfterPeriapse = timeAfterPeriapse - animationPeriod*360/361;
+        // timeAfterPeriapseInSeconds = timeAfterPeriapseInSeconds - (animationPeriod*ctu*360/361);
+      }
+
+      x0 = px;
+      y0 = py;
+      vx0 = vx;
+      vy0 = vy;
+
+      if (p){
+        let x1 = universalArray[universalArrayIndex1%universalArraySize].f*rp;
+        let y1 = universalArray[universalArrayIndex1%universalArraySize].g*sqrtMuOverP*(e + 1);
+        let vx1 = universalArray[universalArrayIndex1%universalArraySize].fdot*rp;
+        let vy1 = universalArray[universalArrayIndex1%universalArraySize].gdot*sqrtMuOverP*(e + 1);
+        let deltaTime = timeAfterPeriapseInSeconds1 - timeAfterPeriapseInSeconds0;
+        nu0 = universalArray[universalArrayIndex0%universalArraySize].nu;
+        nu1 = universalArray[universalArrayIndex1%universalArraySize].nu;
+        dpxdt = (x1 - x0)/deltaTime;
+        dpydt = (y1 - y0)/deltaTime;
+        dvxdt = (vx1 - vx0)/deltaTime;
+        dvydt = (vy1 - vy0)/deltaTime;
+        dnudt = (nu1 - nu0)/deltaTime;
       }
     }
-
-    // timeAfterPeriapseInSeconds = timeAfterPeriapseInSeconds0;
-    // timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
-    x0 = px;
-    y0 = py;
-    vx0 = vx;
-    vy0 = vy;
   }else{
-    computeKeplerAndTimeAfterPeriapse();
+    p = true;
+    doNuSliderOnInput(nuDegrees);
+    // computeKeplerAndTimeAfterPeriapse();
     x0 = universalArray[universalArrayIndex0%universalArraySize].f*rp;
     y0 = universalArray[universalArrayIndex0%universalArraySize].g*sqrtMuOverP*(e + 1);
     vx0 = universalArray[universalArrayIndex0%universalArraySize].fdot*rp;
     vy0 = universalArray[universalArrayIndex0%universalArraySize].gdot*sqrtMuOverP*(e + 1);
+    if (p){
+      let x1 = universalArray[universalArrayIndex1%universalArraySize].f*rp;
+      let y1 = universalArray[universalArrayIndex1%universalArraySize].g*sqrtMuOverP*(e + 1);
+      let vx1 = universalArray[universalArrayIndex1%universalArraySize].fdot*rp;
+      let vy1 = universalArray[universalArrayIndex1%universalArraySize].gdot*sqrtMuOverP*(e + 1);
+      let deltaTime = timeAfterPeriapseInSeconds1 - timeAfterPeriapseInSeconds0;
+      nu0 = universalArray[universalArrayIndex0%universalArraySize].nu;
+      nu1 = universalArray[universalArrayIndex1%universalArraySize].nu;
+      dpxdt = (x1 - x0)/deltaTime;
+      dpydt = (y1 - y0)/deltaTime;
+      dvxdt = (vx1 - vx0)/deltaTime;
+      dvydt = (vy1 - vy0)/deltaTime;
+      dnudt = (nu1 - nu0)/deltaTime;
+    }
   }
-
-  let x1 = universalArray[universalArrayIndex1%universalArraySize].f*rp;
-  let y1 = universalArray[universalArrayIndex1%universalArraySize].g*sqrtMuOverP*(e + 1);
-  let vx1 = universalArray[universalArrayIndex1%universalArraySize].fdot*rp;
-  let vy1 = universalArray[universalArrayIndex1%universalArraySize].gdot*sqrtMuOverP*(e + 1);
-  let deltaTime = timeAfterPeriapseInSeconds1 - timeAfterPeriapseInSeconds0;
-  // console.log(deltaTime);
-  nu0 = universalArray[universalArrayIndex0%universalArraySize].nu;
-  nu1 = universalArray[universalArrayIndex1%universalArraySize].nu;
-
-  dpxdt = (x1 - x0)/deltaTime;
-  dpydt = (y1 - y0)/deltaTime;
-  dvxdt = (vx1 - vx0)/deltaTime;
-  dvydt = (vy1 - vy0)/deltaTime;
-  dnudt = (nu1 - nu0)/deltaTime;
 }
 
 const animate = function(continueAnimation = true) {
@@ -2449,7 +2599,11 @@ const animate = function(continueAnimation = true) {
     vy = vy0 + dvydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     nuDegrees = nu0 + dnudt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     nu = nuDegrees*piOver180;
+    // console.log('animate nu0=',nu0,' nuDegrees=',nuDegrees,' nu=',nu,' dnudt=',dnudt);
 
+    // if (universalArrayIndex0 > 5 && universalArrayIndex0 < 9){
+    //   console.log('xxxxx',timeAfterPeriapseInSeconds, universalArrayIndex0, universalArrayIndex1, timeAfterPeriapseInSeconds0, timeAfterPeriapseInSeconds1, x0, dpxdt, px, py);
+    // }
     omt.setR(px, py, 0, a);
     omt.setV(vx, vy, 0);
     omt.rotatePlanet2(timeAfterPeriapseInSeconds, planetRotationPeriodSeconds, animationPeriod*ctu);

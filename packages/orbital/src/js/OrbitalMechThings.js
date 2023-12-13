@@ -194,14 +194,14 @@ class OrbitalMechThings {
     // into that function
   }
 
-  // receiveVectorData(r, h, quat, e){
-  //   this._r = r;
-  //   this._h = h;
-  //   this._quat = quat;
-  //   this._e = e;
-  // }
-
   drawOrbitCurveAndVectors(){
+    // this function draws (renders) the orbit curves and vectors.
+    // THREE.js has what it calls "Groups", which would greatly
+    // simplify the code in this function if learned.  This way,
+    // the shafts and arrowheads of vectors could be treated as
+    // a single object.  Pure laziness is why it has not been 
+    // learned and implemented.  rotation.aerovisualizer.com has
+    // similar vectors.
     this._qn.setFromRotationMatrix(this._camera.matrixWorld);
 
     if (this._showPQWFrame){
@@ -333,8 +333,8 @@ class OrbitalMechThings {
       this._v1.copy(this._v0);
       this._vQuat.setFromUnitVectors(this._yunit, this._v0);
       this._q1.multiplyQuaternions(this._quat,this._vQuat);
-      this._v0.multiplyScalar(0.5*this._vVectorScale.y*this._orbitingBodyVectorScale);
-      this._v1.multiplyScalar(0.5*this._vVectorScale.y*this._orbitingBodyVectorScale);
+      this._v0.multiplyScalar(this._vVectorScale.y*0.5*this._fractionForShaft);
+      this._v1.multiplyScalar(this._vVectorScale.y*0.5);
       this._v1.add(this._v0);
       this._v0.add(this._v2);
       this._v1.add(this._v2);

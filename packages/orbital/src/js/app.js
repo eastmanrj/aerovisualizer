@@ -1068,7 +1068,7 @@ lockPeriapseButton.addEventListener('click', () => {
     lockPeriapseButton.innerHTML = 'lock periapse';
 
     if (!periapseTooSmall){
-      lockPeriapseButton.style.backgroundColor = 'mediumblue';
+      lockPeriapseButton.style.backgroundColor = 0x5555ff;
     }
   }else{
     periapseLocked = true;
@@ -1079,7 +1079,7 @@ lockPeriapseButton.addEventListener('click', () => {
     lockApoapseButton.innerHTML = 'lock apoapse';
     
     if (!periapseTooSmall){
-      lockApoapseButton.style.backgroundColor = 'mediumblue';
+      lockApoapseButton.style.backgroundColor = 0x5555ff;
     }
   }
 });
@@ -1092,7 +1092,7 @@ lockApoapseButton.addEventListener('click', () => {
     lockApoapseButton.innerHTML = 'lock apoapse';
 
     if (!periapseTooSmall){
-      lockApoapseButton.style.backgroundColor = 'mediumblue';
+      lockApoapseButton.style.backgroundColor = 0x5555ff;
     }
   }else{
     apoapseLocked = true;
@@ -1103,7 +1103,7 @@ lockApoapseButton.addEventListener('click', () => {
     lockPeriapseButton.innerHTML = 'lock periapse';
 
     if (!periapseTooSmall){
-      lockPeriapseButton.style.backgroundColor = 'mediumblue';
+      lockPeriapseButton.style.backgroundColor = 0x5555ff;
     }
   }
 });
@@ -1974,22 +1974,22 @@ const handlePeriapseCheck = function(){
 
   if (periapseTooSmall === false){
     periapseWarning.innerHTML = '&nbsp';
-    muButton.style.backgroundColor = 'mediumblue';
-    aeButton.style.backgroundColor = 'mediumblue';
-    orientationButton.style.backgroundColor = 'mediumblue';
-    rvButton.style.backgroundColor = 'mediumblue';
-    numericalButton.style.backgroundColor = 'mediumblue';
-    mainReturnButton.style.backgroundColor = 'mediumblue';
-    toggleConicSectionButton.style.backgroundColor = 'mediumblue';
-    prefsButton.style.backgroundColor = 'mediumblue';
-    infoButton.style.backgroundColor = 'mediumblue';
+    muButton.style.backgroundColor = 0x5555ff;
+    aeButton.style.backgroundColor = 0x5555ff;
+    orientationButton.style.backgroundColor = 0x5555ff;
+    rvButton.style.backgroundColor = 0x5555ff;
+    numericalButton.style.backgroundColor = 0x5555ff;
+    mainReturnButton.style.backgroundColor = 0x5555ff;
+    toggleConicSectionButton.style.backgroundColor = 0x5555ff;
+    prefsButton.style.backgroundColor = 0x5555ff;
+    infoButton.style.backgroundColor = 0x5555ff;
 
     if (!periapseLocked){
-      lockPeriapseButton.style.backgroundColor = 'mediumblue';
+      lockPeriapseButton.style.backgroundColor = 0x5555ff;
     }
 
     if (!apoapseLocked){
-      lockApoapseButton.style.backgroundColor = 'mediumblue';
+      lockApoapseButton.style.backgroundColor = 0x5555ff;
     }
   }else{
     periapseWarning.innerHTML = 'PERIAPSE TOO SMALL';
@@ -2421,15 +2421,19 @@ const completeInitialization = function(continueAnimation = true) {
     doVectorScaleSliderOnInput('orbit-fixed',orbitFixedVectorScale);
     doVectorScaleSliderOnInput('orbitingBody',orbitingBodyVectorScale);
 
+    inertialVectorScaleSlider.value = inertialVectorScale;
+    orbitFixedVectorScaleSlider.value = orbitFixedVectorScale;
+    orbitingBodyVectorScaleSlider.value = orbitingBodyVectorScale;
+
+    omt.setInertialVectorScale(inertialVectorScale);
+    omt.setOrbitFixedVectorScale(orbitFixedVectorScale);
+    omt.setOrbitingBodyVectorScale(orbitingBodyVectorScale);
+
     px = x0 + dpxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     py = y0 + dpydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     vx = vx0 + dvxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     vy = vy0 + dvydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     displayNumerical();
-
-    omt.setInertialVectorScale(inertialVectorScale);
-    omt.setOrbitFixedVectorScale(orbitFixedVectorScale);
-    omt.setOrbitingBodyVectorScale(orbitingBodyVectorScale);
 
     showOutOfPlaneVectorsCheckbox.checked = showOutOfPlaneVectors;
     doWVectors();

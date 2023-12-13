@@ -114,7 +114,7 @@ label {
 
 .menu {
   display: block;
-  background-color:mediumblue;
+  background-color: #5555ff;
   color: rgb(235, 235, 255);
   font-family: inherit;
   font-size: 1.5rem;
@@ -131,7 +131,7 @@ label {
 .btn:link,
 .btn:visited {
   display: block;
-  background-color:mediumblue;
+  background-color: #5555ff;
   color: rgb(225, 225, 255);
   font-family: inherit;
   font-weight: 600;
@@ -271,7 +271,7 @@ input[type="range"]:focus {
 /***** Chrome, Safari, Opera and Edge Chromium styles *****/
 /* slider track */
 input[type="range"]::-webkit-slider-runnable-track {
-  background-color: #4780fc;
+  background-color: #5555ff;
   border-radius: 0.5rem;
   height: 0.5rem; /*testing*/ 
 }
@@ -283,7 +283,7 @@ input[type="range"]::-webkit-slider-thumb {
   margin-top: -10px; /* Centers thumb on the track */
 
   /*custom styles*/
-  background-color: #3243ff;
+  background-color: #5555ff;
   height: 2.5rem;
   width: 2.5rem;
   border-radius: 50%;
@@ -384,8 +384,8 @@ input[type="range"]:focus::-webkit-slider-thumb {
   }
 
   .non-3D-world{
-    width: 100%;/* testing not sure*/
-    height: calc(100vh - 90vw);/* testing not sure*/
+    width: 100%;/* test*/
+    height: calc(100vh - 90vw);/* test*/
   }
 
   .elements{
@@ -393,7 +393,16 @@ input[type="range"]:focus::-webkit-slider-thumb {
   }
 
   .numerical{
-    font-size: x-small;
+    font-size: small;
+  }
+
+  .btn-group-fixed{
+    bottom: 1.5%;
+  }
+
+  .p-normal {
+    font-size: 0.65rem;
+    margin-bottom: 0.25rem;
   }
 }
 
@@ -433,7 +442,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
   }
 
   .p-normal {
-    font-size: 0.65rem;
+    font-size: 0.85rem;
     margin-bottom: 0.5rem;
   }
 

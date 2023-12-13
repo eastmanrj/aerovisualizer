@@ -395,9 +395,6 @@ Om       = Longitude of ascending node (deg) J2000
 om       = Longitude of perihelion (deg) J2000
 ml       = Mean Longitude (deg) J2000
 
-sun, 1.98847E+06, 696340, x, 615, 1.32712440018E+11
-{name:'sun', CDU:696000},
-
 G, 6.67430E-11, m3/kg/s2
 G, 39.478, AU3/M(sun)/yr2
 G, 6.67430E-20, km3/kg/s2
@@ -416,11 +413,9 @@ incEcl = Inclination to ecliptic (deg) 5.145
 */
 
 /*
-G km^3/kg/s^2 6.6743E-20
+G km^3/kg/s^2 = 6.6743E-20
+1 AU = 149597870.70 km exactly
 
-AU (exact)
-km
-149597870.70
 according to source, for earth
 from https://archive.aoe.vt.edu/lutze/AOE2104/consts.pdf
 JGM-2
@@ -430,103 +425,71 @@ and heliocentric
 TU=58.132821 days
 avg dist=149599650
 AU/TU=29.784852 km/s
-
-Avg Dist from Sun (AU),Avg Dist from Sun (km),TU s,TU min,TU hrs,TU days,AU/TU km/s,2pi * TU days
-
-sun,1988470,132712440018,696000.0,1593.888886079390,
-436.66782928137800
-
-cb,m (x1e24) kg,mu km^3/s^2,radius (CDU) km,CTU s,CDU/CTU km/s,
-moon,0.0734767309,4904.8695,1079.6,506.501324477232,2.13148504816700
-
-Mercury,0.3301,22032,2439.7,811.853519657804,3.00509875356374,
-0.39,58343169.57,1223289.40,20388.16,339.80,14.16,47.69,88.96
-
-Venus,4.8673,324859,6051.8,825.998766884161,7.32664532034188,
-0.72,107710466.90,3068534.75,51142.25,852.37,35.52,35.10,223.15
-
-Earth,5.97220,398600.4418,6378.1,806.804103286409,7.90538864889216,
-1.00,149597870.70,5022642.89,83710.71,1395.18,58.13,29.78,365.26
-
-Mars,0.64169,42828,3389.5,953.541414862714,3.55464371779594,
-1.52,227388763.46,9412341.65,156872.36,2614.54,108.94,24.16,684.48
-
-Jupiter,1898.13,126687000,69911.0,1642.299064209990,42.56898242442230,
-5.20,777908927.64,59557617.54,992626.96,16543.78,689.32,13.06,4331.15
-
-Saturn,568.32,37931000,58232.0,2281.631023447120,25.52209336285330,
-9.50,1421179771.65,147067838.31,2451130.64,40852.18,1702.17,9.66,10695.08
-
-Uranus,86.811,5794000,25362.0,1677.976993115500,15.11462916598780,
-19.20,2872279117.44,422555874.80,7042597.91,117376.63,4890.69,6.80,30729.13
-
-Neptune,102.409,6835100,24622.0,1477.789423646780,16.66137245673320,
-30.10,4502895908.07,829434402.04,13823906.70,230398.45,9599.94,5.43,60318.17
 */
 
 let centralBodyData = [
-  {name:'sun1', id:0, m:1988470, CDU:696000, CTU:1593.888886079390, gravSurf:'NA?', 
-  vesc:'NA?', mu:132712440018, Tsid:'NA?', perihel:'NA', 
-  aphel:'NA', Tsyn:'NA?', vmean:'NA', vmax:'NA', vmin:'NA', 
-  srp:0, daylen:'NA?', obliqu:'NA', incEqu:'NA', 
+  {name:'sun1', id:0, m:1988470, CDU:696000, CTU:1593.888886079390, gravSurf:'NA', 
+  vesc:617.5, mu:132712440018, Tsid:'NA', perihel:'NA', radius:696000, 
+  aphel:'NA', Tsyn:'NA', vmean:'NA', vmax:'NA', vmin:'NA', 
+  srp:0, daylen:'NA', obliqu:'NA', incEqu:'NA', 
   a:'NA', e:'NA', i:'NA', Om:'NA', 
-  om:'NA', ml:'NA?'},
-  {name:'sun2', id:1, m:1988470, CDU:149597870.70, CTU:5022675.7344, gravSurf:'NA?', 
-  vesc:'NA?', mu:132712440018, Tsid:'NA?', perihel:'NA', 
-  aphel:'NA', Tsyn:'NA?', vmean:'NA', vmax:'NA', vmin:'NA', 
-  srp:0, daylen:'NA?', obliqu:'NA', incEqu:'NA', 
+  om:'NA', ml:'NA'},
+  {name:'sun2', id:1, m:1988470, CDU:149597870.70, CTU:5022675.7344, gravSurf:'NA', 
+  vesc:617.5, mu:132712440018, Tsid:'NA', perihel:'NA', radius:696000, 
+  aphel:'NA', Tsyn:'NA', vmean:'NA', vmax:'NA', vmin:'NA', 
+  srp:0, daylen:'NA', obliqu:'NA', incEqu:'NA', 
   a:'NA', e:'NA', i:'NA', Om:'NA', 
-  om:'NA', ml:'NA?'},
-  {name:'moon', id:5, m:0.0734767309, CDU:1079.6, CTU:506.501324477232, gravSurf:'NA?', 
-  vesc:'NA?', mu:4904.8695, Tsid:'NA?', perihel:'NA', 
-  aphel:'NA', Tsyn:'NA?', vmean:'NA', vmax:'NA', vmin:'NA', 
-  srp:0, daylen:'NA?', obliqu:'NA', incEqu:'NA', 
+  om:'NA', ml:'NA'},
+  {name:'moon', id:5, m:0.0734767309, CDU:1079.6, CTU:506.501324477232, gravSurf:'?', 
+  vesc:2.38, mu:4904.8695, Tsid:'?', perihel:'NA', radius:1079.6, 
+  aphel:'NA', Tsyn:'?', vmean:'NA', vmax:'NA', vmin:'NA', 
+  srp:0, daylen:'?', obliqu:'NA', incEqu:'NA', 
   a:'NA', e:'NA', i:'NA', Om:'NA', 
-  om:'NA', ml:'NA?'},
+  om:'NA', ml:'?'},
   {name:'Mercury', id:2, m:0.3301, CDU:2439.7, CTU: 811.853519657804, gravSurf:3.7, 
-  vesc:4.3, mu:22032., Tsid:87.969, perihel:46., 
+  vesc:4.3, mu:22032., Tsid:87.969, perihel:46., radius:2439.7, 
   aphel:69.818, Tsyn:115.88, vmean:47.36, vmax:58.97, vmin:38.86, 
   srp:1407.6, daylen:4222.6, obliqu:0.034, incEqu:0.034, 
   a:0.38709893, e:0.20563069, i:7.00487, Om:48.33167, 
   om:77.45645, ml:252.25084},
   {name:'Venus', id:3, m:4.8673, CDU:6051.8, CTU: 825.998766884161, gravSurf:8.87, 
-  vesc:10.36, mu:324859, Tsid:224.701, perihel:107.48, 
+  vesc:10.36, mu:324859, Tsid:224.701, perihel:107.48, radius:6051.8, 
   aphel:108.941, Tsyn:583.92, vmean:35.02, vmax:35.26, vmin:34.78, 
   srp:-5832.6, daylen:2802., obliqu:177.36, incEqu:2.64, 
   a:0.72333199, e:0.00677323, i:3.39471, Om:76.68069, 
   om:131.53298, ml:181.97973},
   {name:'Earth', id:4, m:5.9722, CDU:6378.1, CTU: 806.804103286409, gravSurf:9.82, 
-  vesc:11.186, mu:398600.4418, Tsid:365.256, perihel:147.095, 
+  vesc:11.186, mu:398600.4418, Tsid:365.256, perihel:147.095, radius:6378.1, 
   aphel:152.1, Tsyn:0, vmean:29.78, vmax:30.29, vmin:29.29, 
   srp:23.9345, daylen:24., obliqu:23.44, incEqu:23.44, 
   a:1.00000011, e:0.01671022, i:0.00005, Om:-11.26064, 
   om:102.94719, ml:100.46435},
   {name:'Mars', id:6, m:0.64169, CDU:3389.5, CTU: 953.541414862714, gravSurf:3.73, 
-  vesc:5.03, mu:42828, Tsid:686.98, perihel:206.65, 
+  vesc:5.03, mu:42828, Tsid:686.98, perihel:206.65, radius:3389.5, 
   aphel:249.261, Tsyn:779.94, vmean:24.08, vmax:26.5, vmin:21.97, 
   srp:24.6229, daylen:24.6597, obliqu:25.19, incEqu:25.19, 
   a:1.52366231, e:0.09341233, i:1.85061, Om:49.57854, 
   om:336.04084, ml:355.45332},
   {name:'Jupiter', id:7, m:1898.13, CDU:69911, CTU: 1642.299064209990, gravSurf:25.92, 
-  vesc:59.5, mu:126687000, Tsid:4332.59, perihel:740.595, 
+  vesc:59.5, mu:126687000, Tsid:4332.59, perihel:740.595, radius:69911, 
   aphel:816.363, Tsyn:398.88, vmean:13.06, vmax:13.72, vmin:12.44, 
   srp:9.925, daylen:9.9259, obliqu:3.13, incEqu:3.13, 
   a:5.20336301, e:0.04839266, i:1.3053, Om:100.55615, 
   om:14.75385, ml:34.40438},
   {name:'Saturn', id:8, m:568.32, CDU:58232, CTU: 2281.631023447120, gravSurf:11.19, 
-  vesc:35.5, mu:37931000, Tsid:10759.22, perihel:1357.55, 
+  vesc:35.5, mu:37931000, Tsid:10759.22, perihel:1357.55, radius:58232, 
   aphel:1506.53, Tsyn:378.09, vmean:9.67, vmax:10.14, vmin:9.14, 
   srp:10.656, daylen:10.656, obliqu:26.73, incEqu:undefined, 
   a:9.53707032, e:0.0541506, i:2.48446, Om:113.71504, 
   om:92.43194, ml:49.94432},
   {name:'Uranus', id:9, m:86.811, CDU:25362, CTU: 1677.976993115500, gravSurf:9.01, 
-  vesc:21.3, mu:5794000, Tsid:30685.40, perihel:2732.70, 
+  vesc:21.3, mu:5794000, Tsid:30685.40, perihel:2732.70, radius:25362, 
   aphel:3001.39, Tsyn:369.66, vmean:6.79, vmax:7.13, vmin:6.49, 
   srp:-17.24, daylen:17.24, obliqu:97.77, incEqu:82.23, 
   a:19.19126393, e:0.04716771, i:0.76986, Om:74.22988, 
   om:170.96424, ml:313.23218},
   {name:'Neptune', id:10, m:102.409, CDU:24622, CTU: 1477.789423646780, gravSurf:11.27, 
-  vesc:23.5, mu:6835100, Tsid:60189.00, perihel:4471.05, 
+  vesc:23.5, mu:6835100, Tsid:60189.00, perihel:4471.05, radius:24622, 
   aphel:4558.86, Tsyn:367.49, vmean:5.45, vmax:5.47, vmin:5.37, 
   srp:16.11, daylen:16.11, obliqu:28.32, incEqu:28.32, 
   a:30.06896348, e:0.00858587, i:1.76917, Om:131.72169, 
@@ -1283,7 +1246,7 @@ const computeVHyperbola = function(){
   vVector.set(x, y, 0);
   omt.setV(x, y, 0, -a);
 }
-//blah
+
 const computeKeplerStuff = function(){
   // see Bate Mueller White pp. 182-188
   const cosnu = Math.cos(nu);
@@ -1622,18 +1585,16 @@ const handlePlanetChange = function(){
   ctu = theCB.CTU;
   cdu = theCB.CDU;
   planetRotationPeriodSeconds = 3600*theCB.srp;
-  const cbIndex = Number(theCB.id);
-  muDisplay.innerHTML = `${+theCB.mu*1e6} km&sup3;/s&sup2;`;//+theCB.mu*1e6;//GM
+  muDisplay.innerHTML = `${Number(+theCB.mu*1e6).toExponential(6).toString()} km&sup3;/s&sup2;`;//GM
+  radiusDisplay.innerHTML = `${theCB.radius} km`;//radius
+  vescDisplay.innerHTML = `${theCB.vesc} km/s`;//escape velocity from surface
   aCBDisplay.innerHTML = `${theCB.a} AU`;//semimajor axis
   eCBDisplay.innerHTML = `${theCB.e}`;//orbital eccentricity
   iDisplay.innerHTML = `${theCB.i}&deg;`;//orbital inclination
   OmegaDisplay.innerHTML = `${theCB.Om}&deg;`;//longitude of ascending node
   omegaDisplay.innerHTML = `${theCB.om}&deg;`;//longitude of perihelion
-  radiusDisplay.innerHTML = `${theCB.CDU} km`;//canonical distance unit (radius)
-  vescDisplay.innerHTML = `${theCB.vesc} km/s`;//escape velocity
-  omt.setMuIndex(cbIndex);
+  omt.setMuIndex(theCB.id);
 
-  //blah
   // START OF UNCERTAIN SECTION
   const temp1 = sliderEcanChange;
   const temp2 = sliderAcanChange;

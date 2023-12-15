@@ -88,8 +88,7 @@ label {
   flex-wrap: wrap;
   justify-content: space-between;
   width: 100%;
-  gap: 0.5rem;
-  margin: 0.25rem;
+  column-gap: 1.5rem;
 }
 
 /* .btn-group > *{
@@ -143,6 +142,7 @@ label {
   padding: 0.5rem 0.7rem;
   flex: 1 1 auto;
   touch-action:manipulation;
+  margin-bottom: 0.5rem;
 }
 
 .btn:disabled,
@@ -226,7 +226,7 @@ label {
 }
 
 .bottom-margin{
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .left-border{
@@ -273,7 +273,8 @@ input[type="range"]:focus {
 input[type="range"]::-webkit-slider-runnable-track {
   background-color: #5555ff;
   border-radius: 0.5rem;
-  height: 0.5rem; /*testing*/ 
+  height: 0.5rem; /*testing*/
+  margin-bottom: 1.5rem;
 }
 
 /* slider thumb */
@@ -305,6 +306,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
   display: grid;
   grid-template-columns: 2fr 3fr 3fr 2fr;
   align-content: space-around;
+  /* align-items: stretch; */
   padding-left: 1.5%;
   padding-right: 1.5%;
   padding-top: 1.5%;
@@ -394,6 +396,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
 
   .elements{
     padding-top: 0.25%;
+    /* height: 15rem;test */
   }
 
   .numerical{
@@ -440,7 +443,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
   }
 
   .p-normal {
-    font-size: 1.15rem;
+    font-size: 0.95rem;
     margin-bottom: 0.5rem;
   }
 

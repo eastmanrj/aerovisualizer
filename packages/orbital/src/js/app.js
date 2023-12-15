@@ -186,6 +186,7 @@ let specificEnergy = -muCanonical/(2*a);
 let vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));//v vector magnitude at periapse
 let h = rp*vp;
 periapseTooSmall = rp < cbRadius ? true : false;
+
 let periapseLocked = false;
 let apoapseLocked = false;
 let sliderAcanChange = false;//required for locking the periapse/apoapse
@@ -431,21 +432,15 @@ let centralBodyData = [
   {name:'sun1', id:0, m:1988470, CDU:696000, CTU:1593.888886079390, gravSurf:'NA', 
   vesc:617.5, mu:132712440018, Tsid:'NA', perihel:'NA', radius:696000, 
   aphel:'NA', Tsyn:'NA', vmean:'NA', vmax:'NA', vmin:'NA', 
-  srp:0, daylen:'NA', obliqu:'NA', incEqu:'NA', 
+  srp:1000000, daylen:'NA', obliqu:'NA', incEqu:'NA', 
   a:'NA', e:'NA', i:'NA', Om:'NA', 
   om:'NA', ml:'NA'},
   {name:'sun2', id:1, m:1988470, CDU:149597870.70, CTU:5022675.7344, gravSurf:'NA', 
   vesc:617.5, mu:132712440018, Tsid:'NA', perihel:'NA', radius:696000, 
   aphel:'NA', Tsyn:'NA', vmean:'NA', vmax:'NA', vmin:'NA', 
-  srp:0, daylen:'NA', obliqu:'NA', incEqu:'NA', 
+  srp:1000000, daylen:'NA', obliqu:'NA', incEqu:'NA', 
   a:'NA', e:'NA', i:'NA', Om:'NA', 
   om:'NA', ml:'NA'},
-  {name:'moon', id:5, m:0.0734767309, CDU:1079.6, CTU:506.501324477232, gravSurf:'?', 
-  vesc:2.38, mu:4904.8695, Tsid:'?', perihel:'NA', radius:1079.6, 
-  aphel:'NA', Tsyn:'?', vmean:'NA', vmax:'NA', vmin:'NA', 
-  srp:0, daylen:'?', obliqu:'NA', incEqu:'NA', 
-  a:'NA', e:'NA', i:'NA', Om:'NA', 
-  om:'NA', ml:'?'},
   {name:'Mercury', id:2, m:0.3301, CDU:2439.7, CTU: 811.853519657804, gravSurf:3.7, 
   vesc:4.3, mu:22032., Tsid:87.969, perihel:46., radius:2439.7, 
   aphel:69.818, Tsyn:115.88, vmean:47.36, vmax:58.97, vmin:38.86, 
@@ -464,6 +459,12 @@ let centralBodyData = [
   srp:23.9345, daylen:24., obliqu:23.44, incEqu:23.44, 
   a:1.00000011, e:0.01671022, i:0.00005, Om:-11.26064, 
   om:102.94719, ml:100.46435},
+  {name:'moon', id:5, m:0.0734767309, CDU:1079.6, CTU:506.501324477232, gravSurf:'?', 
+  vesc:2.38, mu:4904.8695, Tsid:'?', perihel:'NA', radius:1079.6, 
+  aphel:'NA', Tsyn:'?', vmean:'NA', vmax:'NA', vmin:'NA', 
+  srp:655.728, daylen:'?', obliqu:'NA', incEqu:'NA', 
+  a:'NA', e:'NA', i:'NA', Om:'NA', 
+  om:'NA', ml:'?'},
   {name:'Mars', id:6, m:0.64169, CDU:3389.5, CTU: 953.541414862714, gravSurf:3.73, 
   vesc:5.03, mu:42828, Tsid:686.98, perihel:206.65, radius:3389.5, 
   aphel:249.261, Tsyn:779.94, vmean:24.08, vmax:26.5, vmin:21.97, 
@@ -680,7 +681,7 @@ const displayNumerical = function(){
   numQ.innerHTML = `${Number(Q).toFixed(4).toString()}`;
 
   computeKeplerStuff();
-// console.log('wow');
+
   if (e < 1){
     numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
     numHyperAnom.innerHTML = 'x';
@@ -879,6 +880,7 @@ const doASliderOnInput = function(value){
   // We want to scale the size of the sun additionally by a factor of
   // the ratio of 1 AU to the radius of the sun.  Make sure that
   // the centralBodyData id for 'sun2' is 1
+
   if (theCB.id !== 1){
     omt.shapeOrbitCurve(a, e);
   }else{
@@ -1031,7 +1033,7 @@ lockPeriapseButton.addEventListener('click', () => {
     lockPeriapseButton.innerHTML = 'lock periapse';
 
     if (!periapseTooSmall){
-      lockPeriapseButton.style.backgroundColor = 0x5555ff;
+      lockPeriapseButton.style.backgroundColor = "#5555ff";
     }
   }else{
     periapseLocked = true;
@@ -1042,7 +1044,7 @@ lockPeriapseButton.addEventListener('click', () => {
     lockApoapseButton.innerHTML = 'lock apoapse';
     
     if (!periapseTooSmall){
-      lockApoapseButton.style.backgroundColor = 0x5555ff;
+      lockApoapseButton.style.backgroundColor = "#5555ff";
     }
   }
 });
@@ -1055,7 +1057,7 @@ lockApoapseButton.addEventListener('click', () => {
     lockApoapseButton.innerHTML = 'lock apoapse';
 
     if (!periapseTooSmall){
-      lockApoapseButton.style.backgroundColor = 0x5555ff;
+      lockApoapseButton.style.backgroundColor = "#5555ff";
     }
   }else{
     apoapseLocked = true;
@@ -1066,7 +1068,7 @@ lockApoapseButton.addEventListener('click', () => {
     lockPeriapseButton.innerHTML = 'lock periapse';
 
     if (!periapseTooSmall){
-      lockPeriapseButton.style.backgroundColor = 0x5555ff;
+      lockPeriapseButton.style.backgroundColor = "#5555ff";
     }
   }
 });
@@ -1272,14 +1274,10 @@ const computeKeplerStuff = function(){
   meanMotion = Math.sqrt(muCanonical/aCubed);
   timeAfterPeriapse = meanAnomaly/meanMotion;
   timeAfterPeriapseInSeconds = timeAfterPeriapse*ctu;
-  // console.log('hello ',nu, timeAfterPeriapseInSeconds);
-  // console.log('computeKeplerStuff nu0=',nu0,' nuDegrees=',nuDegrees,' nu=',nu,' dnudt=',dnudt);
 }
 
 const computeKeplerAndTimeAfterPeriapse = function(){
   computeKeplerStuff();
-  // console.log('computeKeplerAndTimeAfterPeriapse nu0=',nu0,' nuDegrees=',nuDegrees,' nu1=',nu1,' dnudt=',dnudt,' universalArrayIndex0=',universalArrayIndex0,' universalArrayIndex1=',universalArrayIndex1);
-
   universalArrayIndex0 = universalArray.findIndex((e) => e.t >= timeAfterPeriapse);
   universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
   timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
@@ -1353,11 +1351,7 @@ zeroNuButton.addEventListener('click', () => {
   nu = 0;
   nuDegrees = 0;
   nuSlider.value = nuDegrees;  
-  doNuAndTimeDisplay();
-  // omt.needsRefresh = true;
-
-  // localStorage.clear();//temporary
-  // location.reload();//temporary
+  doUniversalPointCalculations(1);
   replaceAerovisualizerData('true-anomaly',nuDegrees);
   saveToLocalStorage();
 });
@@ -1935,22 +1929,22 @@ const handlePeriapseCheck = function(){
 
   if (periapseTooSmall === false){
     periapseWarning.innerHTML = '&nbsp';
-    muButton.style.backgroundColor = 0x5555ff;
-    aeButton.style.backgroundColor = 0x5555ff;
-    orientationButton.style.backgroundColor = 0x5555ff;
-    rvButton.style.backgroundColor = 0x5555ff;
-    numericalButton.style.backgroundColor = 0x5555ff;
-    mainReturnButton.style.backgroundColor = 0x5555ff;
-    toggleConicSectionButton.style.backgroundColor = 0x5555ff;
-    prefsButton.style.backgroundColor = 0x5555ff;
-    infoButton.style.backgroundColor = 0x5555ff;
+    muButton.style.backgroundColor = "#5555ff";
+    aeButton.style.backgroundColor = "#5555ff";
+    orientationButton.style.backgroundColor = "#5555ff";
+    rvButton.style.backgroundColor = "#5555ff";
+    numericalButton.style.backgroundColor = "#5555ff";
+    mainReturnButton.style.backgroundColor = "#5555ff";
+    toggleConicSectionButton.style.backgroundColor = "#5555ff";
+    prefsButton.style.backgroundColor = "#5555ff";
+    infoButton.style.backgroundColor = "#5555ff";
 
     if (!periapseLocked){
-      lockPeriapseButton.style.backgroundColor = 0x5555ff;
+      lockPeriapseButton.style.backgroundColor = "#5555ff";
     }
 
     if (!apoapseLocked){
-      lockApoapseButton.style.backgroundColor = 0x5555ff;
+      lockApoapseButton.style.backgroundColor = "#5555ff";
     }
   }else{
     periapseWarning.innerHTML = 'PERIAPSE TOO SMALL';
@@ -2190,6 +2184,7 @@ const initTHREE = function() {
 
   if (!renderer.isWebGLRenderer){
     periapseTooSmall = true;
+
     handlePeriapseCheck();
     handleMainButtons('none');
     return;

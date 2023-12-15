@@ -1216,7 +1216,8 @@ class OrbitalMechThings {
   }
 
   _constructPlanets(){
-    const geometry = new THREE.SphereGeometry(0.976, 32, 16);
+    const geometry = new THREE.SphereGeometry(1, 32, 16);
+    // const geometry = new THREE.SphereGeometry(0.976, 32, 16);
     let texture;
     let material;
     //creates spherical geometry with radius 0.976, 32 horizontal segments and 16 vertical segments

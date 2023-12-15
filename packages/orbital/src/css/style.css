@@ -222,7 +222,7 @@ label {
 }
 
 .top-margin{
-  margin-top: 1rem;
+  margin-top: 0.25rem;
 }
 
 .bottom-margin{
@@ -384,14 +384,14 @@ input[type="range"]:focus::-webkit-slider-thumb {
  @media (orientation: portrait) and (max-width: 450px) {
   #threeD-world {
     /* flex-basis: 80vh; */
-    width: 90vw;
-    height: 90vw;
+    width: 85vw;
+    height: 85vw;
     align-self: center;
   }
 
   .non-3D-world{
     width: 100%;/* test*/
-    height: calc(100vh - 90vw);/* test*/
+    height: calc(100vh - 85vw);/* test*/
   }
 
   .elements{
@@ -407,9 +407,13 @@ input[type="range"]:focus::-webkit-slider-thumb {
     bottom: 1.5%;
   }
 
+  .bottom-margin{
+    margin-bottom: 0.75rem;
+  }
+
   .p-normal {
-    font-size: 1.25rem;
-    margin-bottom: 0.25rem;
+    font-size: 1.15rem;
+    margin-bottom: 0.15rem;
   }
 }
 
@@ -443,8 +447,8 @@ input[type="range"]:focus::-webkit-slider-thumb {
   }
 
   .p-normal {
-    font-size: 0.95rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
   }
 
   .elements{
@@ -453,6 +457,10 @@ input[type="range"]:focus::-webkit-slider-thumb {
 
   .numerical{
     font-size: small;
+  }
+
+  .bottom-margin{
+    margin-bottom: 0.5rem;
   }
 }
 

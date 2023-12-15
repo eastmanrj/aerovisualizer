@@ -1895,6 +1895,8 @@ toggleConicSectionButton.addEventListener('click', () => {
   ra = Number(a*(1+e));
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
+  nuDegrees = 0;
+  nuSlider.value = 0;
   doNuSliderOnInput(nuDegrees);
   handlePeriapseCheck();
   displayNumerical();

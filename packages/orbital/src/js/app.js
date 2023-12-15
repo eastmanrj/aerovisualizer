@@ -720,7 +720,7 @@ const handleMainButtons = function(button){
   numericalElements2.style.display = 'none';
   numericalElements3.style.display = 'none';
   prefsElements.style.display = 'none';
-  playResetButtonsElements.display = 'none';
+  playResetButtonsElements.style.display = 'flex';
   generalPrefsElements.style.display = 'none';
   inertialVectorsElements.style.display = 'none';
   orbitFixedVectorsElements.style.display = 'none';
@@ -737,19 +737,16 @@ const handleMainButtons = function(button){
     case 'aeP':
       haltPlay();
       aeElements.style.display = 'grid';
-      playResetButtonsElements.display = 'grid';
       aeButton.disabled = true;
       break;
     case 'orientation':
       haltPlay();
       orientationElements.style.display = 'grid';
-      playResetButtonsElements.display = 'grid';
       orientationButton.disabled = true;
       break;
     case 'rv':
       haltPlay();
       nuElements.style.display = 'grid';
-      playResetButtonsElements.display = 'grid';
       rvButton.disabled = true;
       break;
     case 'numerical':
@@ -765,7 +762,6 @@ const handleMainButtons = function(button){
           break;
       }
 
-      playResetButtonsElements.display = 'grid';
       numericalButton.disabled = true;
       numericalDisplayIsOccurring = true;
       displayNumerical();
@@ -774,11 +770,14 @@ const handleMainButtons = function(button){
       haltPlay();
       prefsElements.style.display = 'grid';
       prefsButton.disabled = true;
+      playResetButtonsElements.style.display = 'none';
       handleMainPrefs(mainPrefsMenu.value);
       break;
     case 'info':
+      haltPlay();
       infoElements.style.display = 'grid';
       infoButton.disabled = true;
+      playResetButtonsElements.style.display = 'none';
       break;
     case 'none':
       break;
@@ -829,6 +828,21 @@ const computeDelta = function(){
   delta = 2*Math.asin(1/e);// delta is an angle in radians
 }
 
+const doTwoSunOptionChoice = function(){
+  // 'sun1' is the sun with its radius as the canonical distance unit.
+  // 'sun2' uses 1 AU as the CDU, and we need to scale the size of the  
+  // sun additionally by a factor of the ratio of 1 AU to the radius of  
+  // the sun (ratio=214.9...).  sun2 is needed to allow the 'a' slider 
+  // to reach larger scales of distance.  Make sure that the 
+  // centralBodyData id for 'sun2' is 1
+
+  if (theCB.id !== 1){
+    omt.shapeOrbitCurve(a, e);
+  }else{
+    omt.shapeOrbitCurve(214.939469396551724*a, e);
+  }
+}
+
 const doASliderOnInput = function(value){
   haltPlay();
   let c = aRange/(Math.log(aSliderRange+1));
@@ -875,17 +889,7 @@ const doASliderOnInput = function(value){
   specificEnergy = -muCanonical/(2*a);
   aDisplay.innerHTML = `a: ${Number(a).toFixed(2).toString()}`;
   computeP();
-
-  // 'sun2' is sun with 1 AU being the canonical distance unit.
-  // We want to scale the size of the sun additionally by a factor of
-  // the ratio of 1 AU to the radius of the sun.  Make sure that
-  // the centralBodyData id for 'sun2' is 1
-
-  if (theCB.id !== 1){
-    omt.shapeOrbitCurve(a, e);
-  }else{
-    omt.shapeOrbitCurve(214.939469396551724*a, e);
-  }
+  doTwoSunOptionChoice();
 }
 
 const doESliderOnInput = function(value){
@@ -914,12 +918,7 @@ const doESliderOnInput = function(value){
 
   needToComputeUniversal = true;
   computeP();
-
-  if (theCB.id !== 1){
-    omt.shapeOrbitCurve(a, e);
-  }else{
-    omt.shapeOrbitCurve(214.939469396551724*a, e);
-  }
+  doTwoSunOptionChoice();
 }
 
 aSlider.oninput = function(){
@@ -1130,12 +1129,7 @@ const handleOrientationOnInput = function(opt, setValuesOnly = false){
   if (!setValuesOnly){
     haltPlay();
     computePQW2IJKRotation();
-
-    if (theCB.id !== 1){
-      omt.shapeOrbitCurve(a, e);
-    }else{
-      omt.shapeOrbitCurve(214.939469396551724*a, e);
-    }
+    doTwoSunOptionChoice();
   }
 }
 
@@ -1167,34 +1161,22 @@ aopSlider.onpointerup = function(){
 }
 
 zeroLanButton.addEventListener('click', () => {
-  haltPlay();
-  lan = 0;
-  lanDegrees = 0;
-  lanSlider.value = lanDegrees;
-  lanDisplay.innerHTML = lanDegrees;
-  computePQW2IJKRotation();
+  lanSlider.value = 0;
+  handleOrientationOnInput('lan');
   replaceAerovisualizerData('longitude-of-ascending-node',0);
   saveToLocalStorage();
 });
 
 zeroIncButton.addEventListener('click', () => {
-  haltPlay();
-  inc = 0;
-  incDegrees = 0;
-  incSlider.value = incDegrees;
-  incDisplay.innerHTML = incDegrees;
-  computePQW2IJKRotation();
+  incSlider.value = 0;
+  handleOrientationOnInput('inc');
   replaceAerovisualizerData('inclination',0);
   saveToLocalStorage();
 });
 
 zeroAopButton.addEventListener('click', () => {
-  haltPlay();
-  aop = 0;
-  aopDegrees = 0;
-  aopSlider.value = aopDegrees;
-  aopDisplay.innerHTML = aopDegrees;
-  computePQW2IJKRotation();
+  aopSlider.value = 0;
+  handleOrientationOnInput('aop');
   replaceAerovisualizerData('argument-of-periapsis',0);
   saveToLocalStorage();
 });
@@ -1211,7 +1193,7 @@ const computeRHyperbola = function(){
   // don't render the r vector when the true anomaly
   // is in a range such that r would point to the
   // wrong branch of the hyperbola.
-  // if going from 0 to 360, do this -->
+  // Also, if going from 0 to 360, replace the code below with this -->
   // if (nu > (Math.PI + delta)/2 && nu < 1.5*Math.PI - delta/2){
 
   if (nu > (Math.PI + delta)/2 || nu < -(Math.PI + delta)/2){
@@ -1604,11 +1586,7 @@ const handlePlanetChange = function(){
   // handlePeriapseCheck();
   // END Of UNCERTAIN SECTION
 
-  if (theCB.id !== 1){
-    omt.shapeOrbitCurve(a, e);
-  }else{
-    omt.shapeOrbitCurve(214.939469396551724*a, e);
-  }
+  doTwoSunOptionChoice();
 }
 
 muMenu.addEventListener('change', () => {

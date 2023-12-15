@@ -88,7 +88,7 @@ label {
   flex-wrap: wrap;
   justify-content: space-between;
   width: 100%;
-  column-gap: 1.5rem;
+  column-gap: 1.15rem;
 }
 
 /* .btn-group > *{
@@ -120,7 +120,7 @@ label {
   font-weight: 600;
   border-width: 2px;
   border-radius: 0.7rem;
-  border-color:rgb(125, 225, 255);
+  border-color:orange;
   cursor: pointer;
   /* text-transform: uppercase; */
   padding: 0.6rem 0.6rem;
@@ -136,7 +136,7 @@ label {
   font-weight: 600;
   border-width: 2px;
   border-radius: 0.7rem;
-  border-color:rgb(125, 225, 255);
+  border-color:orange;
   cursor: pointer;
   /* text-transform: uppercase; */
   padding: 0.5rem 0.7rem;
@@ -226,7 +226,7 @@ label {
 }
 
 .bottom-margin{
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.15rem;
 }
 
 .left-border{

@@ -1297,6 +1297,10 @@ const doNuAndTimeDisplay = function(){
 }
 
 const doNuSliderOnInput = function(value){
+  // console.log('inside doNuSliderOnInput() top of the function');
+  // console.log('about to set nuDegrees to ', nuDegrees);
+  // console.log('and then set nu and call computeKeplerAndTimeAfterPeriapse()');
+
   haltPlay();
   nuDegrees = value;
   nu = nuDegrees*piOver180;
@@ -1352,6 +1356,7 @@ const computeUniversal = function(){
   let i;
   let rx;
   let ry;
+  // console.log('in computeUniversal() at the beginning');
 
   needToComputeUniversal = false;
   // set needToComputeUniversal to true whenever a or e changes
@@ -1483,6 +1488,7 @@ const computeUniversal = function(){
   universalArray[0].nu = -180;//set the first one to -180 because atan2 makes it +180
   univPoint = {...universalArray[0]};
   universalArray.push(univPoint);//make the last one equal the first one
+  // console.log('inside computeUniversal() at the end, universalArray.length=',universalArray.length);
 }
 
 const setInertialVectorColor = function(color, save=false){
@@ -2274,7 +2280,8 @@ const initialize = function(data, camera){
 
   muMenu.value = centralBody;
   handlePlanetChange();
-
+  // console.log('initialize, about to set eSlider.value to eSl, aSlider.value = +aSl');
+  // console.log('and then call doESliderOnInput(+eSl) and doASliderOnInput(+aSl)');
   eSlider.value = +eSl;
   aSlider.value = +aSl;
   doESliderOnInput(+eSl);
@@ -2294,7 +2301,8 @@ const initialize = function(data, camera){
 
   timeScaleMenu.value = timeScaleMenuChoice;
   doTimeScaleMenu();
-
+  // console.log('initialize, about to set nuSlider.value to nuDegrees');
+  // console.log('and then call computeUniversal(), doUniversalPointCalculations(1), doNuSliderOnInput(nuDegrees)');
   nuSlider.value = nuDegrees;
   computeUniversal();
   doUniversalPointCalculations(1);
@@ -2424,9 +2432,12 @@ resetButton.addEventListener('click', () => {
 });
 
 const doUniversalPointCalculations = function(opt=0){
+  // console.log('inside doUniversalPointCalculations(), opt=',opt);
+
   let p = false;
 
   if (!universalArray){
+    // console.log('inside doUniversalPointCalculations(), about to return because universalArray is null');
     return;
   }
 
@@ -2434,6 +2445,7 @@ const doUniversalPointCalculations = function(opt=0){
   // then compute the next ones
   // option 1: compute both the current values and the next ones 
   if (opt === 0){
+    // console.log('inside doUniversalPointCalculations() top of the opt===0 section');
     let safety = 0;
 
     while (timeAfterPeriapseInSeconds > timeAfterPeriapseInSeconds1 && safety<10){
@@ -2445,6 +2457,8 @@ const doUniversalPointCalculations = function(opt=0){
       timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
       
       if (universalArrayIndex1 === 0){
+        // console.log('inside doUniversalPointCalculations(), universalArrayIndex1 === 0');
+        // console.log('and about to set nuDegrees to -180');
         universalArrayIndex0 = universalArrayIndex1;
         universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
         timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
@@ -2482,6 +2496,9 @@ const doUniversalPointCalculations = function(opt=0){
       }
     }
   }else{
+    // console.log('inside doUniversalPointCalculations() top of the opt===1 section');
+    // console.log('and about to call doNuSliderOnInput(nuDegrees), nuDegrees=',nuDegrees);
+
     p = true;
     doNuSliderOnInput(nuDegrees);
     // computeKeplerAndTimeAfterPeriapse();
@@ -2489,6 +2506,7 @@ const doUniversalPointCalculations = function(opt=0){
     y0 = universalArray[universalArrayIndex0%universalArraySize].g*sqrtMuOverP*(e + 1);
     vx0 = universalArray[universalArrayIndex0%universalArraySize].fdot*rp;
     vy0 = universalArray[universalArrayIndex0%universalArraySize].gdot*sqrtMuOverP*(e + 1);
+
     if (p){
       let x1 = universalArray[universalArrayIndex1%universalArraySize].f*rp;
       let y1 = universalArray[universalArrayIndex1%universalArraySize].g*sqrtMuOverP*(e + 1);
@@ -2527,6 +2545,8 @@ const animate = function(continueAnimation = true) {
     const deltaT = timeScale*clock.getDelta();
     timeAfterPeriapseInSeconds += deltaT;// deltaT for 60 fps is 0.01666
     timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
+    // console.log('inside animate() in the playing section, about to call doUniversalPointCalculations()');
+
     doUniversalPointCalculations();
 
     //do the linear interpolation between computed points on the ellipse or

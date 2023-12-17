@@ -140,19 +140,19 @@ class OrbitalMechThings {
     this._hQuat.setFromAxisAngle(new THREE.Vector3(1,0,0),0);
     this._eQuat = new THREE.Quaternion();
     
-    this._pVectorLabel = null;
-    this._qVectorLabel = null;
-    this._wVectorLabel = null;
-    this._iVectorLabel = null;
-    this._jVectorLabel = null;
-    this._kVectorLabel = null;
-    this._UVectorLabel = null;
-    this._VVectorLabel = null;
-    this._WVectorLabel = null;
-    this._rVectorLabel = null;
-    this._vVectorLabel = null;
-    this._hVectorLabel = null;
-    this._eVectorLabel = null;
+    this._pVectorLabelMesh = null;
+    this._qVectorLabelMesh = null;
+    this._wVectorLabelMesh = null;
+    this._iVectorLabelMesh = null;
+    this._jVectorLabelMesh = null;
+    this._kVectorLabelMesh = null;
+    this._UVectorLabelMesh = null;
+    this._VVectorLabelMesh = null;
+    this._WVectorLabelMesh = null;
+    this._rVectorLabelMesh = null;
+    this._vVectorLabelMesh = null;
+    this._hVectorLabelMesh = null;
+    this._eVectorLabelMesh = null;
         
     this._vectorOpacity = 1;
 
@@ -218,7 +218,7 @@ class OrbitalMechThings {
       this._pVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitFixedVectors);
       this._pVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleOrbitFixedVectors);
       this._v1.multiplyScalar(1.1);
-      this._pVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+      this._pVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
       
       this._q1.multiplyQuaternions(this._quat,this._yQuat);
       this._v0.copy(this._jVectorPos);
@@ -232,7 +232,7 @@ class OrbitalMechThings {
       this._qVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitFixedVectors);
       this._qVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleOrbitFixedVectors);
       this._v1.multiplyScalar(1.1);
-      this._qVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+      this._qVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
 
       if (this._showWVectors){
         // out of plane vector
@@ -248,7 +248,7 @@ class OrbitalMechThings {
         this._wVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitFixedVectors);
         this._wVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleOrbitFixedVectors);
         this._v1.multiplyScalar(1.1);
-        this._wVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+        this._wVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
       }
     }
 
@@ -272,7 +272,7 @@ class OrbitalMechThings {
       this._iVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleInertialVectors);
       this._iVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleInertialVectors);
       this._v1.multiplyScalar(1.1);
-      this._iVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+      this._iVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
 
       this._q1.copy(this._yQuat);
       this._v0.copy(this._jVectorPos);
@@ -284,7 +284,7 @@ class OrbitalMechThings {
       this._jVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleInertialVectors);
       this._jVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleInertialVectors);
       this._v1.multiplyScalar(1.1);
-      this._jVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+      this._jVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
 
       this._q1.copy(this._zQuat);
       this._v0.copy(this._kVectorPos);
@@ -296,7 +296,7 @@ class OrbitalMechThings {
       this._kVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleInertialVectors);
       this._kVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleInertialVectors);
       this._v1.multiplyScalar(1.1);
-      this._kVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+      this._kVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
     }
 
     if (this._showR || this._showV || this._showUVWFrame){
@@ -323,7 +323,7 @@ class OrbitalMechThings {
         this._rVectorShaftMesh.matrix.compose(this._v0, this._q1, this._rVectorScale);
         this._rVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._rVectorScale);
         this._v1.multiplyScalar(1.1);
-        this._rVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+        this._rVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
       }
     }
 
@@ -344,7 +344,7 @@ class OrbitalMechThings {
       this._vVectorShaftMesh.matrix.compose(this._v0, this._q1, this._vVectorScale);
       this._vVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._vVectorScale);
       this._v1.multiplyScalar(1.1);
-      this._vVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+      this._vVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
     }
 
     if (this._showH){
@@ -360,7 +360,7 @@ class OrbitalMechThings {
       this._hVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitFixedVectors);
       this._hVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleOrbitFixedVectors);
       this._v1.multiplyScalar(1.1);
-      this._hVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+      this._hVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
     }
 
     if (this._showE){
@@ -376,7 +376,7 @@ class OrbitalMechThings {
       this._eVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitFixedVectors);
       this._eVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleOrbitFixedVectors);
       this._v1.multiplyScalar(1.1);
-      this._eVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+      this._eVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
     }
 
     if (this._showUVWFrame){
@@ -397,7 +397,7 @@ class OrbitalMechThings {
       this._UVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitingBodyVectors);
       this._UVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleOrbitingBodyVectors);
       this._v1.multiplyScalar(1.1);
-      this._UVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+      this._UVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
 
       if (this._showWVectors){
         // out of plane vector
@@ -418,7 +418,7 @@ class OrbitalMechThings {
         this._WVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitingBodyVectors);
         this._WVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleOrbitingBodyVectors);
         this._v1.multiplyScalar(1.1);
-        this._WVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+        this._WVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
       }
 
       this._q1.multiplyQuaternions(this._rQuat,this._turn90Quat);
@@ -441,7 +441,7 @@ class OrbitalMechThings {
       this._VVectorShaftMesh.matrix.compose(this._v0, this._q1, this._scaleOrbitingBodyVectors);
       this._VVectorArrowheadMesh.matrix.compose(this._v1, this._q1, this._scaleOrbitingBodyVectors);
       this._v1.multiplyScalar(1.1);
-      this._VVectorLabel.matrix.compose(this._v1, this._qn, this._scale);
+      this._VVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
     }
   }
 
@@ -499,12 +499,12 @@ class OrbitalMechThings {
         this._iVectorArrowheadMesh.material.color.set(theColor);
         this._jVectorArrowheadMesh.material.color.set(theColor);
         this._kVectorArrowheadMesh.material.color.set(theColor);
-        this._iVectorLabel.material[0].color.set(theColor);
-        this._iVectorLabel.material[1].color.set(theColor);
-        this._jVectorLabel.material[0].color.set(theColor);
-        this._jVectorLabel.material[1].color.set(theColor);
-        this._kVectorLabel.material[0].color.set(theColor);
-        this._kVectorLabel.material[1].color.set(theColor);
+        this._iVectorLabelMesh.material[0].color.set(theColor);
+        this._iVectorLabelMesh.material[1].color.set(theColor);
+        this._jVectorLabelMesh.material[0].color.set(theColor);
+        this._jVectorLabelMesh.material[1].color.set(theColor);
+        this._kVectorLabelMesh.material[0].color.set(theColor);
+        this._kVectorLabelMesh.material[1].color.set(theColor);
         break;
 
       case 'orbitFixedVectors':
@@ -512,13 +512,13 @@ class OrbitalMechThings {
 
         this._hVectorShaftMesh.material.color.set(theColor);
         this._hVectorArrowheadMesh.material.color.set(theColor);
-        this._hVectorLabel.material[0].color.set(theColor);
-        this._hVectorLabel.material[1].color.set(theColor);
+        this._hVectorLabelMesh.material[0].color.set(theColor);
+        this._hVectorLabelMesh.material[1].color.set(theColor);
 
         this._eVectorShaftMesh.material.color.set(theColor);
         this._eVectorArrowheadMesh.material.color.set(theColor);
-        this._eVectorLabel.material[0].color.set(theColor);
-        this._eVectorLabel.material[1].color.set(theColor);
+        this._eVectorLabelMesh.material[0].color.set(theColor);
+        this._eVectorLabelMesh.material[1].color.set(theColor);
 
         this._pVectorShaftMesh.material.color.set(theColor);
         this._qVectorShaftMesh.material.color.set(theColor);
@@ -526,12 +526,12 @@ class OrbitalMechThings {
         this._pVectorArrowheadMesh.material.color.set(theColor);
         this._qVectorArrowheadMesh.material.color.set(theColor);
         this._wVectorArrowheadMesh.material.color.set(theColor);
-        this._pVectorLabel.material[0].color.set(theColor);
-        this._pVectorLabel.material[1].color.set(theColor);
-        this._qVectorLabel.material[0].color.set(theColor);
-        this._qVectorLabel.material[1].color.set(theColor);
-        this._wVectorLabel.material[0].color.set(theColor);
-        this._wVectorLabel.material[1].color.set(theColor);
+        this._pVectorLabelMesh.material[0].color.set(theColor);
+        this._pVectorLabelMesh.material[1].color.set(theColor);
+        this._qVectorLabelMesh.material[0].color.set(theColor);
+        this._qVectorLabelMesh.material[1].color.set(theColor);
+        this._wVectorLabelMesh.material[0].color.set(theColor);
+        this._wVectorLabelMesh.material[1].color.set(theColor);
         break;
 
       case 'uvwVectors':
@@ -543,12 +543,12 @@ class OrbitalMechThings {
         this._UVectorArrowheadMesh.material.color.set(theColor);
         this._VVectorArrowheadMesh.material.color.set(theColor);
         this._WVectorArrowheadMesh.material.color.set(theColor);
-        this._UVectorLabel.material[0].color.set(theColor);
-        this._UVectorLabel.material[1].color.set(theColor);
-        this._VVectorLabel.material[0].color.set(theColor);
-        this._VVectorLabel.material[1].color.set(theColor);
-        this._WVectorLabel.material[0].color.set(theColor);
-        this._WVectorLabel.material[1].color.set(theColor);
+        this._UVectorLabelMesh.material[0].color.set(theColor);
+        this._UVectorLabelMesh.material[1].color.set(theColor);
+        this._VVectorLabelMesh.material[0].color.set(theColor);
+        this._VVectorLabelMesh.material[1].color.set(theColor);
+        this._WVectorLabelMesh.material[0].color.set(theColor);
+        this._WVectorLabelMesh.material[1].color.set(theColor);
         break;
 
       case 'rVector':
@@ -556,8 +556,8 @@ class OrbitalMechThings {
 
         this._rVectorShaftMesh.material.color.set(theColor);
         this._rVectorArrowheadMesh.material.color.set(theColor);
-        this._rVectorLabel.material[0].color.set(theColor);
-        this._rVectorLabel.material[1].color.set(theColor);
+        this._rVectorLabelMesh.material[0].color.set(theColor);
+        this._rVectorLabelMesh.material[1].color.set(theColor);
         break;
 
       case 'vVector':
@@ -565,8 +565,8 @@ class OrbitalMechThings {
 
         this._vVectorShaftMesh.material.color.set(theColor);
         this._vVectorArrowheadMesh.material.color.set(theColor);
-        this._vVectorLabel.material[0].color.set(theColor);
-        this._vVectorLabel.material[1].color.set(theColor);
+        this._vVectorLabelMesh.material[0].color.set(theColor);
+        this._vVectorLabelMesh.material[1].color.set(theColor);
     }
   }
 
@@ -660,6 +660,10 @@ class OrbitalMechThings {
   // simple version of rotatePlanet2 to be used in situations except
   // for animation
   rotatePlanet(tSeconds, rotationPeriodSeconds){
+    if (this._planetOpacity < 0.1){
+      return;
+    }
+
     this._planetQuat1.setFromAxisAngle(this._zunit,2*Math.PI*tSeconds/rotationPeriodSeconds);
     this._planetQuat.multiplyQuaternions(this._planetQuat1,this._planetQuat0);
     this._planetMeshArray[this._planetMeshArrayIndex].matrix.compose(this._origin, this._planetQuat, this._planetScale);
@@ -667,13 +671,15 @@ class OrbitalMechThings {
 
   // use this function to rotate the planet during animations
   rotatePlanet2(tSeconds, rotationPeriodSeconds, orbitalPeriodSeconds){
+    if (this._planetOpacity < 0.1){
+      return;
+    }
+    
     if (tSeconds < this._previousTime){
       this._numApoapsePasses += 1;
     }
 
     this._previousTime = tSeconds;
-
-    // console.log(this._numApoapsePasses, this._numApoapsePasses + tSeconds/rotationPeriodSeconds); //blah
     this._planetQuat1.setFromAxisAngle(this._zunit,
       2*Math.PI*(this._numApoapsePasses*orbitalPeriodSeconds/rotationPeriodSeconds + tSeconds/rotationPeriodSeconds));
     this._planetQuat.multiplyQuaternions(this._planetQuat1,this._planetQuat0);
@@ -705,8 +711,11 @@ class OrbitalMechThings {
       this._planetScale.set(-1/a, -1/a, -1/a);
     }
 
-    this._planetMeshArray[this._planetMeshArrayIndex].matrix.compose(this._origin, this._planetQuat, this._planetScale);
-    this.resetPlanetRotationParameters();
+    if (this._planetOpacity >= 0.1){
+      this._planetMeshArray[this._planetMeshArrayIndex].matrix.compose(this._origin, this._planetQuat, this._planetScale);
+      this.resetPlanetRotationParameters();
+    }
+
     this.needsRefresh = true;
   }
 
@@ -846,18 +855,18 @@ class OrbitalMechThings {
   setRVisible(visible){
     this._rVectorShaftMesh.material.visible = visible;
     this._rVectorArrowheadMesh.material.visible = visible;
-    this._rVectorLabel.material.visible = visible;
-    this._rVectorLabel.material[0].visible = visible;
-    this._rVectorLabel.material[1].visible = visible;
+    this._rVectorLabelMesh.material.visible = visible;
+    this._rVectorLabelMesh.material[0].visible = visible;
+    this._rVectorLabelMesh.material[1].visible = visible;
   }
 
   // similar comment to setRVisible
   setVVisible(visible){
     this._vVectorShaftMesh.material.visible = visible;
     this._vVectorArrowheadMesh.material.visible = visible;
-    this._vVectorLabel.material.visible = visible;
-    this._vVectorLabel.material[0].visible = visible;
-    this._vVectorLabel.material[1].visible = visible;
+    this._vVectorLabelMesh.material.visible = visible;
+    this._vVectorLabelMesh.material[0].visible = visible;
+    this._vVectorLabelMesh.material[1].visible = visible;
   }
 
   _constructVectorLabels() {
@@ -935,56 +944,56 @@ class OrbitalMechThings {
 
         switch (i){
           case 0:
-            this._iVectorLabel = new THREE.Mesh(textGeo, material1);
-            this._iVectorLabel.matrixAutoUpdate = false;
+            this._iVectorLabelMesh = new THREE.Mesh(textGeo, material1);
+            this._iVectorLabelMesh.matrixAutoUpdate = false;
             break;
           case 1:
-            this._jVectorLabel = new THREE.Mesh(textGeo, material1);
-            this._jVectorLabel.matrixAutoUpdate = false;
+            this._jVectorLabelMesh = new THREE.Mesh(textGeo, material1);
+            this._jVectorLabelMesh.matrixAutoUpdate = false;
             break;
           case 2:
-            this._kVectorLabel  = new THREE.Mesh(textGeo, material1);
-            this._kVectorLabel.matrixAutoUpdate = false;
+            this._kVectorLabelMesh  = new THREE.Mesh(textGeo, material1);
+            this._kVectorLabelMesh.matrixAutoUpdate = false;
             break;
           case 3:
-            this._hVectorLabel = new THREE.Mesh(textGeo, material2);
-            this._hVectorLabel.matrixAutoUpdate = false;
+            this._hVectorLabelMesh = new THREE.Mesh(textGeo, material2);
+            this._hVectorLabelMesh.matrixAutoUpdate = false;
             break;
           case 4:
-            this._eVectorLabel = new THREE.Mesh(textGeo, material2);
-            this._eVectorLabel.matrixAutoUpdate = false;
+            this._eVectorLabelMesh = new THREE.Mesh(textGeo, material2);
+            this._eVectorLabelMesh.matrixAutoUpdate = false;
             break;
           case 5:
-            this._pVectorLabel = new THREE.Mesh(textGeo, material2);
-            this._pVectorLabel.matrixAutoUpdate = false;
+            this._pVectorLabelMesh = new THREE.Mesh(textGeo, material2);
+            this._pVectorLabelMesh.matrixAutoUpdate = false;
             break;
           case 6:
-            this._qVectorLabel = new THREE.Mesh(textGeo, material2);
-            this._qVectorLabel.matrixAutoUpdate = false;
+            this._qVectorLabelMesh = new THREE.Mesh(textGeo, material2);
+            this._qVectorLabelMesh.matrixAutoUpdate = false;
             break;
           case 7:
-            this._wVectorLabel = new THREE.Mesh(textGeo, material6);
-            this._wVectorLabel.matrixAutoUpdate = false;
+            this._wVectorLabelMesh = new THREE.Mesh(textGeo, material6);
+            this._wVectorLabelMesh.matrixAutoUpdate = false;
             break;
           case 8:
-            this._rVectorLabel = new THREE.Mesh(textGeo, material4);
-            this._rVectorLabel.matrixAutoUpdate = false;
+            this._rVectorLabelMesh = new THREE.Mesh(textGeo, material4);
+            this._rVectorLabelMesh.matrixAutoUpdate = false;
             break;
           case 9:
-            this._vVectorLabel = new THREE.Mesh(textGeo, material5);
-            this._vVectorLabel.matrixAutoUpdate = false;
+            this._vVectorLabelMesh = new THREE.Mesh(textGeo, material5);
+            this._vVectorLabelMesh.matrixAutoUpdate = false;
             break;
           case 10:
-            this._UVectorLabel = new THREE.Mesh(textGeo, material3);
-            this._UVectorLabel.matrixAutoUpdate = false;
+            this._UVectorLabelMesh = new THREE.Mesh(textGeo, material3);
+            this._UVectorLabelMesh.matrixAutoUpdate = false;
             break;
           case 11:
-            this._VVectorLabel = new THREE.Mesh(textGeo, material3);
-            this._VVectorLabel.matrixAutoUpdate = false;
+            this._VVectorLabelMesh = new THREE.Mesh(textGeo, material3);
+            this._VVectorLabelMesh.matrixAutoUpdate = false;
             break;
           case 12:
-            this._WVectorLabel  = new THREE.Mesh(textGeo, material7);
-            this._WVectorLabel.matrixAutoUpdate = false;
+            this._WVectorLabelMesh  = new THREE.Mesh(textGeo, material7);
+            this._WVectorLabelMesh.matrixAutoUpdate = false;
             break;
         }
       }
@@ -1012,9 +1021,9 @@ class OrbitalMechThings {
           scene.add(this._jVectorArrowheadMesh);
           scene.add(this._kVectorShaftMesh);
           scene.add(this._kVectorArrowheadMesh);
-          scene.add(this._iVectorLabel);
-          scene.add(this._jVectorLabel);
-          scene.add(this._kVectorLabel);
+          scene.add(this._iVectorLabelMesh);
+          scene.add(this._jVectorLabelMesh);
+          scene.add(this._kVectorLabelMesh);
         }
 
         if (remove){
@@ -1024,9 +1033,9 @@ class OrbitalMechThings {
           scene.remove(this._jVectorArrowheadMesh);
           scene.remove(this._kVectorShaftMesh);
           scene.remove(this._kVectorArrowheadMesh);
-          scene.remove(this._iVectorLabel);
-          scene.remove(this._jVectorLabel);
-          scene.remove(this._kVectorLabel);
+          scene.remove(this._iVectorLabelMesh);
+          scene.remove(this._jVectorLabelMesh);
+          scene.remove(this._kVectorLabelMesh);
         }
         break;
 
@@ -1042,9 +1051,9 @@ class OrbitalMechThings {
           scene.add(this._qVectorArrowheadMesh);
           scene.add(this._wVectorShaftMesh);
           scene.add(this._wVectorArrowheadMesh);
-          scene.add(this._pVectorLabel);
-          scene.add(this._qVectorLabel);
-          scene.add(this._wVectorLabel);
+          scene.add(this._pVectorLabelMesh);
+          scene.add(this._qVectorLabelMesh);
+          scene.add(this._wVectorLabelMesh);
         }
 
         if (remove){
@@ -1054,9 +1063,9 @@ class OrbitalMechThings {
           scene.remove(this._qVectorArrowheadMesh);
           scene.remove(this._wVectorShaftMesh);
           scene.remove(this._wVectorArrowheadMesh);
-          scene.remove(this._pVectorLabel);
-          scene.remove(this._qVectorLabel);
-          scene.remove(this._wVectorLabel);
+          scene.remove(this._pVectorLabelMesh);
+          scene.remove(this._qVectorLabelMesh);
+          scene.remove(this._wVectorLabelMesh);
         }
         break;
 
@@ -1072,9 +1081,9 @@ class OrbitalMechThings {
           scene.add(this._VVectorArrowheadMesh);
           scene.add(this._WVectorShaftMesh);
           scene.add(this._WVectorArrowheadMesh);
-          scene.add(this._UVectorLabel);
-          scene.add(this._VVectorLabel);
-          scene.add(this._WVectorLabel);
+          scene.add(this._UVectorLabelMesh);
+          scene.add(this._VVectorLabelMesh);
+          scene.add(this._WVectorLabelMesh);
         }
   
         if (remove){
@@ -1084,9 +1093,9 @@ class OrbitalMechThings {
           scene.remove(this._VVectorArrowheadMesh);
           scene.remove(this._WVectorShaftMesh);
           scene.remove(this._WVectorArrowheadMesh);
-          scene.remove(this._UVectorLabel);
-          scene.remove(this._VVectorLabel);
-          scene.remove(this._WVectorLabel);
+          scene.remove(this._UVectorLabelMesh);
+          scene.remove(this._VVectorLabelMesh);
+          scene.remove(this._WVectorLabelMesh);
         }
         break;
 
@@ -1098,13 +1107,13 @@ class OrbitalMechThings {
         if (add){
           scene.add(this._rVectorShaftMesh);
           scene.add(this._rVectorArrowheadMesh);
-          scene.add(this._rVectorLabel);
+          scene.add(this._rVectorLabelMesh);
         }
 
         if (remove){
           scene.remove(this._rVectorShaftMesh);
           scene.remove(this._rVectorArrowheadMesh);
-          scene.remove(this._rVectorLabel);
+          scene.remove(this._rVectorLabelMesh);
         }
         break;
 
@@ -1116,13 +1125,13 @@ class OrbitalMechThings {
         if (add){
           scene.add(this._vVectorShaftMesh);
           scene.add(this._vVectorArrowheadMesh);
-          scene.add(this._vVectorLabel);
+          scene.add(this._vVectorLabelMesh);
         }
 
         if (remove){
           scene.remove(this._vVectorShaftMesh);
           scene.remove(this._vVectorArrowheadMesh);
-          scene.remove(this._vVectorLabel);
+          scene.remove(this._vVectorLabelMesh);
         }
         break;
 
@@ -1134,13 +1143,13 @@ class OrbitalMechThings {
         if (add){
           scene.add(this._hVectorShaftMesh);
           scene.add(this._hVectorArrowheadMesh);
-          scene.add(this._hVectorLabel);
+          scene.add(this._hVectorLabelMesh);
         }
 
         if (remove){
           scene.remove(this._hVectorShaftMesh);
           scene.remove(this._hVectorArrowheadMesh);
-          scene.remove(this._hVectorLabel);
+          scene.remove(this._hVectorLabelMesh);
         }
         break;
 
@@ -1152,13 +1161,13 @@ class OrbitalMechThings {
         if (add){
           scene.add(this._eVectorShaftMesh);
           scene.add(this._eVectorArrowheadMesh);
-          scene.add(this._eVectorLabel);
+          scene.add(this._eVectorLabelMesh);
         }
 
         if (remove){
           scene.remove(this._eVectorShaftMesh);
           scene.remove(this._eVectorArrowheadMesh);
-          scene.remove(this._eVectorLabel);
+          scene.remove(this._eVectorLabelMesh);
         }
         break;
     }
@@ -1182,15 +1191,24 @@ class OrbitalMechThings {
     // PQW out of plane vector
     this._wVectorShaftMesh.material.opacity = value;
     this._wVectorArrowheadMesh.material.opacity = value;
-    this._wVectorLabel.material[0].opacity = value;
-    this._wVectorLabel.material[1].opacity = value;
+    this._wVectorLabelMesh.material[0].opacity = value;
+    this._wVectorLabelMesh.material[1].opacity = value;
 
     // UVW out of plane vector
     this._WVectorShaftMesh.material.opacity = value;
     this._WVectorArrowheadMesh.material.opacity = value;
-    this._WVectorLabel.material.opacity = value;
-    this._WVectorLabel.material[0].opacity = value;
-    this._WVectorLabel.material[1].opacity = value;
+    this._WVectorLabelMesh.material.opacity = value;
+    this._WVectorLabelMesh.material[0].opacity = value;
+    this._WVectorLabelMesh.material[1].opacity = value;
+
+    // move stuff far away
+    this._v3.set(1000,1000,1000);
+    this._wVectorShaftMesh.matrix.compose(this._v3, this._nullQuat, this._unitScale);
+    this._wVectorArrowheadMesh.matrix.compose(this._v3, this._nullQuat, this._unitScale);
+    this._wVectorLabelMesh.matrix.compose(this._v3, this._nullQuat, this._unitScale);
+    this._WVectorShaftMesh.matrix.compose(this._v3, this._nullQuat, this._unitScale);
+    this._WVectorArrowheadMesh.matrix.compose(this._v3, this._nullQuat, this._unitScale);
+    this._WVectorLabelMesh.matrix.compose(this._v3, this._nullQuat, this._unitScale);
   };
 
   showR(value) {
@@ -1209,7 +1227,8 @@ class OrbitalMechThings {
     this._addRemoveVectorsAndLabels('e',value);
   }
 
-  setMuIndex(i){
+  setPlanet(i){
+    this._planetMeshArray[this._planetMeshArrayIndex].matrix.compose(this._origin, this._planetQuat0, this._planetScale);
     this._scene.remove(this._planetMeshArray[this._planetMeshArrayIndex]);
     this._planetMeshArrayIndex = i;
     this._scene.add(this._planetMeshArray[i]);
@@ -1285,9 +1304,19 @@ class OrbitalMechThings {
   setPlanetOpacity(opacity){  
     this.needsRefresh = true;
     this._planetOpacity = opacity;
+    this._v3.set(1000,1000,1000);
   
+    // do all of the planets even if they are not being used
     for (let i=0; i<this._planetMeshArray.length; i++){
       this._planetMeshArray[i].material.opacity = opacity;
+
+      if (opacity <= 0.1){
+        // move the planet far away so that it does not cover up the vectors
+        // which it shouldn't anyway, but there may be a bug in the THREE.js code
+        this._planetMeshArray[i].matrix.compose(this._v3, this._nullQuat, this._unitScale);
+      }else{
+        this._planetMeshArray[this._planetMeshArrayIndex].matrix.compose(this._origin, this._planetQuat, this._planetScale);
+      }
     }
   }
 }

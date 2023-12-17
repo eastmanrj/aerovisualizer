@@ -1,6 +1,8 @@
 import * as THREE from '../../../../node_modules/three/build/three.module.js';
 import OrbitalMechThings from './OrbitalMechThings.js';
 import {OrbitControls} from './OrbitControls.js';
+// let testTemp = false;
+// let testTemp2 = false;
 
 const piOver180 = Math.PI / 180;
 const twoPi = 2*Math.PI;
@@ -32,7 +34,7 @@ const defaultE = 0;//use 0 for ellipse or Math.SQRT2 for hyperbola
 const defaultLan = 0;//degrees
 const defaultInclination = 0;//degrees
 const defaultAop = 0;//degrees
-const defaultNu = 0;//degrees
+// const defaultNu = 0;//degrees deprecated
 
 const defaultDelta = Math.PI/2;// 90 degrees for "square" hyperbola
 // const defaultVectorSize = 6;
@@ -68,7 +70,7 @@ let aerovisualizerData = [
   {name:'longitude-of-ascending-node', value:defaultLan},
   {name:'inclination', value:defaultInclination},
   {name:'argument-of-periapsis', value:defaultAop},
-  {name:'true-anomaly', value:defaultNu},
+  {name:'true-anomaly', value:0},//true-anomaly is deprecated but keep it here
   {name:'inertialVectorsChoice', value:defaultInertialVectorsChoice},
   {name:'orbitFixedVectorsChoice', value:defaultOrbitFixedVectorsChoice},
   {name:'orbitingBodyVectorsChoice', value:defaultOrbitingBodyVectorsChoice},
@@ -102,7 +104,7 @@ let aopDegrees = defaultAop;
 let aop = aopDegrees*piOver180;// argument of periapsis
 let dcmPQW2IJK = new THREE.Matrix3();
 let dcmPQW2UVW = new THREE.Matrix3();
-let nuDegrees = defaultNu;
+let nuDegrees = 0;
 let nu = nuDegrees*piOver180;// true anomaly
 let eccentricAnomaly;
 let hyperbolicAnomaly;
@@ -770,7 +772,6 @@ const handleMainButtons = function(button){
       haltPlay();
       prefsElements.style.display = 'grid';
       prefsButton.disabled = true;
-      playResetButtonsElements.style.display = 'none';
       handleMainPrefs(mainPrefsMenu.value);
       break;
     case 'info':
@@ -1329,8 +1330,6 @@ nuSlider.oninput = function(){
 
 nuSlider.onpointerup = function(){
   doUniversalPointCalculations(1);
-  replaceAerovisualizerData('true-anomaly',nuDegrees);
-  saveToLocalStorage();
 }
 
 zeroNuButton.addEventListener('click', () => {
@@ -1338,8 +1337,6 @@ zeroNuButton.addEventListener('click', () => {
   nuDegrees = 0;
   nuSlider.value = nuDegrees;  
   doUniversalPointCalculations(1);
-  replaceAerovisualizerData('true-anomaly',nuDegrees);
-  saveToLocalStorage();
 });
 
 const computeUniversal = function(){
@@ -1575,7 +1572,7 @@ const handlePlanetChange = function(){
   iDisplay.innerHTML = `${theCB.i}&deg;`;//orbital inclination
   OmegaDisplay.innerHTML = `${theCB.Om}&deg;`;//longitude of ascending node
   omegaDisplay.innerHTML = `${theCB.om}&deg;`;//longitude of perihelion
-  omt.setMuIndex(theCB.id);
+  omt.setPlanet(theCB.id);
 
   // START OF UNCERTAIN SECTION
   const temp1 = sliderEcanChange;
@@ -1861,12 +1858,9 @@ const setCentralBodyTransparency = function(transparency){
   omt.setPlanetOpacity(opacity);
 }
 
-centralBodyTransparencySlider.oninput = function(){
-  setCentralBodyTransparency(this.value);
-}
-
 centralBodyTransparencySlider.onpointerup = function(){
-  setCentralBodyTransparency(this.value);
+  setCentralBodyTransparency(this.value);//don't call this in oninput
+  // because it is computationally intensive
   replaceAerovisualizerData('centralBodyTransparency',this.value);
   saveToLocalStorage();
 }
@@ -2225,9 +2219,9 @@ const initialize = function(data, camera){
           case 'argument-of-periapsis':
             aopDegrees  = Number(o.value);
             break;
-          case 'true-anomaly':
-            nuDegrees  = Number(o.value);
-            break;
+          // case 'true-anomaly': deprecated
+          //   nuDegrees  = Number(o.value);
+          //   break;
           case 'inertialVectorsChoice':
             inertialVectorsChoice  = o.value;
             break;
@@ -2303,7 +2297,8 @@ const initialize = function(data, camera){
   doTimeScaleMenu();
   // console.log('initialize, about to set nuSlider.value to nuDegrees');
   // console.log('and then call computeUniversal(), doUniversalPointCalculations(1), doNuSliderOnInput(nuDegrees)');
-  nuSlider.value = nuDegrees;
+  nuDegrees = 0;
+  nuSlider.value = 0;
   computeUniversal();
   doUniversalPointCalculations(1);
   doNuSliderOnInput(nuDegrees);
@@ -2455,10 +2450,13 @@ const doUniversalPointCalculations = function(opt=0){
       universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
       timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
       timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
-      
+      // if (testTemp2){
+      //   console.log('B - ', px, x0, dpxdt, timeAfterPeriapseInSeconds, timeAfterPeriapseInSeconds0);
+      // }
       if (universalArrayIndex1 === 0){
+        // testTemp = true;
         // console.log('inside doUniversalPointCalculations(), universalArrayIndex1 === 0');
-        // console.log('and about to set nuDegrees to -180');
+        // console.log('about to set nuDegrees to -180');
         universalArrayIndex0 = universalArrayIndex1;
         universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
         timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
@@ -2467,6 +2465,7 @@ const doUniversalPointCalculations = function(opt=0){
         timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
         nuDegrees = -180;
         nu = nuDegrees*piOver180;
+        computeKeplerAndTimeAfterPeriapse();
         // x0 = universalArray[universalArrayIndex0%universalArraySize].f*rp;
         // y0 = universalArray[universalArrayIndex0%universalArraySize].g*sqrtMuOverP*(e + 1);
         // vx0 = universalArray[universalArrayIndex0%universalArraySize].fdot*rp;
@@ -2495,6 +2494,10 @@ const doUniversalPointCalculations = function(opt=0){
         dnudt = (nu1 - nu0)/deltaTime;
       }
     }
+
+    // if (testTemp){
+    //   console.log(nu0, nu1, dpxdt, dpydt,dvxdt,dvydt,dnudt);
+    // }
   }else{
     // console.log('inside doUniversalPointCalculations() top of the opt===1 section');
     // console.log('and about to call doNuSliderOnInput(nuDegrees), nuDegrees=',nuDegrees);
@@ -2546,7 +2549,6 @@ const animate = function(continueAnimation = true) {
     timeAfterPeriapseInSeconds += deltaT;// deltaT for 60 fps is 0.01666
     timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
     // console.log('inside animate() in the playing section, about to call doUniversalPointCalculations()');
-
     doUniversalPointCalculations();
 
     //do the linear interpolation between computed points on the ellipse or
@@ -2559,6 +2561,11 @@ const animate = function(continueAnimation = true) {
     vy = vy0 + dvydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     nuDegrees = nu0 + dnudt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     nu = nuDegrees*piOver180;
+
+    // if (testTemp){
+    //   console.log('A - ', px, x0, dpxdt, timeAfterPeriapseInSeconds, timeAfterPeriapseInSeconds0);
+    //   testTemp2 = true;
+    // }
     // console.log('animate nu0=',nu0,' nuDegrees=',nuDegrees,' nu=',nu,' dnudt=',dnudt);
 
     // if (universalArrayIndex0 > 5 && universalArrayIndex0 < 9){

@@ -58,6 +58,7 @@ const defaultTimeScaleMenuChoice = 'sec-equals-1sec';
 
 const defaultCentralBodyTransparency = 0;//0=completely opaque, 100=completely transparent
 const defaultShowOutOfPlaneVectors = true;
+const defaultTrueAnomalyRange360 = false;
 
 //aerovisualizerData is modified and saved to local storage when 
 // values and preferences are changed and is retrieved from local 
@@ -84,7 +85,23 @@ let aerovisualizerData = [
   {name:'orbitingBodyVectorScale', value:defaultOrbitingBodyVectorScale},
   {name:'timeScaleMenuChoice', value:defaultTimeScaleMenuChoice},
   {name:'centralBodyTransparency', value:defaultCentralBodyTransparency},
-  {name:'showOutOfPlaneVectors', value:defaultShowOutOfPlaneVectors}
+  {name:'showOutOfPlaneVectors', value:defaultShowOutOfPlaneVectors},
+  {name:'trueAnomalyRange360', value:defaultTrueAnomalyRange360},
+  {name:'param1', value:0},
+  {name:'param2', value:0},
+  {name:'param3', value:0},
+  {name:'param4', value:0},
+  {name:'param5', value:0},
+  {name:'param6', value:0},
+  {name:'param7', value:0},
+  {name:'param8', value:0},
+  {name:'param9', value:0},
+  {name:'param10', value:0},
+  {name:'param11', value:0},
+  {name:'param12', value:0},
+  {name:'param13', value:0},
+  {name:'param14', value:0},
+  {name:'param15', value:0}
 ];
 
 let centralBody = defaultCentralBody;
@@ -164,11 +181,15 @@ let orbitFixedVectorScale = defaultOrbitFixedVectorScale;
 let orbitingBodyVectorScale = defaultOrbitingBodyVectorScale;
 
 let timeScale = defaultTimeScale;
+let deltaT = timeScale*0.01666;// 0.01666 is what clock.getDelta() 
+// would return for 60 frames/sec 
+
 let displayTimeScale = defaultTimeScale;
 let timeScaleMenuChoice = defaultTimeScaleMenuChoice;
 
 let centralBodyTransparency = defaultCentralBodyTransparency;
 let showOutOfPlaneVectors = defaultShowOutOfPlaneVectors;
+let trueAnomalyRange360 = defaultTrueAnomalyRange360;
 
 let rVector = new THREE.Vector3(1, 1, 1);
 let rPQW = new THREE.Vector3(1, 1, 1);
@@ -213,7 +234,7 @@ const threeDWorld = document.getElementById('threeD-world');
 const muButton = document.getElementById('mu-btn');
 const aeButton = document.getElementById('a-e-btn');
 const orientationButton = document.getElementById('orientation-btn');
-const rvButton = document.getElementById('r-v-btn');
+const nuButton = document.getElementById('nu-btn');
 const numericalButton = document.getElementById('numerical-btn');
 const mainReturnButton = document.getElementById('main-return-btn');
 
@@ -335,6 +356,7 @@ mainPrefsMenu.value = 'general-preferences';
 
 const centralBodyTransparencySlider = document.getElementById('central-body-transparency-slider');
 const showOutOfPlaneVectorsCheckbox = document.getElementById('show-out-of-plane');
+const trueAnomalyOptionCheckbox = document.getElementById('true-anomaly-option');
 
 const inertialVectorsMenu = document.getElementById('inertial-vectors-menu');
 inertialVectorsMenu.value = inertialVectorsChoice;
@@ -465,7 +487,7 @@ let centralBodyData = [
   vesc:2.38, mu:4904.8695, Tsid:'?', perihel:'NA', radius:1079.6, 
   aphel:'NA', Tsyn:'?', vmean:'NA', vmax:'NA', vmin:'NA', 
   srp:655.728, daylen:'?', obliqu:'NA', incEqu:'NA', 
-  a:'NA', e:'NA', i:'NA', Om:'NA', 
+  a:0.002570, e:0.0549, i:'NA', Om:'NA', 
   om:'NA', ml:'?'},
   {name:'Mars', id:6, m:0.64169, CDU:3389.5, CTU: 953.541414862714, gravSurf:3.73, 
   vesc:5.03, mu:42828, Tsid:686.98, perihel:206.65, radius:3389.5, 
@@ -511,8 +533,8 @@ const replaceAerovisualizerData = function(name, value){
 const saveToLocalStorage = function(){
   localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
 }
-// localStorage.clear();//temp
-// saveToLocalStorage();//temp blah
+localStorage.clear();//temp
+saveToLocalStorage();//temp blah
 // location.reload();//temp
 
 const getFromLocalStorage = function(){
@@ -536,13 +558,18 @@ cycleNumericalDisplayButton3.addEventListener('click', () => {
 });
 
 
-const displayNumerical = function(){
+const displayNumerical = function(){//blah
   let tap = displayUnits === 1 ? timeAfterPeriapse : timeAfterPeriapseInSeconds/displayTimeScale;
 
   if (meanAnomaly !== null){
     computePQW2IJKRotation();
     computePQW2UVWRotation();
-    numNu.innerHTML = `${Number(nuDegrees).toFixed(2).toString()}`;
+
+    if (trueAnomalyRange360){
+      numNu.innerHTML = `${Number(nuDegrees+180).toFixed(2).toString()}`;
+    }else{
+      numNu.innerHTML = `${Number(nuDegrees).toFixed(2).toString()}`;
+    }
 
     switch (timeScaleMenuChoice){
       case 'sec-equals-1sec':
@@ -685,14 +712,29 @@ const displayNumerical = function(){
   computeKeplerStuff();
 
   if (e < 1){
-    numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
+    if (trueAnomalyRange360){
+      numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180 + 180).toFixed(2).toString()}`;
+    }else{
+      numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
+    }
+
     numHyperAnom.innerHTML = 'x';
   }else{
     numEccenAnom.innerHTML = 'x';
-    numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180).toFixed(2).toString()}`;
+
+    if (trueAnomalyRange360){
+      numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180 + 180).toFixed(2).toString()}`;
+    }else{
+      numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180).toFixed(2).toString()}`;
+    }
   }
   
-  numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180).toFixed(2).toString()}`;
+  if (trueAnomalyRange360){
+    numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180 + 180).toFixed(2).toString()}`;
+  }else{
+    numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180).toFixed(2).toString()}`;
+  }
+
   numMeanMotion.innerHTML = `${Number(mm).toFixed(4).toString()}`;
 }
 
@@ -710,7 +752,7 @@ const handleMainButtons = function(button){
   muButton.disabled = false;
   aeButton.disabled = false;
   orientationButton.disabled = false;
-  rvButton.disabled = false;
+  nuButton.disabled = false;
   numericalButton.disabled = false;
   prefsButton.disabled = false;
   infoButton.disabled = false;
@@ -746,10 +788,16 @@ const handleMainButtons = function(button){
       orientationElements.style.display = 'grid';
       orientationButton.disabled = true;
       break;
-    case 'rv':
+    case 'nu':
       haltPlay();
       nuElements.style.display = 'grid';
-      rvButton.disabled = true;
+      nuButton.disabled = true;
+
+      if (trueAnomalyRange360){
+        nuSlider.value = nuDegrees - 180;
+      }else{
+        nuSlider.value = nuDegrees;
+      }
       break;
     case 'numerical':
       switch (numericalDisplayOption){
@@ -797,8 +845,8 @@ orientationButton.addEventListener('click', () => {
   handleMainButtons('orientation');
 });
 
-rvButton.addEventListener('click', () => {
-  handleMainButtons('rv');
+nuButton.addEventListener('click', () => {
+  handleMainButtons('nu');
 });
 
 numericalButton.addEventListener('click', () => {
@@ -835,7 +883,8 @@ const doTwoSunOptionChoice = function(){
   // sun additionally by a factor of the ratio of 1 AU to the radius of  
   // the sun (ratio=214.9...).  sun2 is needed to allow the 'a' slider 
   // to reach larger scales of distance.  Make sure that the 
-  // centralBodyData id for 'sun2' is 1
+  // centralBodyData id for 'sun2' is 1.  NOTE: the sun is not visible 
+  // to scale even at the smallest value of 'a' (1 AU).
 
   if (theCB.id !== 1){
     omt.shapeOrbitCurve(a, e);
@@ -932,6 +981,27 @@ eSlider.oninput = function(){
   sliderAcanChange = true;//needed for locking the periapse/apoapse
 }
 
+// CALL THIS AT THE BEGINNING!!!!!!!!!!!!!
+// DON'T LET IT BE SELECTED AT THE BEGINNING IF NOT ALLOWED!!!!!
+const enableDisableTimeScaleOptions = function(){//blah
+  // don't allow timeScale to be more than a specified
+  // fraction of the orbital period
+  
+  const tsArray = [1, 60, 300, 900, 3600, 3600*24];
+  const fraction = 0.1;
+  const periodInSeconds = animationPeriod*ctu;
+  const timeFraction = fraction*periodInSeconds;
+
+  for (let i=0; i<tsArray.length; i++){
+    if (tsArray[i] > timeFraction){
+      timeScaleMenu.options[i].disabled = true;
+    }
+  }
+
+  // console.log('blah animationPeriod=', animationPeriod,' ctu=', ctu,' timeScale=', timeScale);
+  // timeScaleMenu.options[timeScaleMenu.selectedIndex].disabled = true;
+}
+
 aSlider.onpointerup = function(){
   if ((periapseLocked || apoapseLocked) && sliderEcanChange){
     const apses = [periapseLocked, apoapseLocked];
@@ -977,6 +1047,7 @@ aSlider.onpointerup = function(){
   handlePeriapseCheck();
   sliderEcanChange = false;
   doNuSliderOnInput(nuDegrees);
+  enableDisableTimeScaleOptions();
   replaceAerovisualizerData('semimajor-axis',+this.value);
   saveToLocalStorage();
 }
@@ -1007,6 +1078,7 @@ eSlider.onpointerup = function(){
         let aS = aSliderRange - (Math.exp((da-atemp)/ca) - 1);
 
         if (0 < aS && aS < aSliderRange){
+          console.log('x: ',aSlider.value,+aS);
           aSlider.value = +aS;
           doASliderOnInput(+aS);// sets the value of 'a'
         }
@@ -1269,28 +1341,47 @@ const computeKeplerAndTimeAfterPeriapse = function(){
 
 const doNuAndTimeDisplay = function(){
   if (meanAnomaly !== null){
-    nuDisplay.innerHTML = `&nu;: ${Number(nuDegrees).toFixed(2).toString()}`;
     computePQW2UVWRotation();
 
-    switch (timeScaleMenuChoice){
-      case 'sec-equals-1sec':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(0).toString()} seconds`;
-        break;
-      case 'sec-equals-1minute':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
-        break;
-      case 'sec-equals-5minutes':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
-        break;
-      case 'sec-equals-15minutes':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
-        break;
-      case 'sec-equals-1hour':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(2).toString()} hours`;
-        break;
-      case 'sec-equals-1day':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(3).toString()} days`;
-        break;
+    if (trueAnomalyRange360){
+      nuDisplay.innerHTML = `&nu;: ${Number(+(nuSlider.value) + 180).toFixed(2).toString()}`;
+      const halfPeriod = animationPeriod*ctu/2;
+
+      switch (timeScaleMenuChoice){
+        case 'sec-equals-1sec':
+          timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(0).toString()} seconds`;
+          break;
+        case 'sec-equals-1minute':
+        case 'sec-equals-5minutes':
+        case 'sec-equals-15minutes':
+          timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(1).toString()} minutes`;
+          break;
+        case 'sec-equals-1hour':
+          timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(2).toString()} hours`;
+          break;
+        case 'sec-equals-1day':
+          timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(3).toString()} days`;
+          break;
+      }
+    }else{
+      nuDisplay.innerHTML = `&nu;: ${Number(+(nuSlider.value)).toFixed(2).toString()}`;
+
+      switch (timeScaleMenuChoice){
+        case 'sec-equals-1sec':
+          timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(0).toString()} seconds`;
+          break;
+        case 'sec-equals-1minute':
+        case 'sec-equals-5minutes':
+        case 'sec-equals-15minutes':
+          timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
+          break;
+        case 'sec-equals-1hour':
+          timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(2).toString()} hours`;
+          break;
+        case 'sec-equals-1day':
+          timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(3).toString()} days`;
+          break;
+      }
     }
   }else{
     timeAfterPeriapseDisplay.innerHTML = 't: INFINITY';
@@ -1335,7 +1426,13 @@ nuSlider.onpointerup = function(){
 zeroNuButton.addEventListener('click', () => {
   nu = 0;
   nuDegrees = 0;
-  nuSlider.value = nuDegrees;  
+
+  if (trueAnomalyRange360){
+    nuSlider.value = nuDegrees - 180;
+  }else{
+    nuSlider.value = nuDegrees;
+  }
+  
   doUniversalPointCalculations(1);
 });
 
@@ -1629,6 +1726,10 @@ const doTimeScaleMenu = function(){
       displayTimeScale = 3600*24;
       break;
   }
+  
+  if (numericalDisplayIsOccurring){
+    displayNumerical();
+  }
 }
 
 timeScaleMenu.addEventListener('change', () => {
@@ -1878,6 +1979,17 @@ showOutOfPlaneVectorsCheckbox.addEventListener('change', () => {
   saveToLocalStorage();
 });
 
+trueAnomalyOptionCheckbox.addEventListener('change', () => {
+  trueAnomalyRange360 = trueAnomalyOptionCheckbox.checked;
+
+  if (numericalDisplayIsOccurring){
+    displayNumerical();
+  }
+
+  replaceAerovisualizerData('trueAnomalyRange360',trueAnomalyRange360);
+  saveToLocalStorage();
+});
+
 toggleConicSectionButton.addEventListener('click', () => {
   conicSection = conicSection === 'ellipse' ? 'hyperbola' : 'ellipse';
 
@@ -1896,7 +2008,13 @@ toggleConicSectionButton.addEventListener('click', () => {
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
   nuDegrees = 0;
-  nuSlider.value = 0;
+  
+  if (trueAnomalyRange360){
+    nuSlider.value = -180;
+  }else{
+    nuSlider.value = 0;
+  }
+
   doNuSliderOnInput(nuDegrees);
   handlePeriapseCheck();
   displayNumerical();
@@ -1907,12 +2025,12 @@ toggleConicSectionButton.addEventListener('click', () => {
 const handlePeriapseCheck = function(){
   periapseTooSmall = rp < cbRadius ? true : false;
 
-  if (periapseTooSmall === false){
+  if ((periapseTooSmall === false) || (theCB.id === 1)){
     periapseWarning.innerHTML = '&nbsp';
     muButton.style.backgroundColor = "#5555ff";
     aeButton.style.backgroundColor = "#5555ff";
     orientationButton.style.backgroundColor = "#5555ff";
-    rvButton.style.backgroundColor = "#5555ff";
+    nuButton.style.backgroundColor = "#5555ff";
     numericalButton.style.backgroundColor = "#5555ff";
     mainReturnButton.style.backgroundColor = "#5555ff";
     toggleConicSectionButton.style.backgroundColor = "#5555ff";
@@ -1931,7 +2049,7 @@ const handlePeriapseCheck = function(){
     muButton.style.backgroundColor = 'red';
     aeButton.style.backgroundColor = 'red';
     orientationButton.style.backgroundColor = 'red';
-    rvButton.style.backgroundColor = 'red';
+    nuButton.style.backgroundColor = 'red';
     numericalButton.style.backgroundColor = 'red';
     mainReturnButton.style.backgroundColor = 'red';
     toggleConicSectionButton.style.backgroundColor = 'red';
@@ -2016,8 +2134,7 @@ const handleInfoMenuChoice = function(choice){
       <p class="p-normal">Click <em>&nu;</em>.  Use the slider 
       control to set the <em>true anomaly (&nu;)</em> .  The true anomaly is displayed in 
       degrees as is the time since periapse passage.  Various vectors change in accordance 
-      with the slider.  Use the button to set &nu; to zero.  Choose the time scale 
-      from the menu.</p>
+      with the slider.  Use the button to set &nu; to zero.</p>
       `;
       break;
 
@@ -2033,7 +2150,8 @@ const handleInfoMenuChoice = function(choice){
       circular satellite (vcs), escape velocity (vesc), and the Q parameter (Q).
       </p>
       <p class="p-normal">Click <em>units</em> to switch between canonical and metric 
-      units.</p>`;
+      units.  The time after periapse and orbital period are in the units of the time 
+      scale.  Angles are in degrees.</p>`;
       break;
 
     case 'info-numerical-2-3':
@@ -2057,6 +2175,14 @@ const handleInfoMenuChoice = function(choice){
       periapse.</p>`;
       break;
 
+    case 'info-time-scale':
+      infoText.innerHTML = `<p class="p-normal">Choose the time scale from the <em>time scale menu</em>.   
+      Click the play button.  The animation rate matches your menu choice.  For example, if you 
+      choose "1 second = 1 hour", an hour of orbital motion is compressed into one second of real time.  
+      If chosen, the numerical display presents the time after periapse and orbital period in the units 
+      of the time scale.</p>`;
+      break;
+      
     case 'info-prefs-main':
       infoText.innerHTML = `<p class="p-normal">Click <em>preferences</em>.  Another menu 
       appears letting you choose from several preferences categories.</p>`;
@@ -2264,6 +2390,9 @@ const initialize = function(data, camera){
           case 'showOutOfPlaneVectors':
             showOutOfPlaneVectors  = o.value;
             break;
+          case 'trueAnomalyRange360':
+            trueAnomalyRange360  = o.value;
+            break;
       }
     }
   }
@@ -2277,6 +2406,8 @@ const initialize = function(data, camera){
   // console.log('initialize, about to set eSlider.value to eSl, aSlider.value = +aSl');
   // console.log('and then call doESliderOnInput(+eSl) and doASliderOnInput(+aSl)');
   eSlider.value = +eSl;
+  aSl -= 1;//subtracting 1, not sure how it works, but it makes sure that
+  //the 'aSlider' gets set right
   aSlider.value = +aSl;
   doESliderOnInput(+eSl);
   doASliderOnInput(+aSl);
@@ -2298,7 +2429,13 @@ const initialize = function(data, camera){
   // console.log('initialize, about to set nuSlider.value to nuDegrees');
   // console.log('and then call computeUniversal(), doUniversalPointCalculations(1), doNuSliderOnInput(nuDegrees)');
   nuDegrees = 0;
-  nuSlider.value = 0;
+
+  if (trueAnomalyRange360){
+    nuSlider.value = -180;
+  }else{
+    nuSlider.value = 0;
+  }
+
   computeUniversal();
   doUniversalPointCalculations(1);
   doNuSliderOnInput(nuDegrees);
@@ -2376,6 +2513,7 @@ const completeInitialization = function(continueAnimation = true) {
 
     showOutOfPlaneVectorsCheckbox.checked = showOutOfPlaneVectors;
     doWVectors();
+    trueAnomalyOptionCheckbox.checked = trueAnomalyRange360;
 
     omt.needsRefresh = true;
   }
@@ -2398,8 +2536,6 @@ const doPlayPause = function(){
   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
   <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" stroke-width="0" fill="currentColor"></path>
 </svg>`;
-  // sdo.realTime = 0;
-  // sdo.simulationTime = 0;
   clock.getDelta();
 }
 
@@ -2545,7 +2681,7 @@ const animate = function(continueAnimation = true) {
   renderer.render(scene, camera);
 
   if (playing){
-    const deltaT = timeScale*clock.getDelta();
+    deltaT = timeScale*clock.getDelta();
     timeAfterPeriapseInSeconds += deltaT;// deltaT for 60 fps is 0.01666
     timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
     // console.log('inside animate() in the playing section, about to call doUniversalPointCalculations()');
@@ -2574,12 +2710,12 @@ const animate = function(continueAnimation = true) {
     omt.setR(px, py, 0, a);
     omt.setV(vx, vy, 0);
     omt.rotatePlanet2(timeAfterPeriapseInSeconds, planetRotationPeriodSeconds, animationPeriod*ctu);
-    doNuAndTimeDisplay();
+    // doNuAndTimeDisplay();
 
     if (numericalDisplayIsOccurring){
       displayNumerical();
     }
-
+    
     omt.needsRefresh = true;
   }
 

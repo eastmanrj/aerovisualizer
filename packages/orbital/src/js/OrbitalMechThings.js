@@ -741,7 +741,7 @@ class OrbitalMechThings {
 
   _constructVectors(){
     const length = 1;
-    const shaftRadius = 0.007*length;
+    const shaftRadius = 0.006*length;
     const fractionForShaft = this._fractionForShaft;
 
     const shaftGeometry = new THREE.CylinderGeometry(shaftRadius, 

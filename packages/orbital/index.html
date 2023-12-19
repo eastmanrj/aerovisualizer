@@ -25,7 +25,7 @@
           <button id="mu-btn" class="btn no-uppercase">&mu;</button>
           <button id="a-e-btn" class="btn no-uppercase">a&nbsp;e</button>
           <button id="orientation-btn" class="btn no-uppercase">&Omega;&nbsp;i&nbsp;&omega;</button>
-          <button id="r-v-btn" class="btn no-uppercase">&nu;</button>
+          <button id="nu-btn" class="btn no-uppercase">&nu;</button>
           <button id="numerical-btn" class="btn no-uppercase">1&nbsp;2&nbsp;3</button>
           <button id="main-return-btn" class="btn btn-with-icon" onclick="window.location.href='https://aerovisualizer.com'">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" 
@@ -205,6 +205,8 @@
           <div class="grid-item span4 checkbox center-grid-item">
             <input type="checkbox" id="show-out-of-plane" name="show-out-of-plane-checkbox" value="yes">
             <label for="show-out-of-plane">show out of plane (W) vectors</label>
+            <input type="checkbox" id="true-anomaly-option" name="true-anomaly-option-checkbox" value="yes">
+            <label for="true-anomaly-option">true anomaly range 0&deg; - 360&deg;</label>
           </div>
         </div>
         <div class="elements" id="inertial-vectors-elements">
@@ -304,6 +306,7 @@
             <option value="info-numerical-1">numerical display 1</option>
             <option value="info-numerical-2-3">numerical display 2 & 3</option>
             <option value="info-ellipse-hyperbola">ellipse / hyperbola</option>
+            <option value="info-time-scale">time scale</option>
             <option value="info-prefs-main">preferences</option>
             <option value="info-prefs-general">preferences - general</option>
             <option value="info-prefs-inertial-vectors">preferences - inertial vectors</option>

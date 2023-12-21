@@ -533,8 +533,8 @@ const replaceAerovisualizerData = function(name, value){
 const saveToLocalStorage = function(){
   localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
 }
-localStorage.clear();//temp
-saveToLocalStorage();//temp blah
+// localStorage.clear();//temp
+// saveToLocalStorage();//temp blah
 // location.reload();//temp
 
 const getFromLocalStorage = function(){
@@ -558,7 +558,7 @@ cycleNumericalDisplayButton3.addEventListener('click', () => {
 });
 
 
-const displayNumerical = function(){//blah
+const displayNumerical = function(){
   let tap = displayUnits === 1 ? timeAfterPeriapse : timeAfterPeriapseInSeconds/displayTimeScale;
 
   if (meanAnomaly !== null){
@@ -566,29 +566,47 @@ const displayNumerical = function(){//blah
     computePQW2UVWRotation();
 
     if (trueAnomalyRange360){
-      numNu.innerHTML = `${Number(nuDegrees+180).toFixed(2).toString()}`;
+      if (nuDegrees < 0){
+        numNu.innerHTML = `${Number(nuDegrees+360).toFixed(2).toString()}`;
+      }else{
+        numNu.innerHTML = `${Number(nuDegrees).toFixed(2).toString()}`;
+      }
     }else{
       numNu.innerHTML = `${Number(nuDegrees).toFixed(2).toString()}`;
     }
 
+    const halfPeriod = animationPeriod*ctu/2;
+
     switch (timeScaleMenuChoice){
       case 'sec-equals-1sec':
-        numT.innerHTML = `${Number(tap).toFixed(0).toString()}`;
+        if (tap < 0){
+          numT.innerHTML = `${Number(tap+halfPeriod).toFixed(0).toString()}`;
+        }else{
+          numT.innerHTML = `${Number(tap).toFixed(0).toString()}`;
+        }
         break;
       case 'sec-equals-1minute':
-        numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
-        break;
       case 'sec-equals-5minutes':
-        numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
-        break;
       case 'sec-equals-15minutes':
-        numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
+        if (tap < 0){
+          numT.innerHTML = `${Number(tap+halfPeriod).toFixed(1).toString()}`;
+        }else{
+          numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
+        }
         break;
       case 'sec-equals-1hour':
-        numT.innerHTML = `${Number(tap).toFixed(2).toString()}`;
+        if (tap < 0){
+          numT.innerHTML = `${Number(tap+halfPeriod).toFixed(1).toString()}`;
+        }else{
+          numT.innerHTML = `${Number(tap).toFixed(2).toString()}`;
+        }
         break;
       case 'sec-equals-1day':
-        numT.innerHTML = `${Number(tap).toFixed(3).toString()}`;
+        if (tap < 0){
+          numT.innerHTML = `${Number(tap+halfPeriod).toFixed(1).toString()}`;
+        }else{
+          numT.innerHTML = `${Number(tap).toFixed(3).toString()}`;
+        }
         break;
     }
   }else{
@@ -713,7 +731,11 @@ const displayNumerical = function(){//blah
 
   if (e < 1){
     if (trueAnomalyRange360){
-      numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180 + 180).toFixed(2).toString()}`;
+      if (eccentricAnomaly < 0){
+        numEccenAnom.innerHTML = `${Number((eccentricAnomaly+360)/piOver180).toFixed(2).toString()}`;
+      }else{
+        numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
+      }
     }else{
       numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
     }
@@ -723,14 +745,22 @@ const displayNumerical = function(){//blah
     numEccenAnom.innerHTML = 'x';
 
     if (trueAnomalyRange360){
-      numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180 + 180).toFixed(2).toString()}`;
+      if (eccentricAnomaly < 0){
+        numHyperAnom.innerHTML = `${Number((hyperbolicAnomaly+360)/piOver180).toFixed(2).toString()}`;
+      }else{
+        numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180).toFixed(2).toString()}`;
+      }
     }else{
       numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180).toFixed(2).toString()}`;
     }
   }
   
   if (trueAnomalyRange360){
-    numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180 + 180).toFixed(2).toString()}`;
+    if (eccentricAnomaly < 0){
+      numMeanAnom.innerHTML = `${Number((meanAnomaly+360)/piOver180).toFixed(2).toString()}`;
+    }else{
+      numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180).toFixed(2).toString()}`;
+    }
   }else{
     numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180).toFixed(2).toString()}`;
   }
@@ -992,9 +1022,15 @@ const enableDisableTimeScaleOptions = function(){//blah
   const periodInSeconds = animationPeriod*ctu;
   const timeFraction = fraction*periodInSeconds;
 
-  for (let i=0; i<tsArray.length; i++){
+  for (let i=tsArray.length-1; i>=0; i--){
+    timeScaleMenu.options[i].disabled = false;
+
     if (tsArray[i] > timeFraction){
       timeScaleMenu.options[i].disabled = true;
+
+      if (timeScaleMenu.selectedIndex >= i){
+        timeScaleMenu.selectedIndex = i - 1;
+      }
     }
   }
 
@@ -1416,7 +1452,11 @@ const doNuSliderOnInput = function(value){
 }
 
 nuSlider.oninput = function(){
-  doNuSliderOnInput(+this.value);
+  if (trueAnomalyRange360){
+    doNuSliderOnInput(+this.value+180);
+  }else{
+    doNuSliderOnInput(+this.value);
+  }
 }
 
 nuSlider.onpointerup = function(){
@@ -2425,6 +2465,7 @@ const initialize = function(data, camera){
   handleOrientationOnInput('aop');
 
   timeScaleMenu.value = timeScaleMenuChoice;
+  enableDisableTimeScaleOptions();
   doTimeScaleMenu();
   // console.log('initialize, about to set nuSlider.value to nuDegrees');
   // console.log('and then call computeUniversal(), doUniversalPointCalculations(1), doNuSliderOnInput(nuDegrees)');

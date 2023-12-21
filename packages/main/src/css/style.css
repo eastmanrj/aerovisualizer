@@ -32,7 +32,7 @@ h1 {
   -webkit-user-select: none;
   -ms-user-select: none;
   grid-column: 1fr 1fr;
-  justify-content:start;
+  justify-content:center;
   justify-items: center;
   align-items: stretch;
   pointer-events: all;

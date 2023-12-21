@@ -15,14 +15,14 @@ body {
 
 h1 {
   font-family: inherit;
-  font-size: 7rem;
+  font-size: 2rem;
   font-weight: 800;
   color: rgb(225, 225, 255);
 }
 
 .container {
-  width: 90vw;
-  height: 90vh;
+  width: 100vw;
+  height: 100vh;
   display: grid;
   flex-wrap: wrap;
   row-gap: 20%;
@@ -44,9 +44,9 @@ h1 {
   background-color:blue;
   color: rgb(225, 225, 255);
   font-family: inherit;
-  font-size: 12rem;
+  font-size: 4rem;
   font-weight: 800;
-  border-width: 4px;
+  border-width: 5px;
   border-radius: 2.5rem;
   border-color:orange;
   cursor: pointer;
@@ -54,3 +54,24 @@ h1 {
   touch-action:manipulation;
   align-self: stretch;
 }
+
+/* 
+/*******************************
+ * Device Orientation Portrait
+ ******************************* /
+ @media (orientation: portrait) {
+  .container {
+    width: 100vw;
+    height: 100vh;
+  }
+}
+
+/*******************************
+ * Device Orientation Landscape
+ ******************************* /
+ @media (orientation: landscape) {
+  .container {
+    width: 100vh;
+    height: 100vw;
+  }
+} */

@@ -87,7 +87,8 @@ label {
   flex-wrap: wrap;
   justify-content: space-between;
   width: 100%;
-  gap: 0.5rem;
+  row-gap: 0.5rem;
+  column-gap: 1.15rem;
   margin: 0.25rem;
 }
 
@@ -123,26 +124,27 @@ label {
 .btn:link,
 .btn:visited {
   display: block;
-  background-color: rgb(125, 125, 255);
+  background-color: #5555ff;
   color: rgb(225, 225, 255);
   font-family: inherit;
   font-weight: 600;
   border-width: 2px;
   border-radius: 0.7rem;
-  border-color:rgb(125, 225, 255);
+  border-color:orange;
   cursor: pointer;
   /* text-transform: uppercase; */
   padding: 0.5rem 0.7rem;
   flex: 1 1 auto;
   touch-action:manipulation;
+  margin-bottom: 0.5rem;
 }
 
 .btn:disabled,
 .btn[disabled],
 .btn.disabled:hover,
 .btn.disabled:active {
-  background-color: #aaa;
-  color: #555;
+  color:orange;
+  border-color:orange;
 }
 
 .btn-with-icon {

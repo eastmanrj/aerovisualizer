@@ -25,7 +25,7 @@ h1 {
   width: 100vw;
   height: 80vh;
   display: grid;
-  row-gap: 5%;
+  row-gap: 3%;
   cursor: pointer;
   user-select: none;
   -moz-user-select: none;
@@ -44,13 +44,13 @@ h1 {
   background-color:blue;
   color: rgb(225, 225, 255);
   font-family: inherit;
-  font-size: 4rem;
+  font-size: 3rem;
   font-weight: 800;
   border-width: 5px;
   border-radius: 2.5rem;
   border-color:orange;
   cursor: pointer;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.5rem;
   touch-action:manipulation;
   align-self: stretch;
 }

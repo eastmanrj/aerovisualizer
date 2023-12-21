@@ -13,19 +13,27 @@ body {
   background-color: #000;
 }
 
+h1 {
+  font-family: inherit;
+  font-size: 7rem;
+  font-weight: 800;
+  color: rgb(225, 225, 255);
+}
+
 .container {
   width: 90vw;
   height: 90vh;
-  display: flex;
+  display: grid;
   flex-wrap: wrap;
-  gap: 10%;
+  row-gap: 20%;
   flex-direction: column;
   cursor: pointer;
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
-  justify-content:space-around;
+  justify-content: space-around;
+  justify-items: center;
   align-items: stretch;
   pointer-events: all;
   margin: 30px;
@@ -33,18 +41,16 @@ body {
 
 .btn{
   display: block;
-  background-color: rgb(125, 125, 255);
+  background-color:blue;
   color: rgb(225, 225, 255);
   font-family: inherit;
-  font-size:25px;
-  /* font-size: 100rem;
-  font-weight: 800; */
-  border-width: 2px;
-  border-radius: 0.7rem;
-  border-color:rgb(125, 225, 255);
+  font-size: 12rem;
+  font-weight: 800;
+  border-width: 4px;
+  border-radius: 2.5rem;
+  border-color:orange;
   cursor: pointer;
-  /* padding: 0.5rem 0.7rem; */
-  flex: 1 1 20%;
+  padding: 2.5rem 5rem;
   touch-action:manipulation;
   align-self: stretch;
 }

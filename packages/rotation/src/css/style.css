@@ -127,6 +127,7 @@ label {
   background-color: #5555ff;
   color: rgb(225, 225, 255);
   font-family: inherit;
+  font-size: 1.25rem;
   font-weight: 600;
   border-width: 2px;
   border-radius: 0.7rem;
@@ -414,7 +415,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
   }
 
   .p-normal {
-    font-size: 0.65rem;
+    font-size: 0.85rem;
     margin-bottom: 0.5rem;
   }
 

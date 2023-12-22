@@ -44,6 +44,8 @@
           <button id="rotation-btn" class="btn no-uppercase">&omega;&nbsp;/&nbsp;H</button>
           <button id="torque-btn" class="btn no-uppercase">&tau;</button>
           <button id="numerical-btn" class="btn no-uppercase">1&nbsp;2&nbsp;3</button>
+          <button id="preferences-btn" class="btn span2 no-uppercase center-grid-item">pref</button>
+          <button id="info-btn" class="btn span2 center-grid-item">&nbsp;?&nbsp;</button>
           <button id="main-return-btn" class="btn btn-with-icon" onclick="window.location.href='https://aerovisualizer.com'">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" 
             width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" 
@@ -64,11 +66,13 @@
           <button id="euler-angle-order-btn" class="btn">Euler angle order</button>
           <button id="cones-btn" class="btn">space and body cones</button>
           <button id="poinsot-btn" class="btn">Poinsot's construction</button>
-          <button id="prefs-return-btn" class="btn btn-with-icon"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <button id="prefs-return-btn" class="btn btn-with-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
             <path d="M9 14l-4 -4l4 -4"></path>
             <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
-         </svg></button>
+            </svg>
+          </button>
         </div>
         <div class="elements" id="default-elements">
           <label class="center-grid-item span3">reset to defaults?</label>
@@ -131,7 +135,6 @@
           <select id="info-menu" class="menu span3" name="info-menu">
             <option value="info-intro">introduction</option>
             <option value="info-how-to-use">how to use aerovisualizer</option>
-            <option value="info-numerical">numerical display</option>
             <option value="info-mass-prop">mass properties</option>
             <option value="info-attitude">Euler angles & quaternions</option>
             <option value="info-angular-rates">angular velocity & momentum</option>
@@ -143,6 +146,7 @@
             <option value="info-torque-acs">torque - ACS stabilization</option>
             <option value="info-torque-gg">torque - gravity gradient</option>
             <option value="info-torque-top">torque - spinning top</option>
+            <option value="info-numerical">numerical display</option>
             <option value="info-prefs-main">preferences</option>
             <option value="info-prefs-default">preferences - default</option>
             <option value="info-prefs-general">preferences - general</option>
@@ -363,9 +367,6 @@
         </div>
         <div class="elements-group">
           <div class="elements numerical" id="numerical-elements-general">
-            <p class="span4 center-grid-item">Aerovisualizer - Rotation</p>
-            <button id="preferences-btn" class="btn span2 no-uppercase center-grid-item">pref</button>
-            <button id="info-btn" class="btn span2 center-grid-item">&nbsp;?&nbsp;</button>
             <p class="span2 top-border">moi</p><p class="span2 top-border left-border">&omega;</p>
             <p class="span2 top-border left-border">H</p><p class="span2 top-border left-border">&tau;</p>
             <p>Ixx</p><pre><span id="ixx-number"></span></pre>

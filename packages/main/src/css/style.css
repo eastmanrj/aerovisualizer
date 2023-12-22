@@ -25,7 +25,7 @@ h1 {
   width: 100vw;
   height: 80vh;
   display: grid;
-  row-gap: 3%;
+  row-gap: 10%;
   cursor: pointer;
   user-select: none;
   -moz-user-select: none;
@@ -34,7 +34,7 @@ h1 {
   grid-column: 1fr 1fr;
   justify-content:center;
   justify-items: center;
-  align-items: stretch;
+  align-items:start;
   pointer-events: all;
   margin-top: 15%;
   margin-bottom: 15%;
@@ -53,5 +53,5 @@ h1 {
   cursor: pointer;
   padding: 0.5rem 0.5rem;
   touch-action:manipulation;
-  align-self: stretch;
+  align-self:start;
 }

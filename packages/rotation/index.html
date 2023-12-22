@@ -39,11 +39,11 @@
       <div id="sixDOF-world"></div>
       <div class="non-sixDOF-world">
         <div class="btn-group bottom-margin">
-          <button id="numerical-btn" class="btn no-uppercase">1&nbsp;2&nbsp;3</button>
           <button id="mass-prop-btn" class="btn no-uppercase">mass</button>
           <button id="attitude-btn" class="btn no-uppercase">&psi;&nbsp;&theta;&nbsp;&phi;</button>
           <button id="rotation-btn" class="btn no-uppercase">&omega;&nbsp;/&nbsp;H</button>
           <button id="torque-btn" class="btn no-uppercase">&tau;</button>
+          <button id="numerical-btn" class="btn no-uppercase">1&nbsp;2&nbsp;3</button>
           <button id="main-return-btn" class="btn btn-with-icon" onclick="window.location.href='https://aerovisualizer.com'">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" 
             width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" 
@@ -427,7 +427,7 @@
             <input class="slider span2" type="range" min="0" max="10" value="4" id="dimZ-slider" oninput="dimZ.innerText = this.value">
             <p class="span3 top-margin">Ixx: <span id="ixx-display">0</span> Iyy: <span id="iyy-display">0</span> Izz: <span id="izz-display">0</span></p>        
           </div>
-          <div class="elements" id="rotation-elements">
+          <div class="elements span4" id="rotation-elements">
             <div class="grid-item grid-item-end">
               <input type="radio" id="omega-or-H-omega" name="omega-or-H-radio" value="omega" class="radio">
               <label for="omega-or-H-omega">&omega;</label>

@@ -36,7 +36,8 @@ h1 {
   justify-items: center;
   align-items: stretch;
   pointer-events: all;
-  margin: 30px;
+  margin-top: 15%;
+  margin-bottom: 15%;
 }
 
 .btn{

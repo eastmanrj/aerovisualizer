@@ -63,7 +63,7 @@ const defaultTimeScaleMenuChoice = 'sec-equals-1sec';
 
 const defaultCentralBodyTransparency = 0;//0=completely opaque, 100=completely transparent
 const defaultShowOutOfPlaneVectors = true;
-const defaultTrueAnomalyRange360 = false;
+const defaultTrueAnomaly360 = false;
 
 //aerovisualizerData is modified and saved to local storage when 
 // values and preferences are changed and is retrieved from local 
@@ -91,7 +91,7 @@ let aerovisualizerData = [
   {name:'timeScaleMenuChoice', value:defaultTimeScaleMenuChoice},
   {name:'centralBodyTransparency', value:defaultCentralBodyTransparency},
   {name:'showOutOfPlaneVectors', value:defaultShowOutOfPlaneVectors},
-  {name:'trueAnomalyRange360', value:defaultTrueAnomalyRange360},
+  {name:'trueAnomaly360', value:defaultTrueAnomaly360},
   {name:'param1', value:0},
   {name:'param2', value:0},
   {name:'param3', value:0},
@@ -207,7 +207,7 @@ let timeScaleMenuChoice = defaultTimeScaleMenuChoice;
 
 let centralBodyTransparency = defaultCentralBodyTransparency;
 let showOutOfPlaneVectors = defaultShowOutOfPlaneVectors;
-let trueAnomalyRange360 = defaultTrueAnomalyRange360;
+let trueAnomaly360 = defaultTrueAnomaly360;//true=0 to 360, false=-180 to 180
 
 let rVector = new THREE.Vector3(1, 1, 1);
 let rPQW = new THREE.Vector3(1, 1, 1);
@@ -578,7 +578,7 @@ const displayNumerical = function(){
     computePQW2IJKRotation();
     computePQW2UVWRotation();
 
-    if (trueAnomalyRange360){
+    if (trueAnomaly360){
       if (nuDegrees < 0){
         numNu.innerHTML = `${Number(nuDegrees+360).toFixed(2).toString()}`;
       }else{
@@ -741,7 +741,7 @@ const displayNumerical = function(){
   computeKeplerStuff();
 
   if (e < 1){
-    if (trueAnomalyRange360){
+    if (trueAnomaly360){
       if (eccentricAnomaly < 0){
         numEccenAnom.innerHTML = `${Number((eccentricAnomaly+360)/piOver180).toFixed(2).toString()}`;
       }else{
@@ -755,7 +755,7 @@ const displayNumerical = function(){
   }else{
     numEccenAnom.innerHTML = 'x';
 
-    if (trueAnomalyRange360){
+    if (trueAnomaly360){
       if (eccentricAnomaly < 0){
         numHyperAnom.innerHTML = `${Number((hyperbolicAnomaly+360)/piOver180).toFixed(2).toString()}`;
       }else{
@@ -766,8 +766,8 @@ const displayNumerical = function(){
     }
   }
   
-  if (trueAnomalyRange360){
-    if (eccentricAnomaly < 0){
+  if (trueAnomaly360){
+    if (meanAnomaly < 0){
       numMeanAnom.innerHTML = `${Number((meanAnomaly+360)/piOver180).toFixed(2).toString()}`;
     }else{
       numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180).toFixed(2).toString()}`;
@@ -1385,16 +1385,16 @@ const doNuAndTimeDisplay = function(){
   if (meanAnomaly !== null){
     let halfPeriod = 0;
 
-    if (trueAnomalyRange360){
+    if (trueAnomaly360){
       halfPeriod = animationPeriod*ctu/2;
 
       if (nuDegrees < 0){
-        nuDisplay.innerHTML = `&nu;: ${Number(+(nuSlider.value)+360).toFixed(2).toString()}`;
+        nuDisplay.innerHTML = `&nu;: ${Number(nuDegrees+360).toFixed(2).toString()}`;
       }else{
-        nuDisplay.innerHTML = `&nu;: ${Number(+(nuSlider.value)).toFixed(2).toString()}`;
+        nuDisplay.innerHTML = `&nu;: ${Number(nuDegrees).toFixed(2).toString()}`;
       }
     }else{
-      nuDisplay.innerHTML = `&nu;: ${Number(+(nuSlider.value)).toFixed(2).toString()}`;
+      nuDisplay.innerHTML = `&nu;: ${Number(nuDegrees).toFixed(2).toString()}`;
     }
 
     computePQW2UVWRotation();
@@ -1423,18 +1423,6 @@ const doNuAndTimeDisplay = function(){
 const doNuSliderOnInput = function(value){
   haltPlay();
   nuDegrees = value;
-
-  // if (trueAnomalyRange360){
-  //   halfPeriod = animationPeriod*ctu/2;
-
-  //   if (value < 0){
-  //     nuDegrees = value + 360;
-  //   }else{
-  //     nuDegrees = value;
-  //   }
-  // }else{
-  // }
-
   nu = nuDegrees*piOver180;
   computeKeplerAndTimeAfterPeriapse();
   doNuAndTimeDisplay();
@@ -1456,7 +1444,7 @@ const doNuSliderOnInput = function(value){
 }
 
 nuSlider.oninput = function(){
-  if (trueAnomalyRange360){
+  if (trueAnomaly360){
     if (Number(this.value) > 0){
       doNuSliderOnInput(Number(this.value)-180);
     }else{
@@ -1472,7 +1460,7 @@ nuSlider.onpointerup = function(){
 }
 
 zeroNuButton.addEventListener('click', () => {
-  if (trueAnomalyRange360){
+  if (trueAnomaly360){
     // halfPeriod = animationPeriod*ctu/2;
     nuSlider.value = -180;
   }else{
@@ -2020,20 +2008,8 @@ showOutOfPlaneVectorsCheckbox.addEventListener('change', () => {
 });
 
 trueAnomalyOptionCheckbox.addEventListener('change', () => {
-  trueAnomalyRange360 = trueAnomalyOptionCheckbox.checked;
-
-  // if (trueAnomalyRange360){
-  //   // halfPeriod = animationPeriod*ctu/2;
-  //   nuSlider.value = nuDegrees - 180;
-  // }else{
-  //   nuSlider.value = nuDegrees;
-  // }
-
-  if (numericalDisplayIsOccurring){
-    displayNumerical();
-  }
-
-  replaceAerovisualizerData('trueAnomalyRange360',trueAnomalyRange360);
+  trueAnomaly360 = trueAnomalyOptionCheckbox.checked;
+  replaceAerovisualizerData('trueAnomaly360',trueAnomaly360);
   saveToLocalStorage();
 });
 
@@ -2055,17 +2031,16 @@ toggleConicSectionButton.addEventListener('click', () => {
   h = rp*vp;
   nuDegrees = 0;
   nu = nuDegrees*piOver180;
-  doESliderOnInput(+eSlider.value);
-  doASliderOnInput(+aSlider.value);
-  computePVTArray();
 
-  if (trueAnomalyRange360){
+  if (trueAnomaly360){
     // halfPeriod = animationPeriod*ctu/2;
     nuSlider.value = -180;
   }else{
     nuSlider.value = 0;
   }
-
+  computePVTArray();
+  doESliderOnInput(+eSlider.value);
+  doASliderOnInput(+aSlider.value);
   doNuSliderOnInput(nuDegrees);
   handlePeriapseCheck();
   displayNumerical();
@@ -2441,8 +2416,8 @@ const initialize = function(data, camera){
           case 'showOutOfPlaneVectors':
             showOutOfPlaneVectors  = o.value;
             break;
-          case 'trueAnomalyRange360':
-            trueAnomalyRange360  = o.value;
+          case 'trueAnomaly360':
+            trueAnomaly360  = o.value;
             break;
       }
     }
@@ -2477,6 +2452,7 @@ const initialize = function(data, camera){
   enableDisableTimeScaleOptions();
   doTimeScaleMenu();
   nuDegrees = 0;
+  nu = 0;
   conicSectionIsEllipse = conicSection === 'ellipse';
 
   if (conicSectionIsEllipse){
@@ -2485,7 +2461,7 @@ const initialize = function(data, camera){
     toggleConicSectionButton.innerHTML = 'ellipse&nbsp;/&nbsp;HYPERBOLA';
   }
 
-  if (trueAnomalyRange360){
+  if (trueAnomaly360){
     // halfPeriod = animationPeriod*ctu/2;
     nuSlider.value = -180;
   }else{
@@ -2562,7 +2538,7 @@ const completeInitialization = function(continueAnimation = true) {
 
     showOutOfPlaneVectorsCheckbox.checked = showOutOfPlaneVectors;
     doWVectors();
-    trueAnomalyOptionCheckbox.checked = trueAnomalyRange360;
+    trueAnomalyOptionCheckbox.checked = trueAnomaly360;
 
     omt.needsRefresh = true;
   }
@@ -2606,10 +2582,14 @@ const haltPlay = function(){
 }
 
 resetButton.addEventListener('click', () => {
-  if (trueAnomalyRange360){
-    doNuSliderOnInput(+(nuSlider.value)+180);
+  if (trueAnomaly360){
+    if (Number(nuSlider.value) > 0){
+      doNuSliderOnInput(Number(nuSlider.value)-180);
+    }else{
+      doNuSliderOnInput(Number(nuSlider.value)+180);
+    }
   }else{
-    doNuSliderOnInput(+(nuSlider.value));
+    doNuSliderOnInput(Number(nuSlider.value));
   }
 
   adjustPVTArrayPointers(1);

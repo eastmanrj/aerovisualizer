@@ -34,7 +34,7 @@ h1 {
   grid-template-columns: 1fr;
   grid-template-rows: 1fr 1fr 1fr;
   align-items: stretch;
-  justify-items: center;
+  justify-items: stretch;
   pointer-events: all;
   margin-top: 2.5%;
   margin-bottom: 15%;
@@ -47,10 +47,10 @@ h1 {
   font-family: inherit;
   font-size: 3rem;
   font-weight: 800;
-  border-width: 5px;
-  border-radius: 0.5rem;
+  border-width: 4px;
+  border-radius: 1rem;
   border-color:orange;
   cursor: pointer;
-  padding: 0.5rem 0.5rem;
+  padding: 0.5rem 1rem;
   touch-action:manipulation;
 }

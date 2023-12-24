@@ -9,6 +9,7 @@
       content="Aerovisualizer is a site for teaching concepts of aerospace engineering.">
     <link rel="stylesheet" href="src/css/style.css">
     <title>Aerovisualizer</title>
+    <link rel="manifest" href="app.webmanifest">
     <script type="module" src="src/js/app.js"></script>
 
     <!-- <meta name="apple-mobile-web-app-capable" content="yes">
@@ -86,13 +87,13 @@
         </div>
         <div class="elements" id="orientation-elements">
           <p class="center-grid-item">&Omega;: <span id="lan-display">0</span>&deg;</p>
-          <input class="slider span2" type="range" min="-180" max="179" value="0" id="lan-slider">
+          <input class="slider span2" type="range" min="-180" max="180" value="0" id="lan-slider">
           <button id="zero-lan-btn" class="btn center-grid-item">zero</button>
           <p class="center-grid-item">i: <span id="inc-display">0</span>&deg;</p>
-          <input class="slider span2" type="range" min="-180" max="179" value="0" id="inc-slider">
+          <input class="slider span2" type="range" min="-180" max="180" value="0" id="inc-slider">
           <button id="zero-inc-btn" class="btn center-grid-item">zero</button>
           <p class="center-grid-item">&omega;: <span id="aop-display">0</span>&deg;</p>
-          <input class="slider span2" type="range" min="-180" max="179" value="0" id="aop-slider">
+          <input class="slider span2" type="range" min="-180" max="180" value="0" id="aop-slider">
           <button id="zero-aop-btn" class="btn center-grid-item">zero</button>
         </div>
         <div class="elements" id="nu-elements">
@@ -207,7 +208,7 @@
             <input type="checkbox" id="show-out-of-plane" name="show-out-of-plane-checkbox" value="yes">
             <label for="show-out-of-plane">show out of plane (W) vectors</label>
             <input type="checkbox" id="true-anomaly-option" name="true-anomaly-option-checkbox" value="yes">
-            <label for="true-anomaly-option">true anomaly range 0&deg; - 360&deg;</label>
+            <label for="true-anomaly-option">true anomaly 0&deg; to 360&deg;</label>
           </div>
         </div>
         <div class="elements" id="inertial-vectors-elements">

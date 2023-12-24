@@ -24,19 +24,19 @@ h1 {
 .container {
   width: 100vw;
   height: 80vh;
-  display: grid;
-  row-gap: 10%;
   cursor: pointer;
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
-  grid-column: 1fr 1fr;
-  justify-content:center;
+  display: grid;
+  row-gap: 2.5%;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  align-items: stretch;
   justify-items: center;
-  align-items:start;
   pointer-events: all;
-  margin-top: 15%;
+  margin-top: 2.5%;
   margin-bottom: 15%;
 }
 
@@ -48,10 +48,9 @@ h1 {
   font-size: 3rem;
   font-weight: 800;
   border-width: 5px;
-  border-radius: 2.5rem;
+  border-radius: 0.5rem;
   border-color:orange;
   cursor: pointer;
   padding: 0.5rem 0.5rem;
   touch-action:manipulation;
-  align-self:start;
 }

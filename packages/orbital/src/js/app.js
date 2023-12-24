@@ -1,10 +1,15 @@
 import * as THREE from '../../../../node_modules/three/build/three.module.js';
 import OrbitalMechThings from './OrbitalMechThings.js';
 import {OrbitControls} from './OrbitControls.js';
-// let testTemp = false;
-// let testTemp2 = false;
 
-const piOver180 = Math.PI / 180;
+/*
+References
+
+"Fundamentals of Astrodynamics" by Bate, Mueller, and White, 
+Dover Publications (Bate)
+*/
+
+const piOver180 = Math.PI/180;
 const twoPi = 2*Math.PI;
 
 let scene, camera, renderer;
@@ -16,14 +21,15 @@ nominalCameraPos.multiplyScalar(cameraRadius);
 let cpx, cpy, cpz;// camera position
 const centerOfRotation = [0, 0, 0];
 let clock = null;
-let omt = null;//"vectors object" (handles all of the vectors)
+let omt = null;//"orbital mechanics thing" object handles the rendering of 
+// the vectors, their labels, the planets, and the orbit curves
 let orbitControls = null;//in this context, "orbit" refers to the camera
 // OrbitControls is a THREE.js class that has nothing to do with orbital mechanics
 let playing = false;
 let cbRadius = 1;
 const muCanonical = 1;//mu is 1 for canonical units of distance (DU)
-//and time (TU). This is included in the code rather than 1 to
-//maintain clarity
+//and time (TU). This constant is included in the code rather than 
+//the number 1 to maintain clarity
 const sqrtMuCanonical = Math.sqrt(muCanonical);//this also should be 1
 let periapseTooSmall = false;
 
@@ -34,12 +40,11 @@ const defaultE = 0;//use 0 for ellipse or Math.SQRT2 for hyperbola
 const defaultLan = 0;//degrees
 const defaultInclination = 0;//degrees
 const defaultAop = 0;//degrees
-// const defaultNu = 0;//degrees deprecated
+// const defaultNu = 0;//degrees deprecated, nu is now initially set to 0
 
 const defaultDelta = Math.PI/2;// 90 degrees for "square" hyperbola
-// const defaultVectorSize = 6;
 
-const defaultInertialVectorsChoice = 'X-Y-Z';
+const defaultInertialVectorsChoice = 'i-j-k';
 const defaultOrbitFixedVectorsChoice = 'h-and-e';
 const defaultOrbitingBodyVectorsChoice = 'r-and-v';
 
@@ -110,6 +115,7 @@ let ctu = 0;//canonical time unit
 let cdu = 0;//canonical distance unit
 let planetRotationPeriodSeconds = 0;
 let conicSection = defaultConicSection;
+let conicSectionIsEllipse = defaultConicSection === 'ellipse';
 let a = Number(defaultA);
 let tp = twoPi*Math.pow(a,1.5)/muCanonical;//orbital period
 let e = Number(defaultE);
@@ -130,18 +136,30 @@ let meanMotion;
 let timeAfterPeriapse;// in canonical time units (CTU)
 let timeAfterPeriapseInSeconds;
 
-let universalArray = [];
-const universalArraySize = 361;
-let universalArrayIndex0;// this is
-// the index of universalArray that corresponds to just before
+let pvtArray = [];//array of objects containing the position,
+// velocity, time, (and nu) of an orbiting body following 
+// either an elliptical or a hyperbolic trajectory.  This array
+// contains 'pvtArraySize' number of object elements.  The array
+// is traversed during animation and the state vector of the 
+// orbiting body is computed by interpolating between adjacent 
+// elements.  The last element is the same as the first
+const pvtArraySize = 361;
+  // pvtArraySize is the size of pvtArray. 361 seems to be a good
+  // enough size, but try to use the smallest number that you can 
+  // get away with. The ellipses and hyperbolas are approximated as 
+  // polyhedrons with this number MINUS 1 number of sides. Lower 
+  // numbers cause the animation to appear segmented around periapse 
+  // and the numbers to be less aaccurate
+let pvtArrayIndex0;// this is
+// the index of pvtArray that corresponds to just before
 // where the time is during animation
-let universalArrayIndex1 = universalArrayIndex0; // this is
-// the index of universalArray that corresponds to just after
+let pvtArrayIndex1 = pvtArrayIndex0; // this is
+// the index of pvtArray that corresponds to just after
 // where the time is during animation
 let timeAfterPeriapseInSeconds0;// time corresponding
-// to universalArray[universalArrayIndex0]
+// to pvtArray[pvtArrayIndex0]
 let timeAfterPeriapseInSeconds1;// time corresponding
-// to universalArray[universalArrayIndex1]
+// to pvtArray[pvtArrayIndex1]
 
 // initial position and velocity of interpolation for animation
 let x0;
@@ -163,7 +181,7 @@ let dnudt;
 let nu0;
 let nu1;
 
-let needToComputeUniversal = true;
+let needToComputePVTArray = true;
 let animationPeriod = tp;
 
 let inertialVectorsChoice = defaultInertialVectorsChoice;
@@ -226,8 +244,6 @@ const eMaxHyperbola = 5;
 const eHyperbolaRange = eMaxHyperbola - eMinHyperbola;
 const aSliderRange = 150;
 const eSliderRange = 150;
-
-// let vectorSize = defaultVectorSize;
 
 const threeDWorld = document.getElementById('threeD-world');
 
@@ -387,9 +403,6 @@ const generalPrefsElements = document.getElementById('general-prefs-elements');
 const inertialVectorsElements = document.getElementById('inertial-vectors-elements');
 const orbitFixedVectorsElements = document.getElementById('orbit-fixed-vectors-elements');
 const orbitingBodyVectorsElements = document.getElementById('orbiting-body-vectors-elements');
-
-const numXXX = document.getElementById('num-xxx');
-
 const infoElements = document.getElementById('info-elements');
 const infoMenu = document.getElementById('info-menu');
 const infoText = document.getElementById('info-text');
@@ -630,8 +643,6 @@ const displayNumerical = function(){
     mm /= ctu;
   }
 
-  numXXX.innerHTML = 'xxx';
-
   numEnergy.innerHTML = `${Number(spEnergy).toFixed(4).toString()}`;
   numE.innerHTML = `${Number(e).toFixed(3).toString()}`;
   numOm.innerHTML = lanDegrees;
@@ -822,12 +833,6 @@ const handleMainButtons = function(button){
       haltPlay();
       nuElements.style.display = 'grid';
       nuButton.disabled = true;
-
-      if (trueAnomalyRange360){
-        nuSlider.value = nuDegrees - 180;
-      }else{
-        nuSlider.value = nuDegrees;
-      }
       break;
     case 'numerical':
       switch (numericalDisplayOption){
@@ -931,7 +936,7 @@ const doASliderOnInput = function(value){
   a = d - c*Math.log(value+1);
 
   // a > 0 for ellipses, a < 0 for hyperbolas
-  if (conicSection === 'ellipse'){
+  if (conicSectionIsEllipse){
     tp = twoPi*Math.pow(a,1.5)/muCanonical;//orbital period
     animationPeriod = tp;
   }else{
@@ -963,7 +968,7 @@ const doASliderOnInput = function(value){
     animationPeriod = (M2 - M1)/n;
   }
 
-  needToComputeUniversal = true;
+  needToComputePVTArray = true;
   meanMotion = Math.sqrt(1/(a*a*a));
   // a = value/aSliderRange*aRange + aMin;
   specificEnergy = -muCanonical/(2*a);
@@ -996,7 +1001,7 @@ const doESliderOnInput = function(value){
       break;
   }
 
-  needToComputeUniversal = true;
+  needToComputePVTArray = true;
   computeP();
   doTwoSunOptionChoice();
 }
@@ -1034,7 +1039,7 @@ const enableDisableTimeScaleOptions = function(){//blah
     }
   }
 
-  // console.log('blah animationPeriod=', animationPeriod,' ctu=', ctu,' timeScale=', timeScale);
+  // console.log('animationPeriod=', animationPeriod,' ctu=', ctu,' timeScale=', timeScale);
   // timeScaleMenu.options[timeScaleMenu.selectedIndex].disabled = true;
 }
 
@@ -1047,7 +1052,7 @@ aSlider.onpointerup = function(){
         let ce;
         let de;
 
-        if (conicSection === 'ellipse'){
+        if (conicSectionIsEllipse){
           ce = eEllipseRange/(Math.log(eSliderRange+1));
           de = eMaxEllipse;
         }else{
@@ -1080,6 +1085,7 @@ aSlider.onpointerup = function(){
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
 
+  computePVTArray();
   handlePeriapseCheck();
   sliderEcanChange = false;
   doNuSliderOnInput(nuDegrees);
@@ -1104,7 +1110,7 @@ eSlider.onpointerup = function(){
           atemp = ra/(1+e);
         }
 
-        if (conicSection === 'hyperbola'){
+        if (!conicSectionIsEllipse){
           // a > 0 for ellipses, a < 0 for hyperbolas
           atemp = -atemp;
         }
@@ -1114,7 +1120,6 @@ eSlider.onpointerup = function(){
         let aS = aSliderRange - (Math.exp((da-atemp)/ca) - 1);
 
         if (0 < aS && aS < aSliderRange){
-          console.log('x: ',aSlider.value,+aS);
           aSlider.value = +aS;
           doASliderOnInput(+aS);// sets the value of 'a'
         }
@@ -1126,6 +1131,7 @@ eSlider.onpointerup = function(){
   ra = a*(1+e);
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
+  computePVTArray();
   handlePeriapseCheck();
   sliderAcanChange = false;
   doNuSliderOnInput(nuDegrees);
@@ -1184,8 +1190,7 @@ lockApoapseButton.addEventListener('click', () => {
 const computePQW2IJKRotation = function(){
   // compute the direction cosine matrix from the perifocal frame
   // to the geocentric equatorial frame (or other inertial frames)
-  // from Fundamentals of Astrodynamics (Bate, Mueller, White), 
-  // p. 82, Dover Publications
+  // (Bate p. 82)
   // this is a 313 Euler rotation sequence
   const clan = Math.cos(lan);//longitude of the ascending node
   const slan = Math.sin(lan);
@@ -1291,9 +1296,10 @@ zeroAopButton.addEventListener('click', () => {
 });
 
 const computeREllipse = function(){
-  const r = p/(1 + e*Math.cos(nu));
-  const x = r*Math.cos(nu);
-  const y = r*Math.sin(nu);
+  let r = p/(1 + e*Math.cos(nu));
+  let x = r*Math.cos(nu);
+  let y = r*Math.sin(nu);
+
   rVector.set(x, y, 0);
   omt.setR(x, y, 0, a);
 }
@@ -1341,7 +1347,7 @@ const computeVHyperbola = function(){
 }
 
 const computeKeplerStuff = function(){
-  // see Bate Mueller White pp. 182-188
+  // Bate pp. 182-188
   const cosnu = Math.cos(nu);
 
   if (e<1){
@@ -1369,55 +1375,45 @@ const computeKeplerStuff = function(){
 
 const computeKeplerAndTimeAfterPeriapse = function(){
   computeKeplerStuff();
-  universalArrayIndex0 = universalArray.findIndex((e) => e.t >= timeAfterPeriapse);
-  universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
-  timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
-  timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
+  pvtArrayIndex0 = pvtArray.findIndex((e) => e.t >= timeAfterPeriapse);
+  pvtArrayIndex1 = (pvtArrayIndex0 + 1)%pvtArraySize;
+  timeAfterPeriapseInSeconds0 = pvtArray[pvtArrayIndex0].t*ctu;
+  timeAfterPeriapseInSeconds1 = pvtArray[pvtArrayIndex1].t*ctu;
 }
 
 const doNuAndTimeDisplay = function(){
   if (meanAnomaly !== null){
-    computePQW2UVWRotation();
+    let halfPeriod = 0;
 
     if (trueAnomalyRange360){
-      nuDisplay.innerHTML = `&nu;: ${Number(+(nuSlider.value) + 180).toFixed(2).toString()}`;
-      const halfPeriod = animationPeriod*ctu/2;
+      halfPeriod = animationPeriod*ctu/2;
 
-      switch (timeScaleMenuChoice){
-        case 'sec-equals-1sec':
-          timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(0).toString()} seconds`;
-          break;
-        case 'sec-equals-1minute':
-        case 'sec-equals-5minutes':
-        case 'sec-equals-15minutes':
-          timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(1).toString()} minutes`;
-          break;
-        case 'sec-equals-1hour':
-          timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(2).toString()} hours`;
-          break;
-        case 'sec-equals-1day':
-          timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(3).toString()} days`;
-          break;
+      if (nuDegrees < 0){
+        nuDisplay.innerHTML = `&nu;: ${Number(+(nuSlider.value)+360).toFixed(2).toString()}`;
+      }else{
+        nuDisplay.innerHTML = `&nu;: ${Number(+(nuSlider.value)).toFixed(2).toString()}`;
       }
     }else{
       nuDisplay.innerHTML = `&nu;: ${Number(+(nuSlider.value)).toFixed(2).toString()}`;
+    }
 
-      switch (timeScaleMenuChoice){
-        case 'sec-equals-1sec':
-          timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(0).toString()} seconds`;
-          break;
-        case 'sec-equals-1minute':
-        case 'sec-equals-5minutes':
-        case 'sec-equals-15minutes':
-          timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(1).toString()} minutes`;
-          break;
-        case 'sec-equals-1hour':
-          timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(2).toString()} hours`;
-          break;
-        case 'sec-equals-1day':
-          timeAfterPeriapseDisplay.innerHTML = `t: ${Number(timeAfterPeriapseInSeconds/displayTimeScale).toFixed(3).toString()} days`;
-          break;
-      }
+    computePQW2UVWRotation();
+
+    switch (timeScaleMenuChoice){
+      case 'sec-equals-1sec':
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(0).toString()} seconds`;
+        break;
+      case 'sec-equals-1minute':
+      case 'sec-equals-5minutes':
+      case 'sec-equals-15minutes':
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(1).toString()} minutes`;
+        break;
+      case 'sec-equals-1hour':
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(2).toString()} hours`;
+        break;
+      case 'sec-equals-1day':
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(3).toString()} days`;
+        break;
     }
   }else{
     timeAfterPeriapseDisplay.innerHTML = 't: INFINITY';
@@ -1425,12 +1421,20 @@ const doNuAndTimeDisplay = function(){
 }
 
 const doNuSliderOnInput = function(value){
-  // console.log('inside doNuSliderOnInput() top of the function');
-  // console.log('about to set nuDegrees to ', nuDegrees);
-  // console.log('and then set nu and call computeKeplerAndTimeAfterPeriapse()');
-
   haltPlay();
   nuDegrees = value;
+
+  // if (trueAnomalyRange360){
+  //   halfPeriod = animationPeriod*ctu/2;
+
+  //   if (value < 0){
+  //     nuDegrees = value + 360;
+  //   }else{
+  //     nuDegrees = value;
+  //   }
+  // }else{
+  // }
+
   nu = nuDegrees*piOver180;
   computeKeplerAndTimeAfterPeriapse();
   doNuAndTimeDisplay();
@@ -1453,30 +1457,33 @@ const doNuSliderOnInput = function(value){
 
 nuSlider.oninput = function(){
   if (trueAnomalyRange360){
-    doNuSliderOnInput(+this.value+180);
+    if (Number(this.value) > 0){
+      doNuSliderOnInput(Number(this.value)-180);
+    }else{
+      doNuSliderOnInput(Number(this.value)+180);
+    }
   }else{
-    doNuSliderOnInput(+this.value);
+    doNuSliderOnInput(Number(this.value));
   }
 }
 
 nuSlider.onpointerup = function(){
-  doUniversalPointCalculations(1);
+  adjustPVTArrayPointers(1);
 }
 
 zeroNuButton.addEventListener('click', () => {
-  nu = 0;
-  nuDegrees = 0;
-
   if (trueAnomalyRange360){
-    nuSlider.value = nuDegrees - 180;
+    // halfPeriod = animationPeriod*ctu/2;
+    nuSlider.value = -180;
   }else{
-    nuSlider.value = nuDegrees;
+    nuSlider.value = 0;
   }
-  
-  doUniversalPointCalculations(1);
+
+  doNuSliderOnInput(0);  
+  adjustPVTArrayPointers(1);
 });
 
-const computeUniversal = function(){
+const computePVTArray = function(){
   let tn;
   let dtdx;
   let xFirstGuess;
@@ -1490,11 +1497,12 @@ const computeUniversal = function(){
   let i;
   let rx;
   let ry;
-  // console.log('in computeUniversal() at the beginning');
 
-  needToComputeUniversal = false;
-  // set needToComputeUniversal to true whenever a or e changes
-  // but don't call this function until the user hits the play button
+  needToComputePVTArray = false;
+  // set needToComputePVTArray to true whenever a or e changes
+  // but don't call this function until pointerup.  Also call this
+  // immediately when switching between conic section types or when 
+  // changing the central body
 
   const t0 = 0;
     // we use the periapse for r0, so t0 = timeAfterPeriapse = 0.
@@ -1516,18 +1524,14 @@ const computeUniversal = function(){
 
   const sqrtA = Math.sqrt(Math.abs(a));
 
-  // clear the universalArray of any entries that exist
-  while (universalArray.length){
-    universalArray.pop();
+  // clear the pvtArray of any entries that exist
+  while (pvtArray.length){
+    pvtArray.pop();
   }
 
-  let univPoint;  
-  // make sure that universalArraySize is an even fraction or
-  // multiple of 360 PLUS 1 such as 61, 91, 121, 181, 361, or 721.
-  // 361 seems to be good enough. lower numbers cause the animation
-  // to look segmented around periapse and the numbers to be
-  // too inaccurate.  The last point is the same as the first
-  for (let t=-animationPeriod/2; t<animationPeriod/2; t+=animationPeriod/(universalArraySize-1)){
+  let pvtPoint;  
+
+  for (let t=-animationPeriod/2; t<animationPeriod/2; t+=animationPeriod/(pvtArraySize-1)){
     // t is the time in canonical time units.  For elliptical orbits, an 
     // orbital period (tp) equals twoPi canonical time units (TU or CTU)
     // which equals animationPeriod.  For a hyperbolic flyby, animationPeriod
@@ -1535,7 +1539,7 @@ const computeUniversal = function(){
     // evenly.  Another way might be to have more data points where nu changes
     // the fastest around periapse
 
-    // see Bate p. 206 for first guess of x
+    // Bate p. 206 for first guess of x
     if (e < 1){
       // ellipse
       xFirstGuess = Math.sqrt(muCanonical)*(t - t0)/a;
@@ -1591,38 +1595,33 @@ const computeUniversal = function(){
       if (Math.abs(t - tn) < 0.001){
         break;
       }
-
-      // if (i>7){
-      //   console.log('i: ',i,'x: ',x, 'z: ',z, 'c: ',c, 's: ',s, 'tn: ',tn, 'dtdx: ',dtdx);
-      // }
     }
     
     // Bate pp. 201-2
-    univPoint = new Object();
-    univPoint.t = t;
+    pvtPoint = new Object();
+    pvtPoint.t = t;
     f = 1 - x*x*c/r0;
     g = t - x*x*x*s/sqrtMuCanonical;
-    univPoint.f = f;
-    univPoint.g = g;
+    pvtPoint.f = f;
+    pvtPoint.g = g;
     // below, r is computed under the assumption that r0 and v0 are
     // at the periapse, which is mentioned earlier
     rx = f*rp;
     ry = g*sqrtMuOverP*(e + 1);
     r = Math.sqrt(rx*rx + ry*ry);
-    univPoint.nu = Math.atan2(ry, rx)/piOver180;
-    univPoint.fdot = sqrtMuCanonical*x*(z*s - 1)/(r0*r);
-    univPoint.gdot = 1 - x*x*c/r;
+    pvtPoint.nu = Math.atan2(ry, rx)/piOver180;
+    pvtPoint.fdot = sqrtMuCanonical*x*(z*s - 1)/(r0*r);
+    pvtPoint.gdot = 1 - x*x*c/r;
     
-    //(f*univPoint.gdot - 1)/g;
-    universalArray.push(univPoint);
+    //(f*pvtPoint.gdot - 1)/g;
+    pvtArray.push(pvtPoint);
 
-    // console.log(f*univPoint.gdot - g*univPoint.fdot);
+    // console.log(f*pvtPoint.gdot - g*pvtPoint.fdot);
   }
 
-  universalArray[0].nu = -180;//set the first one to -180 because atan2 makes it +180
-  univPoint = {...universalArray[0]};
-  universalArray.push(univPoint);//make the last one equal the first one
-  // console.log('inside computeUniversal() at the end, universalArray.length=',universalArray.length);
+  pvtArray[0].nu = -180;//set the first one to -180 because atan2 makes it +180
+  pvtPoint = {...pvtArray[0]};
+  pvtArray.push(pvtPoint);//make the last one equal the first one
 }
 
 const setInertialVectorColor = function(color, save=false){
@@ -1722,6 +1721,7 @@ const handlePlanetChange = function(){
   ra = Number(a*(1+e));
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
+  computePVTArray();
   // doNuSliderOnInput(nuDegrees);
   // handlePeriapseCheck();
   // END Of UNCERTAIN SECTION
@@ -2022,6 +2022,13 @@ showOutOfPlaneVectorsCheckbox.addEventListener('change', () => {
 trueAnomalyOptionCheckbox.addEventListener('change', () => {
   trueAnomalyRange360 = trueAnomalyOptionCheckbox.checked;
 
+  // if (trueAnomalyRange360){
+  //   // halfPeriod = animationPeriod*ctu/2;
+  //   nuSlider.value = nuDegrees - 180;
+  // }else{
+  //   nuSlider.value = nuDegrees;
+  // }
+
   if (numericalDisplayIsOccurring){
     displayNumerical();
   }
@@ -2032,8 +2039,9 @@ trueAnomalyOptionCheckbox.addEventListener('change', () => {
 
 toggleConicSectionButton.addEventListener('click', () => {
   conicSection = conicSection === 'ellipse' ? 'hyperbola' : 'ellipse';
+  conicSectionIsEllipse = conicSection === 'ellipse';
 
-  if (conicSection === 'ellipse'){
+  if (conicSectionIsEllipse){
     toggleConicSectionButton.innerHTML = 'ELLIPSE&nbsp;/&nbsp;hyperbola';
   }else{
     toggleConicSectionButton.innerHTML = 'ellipse&nbsp;/&nbsp;HYPERBOLA';
@@ -2041,15 +2049,18 @@ toggleConicSectionButton.addEventListener('click', () => {
 
   sliderEcanChange = false;
   sliderAcanChange = false;
-  doESliderOnInput(+eSlider.value);
-  doASliderOnInput(+aSlider.value);
   rp = Number(a*(1-e));
   ra = Number(a*(1+e));
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
   nuDegrees = 0;
-  
+  nu = nuDegrees*piOver180;
+  doESliderOnInput(+eSlider.value);
+  doASliderOnInput(+aSlider.value);
+  computePVTArray();
+
   if (trueAnomalyRange360){
+    // halfPeriod = animationPeriod*ctu/2;
     nuSlider.value = -180;
   }else{
     nuSlider.value = 0;
@@ -2443,8 +2454,6 @@ const initialize = function(data, camera){
 
   muMenu.value = centralBody;
   handlePlanetChange();
-  // console.log('initialize, about to set eSlider.value to eSl, aSlider.value = +aSl');
-  // console.log('and then call doESliderOnInput(+eSl) and doASliderOnInput(+aSl)');
   eSlider.value = +eSl;
   aSl -= 1;//subtracting 1, not sure how it works, but it makes sure that
   //the 'aSlider' gets set right
@@ -2467,28 +2476,27 @@ const initialize = function(data, camera){
   timeScaleMenu.value = timeScaleMenuChoice;
   enableDisableTimeScaleOptions();
   doTimeScaleMenu();
-  // console.log('initialize, about to set nuSlider.value to nuDegrees');
-  // console.log('and then call computeUniversal(), doUniversalPointCalculations(1), doNuSliderOnInput(nuDegrees)');
   nuDegrees = 0;
+  conicSectionIsEllipse = conicSection === 'ellipse';
 
-  if (trueAnomalyRange360){
-    nuSlider.value = -180;
-  }else{
-    nuSlider.value = 0;
-  }
-
-  computeUniversal();
-  doUniversalPointCalculations(1);
-  doNuSliderOnInput(nuDegrees);
-  centralBodyTransparencySlider.value = centralBodyTransparency;
-  setCentralBodyTransparency(centralBodyTransparency);
-
-  if (conicSection === 'ellipse'){
+  if (conicSectionIsEllipse){
     toggleConicSectionButton.innerHTML = 'ELLIPSE&nbsp;/&nbsp;hyperbola';
   }else{
     toggleConicSectionButton.innerHTML = 'ellipse&nbsp;/&nbsp;HYPERBOLA';
   }
 
+  if (trueAnomalyRange360){
+    // halfPeriod = animationPeriod*ctu/2;
+    nuSlider.value = -180;
+  }else{
+    nuSlider.value = 0;
+  }
+
+  computePVTArray();
+  adjustPVTArrayPointers(1);
+  doNuSliderOnInput(nuDegrees);
+  centralBodyTransparencySlider.value = centralBodyTransparency;
+  setCentralBodyTransparency(centralBodyTransparency);
   handleMainPrefs(mainPrefsMenu.value);
 }
 
@@ -2564,9 +2572,9 @@ const doPlayPause = function(){
   //icons came from tabler-icons.io
   playing = playing ? false : true;
 
-  if (playing && needToComputeUniversal){
-    computeUniversal();
-    doUniversalPointCalculations(1);
+  if (playing && needToComputePVTArray){
+    computePVTArray();
+    adjustPVTArrayPointers(1);
   }
 
   playPauseButton.innerHTML = playing ? `<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-pause-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -2598,18 +2606,18 @@ const haltPlay = function(){
 }
 
 resetButton.addEventListener('click', () => {
-  doNuSliderOnInput(+(nuSlider.value));
-  doUniversalPointCalculations(1);
+  if (trueAnomalyRange360){
+    doNuSliderOnInput(+(nuSlider.value)+180);
+  }else{
+    doNuSliderOnInput(+(nuSlider.value));
+  }
+
+  adjustPVTArrayPointers(1);
   omt.resetPlanetRotationParameters();
 });
 
-const doUniversalPointCalculations = function(opt=0){
-  // console.log('inside doUniversalPointCalculations(), opt=',opt);
-
-  let p = false;
-
-  if (!universalArray){
-    // console.log('inside doUniversalPointCalculations(), about to return because universalArray is null');
+const adjustPVTArrayPointers = function(opt=0){
+  if (!pvtArray){
     return;
   }
 
@@ -2617,36 +2625,29 @@ const doUniversalPointCalculations = function(opt=0){
   // then compute the next ones
   // option 1: compute both the current values and the next ones 
   if (opt === 0){
-    // console.log('inside doUniversalPointCalculations() top of the opt===0 section');
     let safety = 0;
 
     while (timeAfterPeriapseInSeconds > timeAfterPeriapseInSeconds1 && safety<10){
-      p = true;
       safety++;
-      universalArrayIndex0 = universalArrayIndex1;
-      universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
-      timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
-      timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
-      // if (testTemp2){
-      //   console.log('B - ', px, x0, dpxdt, timeAfterPeriapseInSeconds, timeAfterPeriapseInSeconds0);
-      // }
-      if (universalArrayIndex1 === 0){
-        // testTemp = true;
-        // console.log('inside doUniversalPointCalculations(), universalArrayIndex1 === 0');
-        // console.log('about to set nuDegrees to -180');
-        universalArrayIndex0 = universalArrayIndex1;
-        universalArrayIndex1 = (universalArrayIndex0 + 1)%universalArraySize;
-        timeAfterPeriapseInSeconds0 = universalArray[universalArrayIndex0].t*ctu;
-        timeAfterPeriapseInSeconds1 = universalArray[universalArrayIndex1].t*ctu;
+      pvtArrayIndex0 = pvtArrayIndex1;
+      pvtArrayIndex1 = (pvtArrayIndex0 + 1)%pvtArraySize;
+      timeAfterPeriapseInSeconds0 = pvtArray[pvtArrayIndex0].t*ctu;
+      timeAfterPeriapseInSeconds1 = pvtArray[pvtArrayIndex1].t*ctu;
+
+      if (pvtArrayIndex1 === 0){
+        pvtArrayIndex0 = pvtArrayIndex1;
+        pvtArrayIndex1 = (pvtArrayIndex0 + 1)%pvtArraySize;
+        timeAfterPeriapseInSeconds0 = pvtArray[pvtArrayIndex0].t*ctu;
+        timeAfterPeriapseInSeconds1 = pvtArray[pvtArrayIndex1].t*ctu;
         timeAfterPeriapseInSeconds = timeAfterPeriapseInSeconds0;
         timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
         nuDegrees = -180;
         nu = nuDegrees*piOver180;
         computeKeplerAndTimeAfterPeriapse();
-        // x0 = universalArray[universalArrayIndex0%universalArraySize].f*rp;
-        // y0 = universalArray[universalArrayIndex0%universalArraySize].g*sqrtMuOverP*(e + 1);
-        // vx0 = universalArray[universalArrayIndex0%universalArraySize].fdot*rp;
-        // vy0 = universalArray[universalArrayIndex0%universalArraySize].gdot*sqrtMuOverP*(e + 1);
+        // x0 = pvtArray[pvtArrayIndex0%pvtArraySize].f*rp;
+        // y0 = pvtArray[pvtArrayIndex0%pvtArraySize].g*sqrtMuOverP*(e + 1);
+        // vx0 = pvtArray[pvtArrayIndex0%pvtArraySize].fdot*rp;
+        // vy0 = pvtArray[pvtArrayIndex0%pvtArraySize].gdot*sqrtMuOverP*(e + 1);
         // timeAfterPeriapse = timeAfterPeriapse - animationPeriod*360/361;
         // timeAfterPeriapseInSeconds = timeAfterPeriapseInSeconds - (animationPeriod*ctu*360/361);
       }
@@ -2656,51 +2657,38 @@ const doUniversalPointCalculations = function(opt=0){
       vx0 = vx;
       vy0 = vy;
 
-      if (p){
-        let x1 = universalArray[universalArrayIndex1%universalArraySize].f*rp;
-        let y1 = universalArray[universalArrayIndex1%universalArraySize].g*sqrtMuOverP*(e + 1);
-        let vx1 = universalArray[universalArrayIndex1%universalArraySize].fdot*rp;
-        let vy1 = universalArray[universalArrayIndex1%universalArraySize].gdot*sqrtMuOverP*(e + 1);
-        let deltaTime = timeAfterPeriapseInSeconds1 - timeAfterPeriapseInSeconds0;
-        nu0 = universalArray[universalArrayIndex0%universalArraySize].nu;
-        nu1 = universalArray[universalArrayIndex1%universalArraySize].nu;
-        dpxdt = (x1 - x0)/deltaTime;
-        dpydt = (y1 - y0)/deltaTime;
-        dvxdt = (vx1 - vx0)/deltaTime;
-        dvydt = (vy1 - vy0)/deltaTime;
-        dnudt = (nu1 - nu0)/deltaTime;
-      }
-    }
-
-    // if (testTemp){
-    //   console.log(nu0, nu1, dpxdt, dpydt,dvxdt,dvydt,dnudt);
-    // }
-  }else{
-    // console.log('inside doUniversalPointCalculations() top of the opt===1 section');
-    // console.log('and about to call doNuSliderOnInput(nuDegrees), nuDegrees=',nuDegrees);
-
-    p = true;
-    doNuSliderOnInput(nuDegrees);
-    // computeKeplerAndTimeAfterPeriapse();
-    x0 = universalArray[universalArrayIndex0%universalArraySize].f*rp;
-    y0 = universalArray[universalArrayIndex0%universalArraySize].g*sqrtMuOverP*(e + 1);
-    vx0 = universalArray[universalArrayIndex0%universalArraySize].fdot*rp;
-    vy0 = universalArray[universalArrayIndex0%universalArraySize].gdot*sqrtMuOverP*(e + 1);
-
-    if (p){
-      let x1 = universalArray[universalArrayIndex1%universalArraySize].f*rp;
-      let y1 = universalArray[universalArrayIndex1%universalArraySize].g*sqrtMuOverP*(e + 1);
-      let vx1 = universalArray[universalArrayIndex1%universalArraySize].fdot*rp;
-      let vy1 = universalArray[universalArrayIndex1%universalArraySize].gdot*sqrtMuOverP*(e + 1);
+      let x1 = pvtArray[pvtArrayIndex1%pvtArraySize].f*rp;
+      let y1 = pvtArray[pvtArrayIndex1%pvtArraySize].g*sqrtMuOverP*(e + 1);
+      let vx1 = pvtArray[pvtArrayIndex1%pvtArraySize].fdot*rp;
+      let vy1 = pvtArray[pvtArrayIndex1%pvtArraySize].gdot*sqrtMuOverP*(e + 1);
       let deltaTime = timeAfterPeriapseInSeconds1 - timeAfterPeriapseInSeconds0;
-      nu0 = universalArray[universalArrayIndex0%universalArraySize].nu;
-      nu1 = universalArray[universalArrayIndex1%universalArraySize].nu;
+      nu0 = pvtArray[pvtArrayIndex0%pvtArraySize].nu;
+      nu1 = pvtArray[pvtArrayIndex1%pvtArraySize].nu;
       dpxdt = (x1 - x0)/deltaTime;
       dpydt = (y1 - y0)/deltaTime;
       dvxdt = (vx1 - vx0)/deltaTime;
       dvydt = (vy1 - vy0)/deltaTime;
       dnudt = (nu1 - nu0)/deltaTime;
     }
+  }else{
+    doNuSliderOnInput(nuDegrees);
+    x0 = pvtArray[pvtArrayIndex0%pvtArraySize].f*rp;
+    y0 = pvtArray[pvtArrayIndex0%pvtArraySize].g*sqrtMuOverP*(e + 1);
+    vx0 = pvtArray[pvtArrayIndex0%pvtArraySize].fdot*rp;
+    vy0 = pvtArray[pvtArrayIndex0%pvtArraySize].gdot*sqrtMuOverP*(e + 1);
+
+    let x1 = pvtArray[pvtArrayIndex1%pvtArraySize].f*rp;
+    let y1 = pvtArray[pvtArrayIndex1%pvtArraySize].g*sqrtMuOverP*(e + 1);
+    let vx1 = pvtArray[pvtArrayIndex1%pvtArraySize].fdot*rp;
+    let vy1 = pvtArray[pvtArrayIndex1%pvtArraySize].gdot*sqrtMuOverP*(e + 1);
+    let deltaTime = timeAfterPeriapseInSeconds1 - timeAfterPeriapseInSeconds0;
+    nu0 = pvtArray[pvtArrayIndex0%pvtArraySize].nu;
+    nu1 = pvtArray[pvtArrayIndex1%pvtArraySize].nu;
+    dpxdt = (x1 - x0)/deltaTime;
+    dpydt = (y1 - y0)/deltaTime;
+    dvxdt = (vx1 - vx0)/deltaTime;
+    dvydt = (vy1 - vy0)/deltaTime;
+    dnudt = (nu1 - nu0)/deltaTime;
   }
 }
 
@@ -2725,33 +2713,21 @@ const animate = function(continueAnimation = true) {
     deltaT = timeScale*clock.getDelta();
     timeAfterPeriapseInSeconds += deltaT;// deltaT for 60 fps is 0.01666
     timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
-    // console.log('inside animate() in the playing section, about to call doUniversalPointCalculations()');
-    doUniversalPointCalculations();
+    adjustPVTArrayPointers();
 
     //do the linear interpolation between computed points on the ellipse or
     //hyperbola.  The conic sections are approximated as multi-sided
     //polygons, and thus positions and velocities are affected by this.  To
-    //reduce the error, increase the universalArraySize variable
+    //reduce the error, increase the pvtArraySize variable
     px = x0 + dpxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     py = y0 + dpydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     vx = vx0 + dvxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     vy = vy0 + dvydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     nuDegrees = nu0 + dnudt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     nu = nuDegrees*piOver180;
-
-    // if (testTemp){
-    //   console.log('A - ', px, x0, dpxdt, timeAfterPeriapseInSeconds, timeAfterPeriapseInSeconds0);
-    //   testTemp2 = true;
-    // }
-    // console.log('animate nu0=',nu0,' nuDegrees=',nuDegrees,' nu=',nu,' dnudt=',dnudt);
-
-    // if (universalArrayIndex0 > 5 && universalArrayIndex0 < 9){
-    //   console.log('xxxxx',timeAfterPeriapseInSeconds, universalArrayIndex0, universalArrayIndex1, timeAfterPeriapseInSeconds0, timeAfterPeriapseInSeconds1, x0, dpxdt, px, py);
-    // }
     omt.setR(px, py, 0, a);
     omt.setV(vx, vy, 0);
     omt.rotatePlanet2(timeAfterPeriapseInSeconds, planetRotationPeriodSeconds, animationPeriod*ctu);
-    // doNuAndTimeDisplay();
 
     if (numericalDisplayIsOccurring){
       displayNumerical();

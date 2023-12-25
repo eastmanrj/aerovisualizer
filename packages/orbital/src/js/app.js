@@ -180,9 +180,14 @@ let dnudt;
 // true anomaly of interpolation for animation
 let nu0;
 let nu1;
-
 let needToComputePVTArray = true;
-let animationPeriod = tp;
+
+let period = tp;//period is the orbital period for elliptical orbits
+//in canonical units.  For hyperbolic trajectories, it is the time we
+//establish to go from one extreme to the other, also in canonical units
+let halfPeriod = period/2;
+let periodInSeconds = period*ctu;//this is 0 here because ctu is 0
+let halfPeriodInSeconds = halfPeriod*ctu;//also 0 here
 
 let inertialVectorsChoice = defaultInertialVectorsChoice;
 let orbitFixedVectorsChoice = defaultOrbitFixedVectorsChoice;
@@ -570,77 +575,59 @@ cycleNumericalDisplayButton3.addEventListener('click', () => {
   handleMainButtons('numerical');
 });
 
-
-const displayNumerical = function(){
-  let tap = displayUnits === 1 ? timeAfterPeriapse : timeAfterPeriapseInSeconds/displayTimeScale;
-
-  if (meanAnomaly !== null){
-    computePQW2IJKRotation();
-    computePQW2UVWRotation();
-
-    if (trueAnomaly360){
-      if (nuDegrees < 0){
-        numNu.innerHTML = `${Number(nuDegrees+360).toFixed(2).toString()}`;
-      }else{
-        numNu.innerHTML = `${Number(nuDegrees).toFixed(2).toString()}`;
-      }
-    }else{
-      numNu.innerHTML = `${Number(nuDegrees).toFixed(2).toString()}`;
-    }
-
-    const halfPeriod = animationPeriod*ctu/2;
-
-    switch (timeScaleMenuChoice){
-      case 'sec-equals-1sec':
-        if (tap < 0){
-          numT.innerHTML = `${Number(tap+halfPeriod).toFixed(0).toString()}`;
-        }else{
-          numT.innerHTML = `${Number(tap).toFixed(0).toString()}`;
-        }
-        break;
-      case 'sec-equals-1minute':
-      case 'sec-equals-5minutes':
-      case 'sec-equals-15minutes':
-        if (tap < 0){
-          numT.innerHTML = `${Number(tap+halfPeriod).toFixed(1).toString()}`;
-        }else{
-          numT.innerHTML = `${Number(tap).toFixed(1).toString()}`;
-        }
-        break;
-      case 'sec-equals-1hour':
-        if (tap < 0){
-          numT.innerHTML = `${Number(tap+halfPeriod).toFixed(1).toString()}`;
-        }else{
-          numT.innerHTML = `${Number(tap).toFixed(2).toString()}`;
-        }
-        break;
-      case 'sec-equals-1day':
-        if (tap < 0){
-          numT.innerHTML = `${Number(tap+halfPeriod).toFixed(1).toString()}`;
-        }else{
-          numT.innerHTML = `${Number(tap).toFixed(3).toString()}`;
-        }
-        break;
-    }
-  }else{
+const displayNumerical1 = function(){
+  if (meanAnomaly === null){
     numT.innerHTML = 'INF';
+    return;
   }
+  
+  computeKeplerStuff();
+
+  let tap = displayUnits === 1 ? timeAfterPeriapse : timeAfterPeriapseInSeconds/displayTimeScale;
+  let per = displayUnits === 1 ? period : periodInSeconds/displayTimeScale;
+  per = tap >=0 ? 0 : per;
+  let threeSixty = trueAnomaly360 && (nuDegrees < 0) ? 360 : 0;
 
   let spAngMom = h;
   let spEnergy = specificEnergy;
   let aDisp = a;
   let pDisp = p;
   let tpDisp = tp;
+  let rcs = rPQW.length();
+  let vcs = Math.sqrt(muCanonical/rcs);
+  let vesc = Math.SQRT2*vcs;
+  let Q = vPQW.lengthSq()/vcs/vcs;
   let mm = meanMotion;
 
   if (displayUnits === 2){
-    tap = timeAfterPeriapseInSeconds/displayTimeScale;
     spAngMom *= cdu*cdu/ctu;
     spEnergy *= cdu*cdu/ctu/ctu;
     aDisp *= cdu;
     pDisp *= cdu;
     tpDisp *= ctu/displayTimeScale;
     mm /= ctu;
+  }
+
+  numNu.innerHTML = `${Number(nuDegrees+threeSixty).toFixed(2).toString()}`;
+  numMeanAnom.innerHTML = `${Number((meanAnomaly+threeSixty)/piOver180).toFixed(2).toString()}`;
+  numEccenAnom.innerHTML = `${Number((eccentricAnomaly+threeSixty)/piOver180).toFixed(2).toString()}`;
+  numHyperAnom.innerHTML = `${Number((hyperbolicAnomaly+threeSixty)/piOver180).toFixed(2).toString()}`;
+
+  switch (timeScaleMenuChoice){
+    case 'sec-equals-1sec':
+      numT.innerHTML = `${Number(tap+per).toFixed(0).toString()}`;
+      break;
+    case 'sec-equals-1minute':
+    case 'sec-equals-5minutes':
+    case 'sec-equals-15minutes':
+      numT.innerHTML = `${Number(tap+per).toFixed(1).toString()}`;
+      break;
+    case 'sec-equals-1hour':
+      numT.innerHTML = `${Number(tap+per).toFixed(1).toString()}`;
+      break;
+    case 'sec-equals-1day':
+      numT.innerHTML = `${Number(tap+per).toFixed(1).toString()}`;
+      break;
   }
 
   numEnergy.innerHTML = `${Number(spEnergy).toFixed(4).toString()}`;
@@ -651,9 +638,77 @@ const displayNumerical = function(){
 
   if (e < 1){
     numTotalPeriod.innerHTML = `${Number(tpDisp).toFixed(4).toString()}`;
+    numHyperAnom.innerHTML = 'x';
   }else{
     numTotalPeriod.innerHTML = 'x';
+    numEccenAnom.innerHTML = 'x';
   }
+
+  if (displayUnits === 2){
+    numH.innerHTML = `${Number(spAngMom).toExponential(3).toString()}`;
+    numA.innerHTML = `${Number(aDisp).toExponential(3).toString()}`;
+    numP.innerHTML = `${Number(pDisp).toExponential(3).toString()}`;
+    vcs *= cdu/ctu;
+    vesc *= cdu/ctu;
+  }else{
+    numH.innerHTML = `${Number(spAngMom).toFixed(1).toString()}`;
+    numA.innerHTML = `${Number(aDisp).toFixed(2).toString()}`;
+    numP.innerHTML = `${Number(pDisp).toFixed(2).toString()}`;
+  }
+
+  numVcs.innerHTML = `${Number(vcs).toFixed(4).toString()}`;
+  numVesc.innerHTML = `${Number(vesc).toFixed(4).toString()}`;
+  numQ.innerHTML = `${Number(Q).toFixed(4).toString()}`;
+  numMeanMotion.innerHTML = `${Number(mm).toFixed(4).toString()}`;
+}
+
+const displayNumerical2 = function(){
+  //position and velocity vectors display
+  computePQW2UVWRotation();
+
+  rPQW.set(px, py, 0);
+  rIJK.copy(rPQW);
+  rUVW.copy(rPQW);
+  rIJK.applyMatrix3(dcmPQW2IJK);
+  rUVW.applyMatrix3(dcmPQW2UVW);
+  vPQW.set(vx, vy, 0);
+  vIJK.copy(vPQW);
+  vUVW.copy(vPQW);
+  vIJK.applyMatrix3(dcmPQW2IJK);
+  vUVW.applyMatrix3(dcmPQW2UVW);
+
+  let du = cdu;
+  let duTu = cdu/ctu;
+  let nPos = 0;
+  let nVel = 2;
+
+  if (displayUnits === 1){
+    //canonical units
+    du = 1;
+    duTu = 1;
+    nPos = 2;
+    nVel = 4;
+  }
+
+  numRP.innerHTML = `${Number(du*px).toFixed(nPos).toString()}`;
+  numRQ.innerHTML = `${Number(du*py).toFixed(nPos).toString()}`;
+  numVP.innerHTML = `${Number(duTu*vx).toFixed(nVel).toString()}`;
+  numVQ.innerHTML = `${Number(duTu*vy).toFixed(nVel).toString()}`;
+  numRI.innerHTML = `${Number(du*rIJK.x).toFixed(nPos).toString()}`;
+  numRJ.innerHTML = `${Number(du*rIJK.y).toFixed(nPos).toString()}`;
+  numRK.innerHTML = `${Number(du*rIJK.z).toFixed(nPos).toString()}`;
+  numVI.innerHTML = `${Number(duTu*vIJK.x).toFixed(nVel).toString()}`;
+  numVJ.innerHTML = `${Number(duTu*vIJK.y).toFixed(nVel).toString()}`;
+  numVK.innerHTML = `${Number(duTu*vIJK.z).toFixed(nVel).toString()}`;
+  numRU.innerHTML = `${Number(du*rUVW.x).toFixed(nPos).toString()}`;
+  numRV.innerHTML = '0';
+  numVU.innerHTML = `${Number(duTu*vUVW.x).toFixed(nVel).toString()}`;
+  numVV.innerHTML = `${Number(duTu*vUVW.y).toFixed(nVel).toString()}`;
+}
+
+const displayNumerical3 = function(){
+  //direction cosine matrices display
+  computePQW2UVWRotation();
 
   dcm11pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[0]).toFixed(4).toString()}`;
   dcm12pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[3]).toFixed(4).toString()}`;
@@ -673,119 +728,65 @@ const displayNumerical = function(){
   dcm31pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[2]).toFixed(4).toString()}`;
   dcm32pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[5]).toFixed(4).toString()}`;
   dcm33pqw2uvw.innerHTML = `${Number(dcmPQW2UVW.elements[8]).toFixed(4).toString()}`;
+}
 
-  rPQW.set(px, py, 0);
-  rIJK.copy(rPQW);
-  rUVW.copy(rPQW);
-  rIJK.applyMatrix3(dcmPQW2IJK);
-  rUVW.applyMatrix3(dcmPQW2UVW);
-  vPQW.set(vx, vy, 0);
-  vIJK.copy(vPQW);
-  vUVW.copy(vPQW);
-  vIJK.applyMatrix3(dcmPQW2IJK);
-  vUVW.applyMatrix3(dcmPQW2UVW);
+const displayNumerical = function(){
+  if (!numericalDisplayIsOccurring){
+    return;
+  }
 
-  let rcs = rPQW.length();
-  let vcs = Math.sqrt(muCanonical/rcs);
-  let vesc = Math.SQRT2*vcs;
-  let Q = vPQW.lengthSq()/vcs/vcs;
+  switch (numericalDisplayOption){
+    case 1:
+      numericalElements1.style.display = 'grid';
+      displayNumerical1();
+      break;
+    case 2:
+      numericalElements2.style.display = 'grid';
+      displayNumerical2();
+      break;
+    case 3:
+      numericalElements3.style.display = 'grid';
+      displayNumerical3();
+      break;
+  }
+}
+//blah
+const displayUnitsText = function(){
+  let posAndVelText = 'pos: CDU, vel: CDU/CTU, time: ';
+  let timeText = 'CTU';
 
   if (displayUnits === 2){
-    numH.innerHTML = `${Number(spAngMom).toExponential(3).toString()}`;
-    numA.innerHTML = `${Number(aDisp).toExponential(3).toString()}`;
-    numP.innerHTML = `${Number(pDisp).toExponential(3).toString()}`;
-    vcs *= cdu/ctu;
-    vesc *= cdu/ctu;
-    numRP.innerHTML = `${Number(cdu*px).toFixed(0).toString()}`;
-    numRQ.innerHTML = `${Number(cdu*py).toFixed(0).toString()}`;
-    numVP.innerHTML = `${Number(cdu/ctu*vx).toFixed(3).toString()}`;
-    numVQ.innerHTML = `${Number(cdu/ctu*vy).toFixed(3).toString()}`;
-    numRI.innerHTML = `${Number(cdu*rIJK.x).toFixed(0).toString()}`;
-    numRJ.innerHTML = `${Number(cdu*rIJK.y).toFixed(0).toString()}`;
-    numRK.innerHTML = `${Number(cdu*rIJK.z).toFixed(0).toString()}`;
-    numVI.innerHTML = `${Number(cdu/ctu*vIJK.x).toFixed(3).toString()}`;
-    numVJ.innerHTML = `${Number(cdu/ctu*vIJK.y).toFixed(3).toString()}`;
-    numVK.innerHTML = `${Number(cdu/ctu*vIJK.z).toFixed(3).toString()}`;
-    numRU.innerHTML = `${Number(cdu*rUVW.x).toFixed(0).toString()}`;
-    numRV.innerHTML = '0.000';
-    numVU.innerHTML = `${Number(cdu/ctu*vUVW.x).toFixed(3).toString()}`;
-    numVV.innerHTML = `${Number(cdu/ctu*vUVW.y).toFixed(3).toString()}`;
-    unitsDisplay1.innerHTML = 'metric units (km, km/s)'
-    unitsDisplay2.innerHTML = 'metric units (km, km/s)'
-  }else{
-    numH.innerHTML = `${Number(spAngMom).toFixed(1).toString()}`;
-    numA.innerHTML = `${Number(aDisp).toFixed(2).toString()}`;
-    numP.innerHTML = `${Number(pDisp).toFixed(2).toString()}`;
-    numRP.innerHTML = `${Number(px).toFixed(3).toString()}`;
-    numRQ.innerHTML = `${Number(py).toFixed(3).toString()}`;
-    numVP.innerHTML = `${Number(vx).toFixed(3).toString()}`;
-    numVQ.innerHTML = `${Number(vy).toFixed(3).toString()}`;
-    numRI.innerHTML = `${Number(rIJK.x).toFixed(3).toString()}`;
-    numRJ.innerHTML = `${Number(rIJK.y).toFixed(3).toString()}`;
-    numRK.innerHTML = `${Number(rIJK.z).toFixed(3).toString()}`;
-    numVI.innerHTML = `${Number(vIJK.x).toFixed(3).toString()}`;
-    numVJ.innerHTML = `${Number(vIJK.y).toFixed(3).toString()}`;
-    numVK.innerHTML = `${Number(vIJK.z).toFixed(3).toString()}`;
-    numRU.innerHTML = `${Number(rUVW.x).toFixed(3).toString()}`;
-    numRV.innerHTML = '0.000';
-    numVU.innerHTML = `${Number(vUVW.x).toFixed(3).toString()}`;
-    numVV.innerHTML = `${Number(vUVW.y).toFixed(3).toString()}`;
-    unitsDisplay1.innerHTML = 'canonical units'
-    unitsDisplay2.innerHTML = 'canonical units'
-  }
+    posAndVelText = 'pos: km, vel: km/s, time: ';
 
-  numVcs.innerHTML = `${Number(vcs).toFixed(4).toString()}`;
-  numVesc.innerHTML = `${Number(vesc).toFixed(4).toString()}`;
-  numQ.innerHTML = `${Number(Q).toFixed(4).toString()}`;
-
-  computeKeplerStuff();
-
-  if (e < 1){
-    if (trueAnomaly360){
-      if (eccentricAnomaly < 0){
-        numEccenAnom.innerHTML = `${Number((eccentricAnomaly+360)/piOver180).toFixed(2).toString()}`;
-      }else{
-        numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
-      }
-    }else{
-      numEccenAnom.innerHTML = `${Number(eccentricAnomaly/piOver180).toFixed(2).toString()}`;
-    }
-
-    numHyperAnom.innerHTML = 'x';
-  }else{
-    numEccenAnom.innerHTML = 'x';
-
-    if (trueAnomaly360){
-      if (eccentricAnomaly < 0){
-        numHyperAnom.innerHTML = `${Number((hyperbolicAnomaly+360)/piOver180).toFixed(2).toString()}`;
-      }else{
-        numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180).toFixed(2).toString()}`;
-      }
-    }else{
-      numHyperAnom.innerHTML = `${Number(hyperbolicAnomaly/piOver180).toFixed(2).toString()}`;
+    switch (displayTimeScale){
+      case 1:
+        timeText = 'seconds';
+        break;
+      case 60:
+        timeText = 'minutes';
+        break;
+      case 3600:
+        timeText = 'hours';
+        break;
+      case 3600*24:
+        timeText = 'days';
+        break;
     }
   }
-  
-  if (trueAnomaly360){
-    if (meanAnomaly < 0){
-      numMeanAnom.innerHTML = `${Number((meanAnomaly+360)/piOver180).toFixed(2).toString()}`;
-    }else{
-      numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180).toFixed(2).toString()}`;
-    }
-  }else{
-    numMeanAnom.innerHTML = `${Number(meanAnomaly/piOver180).toFixed(2).toString()}`;
-  }
 
-  numMeanMotion.innerHTML = `${Number(mm).toFixed(4).toString()}`;
+  unitsDisplay1.innerHTML = posAndVelText+timeText;
+  unitsDisplay2.innerHTML = posAndVelText+timeText;
 }
 
 toggleNumericalDisplayUnitsButton1.addEventListener('click', () => {
-  displayUnits = (displayUnits === 1) ? 2 : 1;
+  displayUnits = displayUnits === 1 ? 2 : 1;
+  displayUnitsText();
   displayNumerical();
 });
 
 toggleNumericalDisplayUnitsButton2.addEventListener('click', () => {
-  displayUnits = (displayUnits === 1) ? 2 : 1;
+  displayUnits = displayUnits === 1 ? 2 : 1;
+  displayUnitsText();
   displayNumerical();
 });
 
@@ -835,21 +836,25 @@ const handleMainButtons = function(button){
       nuButton.disabled = true;
       break;
     case 'numerical':
+      numericalButton.disabled = true;
+      numericalDisplayIsOccurring = true;
+      computePQW2IJKRotation();
+      displayUnitsText();
+
       switch (numericalDisplayOption){
         case 1:
           numericalElements1.style.display = 'grid';
+          displayNumerical1();
           break;
         case 2:
           numericalElements2.style.display = 'grid';
+          displayNumerical2();
           break;
         case 3:
           numericalElements3.style.display = 'grid';
+          displayNumerical3();
           break;
       }
-
-      numericalButton.disabled = true;
-      numericalDisplayIsOccurring = true;
-      displayNumerical();
       break;
     case 'prefs':
       haltPlay();
@@ -938,12 +943,15 @@ const doASliderOnInput = function(value){
   // a > 0 for ellipses, a < 0 for hyperbolas
   if (conicSectionIsEllipse){
     tp = twoPi*Math.pow(a,1.5)/muCanonical;//orbital period
-    animationPeriod = tp;
+    period = tp;
+    halfPeriod = period/2;
+    periodInSeconds = period*ctu;
+    halfPeriodInSeconds = halfPeriod*ctu;
   }else{
     a = -a;
     tp = null;//orbital period is not defined for hyperbolic orbits
 
-    // set animationPeriod equal to the time period of the flyby.  
+    // set period equal to the time period of the flyby.  
     // Since the time is infinite to reach the delta angle, we reduce 
     // this angle by a small amount ("th") to make the animation time
     // reasonable.  nu1 and nu2 are true anomalies at the extremes of
@@ -965,7 +973,10 @@ const doASliderOnInput = function(value){
     const M1 = e*Math.sinh(F1) - F1;
     const M2 = e*Math.sinh(F2) - F2;
     const n = Math.sqrt(muCanonical/(-a*a*a));
-    animationPeriod = (M2 - M1)/n;
+    period = (M2 - M1)/n;
+    halfPeriod = period/2;
+    periodInSeconds = period*ctu;
+    halfPeriodInSeconds = halfPeriod*ctu;
   }
 
   needToComputePVTArray = true;
@@ -1024,7 +1035,6 @@ const enableDisableTimeScaleOptions = function(){//blah
   
   const tsArray = [1, 60, 300, 900, 3600, 3600*24];
   const fraction = 0.1;
-  const periodInSeconds = animationPeriod*ctu;
   const timeFraction = fraction*periodInSeconds;
 
   for (let i=tsArray.length-1; i>=0; i--){
@@ -1039,7 +1049,7 @@ const enableDisableTimeScaleOptions = function(){//blah
     }
   }
 
-  // console.log('animationPeriod=', animationPeriod,' ctu=', ctu,' timeScale=', timeScale);
+  // console.log('period=', period,' ctu=', ctu,' timeScale=', timeScale);
   // timeScaleMenu.options[timeScaleMenu.selectedIndex].disabled = true;
 }
 
@@ -1382,11 +1392,15 @@ const computeKeplerAndTimeAfterPeriapse = function(){
 }
 
 const doNuAndTimeDisplay = function(){
-  if (meanAnomaly !== null){
-    let halfPeriod = 0;
+  let hp = 0;
 
+  // period
+  // halfPeriod
+  // periodInSeconds
+  // halfPeriodInSeconds
+  if (meanAnomaly !== null){
     if (trueAnomaly360){
-      halfPeriod = animationPeriod*ctu/2;
+      hp = halfPeriodInSeconds;
 
       if (nuDegrees < 0){
         nuDisplay.innerHTML = `&nu;: ${Number(nuDegrees+360).toFixed(2).toString()}`;
@@ -1397,22 +1411,20 @@ const doNuAndTimeDisplay = function(){
       nuDisplay.innerHTML = `&nu;: ${Number(nuDegrees).toFixed(2).toString()}`;
     }
 
-    computePQW2UVWRotation();
-
     switch (timeScaleMenuChoice){
       case 'sec-equals-1sec':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(0).toString()} seconds`;
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+hp)/displayTimeScale).toFixed(0).toString()} seconds`;
         break;
       case 'sec-equals-1minute':
       case 'sec-equals-5minutes':
       case 'sec-equals-15minutes':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(1).toString()} minutes`;
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+hp)/displayTimeScale).toFixed(1).toString()} minutes`;
         break;
       case 'sec-equals-1hour':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(2).toString()} hours`;
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+hp)/displayTimeScale).toFixed(2).toString()} hours`;
         break;
       case 'sec-equals-1day':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+halfPeriod)/displayTimeScale).toFixed(3).toString()} days`;
+        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+hp)/displayTimeScale).toFixed(3).toString()} days`;
         break;
     }
   }else{
@@ -1461,7 +1473,6 @@ nuSlider.onpointerup = function(){
 
 zeroNuButton.addEventListener('click', () => {
   if (trueAnomaly360){
-    // halfPeriod = animationPeriod*ctu/2;
     nuSlider.value = -180;
   }else{
     nuSlider.value = 0;
@@ -1519,10 +1530,10 @@ const computePVTArray = function(){
 
   let pvtPoint;  
 
-  for (let t=-animationPeriod/2; t<animationPeriod/2; t+=animationPeriod/(pvtArraySize-1)){
+  for (let t=-period/2; t<period/2; t+=period/(pvtArraySize-1)){
     // t is the time in canonical time units.  For elliptical orbits, an 
     // orbital period (tp) equals twoPi canonical time units (TU or CTU)
-    // which equals animationPeriod.  For a hyperbolic flyby, animationPeriod
+    // which equals period.  For a hyperbolic flyby, period
     // equals the time span computed in doASliderOnInput(). t is incremented
     // evenly.  Another way might be to have more data points where nu changes
     // the fastest around periapse
@@ -1687,6 +1698,8 @@ const handlePlanetChange = function(){
   theCB = centralBodyData.find(x => x.name === centralBody);
   ctu = theCB.CTU;
   cdu = theCB.CDU;
+  periodInSeconds = period*ctu;//do this again at initialization, period is not set yet there
+  halfPeriodInSeconds = halfPeriod*ctu;//do this again at initialization, halfPeriod is not set yet there
   planetRotationPeriodSeconds = 3600*theCB.srp;
   muDisplay.innerHTML = `${Number(+theCB.mu*1e6).toExponential(6).toString()} km&sup3;/s&sup2;`;//GM
   radiusDisplay.innerHTML = `${theCB.radius} km`;//radius
@@ -1755,9 +1768,8 @@ const doTimeScaleMenu = function(){
       break;
   }
   
-  if (numericalDisplayIsOccurring){
-    displayNumerical();
-  }
+  displayUnitsText();
+  displayNumerical();
 }
 
 timeScaleMenu.addEventListener('change', () => {
@@ -2033,7 +2045,6 @@ toggleConicSectionButton.addEventListener('click', () => {
   nu = nuDegrees*piOver180;
 
   if (trueAnomaly360){
-    // halfPeriod = animationPeriod*ctu/2;
     nuSlider.value = -180;
   }else{
     nuSlider.value = 0;
@@ -2435,6 +2446,8 @@ const initialize = function(data, camera){
   aSlider.value = +aSl;
   doESliderOnInput(+eSl);
   doASliderOnInput(+aSl);
+  periodInSeconds = period*ctu;
+  halfPeriodInSeconds = halfPeriod*ctu;
   rp = Number(a*(1-e));
   ra = Number(a*(1+e));
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
@@ -2462,7 +2475,6 @@ const initialize = function(data, camera){
   }
 
   if (trueAnomaly360){
-    // halfPeriod = animationPeriod*ctu/2;
     nuSlider.value = -180;
   }else{
     nuSlider.value = 0;
@@ -2488,7 +2500,7 @@ const completeInitialization = function(continueAnimation = true) {
   }
   
   if (omt.constructionComplete){
-    handleMainButtons('numerical');//'mu' <-- set back to this
+    handleMainButtons('mu');
     
     camera.aspect = 1;
     camera.updateProjectionMatrix();
@@ -2628,8 +2640,8 @@ const adjustPVTArrayPointers = function(opt=0){
         // y0 = pvtArray[pvtArrayIndex0%pvtArraySize].g*sqrtMuOverP*(e + 1);
         // vx0 = pvtArray[pvtArrayIndex0%pvtArraySize].fdot*rp;
         // vy0 = pvtArray[pvtArrayIndex0%pvtArraySize].gdot*sqrtMuOverP*(e + 1);
-        // timeAfterPeriapse = timeAfterPeriapse - animationPeriod*360/361;
-        // timeAfterPeriapseInSeconds = timeAfterPeriapseInSeconds - (animationPeriod*ctu*360/361);
+        // timeAfterPeriapse = timeAfterPeriapse - period*360/361;
+        // timeAfterPeriapseInSeconds = timeAfterPeriapseInSeconds - (period*ctu*360/361);
       }
 
       x0 = px;
@@ -2707,11 +2719,8 @@ const animate = function(continueAnimation = true) {
     nu = nuDegrees*piOver180;
     omt.setR(px, py, 0, a);
     omt.setV(vx, vy, 0);
-    omt.rotatePlanet2(timeAfterPeriapseInSeconds, planetRotationPeriodSeconds, animationPeriod*ctu);
-
-    if (numericalDisplayIsOccurring){
-      displayNumerical();
-    }
+    omt.rotatePlanet2(timeAfterPeriapseInSeconds, planetRotationPeriodSeconds, period*ctu);
+    displayNumerical();
     
     omt.needsRefresh = true;
   }

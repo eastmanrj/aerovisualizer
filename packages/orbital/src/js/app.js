@@ -1104,7 +1104,7 @@ aSlider.onpointerup = function(){
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
 
-  console.log('computePVTArray is being called in aSlider.onpointerup');
+  // console.log('computePVTArray is being called in aSlider.onpointerup');
   computePVTArray();
   handlePeriapseCheck();
   sliderEcanChange = false;
@@ -1141,9 +1141,8 @@ eSlider.onpointerup = function(){
 
         if (0 < aS && aS < aSliderRange){
           aSlider.value = +aS;
-          console.log('doASliderOnInput is being called in eSlider.onpointerup');
+          // console.log('doASliderOnInput is being called in eSlider.onpointerup');
           doASliderOnInput(+aS);// sets the value of 'a'
-          console.log('A');
         }
       }
     }
@@ -1153,7 +1152,7 @@ eSlider.onpointerup = function(){
   ra = a*(1+e);
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
-  console.log('computePVTArray is being called in eSlider.onpointerup');
+  // console.log('computePVTArray is being called in eSlider.onpointerup');
   computePVTArray();
 
   handlePeriapseCheck();
@@ -1375,7 +1374,7 @@ const computeKeplerAndTimeAfterPeriapse = function(){
   computeKeplerStuff();
   pvt0 = pvtArray.findIndex((e) => e.t >= timeAfterPeriapse);
 
-  if (pvt0 === -1){
+  if (pvt0 < 0){
     pvt0 = 0;
   }
 
@@ -1449,7 +1448,7 @@ nuSlider.oninput = function(){
 }
 
 nuSlider.onpointerup = function(){
-  console.log('setPVTArrayPointers() is being called in nuSlider.onpointerup');
+  // console.log('setPVTArrayPointers() is being called in nuSlider.onpointerup');
   setPVTArrayPointers();
 }
 
@@ -1461,7 +1460,7 @@ zeroNuButton.addEventListener('click', () => {
   }
 
   doNuSliderOnInput(0);
-  console.log('setPVTArrayPointers() is being called in zeroNuButton click');
+  // console.log('setPVTArrayPointers() is being called in zeroNuButton click');
   setPVTArrayPointers();
 });
 
@@ -1521,10 +1520,10 @@ const computePVTArray = function(){
   for (let k=0; k<pvtArraySize; k++){
     // t is the time in canonical time units.  For elliptical orbits, an 
     // orbital period (tp) equals twoPi canonical time units (TU or CTU)
-    // which equals period.  For a hyperbolic flyby, period
+    // which equals 'period'.  For a hyperbolic flyby, 'period'
     // equals the time span computed in doASliderOnInput(). t is incremented
-    // evenly.  Another way might be to have more data points where nu changes
-    // the fastest around periapse
+    // evenly.  An alternative to this might be to have more data points 
+    // where nu changes the fastest around periapse
 
     // Bate p. 206 for first guess of x
     if (e < 1){
@@ -1610,8 +1609,8 @@ const computePVTArray = function(){
   // pvtPoint = {...pvtArray[0]};
   // pvtArray.push(pvtPoint);//make the last one equal the first one
   // console.log('rp:',rp, ' a:', a,' e:', e, 'period:',period);
-  console.log('pvtArrayp[0].t:',pvtArray[0].nu, 'pvtArray[pvtArraySize-1].t:',pvtArray[pvtArraySize-1].nu);
-  console.log('pvtArraySize:',pvtArraySize, ' pvtArray.length:', pvtArray.length);
+  // console.log('pvtArrayp[0].t:',pvtArray[0].nu, 'pvtArray[pvtArraySize-1].t:',pvtArray[pvtArraySize-1].nu);
+  // console.log('pvtArraySize:',pvtArraySize, ' pvtArray.length:', pvtArray.length);
 }
 
 const setInertialVectorColor = function(color, save=false){
@@ -1706,7 +1705,7 @@ const handlePlanetChange = function(){
   ra = Number(a*(1+e));
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
-  console.log('computePVTArray is being called in handlePlanetChange');
+  // console.log('computePVTArray is being called in handlePlanetChange');
   computePVTArray();
   const temp1 = sliderEcanChange;
   const temp2 = sliderAcanChange;
@@ -2037,7 +2036,7 @@ toggleConicSectionButton.addEventListener('click', () => {
     nuSlider.value = 0;
   }
 
-  console.log('computePVTArray is being called in toggleConicSectionButton click');
+  // console.log('computePVTArray is being called in toggleConicSectionButton click');
   needToComputePVTArray = true;
   const temp1 = sliderEcanChange;
   const temp2 = sliderAcanChange;
@@ -2452,7 +2451,7 @@ const initialize = function(data, camera){
   handlePlanetChange();
   eSlider.value = +eSl;
   aSl -= 1;//subtracting 1, not sure how it works, but it makes sure that
-  //the 'aSlider' gets set right
+  //the 'aSlider' gets set right, but should probably check that it is not -1
   aSlider.value = +aSl;
   doESliderOnInput(+eSl);
   doASliderOnInput(+aSl);
@@ -2485,10 +2484,10 @@ const initialize = function(data, camera){
 
   needToComputePVTArray = true;//initially was false so as not to 
   //do computePVTArray in handlePlanetChange
-  console.log('computePVTArray is being called in initialize');
+  // console.log('computePVTArray is being called in initialize');
   needToComputePVTArray = true;
   computePVTArray();
-  console.log('setPVTArrayPointers() is being called in initialize');
+  // console.log('setPVTArrayPointers() is being called in initialize');
   setPVTArrayPointers();
   centralBodyTransparencySlider.value = centralBodyTransparency;
   setCentralBodyTransparency(centralBodyTransparency);
@@ -2568,10 +2567,15 @@ const doPlayPause = function(){
   playing = playing ? false : true;
 
   if (playing && needToComputePVTArray){
-    console.log('computePVTArray is being called in doPlayPause');
+    // console.log('computePVTArray is being called in doPlayPause');
     computePVTArray();
-    console.log('setPVTArrayPointers() is being called in doPlayPause');
+    // console.log('setPVTArrayPointers() is being called in doPlayPause');
     setPVTArrayPointers();
+    playing = true;
+  }
+
+  if (playing && conicSection === 'hyperbola' && (nu > (Math.PI + delta)/2 || nu < -(Math.PI + delta)/2)){
+    doNuSliderOnInput(0);
     playing = true;
   }
 
@@ -2614,7 +2618,7 @@ resetButton.addEventListener('click', () => {
     doNuSliderOnInput(Number(nuSlider.value));
   }
 
-  console.log('setPVTArrayPointers() is being called in resetButton click');
+  // console.log('setPVTArrayPointers() is being called in resetButton click');
   setPVTArrayPointers();
   omt.resetPlanetRotationParameters();
 });
@@ -2653,6 +2657,7 @@ const advancePVTArrayPointers = function(){
   let safety = 0;
   // console.log('1234567890');
   while (timeAfterPeriapseInSeconds >= timeAfterPeriapseInSeconds1 && safety<10){
+    // console.log(pvt0, pvt1);
     safety++;
     pvt0 = pvt1;
     pvt1 = pvt0 + 1;
@@ -2667,10 +2672,10 @@ const advancePVTArrayPointers = function(){
     timeAfterPeriapseInSeconds = timeAfterPeriapseInSeconds0;
     timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
     // computeKeplerAndTimeAfterPeriapse();
-    x0 = px;
-    y0 = py;
-    vx0 = vx;
-    vy0 = vy;
+    x0 = pvtArray[pvt0%pvtArraySize].f*rp;
+    y0 = pvtArray[pvt0%pvtArraySize].g*sqrtMuOverP*(e + 1);
+    vx0 = pvtArray[pvt0%pvtArraySize].fdot*rp;
+    vy0 = pvtArray[pvt0%pvtArraySize].gdot*sqrtMuOverP*(e + 1);
   }
 
   let x1 = pvtArray[pvt1%pvtArraySize].f*rp;

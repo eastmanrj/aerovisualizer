@@ -117,8 +117,56 @@ let planetRotationPeriodSeconds = 0;
 let conicSection = defaultConicSection;
 let conicSectionIsEllipse = defaultConicSection === 'ellipse';
 let a = Number(defaultA);
+const aArray = [
+  1,1.001,1.002,1.005,1.01,1.07,1.25,1.33,1.47,1.6,1.8,1.9,2.1,
+  2.3,2.5,2.7,2.9,3.1,3.4,3.6,3.9,4.2,4.5,4.8,5.1,5.4,
+  5.8,6.1,6.5,6.8,7.2,7.6,8,8.4,8.8,9.2,9.7,10.1,10.6,
+  11,11.5,11.9,12.4,12.9,13.4,13.9,14.4,14.9,15.4,15.9,
+  16.5,17,17.5,18.1,18.6,19.2,19.7,20.3,20.9,21.4,22,
+  22.6,23.1,23.7,24.3,24.9,25.5,26.1,26.6,27.2,27.8,28.4,
+  29,29.6,30.2,30.8,31.4,32,32.6,33.2,33.8,34.4,34.9,35.5,
+  36.1,36.7,37.3,37.9,38.4,39,39.6,40.1,40.7,41.3,41.8,
+  42.4,42.9,43.5,44,44.5,45.1,45.6,46.1,46.6,47.1,47.6,
+  48.1,48.6,49.1,49.5,50,50.4,50.9,51.3,51.8,52.2,52.6,
+  53,53.4,53.8,54.2,54.5,54.9,55.2,55.6,55.9,56.2,56.5,
+  56.8,57.1,57.4,57.6,57.9,58.1,58.3,58.5,58.7,58.9,59.1,
+  59.2,59.4,59.5,59.6,59.7,59.8,59.9,59.93,59.97,59.99,60
+];
+
 let tp = twoPi*Math.pow(a,1.5)/muCanonical;//orbital period
 let e = Number(defaultE);
+const eArrayEllipse = [
+  0,0.0001,0.0005,0.0012,0.002,0.003,0.005,0.006,0.008,0.01,
+  0.013,0.015,0.018,0.021,0.024,0.028,0.031,0.035,0.039,
+  0.044,0.048,0.053,0.058,0.063,0.068,0.074,0.079,0.085,
+  0.091,0.097,0.103,0.11,0.116,0.123,0.13,0.137,0.144,0.151,
+  0.159,0.166,0.174,0.182,0.19,0.198,0.206,0.214,0.223,0.231,
+  0.24,0.248,0.257,0.266,0.275,0.284,0.293,0.302,0.311,0.321,
+  0.33,0.339,0.349,0.358,0.368,0.377,0.387,0.397,0.407,0.416,
+  0.426,0.436,0.446,0.455,0.465,0.475,0.485,0.495,0.505,0.515,
+  0.525,0.534,0.544,0.554,0.564,0.573,0.583,0.593,0.603,0.612,
+  0.622,0.631,0.641,0.65,0.659,0.669,0.678,0.687,0.696,0.705,
+  0.714,0.723,0.732,0.74,0.749,0.757,0.766,0.774,0.782,0.79,
+  0.798,0.806,0.814,0.821,0.829,0.836,0.843,0.85,0.857,0.864,
+  0.87,0.877,0.883,0.889,0.895,0.901,0.906,0.912,0.917,0.922,
+  0.927,0.932,0.936,0.941,0.945,0.949,0.952,0.956,0.959,0.962,
+  0.965,0.9673,0.9697,0.9718,0.9737,0.9754,0.9768,0.9779,
+  0.9788,0.9795,0.9799,0.98
+];
+const eArrayHyperbola = [
+  1.02,1.021,1.022,1.025,1.028,1.033,1.039,1.046,1.05,1.06,1.07,
+  1.08,1.09,1.11,1.12,1.13,1.15,1.16,1.18,1.2,1.22,1.23,1.25,
+  1.28,1.3,1.32,1.34,1.36,1.39,1.41,1.44,1.47,1.49,1.52,1.55,
+  1.58,1.6,1.63,1.66,1.7,1.73,1.76,1.79,1.82,1.86,1.89,1.92,1.96,
+  1.99,2.03,2.06,2.1,2.14,2.17,2.21,2.25,2.28,2.32,2.36,2.4,2.44,
+  2.48,2.51,2.55,2.59,2.63,2.67,2.71,2.75,2.79,2.83,2.87,2.91,
+  2.95,2.99,3.03,3.07,3.11,3.15,3.19,3.23,3.27,3.31,3.35,3.39,
+  3.43,3.47,3.51,3.54,3.58,3.62,3.66,3.7,3.74,3.77,3.81,3.85,3.88,
+  3.92,3.96,3.99,4.03,4.06,4.1,4.13,4.16,4.2,4.23,4.26,4.29,4.32,
+  4.36,4.39,4.42,4.44,4.47,4.5,4.53,4.55,4.58,4.61,4.63,4.66,4.68,
+  4.7,4.72,4.74,4.77,4.79,4.8,4.82,4.84,4.86,4.87,4.89,4.9,4.91,4.93,
+  4.94,4.95,4.96,4.97,4.974,4.981,4.987,4.992,4.995,4.998,4.999,5
+];
 let lanDegrees = defaultLan;
 let lan = lanDegrees*piOver180; // longitude of the ascending node
 let incDegrees = defaultInclination;
@@ -231,23 +279,6 @@ let vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));//v vector magnitude at periap
 let h = rp*vp;
 periapseTooSmall = rp < cbRadius ? true : false;
 
-let periapseLocked = false;
-let apoapseLocked = false;
-let sliderAcanChange = false;//required for locking the periapse/apoapse
-let sliderEcanChange = false;//required for locking the periapse/apoapse
-
-const aMin = 1;
-const aMax = 60;
-const aRange = aMax - aMin;
-const eMinEllipse = 0;
-const eMaxEllipse = 0.98;
-const eEllipseRange = eMaxEllipse - eMinEllipse;
-const eMinHyperbola = 1.02;
-const eMaxHyperbola = 5;
-const eHyperbolaRange = eMaxHyperbola - eMinHyperbola;
-const aSliderRange = 150;
-const eSliderRange = 150;
-
 const threeDWorld = document.getElementById('threeD-world');
 
 const muButton = document.getElementById('mu-btn');
@@ -267,8 +298,6 @@ const aDisplay = document.getElementById('a-display');
 const eDisplay = document.getElementById('e-display');    
 const aSlider = document.getElementById('a-slider');
 const eSlider = document.getElementById('e-slider');
-const lockPeriapseButton = document.getElementById('lock-periapse-btn');
-const lockApoapseButton = document.getElementById('lock-apoapse-btn');
 const periapseWarning = document.getElementById('periapse-warning');
 const lanDisplay = document.getElementById('lan-display');    
 const incDisplay = document.getElementById('inc-display');    
@@ -942,12 +971,9 @@ const doTwoSunOptionChoice = function(){
   }
 }
 
-const doASliderOnInput = function(value){
+const doASliderOnInput = function(i){
   haltPlay();
-  let c = aRange/(Math.log(aSliderRange+1));
-  let d = aMax;
-  value = aSliderRange - value;
-  a = d - c*Math.log(value+1);
+  a = aArray[i];
 
   // a > 0 for ellipses, a < 0 for hyperbolas
   if (conicSectionIsEllipse){
@@ -990,37 +1016,24 @@ const doASliderOnInput = function(value){
 
   needToComputePVTArray = true;
   meanMotion = Math.sqrt(1/(a*a*a));
-  // a = value/aSliderRange*aRange + aMin;
   specificEnergy = -muCanonical/(2*a);
-  aDisplay.innerHTML = `a: ${Number(a).toFixed(2).toString()}`;
+  aDisplay.innerHTML = `a: ${Number(a).toFixed(3).toString()}`;
   computeP();
   doTwoSunOptionChoice();
 }
 
-const doESliderOnInput = function(value){
+const doESliderOnInput = function(i){
   haltPlay();
-  let c;
-  let d;
-  value = eSliderRange - value;
 
-  switch (conicSection){
-    case 'ellipse':
-      c = eEllipseRange/(Math.log(eSliderRange+1));
-      d = eMaxEllipse;
-      e = d - c*Math.log(value+1);
-      eDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
-      break;
-
-    case 'hyperbola':
-      c = eHyperbolaRange/(Math.log(eSliderRange+1));
-      d = eMaxHyperbola;
-      e = d - c*Math.log(value+1);
-
-      computeDelta();//hypberbolic turning angle
-      eDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
-      break;
+  if (conicSectionIsEllipse){
+    e = eArrayEllipse[i];
+    eDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
+  }else{
+    e = eArrayHyperbola[i];
+    computeDelta();//hypberbolic turning angle
   }
-
+  
+  eDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
   needToComputePVTArray = true;
   computeP();
   doTwoSunOptionChoice();
@@ -1028,12 +1041,10 @@ const doESliderOnInput = function(value){
 
 aSlider.oninput = function(){
   doASliderOnInput(+this.value);
-  sliderEcanChange = true;//needed for locking the periapse/apoapse
 }
 
 eSlider.oninput = function(){
   doESliderOnInput(+this.value);
-  sliderAcanChange = true;//needed for locking the periapse/apoapse
 }
 
 // CALL THIS AT THE BEGINNING!!!!!!!!!!!!!
@@ -1063,42 +1074,6 @@ const enableDisableTimeScaleOptions = function(){
 }
 
 aSlider.onpointerup = function(){
-  if ((periapseLocked || apoapseLocked) && sliderEcanChange){
-    const apses = [periapseLocked, apoapseLocked];
-
-    for (apseLocked in apses){
-      if (apseLocked){
-        let ce;
-        let de;
-
-        if (conicSectionIsEllipse){
-          ce = eEllipseRange/(Math.log(eSliderRange+1));
-          de = eMaxEllipse;
-        }else{
-          ce = eHyperbolaRange/(Math.log(eSliderRange+1));
-          de = eMaxHyperbola;
-        }
-
-        let etemp;
-
-        // assuming that only periapseLocked
-        // or apoapseLocked but not both
-        if (periapseLocked){
-          etemp = 1 - rp/a;
-        }else{
-          etemp = 1 + ra/a;
-        }
-
-        let eS = eSliderRange - (Math.exp((de-etemp)/ce) - 1);
-
-        if (0 < eS && eS < eSliderRange){
-          eSlider.value = +eS;
-          doESliderOnInput(+eS);// sets the value of 'e'
-        }
-      }
-    }
-  }
-
   rp = a*(1-e);
   ra = a*(1+e);
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
@@ -1107,7 +1082,6 @@ aSlider.onpointerup = function(){
   // console.log('computePVTArray is being called in aSlider.onpointerup');
   computePVTArray();
   handlePeriapseCheck();
-  sliderEcanChange = false;
   doNuSliderOnInput(nuDegrees);
   enableDisableTimeScaleOptions();
   replaceAerovisualizerData('semimajor-axis',+this.value);
@@ -1115,39 +1089,6 @@ aSlider.onpointerup = function(){
 }
 
 eSlider.onpointerup = function(){
-  if ((periapseLocked || apoapseLocked) && sliderAcanChange){
-    const apses = [periapseLocked, apoapseLocked];
-
-    for (apseLocked in apses){
-      if (apseLocked){
-        let atemp;
-
-        // assuming that only periapseLocked
-        // or apoapseLocked but not both
-        if (periapseLocked){
-          atemp = rp/(1-e);
-        }else{
-          atemp = ra/(1+e);
-        }
-
-        if (!conicSectionIsEllipse){
-          // a > 0 for ellipses, a < 0 for hyperbolas
-          atemp = -atemp;
-        }
-
-        let ca = aRange/(Math.log(aSliderRange+1));
-        let da = aMax;
-        let aS = aSliderRange - (Math.exp((da-atemp)/ca) - 1);
-
-        if (0 < aS && aS < aSliderRange){
-          aSlider.value = +aS;
-          // console.log('doASliderOnInput is being called in eSlider.onpointerup');
-          doASliderOnInput(+aS);// sets the value of 'a'
-        }
-      }
-    }
-  }
-
   rp = a*(1-e);
   ra = a*(1+e);
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
@@ -1156,59 +1097,10 @@ eSlider.onpointerup = function(){
   computePVTArray();
 
   handlePeriapseCheck();
-  sliderAcanChange = false;
   doNuSliderOnInput(nuDegrees);
   replaceAerovisualizerData('eccentricity',+this.value);
   saveToLocalStorage();
 }
-
-lockPeriapseButton.addEventListener('click', () => {
-  handlePeriapseCheck();
-
-  if (periapseLocked){
-    periapseLocked = false;
-    lockPeriapseButton.innerHTML = 'lock periapse';
-
-    if (!periapseTooSmall){
-      lockPeriapseButton.style.backgroundColor = "#5555ff";
-    }
-  }else{
-    periapseLocked = true;
-    lockPeriapseButton.innerHTML = 'PERIAPSE LOCKED';
-    lockPeriapseButton.style.backgroundColor = 'red';
-
-    apoapseLocked = false;
-    lockApoapseButton.innerHTML = 'lock apoapse';
-    
-    if (!periapseTooSmall){
-      lockApoapseButton.style.backgroundColor = "#5555ff";
-    }
-  }
-});
-
-lockApoapseButton.addEventListener('click', () => {
-  handlePeriapseCheck();
-
-  if (apoapseLocked){
-    apoapseLocked = false;
-    lockApoapseButton.innerHTML = 'lock apoapse';
-
-    if (!periapseTooSmall){
-      lockApoapseButton.style.backgroundColor = "#5555ff";
-    }
-  }else{
-    apoapseLocked = true;
-    lockApoapseButton.innerHTML = 'APOAPSE LOCKED';
-    lockApoapseButton.style.backgroundColor = 'red';
-
-    periapseLocked = false;
-    lockPeriapseButton.innerHTML = 'lock periapse';
-
-    if (!periapseTooSmall){
-      lockPeriapseButton.style.backgroundColor = "#5555ff";
-    }
-  }
-});
 
 const computePQW2IJKRotation = function(){
   // compute the direction cosine matrix from the perifocal frame
@@ -1546,11 +1438,9 @@ const computePVTArray = function(){
     // but is designed to handle extreme cases.  It should usually
     // break out of the loop way before i reaches its maximum.  Tests of
     // this have shown that i can get up to around 30 for eccentricities
-    // near 1 (parabolic).  The variable eMinHyperbola is the
-    // extreme lower limit for hyperbolic orbits and its value for the
-    // tests was set to 1.02.  If you reduce eMinHyperbola, you will 
-    // certainly need to increase the maximum iterations for i but
-    // at the expense of computer performance
+    // near 1 (parabolic).  Eccentricities between 0.98 and 1.02 are
+    // not included in Aerovisualizer to prevent i from being too large 
+    // and affect computer performance
     for (i=0; i<50; i++){
       // Bate p. 195
       z = x*x/a;
@@ -1707,14 +1597,8 @@ const handlePlanetChange = function(){
   h = rp*vp;
   // console.log('computePVTArray is being called in handlePlanetChange');
   computePVTArray();
-  const temp1 = sliderEcanChange;
-  const temp2 = sliderAcanChange;
-  sliderEcanChange = false;
-  sliderAcanChange = false;
   doESliderOnInput(+eSlider.value);
   doASliderOnInput(+aSlider.value);
-  sliderEcanChange = temp1;
-  sliderAcanChange = temp2;
   setPVTArrayPointers();
   handlePeriapseCheck();
   doTwoSunOptionChoice();
@@ -2038,14 +1922,8 @@ toggleConicSectionButton.addEventListener('click', () => {
 
   // console.log('computePVTArray is being called in toggleConicSectionButton click');
   needToComputePVTArray = true;
-  const temp1 = sliderEcanChange;
-  const temp2 = sliderAcanChange;
-  sliderEcanChange = false;
-  sliderAcanChange = false;
   doESliderOnInput(+eSlider.value);
   doASliderOnInput(+aSlider.value);
-  sliderEcanChange = temp1;
-  sliderAcanChange = temp2;
   rp = Number(a*(1-e));
   ra = Number(a*(1+e));
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
@@ -2063,23 +1941,38 @@ const handlePeriapseCheck = function(){
 
   if ((periapseTooSmall === false) || (theCB.id === 1)){
     periapseWarning.innerHTML = '&nbsp';
-    muButton.style.backgroundColor = "#5555ff";
-    aeButton.style.backgroundColor = "#5555ff";
-    orientationButton.style.backgroundColor = "#5555ff";
-    nuButton.style.backgroundColor = "#5555ff";
-    numericalButton.style.backgroundColor = "#5555ff";
-    mainReturnButton.style.backgroundColor = "#5555ff";
-    toggleConicSectionButton.style.backgroundColor = "#5555ff";
-    prefsButton.style.backgroundColor = "#5555ff";
-    infoButton.style.backgroundColor = "#5555ff";
-
-    if (!periapseLocked){
-      lockPeriapseButton.style.backgroundColor = "#5555ff";
-    }
-
-    if (!apoapseLocked){
-      lockApoapseButton.style.backgroundColor = "#5555ff";
-    }
+    muButton.style.backgroundColor = '#5555ff';
+    aeButton.style.backgroundColor = '#5555ff';
+    orientationButton.style.backgroundColor = '#5555ff';
+    nuButton.style.backgroundColor = '#5555ff';
+    numericalButton.style.backgroundColor = '#5555ff';
+    mainReturnButton.style.backgroundColor = '#5555ff';
+    toggleConicSectionButton.style.backgroundColor = '#5555ff';
+    prefsButton.style.backgroundColor = '#5555ff';
+    infoButton.style.backgroundColor = '#5555ff';
+    timeScaleMenu.style.backgroundColor = '#5555ff';
+    muMenu.style.backgroundColor = '#5555ff';
+    infoMenu.style.backgroundColor = '#5555ff';
+    mainPrefsMenu.style.backgroundColor = '#5555ff';
+    inertialVectorsMenu.style.backgroundColor = '#5555ff';
+    orbitFixedVectorsMenu.style.backgroundColor = '#5555ff';
+    orbitingBodyVectorsMenu.style.backgroundColor = '#5555ff';
+    inertialVectorColorMenu.style.backgroundColor = '#5555ff';
+    orbitFixedVectorColorMenu.style.backgroundColor = '#5555ff';
+    uvwVectorColorMenu.style.backgroundColor = '#5555ff';
+    rVectorColorMenu.style.backgroundColor = '#5555ff';
+    vVectorColorMenu.style.backgroundColor = '#5555ff';
+    zeroLanButton.style.backgroundColor = '#5555ff';
+    zeroIncButton.style.backgroundColor = '#5555ff';
+    zeroAopButton.style.backgroundColor = '#5555ff';
+    zeroNuButton.style.backgroundColor = '#5555ff';
+    playPauseButton.style.backgroundColor = '#5555ff';
+    resetButton.style.backgroundColor = '#5555ff';
+    cycleNumericalDisplayButton1.style.backgroundColor = '#5555ff';
+    cycleNumericalDisplayButton2.style.backgroundColor = '#5555ff';
+    cycleNumericalDisplayButton3.style.backgroundColor = '#5555ff';
+    toggleNumericalDisplayUnitsButton1.style.backgroundColor = '#5555ff';
+    toggleNumericalDisplayUnitsButton2.style.backgroundColor = '#5555ff';
   }else{
     periapseWarning.innerHTML = 'PERIAPSE TOO SMALL';
     muButton.style.backgroundColor = 'red';
@@ -2091,8 +1984,29 @@ const handlePeriapseCheck = function(){
     toggleConicSectionButton.style.backgroundColor = 'red';
     prefsButton.style.backgroundColor = 'red';
     infoButton.style.backgroundColor = 'red';
-    lockPeriapseButton.style.backgroundColor = 'red';
-    lockApoapseButton.style.backgroundColor = 'red';
+    timeScaleMenu.style.backgroundColor = 'red';
+    muMenu.style.backgroundColor = 'red';
+    infoMenu.style.backgroundColor = 'red';
+    mainPrefsMenu.style.backgroundColor = 'red';
+    inertialVectorsMenu.style.backgroundColor = 'red';
+    orbitFixedVectorsMenu.style.backgroundColor = 'red';
+    orbitingBodyVectorsMenu.style.backgroundColor = 'red';
+    inertialVectorColorMenu.style.backgroundColor = 'red';
+    orbitFixedVectorColorMenu.style.backgroundColor = 'red';
+    uvwVectorColorMenu.style.backgroundColor = 'red';
+    rVectorColorMenu.style.backgroundColor = 'red';
+    vVectorColorMenu.style.backgroundColor = 'red';
+    zeroLanButton.style.backgroundColor = 'red';
+    zeroIncButton.style.backgroundColor = 'red';
+    zeroAopButton.style.backgroundColor = 'red';
+    zeroNuButton.style.backgroundColor = 'red';
+    playPauseButton.style.backgroundColor = 'red';
+    resetButton.style.backgroundColor = 'red';
+    cycleNumericalDisplayButton1.style.backgroundColor = 'red';
+    cycleNumericalDisplayButton2.style.backgroundColor = 'red';
+    cycleNumericalDisplayButton3.style.backgroundColor = 'red';
+    toggleNumericalDisplayUnitsButton1.style.backgroundColor = 'red';
+    toggleNumericalDisplayUnitsButton2.style.backgroundColor = 'red';
   }
 }
 
@@ -2107,7 +2021,7 @@ const handleInfoMenuChoice = function(choice){
       
       <p class="p-normal"><em>Aerovisualizer - Orbital Mechanics</em> focuses on, well, orbital 
       mechanics.  Set the values of the orbital elements and click the play button to start 
-      the animation.  It is assumed that you have taken or are currently taking a course in this 
+      the animation.  It is assumed that you have taken or are currently taking a course on this 
       topic.</p>`;
       break;
 
@@ -2130,7 +2044,8 @@ const handleInfoMenuChoice = function(choice){
       <p class="p-normal">Click <em>&mu;</em>. A menu appears allowing you to choose the central body 
       and its <em>gravitational parameter &mu;</em> (&mu; = Gm).</p>
       <p class="p-normal">Choose a central body.  The sun/moon/planet changes to reflect your choice. 
-      Data of interest appear, including &mu;.</p>
+      Data for the sun/moon/planet appear.  Besides &mu;, the radius and escape velocity from the 
+      surface appear.  The remaining data are the J2000 orbital parameters.</p>
       <p class="p-normal">The sun has two menu choices.  One sets the canonical distance unit 
       (CDU) equal to the sun's radius.  The other sets it equal to 1 astronomical unit (AU) to 
       allow for greater distances from the sun.</p>
@@ -2139,26 +2054,22 @@ const handleInfoMenuChoice = function(choice){
 
     case 'info-a-and-e':
       infoText.innerHTML = `
-      <p class="p-normal">Click <em>a&nbsp;e</em>.  Use the slider controls to set the 
+      <p class="p-normal">Click <em>a&nbsp;e</em>.  Use the sliders to set the 
       <em>semi-major axis (a)</em> and the <em>orbital eccentricity (e)</em>.  The 
       displayed orbit changes in accordance with the sliders.  If the orbit intersects  
-      the central body, the buttons change to red.</p>
+      the central body, the buttons change to red.  Adjust a and e to prevent this.</p>
       <p class="p-normal">The value of 'a' is displayed in canonical 
       distance units (CDU).  Its range is 1 to 60 for elliptical orbits and -1 to -60 
       for hyperbolic orbits.</p>
-      <p class="p-normal">The value of 'e' is displayed and ranges from 0 to 0.98 for 
-      elliptical orbits and 1.02 to 5 hyperbolic orbits.  Nearly parabolic orbits (e~=1) 
-      are avoided.</p>
-      <p class="p-normal">If you click the buttons labeled 'lock periapse' or 'lock 
-      apoapse', Aerovisualizer attempts to keep those values constant while you move 
-      the sliders.</p>
+      <p class="p-normal">The value of 'e' ranges from 0 to 0.98 for elliptical orbits 
+      and 1.02 to 5 for hyperbolic orbits.  Nearly parabolic orbits (e~=1) are avoided.</p>
       `;
       break;
 
     case 'info-Omega-i-omega':
       infoText.innerHTML = `
-      <p class="p-normal">Click <em>&Omega;&nbsp;i&nbsp;&omega;</em>.  Use the slider 
-      controls to set the orbital elements the <em>longitude of the ascending node (&Omega;)</em>, the 
+      <p class="p-normal">Click <em>&Omega;&nbsp;i&nbsp;&omega;</em>.  Use the sliders 
+      to set the orbital elements of the <em>longitude of the ascending node (&Omega;)</em>, the 
       <em>orbital inclination (i)</em>, and the <em>argument of periapsis (&omega;)</em>.  Their values are displayed in degrees next to their respective 
       sliders.  The displayed orbit changes in accordance with the sliders.  Use the 
       buttons to set the values to zero.</p>
@@ -2168,9 +2079,10 @@ const handleInfoMenuChoice = function(choice){
     case 'info-nu':
       infoText.innerHTML = `
       <p class="p-normal">Click <em>&nu;</em>.  Use the slider 
-      control to set the <em>true anomaly (&nu;)</em> .  The true anomaly is displayed in 
-      degrees as is the time since periapse passage.  Various vectors change in accordance 
-      with the slider.  Use the button to set &nu; to zero.</p>
+      to set the <em>true anomaly (&nu;)</em> .  The true anomaly is displayed in 
+      degrees.  The time since periapse passage is also displayed.  The vectors attached 
+      to the orbiting body move in accordance with the slider.  Use the button to set 
+      &nu; to zero.</p>
       `;
       break;
 
@@ -2182,13 +2094,14 @@ const handleInfoMenuChoice = function(choice){
       eccentric anomaly (E), hyperbolic anomaly (F), mean anomaly (M), mean motion (n), 
       semi-major axis (a), orbital eccentricity (e), longitude of the ascending node 
       (&Omega;), orbital inclination (i), argument of periapsis (&omega;), semi-latus 
-      rectum (P), specific angular momentum (h), specific energy (energy), orbital velocity (v), 
+      rectum (P), specific angular momentum (h), specific energy (spfc en), orbital velocity (vel), 
       velocity of circular satellite (vcs), escape velocity (vesc), the Q parameter (Q), 
       and characteristic energy (C3).
       </p>
       <p class="p-normal">Click <em>units</em> to switch between canonical and metric 
-      units.  The time after periapse and orbital period are in the units of the time 
-      scale.  Angles are in degrees.</p>`;
+      units.  The time after periapse and orbital period are in the units of the chosen 
+      time scale.  Other time-related values such as h, spfc en, and the velocities are always 
+      based on seconds.  Angles are in degrees.</p>`;
       break;
 
     case 'info-numerical-2-3':
@@ -2209,14 +2122,14 @@ const handleInfoMenuChoice = function(choice){
       infoText.innerHTML = `<p class="p-normal">Click <em>ellipse / hyperbola</em> to toggle between the 
       two types of orbits.  If the buttons suddenly appear red, click the 'a e' button and 
       adjust the semi-major axis and/or the orbital eccentricity to increase the 
-      periapse.</p>`;
+      periapse such that the orbit does not intersect the sun/moon/planet.</p>`;
       break;
 
     case 'info-time-scale':
       infoText.innerHTML = `<p class="p-normal">Choose the time scale from the <em>time scale menu</em>.   
-      Click the play button.  The animation rate matches your menu choice.  For example, if you 
-      choose "1 second = 1 hour", an hour of orbital motion is compressed into one second of real time.  
-      If chosen, the numerical display presents the time after periapse and orbital period in the units 
+      Click the play button.  The animation rate matches your choice.  For example, if you 
+      chose "1 second = 1 hour", one second of real time is equal to an hour of orbital motion.  
+      The numerical display shows the time after periapse and orbital period in the units 
       of the time scale.</p>`;
       break;
       
@@ -2227,8 +2140,10 @@ const handleInfoMenuChoice = function(choice){
 
     case 'info-prefs-general':
       infoText.innerHTML = `<p class="p-normal">Under <em>general preferences</em>, use the slider to set the 
-      transparency of the sun/moon/planet.  Use the checkbox to specify whether or not to show 
-      the out of plane (W) vectors of both the PWQ frame and the UVW frame.</p>`;
+      transparency of the sun/moon/planet.  Use the first checkbox to specify whether or not to show 
+      the out of plane vectors (W) of the PWQ and UVW frames.  Use the second checkbox to specify that 
+      the true/eccentric/hyperbolic/mean anomalies range from 0 to 360&deg; rather than -180&deg; 
+      to 180&deg;.</p>`;
       break;
 
     case 'info-prefs-inertial-vectors':
@@ -2450,7 +2365,7 @@ const initialize = function(data, camera){
   needToComputePVTArray = true;
   handlePlanetChange();
   eSlider.value = +eSl;
-  aSl -= 1;//subtracting 1, not sure how it works, but it makes sure that
+  // aSl -= 1;//subtracting 1, not sure how it works, but it makes sure that
   //the 'aSlider' gets set right, but should probably check that it is not -1
   aSlider.value = +aSl;
   doESliderOnInput(+eSl);

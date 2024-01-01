@@ -77,12 +77,10 @@
           <p>&omega;</p><span id="omega">0</span>
         </div>
         <div class="elements" id="a-e-elements">
-          <p class="center-grid-item"><span id="a-display">a: 0</span></p>
-          <input class="slider span3" type="range" min="0" max="150" value="0" id="a-slider">
+          <p class="center-grid-item"><span id="a-display">a: 1</span></p>
+          <input class="slider span3" type="range" min="0" max="149" value="0" id="a-slider">
           <p class="center-grid-item"><span id="e-display">e: 0</span></p>
-          <input class="slider span3" type="range" min="0" max="150" value="0" id="e-slider">
-          <p>&nbsp;</p><button id="lock-periapse-btn" class="btn center-grid-item">lock periapse</button>
-          <button id="lock-apoapse-btn" class="btn center-grid-item">lock apoapse</button><p>&nbsp;</p>
+          <input class="slider span3" type="range" min="0" max="149" value="0" id="e-slider">
           <p id="periapse-warning" class="span4 center-grid-item warning">warning message</p>
         </div>
         <div class="elements" id="orientation-elements">
@@ -114,7 +112,7 @@
           <pre class="left-border"><span>spfc en</span></pre><pre><span id="num-sp-energy">0</span></pre>
           <pre><span>nu</span></pre><pre><span id="num-nu">0</span></pre>
           <pre class="left-border"><span>&Omega;</span></pre><pre><span id="num-Om">0</span></pre>
-          <pre class="left-border"><span>v</span></pre><pre><span id="num-v">0.000</span></pre>
+          <pre class="left-border"><span>vel</span></pre><pre><span id="num-v">0.000</span></pre>
           <pre><span>E</span></pre><pre><span id="num-E">0.000</span></pre>
           <pre class="left-border"><span>i</span></pre><pre><span id="num-i">0</span></pre>
           <pre class="left-border"><span>vcs</span></pre><pre><span id="num-vcs">0.000</span></pre>
@@ -202,8 +200,10 @@
           </select>
         </div>
         <div class="elements" id="general-prefs-elements">
+          <p class="span4">&nbsp;</p>
           <p class="grid-item center-grid-item span4">central body transparency</p>
           <input class="grid-item slider span4" type="range" min="0" max="100" value="100" id="central-body-transparency-slider">
+          <p class="span4">&nbsp;</p>
           <div class="grid-item span4 checkbox center-grid-item">
             <input type="checkbox" id="show-out-of-plane" name="show-out-of-plane-checkbox" value="yes">
             <label for="show-out-of-plane">show out of plane (W) vectors</label>
@@ -212,6 +212,7 @@
           </div>
         </div>
         <div class="elements" id="inertial-vectors-elements">
+          <p class="span4">&nbsp;</p>
           <p class="grid-item center-grid-item span2">vector visibility:</p>
           <p class="grid-item center-grid-item span2">vector color:</p>
           <select id="inertial-vectors-menu" class="grid-item menu span2" name="inertial-vectors-menu">
@@ -227,10 +228,12 @@
             <option value="purple">purple</option>
             <option value="orange">orange</option>
           </select>
+          <p class="span4">&nbsp;</p>
           <p class="grid-item center-grid-item span4">vector scale:</p>
           <input class="grid-item slider span4" type="range" min="0" max="100" value="50" id="inertial-vector-scale-slider">
         </div>
         <div class="elements" id="orbit-fixed-vectors-elements">
+          <p class="span4">&nbsp;</p>
           <p class="center-grid-item span2">vector visibility:</p>
           <p class="center-grid-item span2">vector color:</p>
           <select id="orbit-fixed-vectors-menu" class="menu span2" name="orbit-fixed-vectors-menu">
@@ -249,10 +252,12 @@
             <option value="purple">purple</option>
             <option value="orange">orange</option>
           </select>
+          <p class="span4">&nbsp;</p>
           <p class="center-grid-item span4">vector scale:</p>
           <input class="slider span4" type="range" min="0" max="100" value="50" id="orbit-fixed-vector-scale-slider">
         </div>
         <div class="elements" id="orbiting-body-vectors-elements">
+          <p class="span4">&nbsp;</p>
           <p class="center-grid-item">visibility:</p>
           <select id="orbiting-body-vectors-menu" class="menu" name="orbiting-body-vectors-menu">
             <option value="r-only">r only</option>
@@ -274,6 +279,7 @@
             <option value="purple">purple</option>
             <option value="orange">orange</option>
           </select>
+          <p class="span4">&nbsp;</p>
           <p class="center-grid-item">r color:</p>
           <select id="r-vector-color-menu" class="menu" name="r-vector-color-menu">
             <option value="select-a-color">select a color</option>
@@ -294,6 +300,7 @@
             <option value="purple">purple</option>
             <option value="orange">orange</option>
           </select>
+          <p class="span4">&nbsp;</p>
           <p class="center-grid-item span4">vector scale:</p>
           <input class="slider span4" type="range" min="0" max="100" value="50" id="orbiting-body-vector-scale-slider">
         </div>
@@ -301,10 +308,10 @@
           <select id="info-menu" class="menu span4" name="info-menu">
             <option value="info-intro">introduction</option>
             <option value="info-how-to-use">how to use aerovisualizer</option>
-            <option value="info-mu">gravitational parameter (&mu;)</option>
+            <option value="info-mu">gravitational parameter &mu;</option>
             <option value="info-a-and-e">orbital elements a & e</option>
             <option value="info-Omega-i-omega">orbital elements &Omega;, i & &omega;</option>
-            <option value="info-nu">true anomaly (&nu;)</option>
+            <option value="info-nu">true anomaly &nu;</option>
             <option value="info-numerical-1">numerical display 1</option>
             <option value="info-numerical-2-3">numerical display 2 & 3</option>
             <option value="info-ellipse-hyperbola">ellipse / hyperbola</option>

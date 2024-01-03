@@ -3,7 +3,7 @@ import {FontLoader} from './FontLoader.js';
 import {TextGeometry} from './TextGeometry.js';
 
 /**
- This OrbitalMechThings class encapsulates the computation and rendering of
+ The OrbitalMechThings class encapsulates the computation and rendering of
  central bodies (sun, moon, planets), trajectory curves, and vectors 
  associated with orbital mechanics.  The curves and vectors are the ellipse
  curve, the hyperbola curve, the perifocal frame vectors, the inertial frame
@@ -51,15 +51,16 @@ class OrbitalMechThings {
 
     this._orbitEccentricity = 0;
     this._r = new THREE.Vector3();
-    this._r.set(1,1,1);//arbitrary, will change later
+    this._r.set(1,1,1);//arbitrary and will change later
     this._v = new THREE.Vector3();
-    this._v.set(1,-1,1);//arbitrary, will change later
+    this._v.set(1,-1,1);//arbitrary and will change later
     this._h = new THREE.Vector3();
     this._h.copy(this._zunit);//perpendicular to orbit plane
     this._e = new THREE.Vector3();
     this._e.copy(this._xunit);//points toward periapsis
-    this._dcm = new THREE.Matrix3();
-    this._dcm4x4 = new THREE.Matrix4();
+    this._dcm = new THREE.Matrix3();//direction cosine matrix
+    this._dcm4x4 = new THREE.Matrix4();//needed for setting _quat
+    //from _dcm
 
     this._origin = new THREE.Vector3(0,0,0);
     this._flip180quat = new THREE.Quaternion();
@@ -79,7 +80,7 @@ class OrbitalMechThings {
     this._planetQuat.multiplyQuaternions(this._planetQuat1,this._planetQuat0);
     // _planetQuat0 is the 90 deg rotation that is required because of 
     // the way that the planet textures are provided.  _planetQuat1 is
-    // our rotation about the planet's rotational axis, which is assumed
+    // our rotation about the planet's rotational axis which is assumed
     // to be the planet's ellipsoidal z-axis (no attempt is made to model
     // the actual turning axis since it is practically the same for our
     // purposes).  _planetQuat is the final quaternion used for rendering
@@ -92,7 +93,7 @@ class OrbitalMechThings {
     this._v3 = new THREE.Vector3();
 
     this._circle = [];//radius 1
-    this._hyperbola = [];//"square" hyperbola
+    this._hyperbola = [];//unit hyperbola
     this._ellipticalCurveMesh = null;
     this._hyperbolicCurveMesh = null;
 
@@ -185,10 +186,10 @@ class OrbitalMechThings {
     this._constructPlanets();
 
     this._numApoapsePasses = 0;//used in rotatePlanet2(), needed to 
-    // prevent the planet rotation to reset backwards if the rotating
+    // prevent the planet rotation from resetting backwards if the orbiting
     // body passes through apoapse
     this._previousTime = -1e10;//used in rotatePlanet2(), needed to 
-    // prevent the planet rotation to reset backwards if the rotating
+    // prevent the planet rotation from resetting backwards if the orbiting
     // body passes through apoapse, set here to a large negative number
     // that is assumed to be lower than any time that is passed
     // into that function
@@ -197,11 +198,9 @@ class OrbitalMechThings {
   drawOrbitCurveAndVectors(){
     // this function draws (renders) the orbit curves and vectors.
     // THREE.js has what it calls "Groups", which would greatly
-    // simplify the code in this function if learned.  This way,
+    // simplify the code in this function if learned.  That way,
     // the shafts and arrowheads of vectors could be treated as
-    // a single object.  Pure laziness is why it has not been 
-    // learned and implemented.  rotation.aerovisualizer.com has
-    // similar vectors.
+    // a single object.  Why not learn it?  Pure laziness
     this._qn.setFromRotationMatrix(this._camera.matrixWorld);
 
     if (this._showPQWFrame){
@@ -235,7 +234,7 @@ class OrbitalMechThings {
       this._qVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
 
       if (this._showWVectors){
-        // out of plane vector
+        // out of plane vector of PQW frame
         this._q1.multiplyQuaternions(this._quat,this._zQuat);
         this._v0.copy(this._kVectorPos);
         this._v0.z *= this._fractionForShaft;
@@ -257,8 +256,6 @@ class OrbitalMechThings {
     }else{
       this._hyperbolicCurveMesh.matrix.compose(this._curveCenter, this._quat, this._orbitCurveScale);
     }
-    // this._orbitFixedVectorScale
-    // this._orbitingBodyVectorScale
 
     if (this._showIJKFrame){
       this._q1.copy(this._xQuat);
@@ -400,7 +397,7 @@ class OrbitalMechThings {
       this._UVectorLabelMesh.matrix.compose(this._v1, this._qn, this._scale);
 
       if (this._showWVectors){
-        // out of plane vector
+        // out of plane vector of the UVW frame
         this._v0.copy(this._h);
         this._v0.normalize();
         this._hQuat.setFromUnitVectors(this._yunit, this._v0);
@@ -590,7 +587,7 @@ class OrbitalMechThings {
     let curvePoint;
     let r;
     const sqrt2 = Math.SQRT2; 
-    const cPlusA = Math.SQRT2 + 1;//amount to move the square hyperbola
+    const cPlusA = Math.SQRT2 + 1;//amount to move the unit hyperbola
     // to the left in order to make it a normal hyperbola graph
 
     for (let i=0; i<360; i+=2){
@@ -602,13 +599,10 @@ class OrbitalMechThings {
       // go from -130 degrees to 130 degrees, 135 is infinity
       r = 1/(1 + sqrt2*Math.cos(i*piOver180));
 
-      // e and c equal sqrt(2), a, b, and P equal 1 for a "square" hyperbola
+      // e and c equal sqrt(2), a, b, and P equal 1 for a unit hyperbola
       curvePoint = new THREE.Vector3(r*Math.cos(i*piOver180)-cPlusA,r*Math.sin(i*piOver180),0);
       this._hyperbola.push(curvePoint);      
     }
-
-    // curvePoint.multiplyScalar(10);
-    // curvePoint.applyQuaternion(quat);
   
     if (this._ellipticalCurveMesh == null && this._hyperbolicCurveMesh == null){
       const lineMaterial1 = new THREE.LineBasicMaterial({color: 0xffffff});
@@ -623,12 +617,11 @@ class OrbitalMechThings {
         512,// path segments
         0.002,// THICKNESS
         4, //Roundness of Tube
-        true //closed
+        true //closed curve
       );
   
       this._ellipticalCurveMesh = new THREE.Line(tubeGeometry1, lineMaterial1);
       this._ellipticalCurveMesh.matrixAutoUpdate = false;
-      // this._scene.add(this._ellipticalCurveMesh);
 
       const lineMaterial2 = new THREE.LineBasicMaterial({color: 0xffffff});
       let cp2 = new THREE.CurvePath();
@@ -642,7 +635,7 @@ class OrbitalMechThings {
         512,// path segments
         0.002,// THICKNESS
         4, //Roundness of Tube
-        false //closed
+        false //closed curve
       );
   
       this._hyperbolicCurveMesh = new THREE.Line(tubeGeometry2, lineMaterial2);
@@ -657,9 +650,8 @@ class OrbitalMechThings {
     this._previousTime = -1e10;
   }
 
-  // simple version of rotatePlanet2 to be used in situations except
-  // for animation
-  rotatePlanet(tSeconds, rotationPeriodSeconds){
+  // use this function to rotate the planet when moving sliders
+  rotatePlanet1(tSeconds, rotationPeriodSeconds){
     if (this._planetOpacity < 0.1){
       return;
     }
@@ -728,15 +720,15 @@ class OrbitalMechThings {
   }
 
   setR(x, y, z, a){
+    this.needsRefresh = true;
     this._rVectorScale.setY(Math.sqrt(x*x + y*y + z*z)/Math.abs(a));
     this._r.set(x, y, z);
-    this.needsRefresh = true;
   }
 
   setV(x, y, z){
+    this.needsRefresh = true;
     this._vVectorScale.setY(1.75*Math.sqrt(x*x + y*y + z*z)*this._orbitingBodyVectorScale);
     this._v.set(x, y, z);
-    this.needsRefresh = true;
   }
 
   _constructVectors(){
@@ -812,7 +804,8 @@ class OrbitalMechThings {
     this._qVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[1]);
     this._qVectorArrowheadMesh.matrixAutoUpdate = false;
 
-    // requires a different material from P and Q if we want to allow separate transparency
+    // requires a different material from P and Q if we want to allow
+    // the W vector to be transparent
     this._wVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[5]);
     this._wVectorShaftMesh.matrixAutoUpdate = false;
     this._wVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[5]);
@@ -842,7 +835,8 @@ class OrbitalMechThings {
     this._VVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[2]);
     this._VVectorArrowheadMesh.matrixAutoUpdate = false;
     
-    // requires a different material from U and V if we want to allow separate transparency
+    // requires a different material from U and V if we want to allow
+    // the W vector to be transparent
     this._WVectorShaftMesh = new THREE.Mesh(shaftGeometry, mats[6]);
     this._WVectorShaftMesh.matrixAutoUpdate = false;
     this._WVectorArrowheadMesh = new THREE.Mesh(arrowheadGeometry, mats[6]);
@@ -920,7 +914,7 @@ class OrbitalMechThings {
       ];
 
       // material4 and material5 are for the W vectors of PQW and UVW
-      // which must be distinguished from the others if we allow the
+      // which must be distinguished from the others to allow the
       // user to choose whether or not to display them
       let material6 = [
         new THREE.MeshBasicMaterial({color: this._orbitFixedVectorColor, transparent: true, opacity: this._vectorOpacity}), // front

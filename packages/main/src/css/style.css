@@ -21,6 +21,16 @@ h1 {
   text-align:center;
 }
 
+p {
+  display: block;
+  font-family: inherit;
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: rgb(225, 225, 255);
+  text-align:left;
+  width: 100vw;
+}
+
 .container {
   width: 100vw;
   height: 80vh;
@@ -38,6 +48,8 @@ h1 {
   pointer-events: all;
   margin-top: 2.5%;
   margin-bottom: 15%;
+  margin-left:1%;
+  margin-right:1%;
 }
 
 .btn{
@@ -51,6 +63,6 @@ h1 {
   border-radius: 3rem;
   border-color:orange;
   cursor: pointer;
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0.75rem;
   touch-action:manipulation;
 }

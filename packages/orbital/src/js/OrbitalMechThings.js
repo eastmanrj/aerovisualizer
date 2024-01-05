@@ -59,8 +59,7 @@ class OrbitalMechThings {
     this._e = new THREE.Vector3();
     this._e.copy(this._xunit);//points toward periapsis
     this._dcm = new THREE.Matrix3();//direction cosine matrix
-    this._dcm4x4 = new THREE.Matrix4();//needed for setting _quat
-    //from _dcm
+    this._dcm4x4 = new THREE.Matrix4();//needed for setting _quat from _dcm
 
     this._origin = new THREE.Vector3(0,0,0);
     this._flip180quat = new THREE.Quaternion();
@@ -200,7 +199,7 @@ class OrbitalMechThings {
     // THREE.js has what it calls "Groups", which would greatly
     // simplify the code in this function if learned.  That way,
     // the shafts and arrowheads of vectors could be treated as
-    // a single object.  Why not learn it?  Pure laziness
+    // a single object.  Why wasn't it learned?  Pure laziness
     this._qn.setFromRotationMatrix(this._camera.matrixWorld);
 
     if (this._showPQWFrame){
@@ -587,8 +586,8 @@ class OrbitalMechThings {
     let curvePoint;
     let r;
     const sqrt2 = Math.SQRT2; 
-    const cPlusA = Math.SQRT2 + 1;//amount to move the unit hyperbola
-    // to the left in order to make it a normal hyperbola graph
+    const cPlusA = Math.SQRT2 + 1;//distance from the origin to a focus
+    // for a unit hyperbola
 
     for (let i=0; i<360; i+=2){
       curvePoint = new THREE.Vector3(Math.cos(i*piOver180),Math.sin(i*piOver180),0);
@@ -596,7 +595,7 @@ class OrbitalMechThings {
     }
   
     for (let i=-130; i<130; i+=2){
-      // go from -130 degrees to 130 degrees, 135 is infinity
+      // go from -130 degrees to 130 degrees, 135 is infinity for unit hyperbolas
       r = 1/(1 + sqrt2*Math.cos(i*piOver180));
 
       // e and c equal sqrt(2), a, b, and P equal 1 for a unit hyperbola
@@ -1230,13 +1229,9 @@ class OrbitalMechThings {
 
   _constructPlanets(){
     const geometry = new THREE.SphereGeometry(1, 32, 16);
-    // const geometry = new THREE.SphereGeometry(0.976, 32, 16);
     let texture;
     let material;
-    //creates spherical geometry with radius 0.976, 32 horizontal segments and 16 vertical segments
-    // 0.976 is the ratio of the earth radius to the radius of
-    // a circular low earh orbit at 160 km altitude.
-    // for earth, that orbit is scale 1 for our program
+    // creates spherical geometry with radius 1, 32 horizontal segments and 16 vertical segments
     let sun = new URL('../../static/img/2k_sun.jpg', import.meta.url);
     let moon = new URL('../../static/img/2k_moon.jpg', import.meta.url);
     let mercury = new URL('../../static/img/2k_mercury.jpg', import.meta.url);

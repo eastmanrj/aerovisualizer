@@ -21,26 +21,26 @@ nominalCameraPos.multiplyScalar(cameraRadius);
 let cpx, cpy, cpz;// camera position
 const centerOfRotation = [0, 0, 0];
 let clock = null;
-let omt = null;//"orbital mechanics thing" object handles the rendering of 
+let omt = null;// "orbital mechanics thing" object handles the rendering of 
 // the vectors, their labels, the planets, and the orbit curves
-let orbitControls = null;//in this context, "orbit" refers to the camera
+let orbitControls = null;// in this context, "orbit" refers to the camera
 // OrbitControls is a THREE.js class that has nothing to do with orbital mechanics
 let playing = false;
 let cbRadius = 1;
-const muCanonical = 1;//mu is 1 for canonical units of distance (DU)
-//and time (TU). This constant is included in the code rather than 
-//the number 1 to maintain clarity
+const muCanonical = 1;// mu is 1 for canonical units of distance (DU)
+// and time (TU). This constant is included in the code rather than 
+// the number 1 to maintain clarity
 const sqrtMuCanonical = Math.sqrt(muCanonical);//this also should be 1
 let periapseTooSmall = false;
 
 const defaultCentralBody = 'Earth';
 const defaultConicSection = 'ellipse';
-const defaultA = 1;//positive for ellipses
-const defaultE = 0;//use 0 for ellipse or Math.SQRT2 for hyperbola
-const defaultLan = 0;//degrees
-const defaultInclination = 0;//degrees
-const defaultAop = 0;//degrees
-// const defaultNu = 0;//degrees deprecated, nu is now initially set to 0
+const defaultA = 1;// positive for ellipses
+const defaultE = 0;// use 0 for ellipse or Math.SQRT2 for hyperbola
+const defaultLan = 0;// degrees
+const defaultInclination = 0;// degrees
+const defaultAop = 0;// degrees
+// const defaultNu = 0;// degrees deprecated, nu is now initially set to 0
 
 const defaultDelta = Math.PI/2;// 90 degrees for "square" hyperbola
 
@@ -61,11 +61,11 @@ const defaultOrbitingBodyVectorScale = 50;
 const defaultTimeScale = 1;
 const defaultTimeScaleMenuChoice = 'sec-equals-1sec';
 
-const defaultCentralBodyTransparency = 0;//0=completely opaque, 100=completely transparent
+const defaultCentralBodyTransparency = 0;// 0=completely opaque, 100=completely transparent
 const defaultShowOutOfPlaneVectors = true;
 const defaultTrueAnomaly360 = false;
 
-//aerovisualizerData is modified and saved to local storage when 
+// aerovisualizerData is modified and saved to local storage when 
 // values and preferences are changed and is retrieved from local 
 // storage at startup
 let aerovisualizerData = [
@@ -111,22 +111,22 @@ let aerovisualizerData = [
 
 let centralBody = defaultCentralBody;
 let theCB = null;
-let ctu = 0;//canonical time unit
-let cdu = 0;//canonical distance unit
+let ctu = 0;// canonical time unit
+let cdu = 0;// canonical distance unit
 let planetRotationPeriodSeconds = 0;
 let conicSection = defaultConicSection;
 let conicSectionIsEllipse = defaultConicSection === 'ellipse';
 let a = Number(defaultA);
 // aArray, eArrayEllipse, and eArrayHyperbola contain the values
-// for each of 150 slider positions for the a slider and e slider.
+// for each of 150 slider positions for the 'a' slider and 'e' slider.
 // The values were obtained from an Excel spreadsheet containing
 // Bezier curves that allow for gradual changes at the extreme
 // ends.  The semi-major axis (a) goes from 1 to 60.  For the
 // heliocentric option with CDU = AU, this does not allow for
-// 'a' to be smaller than Earth's. (1 AU).  The eccentricity
+// 'a' to be smaller than Earth's 'a' (1 AU).  The eccentricity
 // (e) goes from 0 to 0.98 for ellipses and 1.02 to 5 for hyberbolas
 const aArray = [
-  1,1.001,1.002,1.005,1.01,1.07,1.25,1.33,1.47,1.6,1.8,1.9,2.1,
+  1,1.001,1.005,1.015,1.025,1.1,1.25,1.33,1.47,1.6,1.8,1.9,2.1,
   2.3,2.5,2.7,2.9,3.1,3.4,3.6,3.9,4.2,4.5,4.8,5.1,5.4,
   5.8,6.1,6.5,6.8,7.2,7.6,8,8.4,8.8,9.2,9.7,10.1,10.6,
   11,11.5,11.9,12.4,12.9,13.4,13.9,14.4,14.9,15.4,15.9,
@@ -192,7 +192,7 @@ let meanMotion;
 let timeAfterPeriapse;// in canonical time units (CTU)
 let timeAfterPeriapseInSeconds;
 
-let pvtArray = [];//array of objects containing the position,
+let pvtArray = [];// array of objects containing the position,
 // velocity, time (PVT), (and nu) of an orbiting body following 
 // either an elliptical or a hyperbolic trajectory.  This array
 // contains 'pvtArraySize' number of object elements.  The array
@@ -238,10 +238,10 @@ let nu0;
 let nu1;
 let needToComputePVTArray = false;
 
-let period = tp;//period is the orbital period for elliptical orbits
-//in canonical units.  For hyperbolic trajectories, it is the time we
-//establish to go from one extreme to the other, also in canonical units
-let periodInSeconds = period*ctu;//this is 0 here because ctu is 0
+let period = tp;// period is the orbital period for elliptical orbits
+// in canonical units.  For hyperbolic trajectories, it is the time we
+// establish to go from one extreme to the other, also in canonical units
+let periodInSeconds = period*ctu;// this is 0 here because ctu is 0
 
 let inertialVectorsChoice = defaultInertialVectorsChoice;
 let orbitFixedVectorsChoice = defaultOrbitFixedVectorsChoice;
@@ -258,15 +258,15 @@ let orbitFixedVectorScale = defaultOrbitFixedVectorScale;
 let orbitingBodyVectorScale = defaultOrbitingBodyVectorScale;
 
 let timeScale = defaultTimeScale;
-let deltaT = timeScale*0.01666;// 0.01666 is what clock.getDelta() 
-// would return for 60 frames/sec 
+let deltaT = timeScale*0.01666;
+// 0.01666 is what clock.getDelta() would return for 60 frames/sec 
 
 let displayTimeScale = defaultTimeScale;
 let timeScaleMenuChoice = defaultTimeScaleMenuChoice;
 
 let centralBodyTransparency = defaultCentralBodyTransparency;
 let showOutOfPlaneVectors = defaultShowOutOfPlaneVectors;
-let trueAnomaly360 = defaultTrueAnomaly360;//true=0 to 360, false=-180 to 180
+let trueAnomaly360 = defaultTrueAnomaly360;// true=0 to 360, false=-180 to 180
 
 let rPQW = new THREE.Vector3(1, 1, 1);
 let rIJK = new THREE.Vector3(1, 1, 1);
@@ -275,11 +275,11 @@ let vPQW = new THREE.Vector3(1, 1, 1);
 let vIJK = new THREE.Vector3(1, 1, 1);
 let vUVW = new THREE.Vector3(1, 1, 1);
 
-let p = a*(1 - e*e);//parameter (semi-latus rectum)
+let p = a*(1 - e*e);// parameter (semi-latus rectum)
 let sqrtMuOverP = Math.sqrt(muCanonical/p);//needed for computing velocity
-let delta = defaultDelta;//turning angle for hyperbolic orbits
-let rp = Number(a*(1-e));//r vector magnitude at periapse
-let ra = Number(a*(1+e));//r vector magnitude at apoapse
+let delta = defaultDelta;// turning angle for hyperbolic orbits
+let rp = Number(a*(1-e));// r vector magnitude at periapse
+let ra = Number(a*(1+e));// r vector magnitude at apoapse
 let specificEnergy = -muCanonical/(2*a);
 let vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));//v vector magnitude at periapse
 let h = rp*vp;
@@ -576,13 +576,13 @@ const saveToLocalStorage = function(){
   localStorage.setItem('aerovisualizerData', JSON.stringify(aerovisualizerData));
 }
 /*
-//un-comment these 2 to create a fresh aerovisualizerData file
-//for local storage
+// un-comment these 2 to create a fresh aerovisualizerData file
+// for local storage
 localStorage.clear();
 saveToLocalStorage();
 */
 
-//location.reload();//unsure, maybe helpful
+// location.reload();// unsure, maybe helpful
 
 const getFromLocalStorage = function(){
   const data = JSON.parse(localStorage.getItem('aerovisualizerData'));
@@ -630,8 +630,8 @@ const displayNumerical1 = function(){
   let vcs = Math.sqrt(muCanonical/r);
   let vesc = Math.SQRT2*vcs;
   let Q = vPQW.lengthSq()/vcs/vcs;// also Q = 2 - r/a
-  let c3 = v*v - vesc*vesc;//also c3 = v*v - 2*muCanonical/r
-  let mm = meanMotion/piOver180;//degrees per CTU
+  let c3 = v*v - vesc*vesc;// also c3 = v*v - 2*muCanonical/r
+  let mm = meanMotion/piOver180;// degrees per CTU
 
   if (displayUnits === 2){
     spAngMom *= cdu*cdu/ctu;
@@ -639,7 +639,7 @@ const displayNumerical1 = function(){
     aDisp *= cdu;
     pDisp *= cdu;
     tpDisp *= ctu/displayTimeScale;
-    mm /= ctu/displayTimeScale;//degrees per second, minute, ...
+    mm /= ctu/displayTimeScale;// degrees per second, minute, ...
   }
 
   numNu.innerHTML = `${Number(nuDegrees+threeSixty).toFixed(2).toString()}`;
@@ -701,7 +701,7 @@ const displayNumerical1 = function(){
 }
 
 const displayNumerical2 = function(){
-  //position and velocity vectors display
+  // position and velocity vectors display
   computePQW2UVWRotation();
 
   rPQW.set(px, py, 0);
@@ -721,7 +721,7 @@ const displayNumerical2 = function(){
   let nVel = 2;
 
   if (displayUnits === 1){
-    //canonical units
+    // canonical units
     du = 1;
     duTu = 1;
     nPos = 2;
@@ -747,7 +747,7 @@ const displayNumerical2 = function(){
 const displayNumerical3 = function(){
   // direction cosine matrices display
   // display two matrices: PQW --> IJK and UVW --> PQW
-  // UVW --> PQW is the inverse of the matrix in the code
+  // UVW --> PQW is the inverse of dcmPQW2UVW
   computePQW2UVWRotation();
 
   dcm11pqw2ijk.innerHTML = `${Number(dcmPQW2IJK.elements[0]).toFixed(4).toString()}`;
@@ -943,13 +943,14 @@ infoButton.addEventListener('click', () => {
 
 const computeP = function(){
   p = a*(1 - e*e);
-  sqrtMuOverP = Math.sqrt(muCanonical/p);//needed for computing velocity
+  sqrtMuOverP = Math.sqrt(muCanonical/p);// needed for computing velocity
 }
 
 const computeDelta = function(){
   // delta is the turning angle (i.e. the angle through
   // which the path of a space probe is turned by its
-  // encounter with a planet during a hyperbolic flyby)
+  // encounter with a planet during a hyperbolic flyby
+  // from infinite distance)
   if (e < 1){
     return;
   }
@@ -979,12 +980,12 @@ const doASliderOnInput = function(i){
 
   // a > 0 for ellipses, a < 0 for hyperbolas
   if (conicSectionIsEllipse){
-    tp = twoPi*Math.pow(a,1.5)/muCanonical;//orbital period
+    tp = twoPi*Math.pow(a,1.5)/muCanonical;// orbital period
     period = tp;
     periodInSeconds = period*ctu;
   }else{
     a = -a;
-    tp = null;//orbital period is not defined for hyperbolic orbits
+    tp = null;// orbital period is not defined for hyperbolic orbits
 
     // set period equal to the time period of the flyby.  
     // Since the time is infinite to reach the delta angle, we reduce 
@@ -998,9 +999,9 @@ const doASliderOnInput = function(i){
     const trueAnomaly2 = (Math.PI + delta)/2 - th;
     const cosnu1 = Math.cos(trueAnomaly1);
     const cosnu2 = Math.cos(trueAnomaly2);
-    //make sure to compute e before this function, otherwise
-    //coshF1 and coshF2 can be such that we compute a square
-    //root of a negative number below
+    // make sure to compute e before this function, otherwise
+    // coshF1 and coshF2 can be such that we compute a square
+    // root of a negative number below
     const coshF1 = (e + cosnu1)/(1 + e*cosnu1);
     const coshF2 = (e + cosnu2)/(1 + e*cosnu2);
     const F1 = -Math.log(coshF1 + Math.sqrt(coshF1*coshF1 - 1));
@@ -1028,7 +1029,7 @@ const doESliderOnInput = function(i){
     eDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
   }else{
     e = eArrayHyperbola[i];
-    computeDelta();//hypberbolic turning angle
+    computeDelta();// hypberbolic turning angle
   }
   
   eDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
@@ -1100,11 +1101,11 @@ const computePQW2IJKRotation = function(){
   // to the geocentric equatorial frame (or other inertial frames)
   // (Bate p. 82)
   // this is a 313 Euler rotation sequence
-  const clan = Math.cos(lan);//longitude of the ascending node
+  const clan = Math.cos(lan);// longitude of the ascending node
   const slan = Math.sin(lan);
-  const cinc = Math.cos(inc);//orbital inclination
+  const cinc = Math.cos(inc);// orbital inclination
   const sinc = Math.sin(inc);
-  const caop = Math.cos(aop);//argument of periapse
+  const caop = Math.cos(aop);// argument of periapse
   const saop = Math.sin(aop);
   const r11 =  clan*caop - slan*saop*cinc;
   const r12 = -clan*saop - slan*caop*cinc;
@@ -1232,7 +1233,7 @@ const computeKepler = function(){
   const cosnu = Math.cos(nu);
 
   if (e<1){
-    let E = Math.acos((e + cosnu)/(1 + e*cosnu));//acos is 0 to pi
+    let E = Math.acos((e + cosnu)/(1 + e*cosnu));// acos is 0 to pi
     eccentricAnomaly = nu < 0 ? -E : E;
     meanAnomaly = eccentricAnomaly - e*Math.sin(E);
   }else{
@@ -1367,7 +1368,7 @@ const computePVTArray = function(){
 
   needToComputePVTArray = false;
   // set needToComputePVTArray to true whenever a or e changes
-  // but don't call this function until pointerup.  Also call this
+  // but don't call this function until pointerup.  Also, call this
   // immediately when switching between conic section types or when 
   // changing the central body
 
@@ -1405,7 +1406,7 @@ const computePVTArray = function(){
     // which equals 'period'.  For a hyperbolic flyby, 'period'
     // equals the time span computed in doASliderOnInput(). t is incremented
     // evenly.  An alternative to this might be to have more data points 
-    // where nu changes the fastest around periapse
+    // where nu changes the fastest (around periapse)
 
     // Bate p. 206 for first guess of x
     if (e < 1){
@@ -1429,8 +1430,8 @@ const computePVTArray = function(){
     // break out of the loop way before i reaches its maximum.  Tests of
     // this have shown that i can get up to around 30 for eccentricities
     // near 1 (parabolic).  Eccentricities between 0.98 and 1.02 are
-    // not included in Aerovisualizer to prevent i from being too large 
-    // and affect computer performance
+    // not allowed to prevent i from being too large and affecting 
+    // computer performance
     for (i=0; i<50; i++){
       // Bate p. 195
       z = x*x/a;
@@ -1457,7 +1458,8 @@ const computePVTArray = function(){
        r0*(1 - z*c))/sqrtMuCanonical;      
       x = x + (t - tn)/dtdx;
 
-      // break out of the loop if "close enough", i is usually way below its max
+      // break out of the loop if "close enough", i is usually 
+      // way below its max, especially for eccentricities far from 1
       if (Math.abs(t - tn) < 0.001){
         break;
       }
@@ -1485,13 +1487,14 @@ const computePVTArray = function(){
     
     pvtArray.push(pvtPoint);
     t += period/(pvtArraySize-1);
-    //console.log((f*pvtPoint.gdot - 1)/g);
-    //console.log(f*pvtPoint.gdot - g*pvtPoint.fdot);
+    // console.log((f*pvtPoint.gdot - 1)/g);
+    // console.log(f*pvtPoint.gdot - g*pvtPoint.fdot);
   }
   
   if (pvtArray[0].nu > 179.999999){
-    pvtArray[0].nu = -180;//set the first one to -180 because atan2 makes it +180
+    pvtArray[0].nu = -180;// set the first one to -180 because atan2 makes it +180
   }
+
   // console.log('rp:',rp, ' a:', a,' e:', e, 'period:',period);
   // console.log('pvtArrayp[0].t:',pvtArray[0].nu, 'pvtArray[pvtArraySize-1].t:',pvtArray[pvtArraySize-1].nu);
   // console.log('pvtArraySize:',pvtArraySize, ' pvtArray.length:', pvtArray.length);
@@ -1572,16 +1575,16 @@ const handlePlanetChange = function(){
   theCB = centralBodyData.find(x => x.name === centralBody);
   ctu = theCB.CTU;
   cdu = theCB.CDU;
-  periodInSeconds = period*ctu;//do this again at initialization, period is not set yet there
+  periodInSeconds = period*ctu;// do this again at initialization, period is not set yet there
   planetRotationPeriodSeconds = 3600*theCB.srp;
-  muDisplay.innerHTML = `${Number(+theCB.mu*1e6).toExponential(6).toString()} km&sup3;/s&sup2;`;//GM
-  radiusDisplay.innerHTML = `${theCB.radius} km`;//radius
-  vescDisplay.innerHTML = `${theCB.vesc} km/s`;//escape velocity from surface
-  aCBDisplay.innerHTML = `${theCB.a} AU`;//semimajor axis
-  eCBDisplay.innerHTML = `${theCB.e}`;//orbital eccentricity
-  iDisplay.innerHTML = `${theCB.i}&deg;`;//orbital inclination
-  OmegaDisplay.innerHTML = `${theCB.Om}&deg;`;//longitude of ascending node
-  omegaDisplay.innerHTML = `${theCB.om}&deg;`;//longitude of perihelion
+  muDisplay.innerHTML = `${Number(+theCB.mu*1e6).toExponential(6).toString()} km&sup3;/s&sup2;`;// GM
+  radiusDisplay.innerHTML = `${theCB.radius} km`;// radius
+  vescDisplay.innerHTML = `${theCB.vesc} km/s`;// escape velocity from surface
+  aCBDisplay.innerHTML = `${theCB.a} AU`;// semimajor axis
+  eCBDisplay.innerHTML = `${theCB.e}`;// orbital eccentricity
+  iDisplay.innerHTML = `${theCB.i}&deg;`;// orbital inclination
+  OmegaDisplay.innerHTML = `${theCB.Om}&deg;`;// longitude of ascending node
+  omegaDisplay.innerHTML = `${theCB.om}&deg;`;// longitude of perihelion
   omt.setPlanet(theCB.id);
 
   rp = Number(a*(1-e));
@@ -1868,7 +1871,7 @@ const setCentralBodyTransparency = function(transparency){
 }
 
 centralBodyTransparencySlider.onpointerup = function(){
-  setCentralBodyTransparency(this.value);//don't call this in oninput
+  setCentralBodyTransparency(this.value);// don't call this in oninput
   // because it is computationally intensive
   replaceAerovisualizerData('centralBodyTransparency',this.value);
   saveToLocalStorage();
@@ -2003,7 +2006,7 @@ const handlePeriapseCheck = function(){
 
 const handleInfoMenuChoice = function(choice){
   switch (choice){
-    case 'info-intro': //Introduction
+    case 'info-intro': // Introduction
       infoText.innerHTML = `<p class="p-normal">The purpose of Aerovisualizer is to 
       assist in teaching or reinforcing concepts in aerospace engineering by presenting 
       them in interesting and engaging ways.  Subjects are displayed as 2D and 3D 
@@ -2016,7 +2019,7 @@ const handleInfoMenuChoice = function(choice){
       topic.</p>`;
       break;
 
-    case 'info-how-to-use': //how to use aerovisualizer
+    case 'info-how-to-use': // how to use aerovisualizer
       infoText.innerHTML = `
       <p class="p-normal">1) Click <em>&mu;</em> to set the central body and its gravitational 
       parameter (&mu;).</p>
@@ -2356,8 +2359,6 @@ const initialize = function(data, camera){
   needToComputePVTArray = true;
   handlePlanetChange();
   eSlider.value = +eSl;
-  // aSl -= 1;//subtracting 1, not sure how it works, but it makes sure that
-  //the 'aSlider' gets set right, but should probably check that it is not -1
   aSlider.value = +aSl;
   doESliderOnInput(+eSl);
   doASliderOnInput(+aSl);
@@ -2389,8 +2390,8 @@ const initialize = function(data, camera){
 
   needToComputePVTArray = true;
   computePVTArray();
-  timeAfterPeriapseInSeconds = 0;//just added
-  timeAfterPeriapse = 0;//just added
+  timeAfterPeriapseInSeconds = 0;
+  timeAfterPeriapse = 0;
   setPVTArrayPointers();
   centralBodyTransparencySlider.value = centralBodyTransparency;
   setCentralBodyTransparency(centralBodyTransparency);
@@ -2398,8 +2399,8 @@ const initialize = function(data, camera){
 }
 
 const completeInitialization = function(continueAnimation = true) {
-  // the reason for this is that the OrbitalMechThings.js file contains
-  // the function _constructLabels() which contains a FontLoader 
+  // the reason for this function is that the OrbitalMechThings.js file 
+  // contains the function _constructLabels() which contains a FontLoader 
   // object called loader that creates code that runs asynchronously.
   // Once omt.constructionComplete is true, we can complete
   // our initialization
@@ -2420,11 +2421,6 @@ const completeInitialization = function(continueAnimation = true) {
 
     renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-
-    // defaultButton.style.display = 'none';
-    // generalPrefButton.style.display = 'none';
-    // infoElements.style.display = 'none';
-    // infoMenu.value = 'info-intro';
 
     handleInfoMenuChoice('info-intro');
     loadBackground();
@@ -2466,7 +2462,7 @@ const completeInitialization = function(continueAnimation = true) {
 };
 
 const doPlayPause = function(){
-  //icons came from tabler-icons.io
+  // icons came from tabler-icons.io
   playing = playing ? false : true;
 
   if (playing && needToComputePVTArray){
@@ -2502,8 +2498,6 @@ const haltPlay = function(){
     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
     <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" stroke-width="0" fill="currentColor"></path>
  </svg>`;
-    // sdo.realTime = 0;
-    // sdo.simulationTime = 0;
     clock.getDelta();
   }
 }
@@ -2600,7 +2594,7 @@ const animate = function(continueAnimation = true) {
     requestAnimationFrame(animate);
   }
   
-  orbitControls.update();//again, orbitControls have nothing to do with orbital mechanics
+  orbitControls.update();// orbitControls have nothing to do with orbital mechanics
 
   if (cpx !== camera.position.x && cpy !== camera.position.y && cpz !== camera.position.z){
     cpx = camera.position.x;
@@ -2618,10 +2612,10 @@ const animate = function(continueAnimation = true) {
     timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
     advancePVTArrayPointers();
 
-    //do the linear interpolation between computed points on the ellipse or
-    //hyperbola.  The conic sections are approximated as multi-sided
-    //polygons, and thus positions and velocities are affected by this.  To
-    //reduce the error, increase the pvtArraySize variable
+    // do the linear interpolation between computed points on the ellipse or
+    // hyperbola.  The conic sections are approximated as multi-sided
+    // polygons, and thus positions and velocities are affected by this.  To
+    // reduce the error, increase the pvtArraySize variable
     px = x0 + dpxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     py = y0 + dpydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
     vx = vx0 + dvxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);

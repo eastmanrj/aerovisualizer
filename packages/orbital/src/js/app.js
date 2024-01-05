@@ -241,9 +241,7 @@ let needToComputePVTArray = false;
 let period = tp;//period is the orbital period for elliptical orbits
 //in canonical units.  For hyperbolic trajectories, it is the time we
 //establish to go from one extreme to the other, also in canonical units
-let halfPeriod = period/2;
 let periodInSeconds = period*ctu;//this is 0 here because ctu is 0
-let halfPeriodInSeconds = halfPeriod*ctu;//also 0 here
 
 let inertialVectorsChoice = defaultInertialVectorsChoice;
 let orbitFixedVectorsChoice = defaultOrbitFixedVectorsChoice;
@@ -320,7 +318,8 @@ const zeroAopButton = document.getElementById('zero-aop-btn');
 const nuSlider = document.getElementById('nu-slider');
 const nuDisplay = document.getElementById('nu-display');
 const zeroNuButton = document.getElementById('zero-nu-btn');
-const timeAfterPeriapseDisplay = document.getElementById('tap-display');
+const timeAfterPeriapseDisplay1 = document.getElementById('tap-display1');
+const timeAfterPeriapseDisplay2 = document.getElementById('tap-display2');
 const timeScaleMenu = document.getElementById('time-scale-menu');
 const playPauseButton = document.getElementById('play-pause-btn');
 const resetButton = document.getElementById('reset-btn');
@@ -982,9 +981,7 @@ const doASliderOnInput = function(i){
   if (conicSectionIsEllipse){
     tp = twoPi*Math.pow(a,1.5)/muCanonical;//orbital period
     period = tp;
-    halfPeriod = period/2;
     periodInSeconds = period*ctu;
-    halfPeriodInSeconds = halfPeriod*ctu;
   }else{
     a = -a;
     tp = null;//orbital period is not defined for hyperbolic orbits
@@ -1012,9 +1009,7 @@ const doASliderOnInput = function(i){
     const M2 = e*Math.sinh(F2) - F2;
     const n = Math.sqrt(muCanonical/(-a*a*a));
     period = (M2 - M1)/n;
-    halfPeriod = period/2;
     periodInSeconds = period*ctu;
-    halfPeriodInSeconds = halfPeriod*ctu;
   }
 
   needToComputePVTArray = true;
@@ -1276,39 +1271,38 @@ const computeKeplerAndTimeAfterPeriapse = function(){
 }
 
 const doNuAndTimeDisplay = function(){
-  let hp = 0;
+  let ps = 0;
 
   if (meanAnomaly !== null){
-    if (trueAnomaly360){
-      hp = halfPeriodInSeconds;
-
-      if (nuDegrees < 0){
-        nuDisplay.innerHTML = `&nu;: ${Number(nuDegrees+360).toFixed(2).toString()}`;
-      }else{
-        nuDisplay.innerHTML = `&nu;: ${Number(nuDegrees).toFixed(2).toString()}`;
-      }
+    if (trueAnomaly360 && nuDegrees < 0){
+      ps = periodInSeconds;
+      nuDisplay.innerHTML = `&nu;: ${Number(nuDegrees+360).toFixed(2).toString()}`;
+      timeAfterPeriapseDisplay1.innerHTML = `t: ${Number(timeAfterPeriapse+period).toFixed(4).toString()} CTU`;
     }else{
       nuDisplay.innerHTML = `&nu;: ${Number(nuDegrees).toFixed(2).toString()}`;
+      timeAfterPeriapseDisplay1.innerHTML = `t: ${Number(timeAfterPeriapse).toFixed(4).toString()} CTU`;
     }
 
     switch (timeScaleMenuChoice){
       case 'sec-equals-1sec':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+hp)/displayTimeScale).toFixed(0).toString()} seconds`;
+        timeAfterPeriapseDisplay2.innerHTML = `${Number((timeAfterPeriapseInSeconds+ps)/displayTimeScale).toFixed(0).toString()} seconds`;
         break;
       case 'sec-equals-1minute':
       case 'sec-equals-5minutes':
       case 'sec-equals-15minutes':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+hp)/displayTimeScale).toFixed(1).toString()} minutes`;
+        timeAfterPeriapseDisplay2.innerHTML = `${Number((timeAfterPeriapseInSeconds+ps)/displayTimeScale).toFixed(1).toString()} minutes`;
         break;
       case 'sec-equals-1hour':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+hp)/displayTimeScale).toFixed(2).toString()} hours`;
+        timeAfterPeriapseDisplay2.innerHTML = `${Number((timeAfterPeriapseInSeconds+ps)/displayTimeScale).toFixed(2).toString()} hours`;
         break;
       case 'sec-equals-1day':
-        timeAfterPeriapseDisplay.innerHTML = `t: ${Number((timeAfterPeriapseInSeconds+hp)/displayTimeScale).toFixed(3).toString()} days`;
+        timeAfterPeriapseDisplay2.innerHTML = `${Number((timeAfterPeriapseInSeconds+ps)/displayTimeScale).toFixed(3).toString()} days`;
         break;
     }
   }else{
-    timeAfterPeriapseDisplay.innerHTML = 't: INFINITY';
+    nuDisplay.innerHTML = 'INFINITY';
+    timeAfterPeriapseDisplay1.innerHTML = 'INFINITY';
+    timeAfterPeriapseDisplay2.innerHTML = 'INFINITY';
   }
 }
 
@@ -1318,7 +1312,6 @@ const doNuSliderOnInput = function(value){
   nu = nuDegrees*piOver180;
   computeKeplerAndTimeAfterPeriapse();
   doNuAndTimeDisplay();
-  omt.rotatePlanet1(timeAfterPeriapseInSeconds, planetRotationPeriodSeconds);
   renderRandV();
   omt.refresh();
 }
@@ -1327,11 +1320,14 @@ nuSlider.oninput = function(){
   if (trueAnomaly360){
     if (Number(this.value) > 0){
       doNuSliderOnInput(Number(this.value)-180);
+      omt.rotatePlanet1(timeAfterPeriapseInSeconds+periodInSeconds, planetRotationPeriodSeconds);
     }else{
       doNuSliderOnInput(Number(this.value)+180);
+      omt.rotatePlanet1(timeAfterPeriapseInSeconds, planetRotationPeriodSeconds);
     }
   }else{
     doNuSliderOnInput(Number(this.value));
+    omt.rotatePlanet1(timeAfterPeriapseInSeconds, planetRotationPeriodSeconds);
   }
 }
 
@@ -1577,7 +1573,6 @@ const handlePlanetChange = function(){
   ctu = theCB.CTU;
   cdu = theCB.CDU;
   periodInSeconds = period*ctu;//do this again at initialization, period is not set yet there
-  halfPeriodInSeconds = halfPeriod*ctu;//do this again at initialization, halfPeriod is not set yet there
   planetRotationPeriodSeconds = 3600*theCB.srp;
   muDisplay.innerHTML = `${Number(+theCB.mu*1e6).toExponential(6).toString()} km&sup3;/s&sup2;`;//GM
   radiusDisplay.innerHTML = `${theCB.radius} km`;//radius
@@ -2089,15 +2084,15 @@ const handleInfoMenuChoice = function(choice){
       <p class="p-normal">time after periapse (t), orbital period (TP), true anomaly (&nu;), 
       eccentric anomaly (E), hyperbolic anomaly (F), mean anomaly (M), mean motion (n), 
       semi-major axis (a), orbital eccentricity (e), longitude of the ascending node 
-      (&Omega;), orbital inclination (i), argument of periapsis (&omega;), semi-latus 
-      rectum (P), specific angular momentum (h), specific energy (spfc en), orbital velocity (vel), 
+      (&Omega;), inclination (i), argument of periapsis (&omega;), semi-latus rectum (P), 
+      specific angular momentum (h), specific energy (spfc en), orbital velocity (vel), 
       velocity of circular satellite (vcs), escape velocity (vesc), the Q parameter (Q), 
       and characteristic energy (C3).
       </p>
       <p class="p-normal">Click <em>units</em> to switch between canonical and metric 
       units.  The time after periapse and orbital period are in the units of the chosen 
-      time scale.  Other time-related values such as h, spfc en, and the velocities are always 
-      based on seconds.  Angles are in degrees.</p>`;
+      time scale.  Other time-related values contain units of seconds.  Angles are in 
+      degrees.</p>`;
       break;
 
     case 'info-numerical-2-3':
@@ -2105,11 +2100,9 @@ const handleInfoMenuChoice = function(choice){
       option <em>2</em> to display the <em>r</em> and <em>v</em> vectors in the 
       IJK, PQW, and UVW coordinate frames.  The IJK frame is an inertial frame such as 
       the geocentric-equatorial frame or the heliocentric-ecliptic frame.  The 
-      PQW frame is the perifocal frame.  The UVW frame is described in sources such as 
-      "Fundamentals of Astrodynamics" by Bate, Mueller, and White.</p>
+      PQW frame is the perifocal frame.  The UVW frame is described in most sources.</p>
       <p class="p-normal">Click <em>units</em> to switch between canonical and metric 
-      units.</p>
-      <p class="p-normal">Choose display option <em>3</em> to display the direction 
+      units.  Choose display option <em>3</em> to display the direction 
       cosine matrices from the PQW frame to the IJK frame and from the UVW frame to 
       the PQW frame.</p>`;
       break;
@@ -2170,7 +2163,9 @@ const handleInfoMenuChoice = function(choice){
     case 'info-contact-disclaimer':
       infoText.innerHTML = `<p class="p-normal">Aerovisualizer is an open source 
       project.  To report bugs or suggestions or to contribute to its development, 
-      please contact us at github.com/eastmanrj/aerovisualizer.</p>
+      please contact us by going to github.com/eastmanrj/aerovisualizer and creating 
+      an "issue".  Alternatively, you can email us at eastmanrj@users.noreply.github.com.  
+      Please include the word "Aerovisualizer" in the subject.</p>
 
       <p class="p-normal">We do not take responsibility for missed problems on 
       quizes, tests, projects, or homework due to software bugs or the 
@@ -2367,7 +2362,6 @@ const initialize = function(data, camera){
   doESliderOnInput(+eSl);
   doASliderOnInput(+aSl);
   periodInSeconds = period*ctu;
-  halfPeriodInSeconds = halfPeriod*ctu;
   rp = Number(a*(1-e));
   ra = Number(a*(1+e));
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));

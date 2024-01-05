@@ -28,7 +28,7 @@ Aerovisualizer is written in Javascript. Even so, if you have some "back end" so
 - Know your code.  That is, know exactly what it is attempting to do.  No black boxes allowed!
 - If your SLOC (software lines of code) is large, please break it up into smaller independent parts to submit separately.
 - Comment your code thoroughly (but not excessively).  This is for everyone's benefit, including yours!
-- DON'T PLAGIARIZE. If someone else spent a lot of time and effort generating some tricky source code, please give them credit for it.  Small code snippets are fine.  DO NOT USE PROPRIETARY CODE.
+- DON'T PLAGIARIZE. People spend a lot of time and effort creating source code.  Please give them credit for it.  Small code snippets are fine.  DO NOT USE PROPRIETARY CODE.
 
 ### HTML / CSS / Javascript
 
@@ -36,11 +36,11 @@ If you know HTML, CSS, or Javascript and would like to contribute directly to ou
 
 - All of the previous guidelines still apply.
 - Code must be HTML, CSS, and Javascript only.
-- Use only "vanilla" Javascript (no frameworks like React, Vue, or Angular).  Including those only adds to bloat and creates something new people have to learn.
-- Avoid importing third party modules.  Again, this adds bloat and also dependencies.  Your code could also end up being rejected, which nobody wants.
+- Straight "vanilla" Javascript is preferred (no frameworks like React, Vue, or Angular).  If you really think that a Aerovisualizer would benefit from a framework and you know what your are doing, let us know. 
+- Avoid importing third party modules.  This adds bloat and also dependencies.
 - New code cannot break old code.
 - Follow the established style.
 - If your code requires 2D or 3D rendering, learn how to use the very popular [THREE.js](https://threejs.org) framework.  All 2D and 3D will use this.
 - Know how to use Git and GitHub.  Fork Aerovisualizer, clone it, checkout a new branch, make your changes, add and commit, push to your fork, and open a pull request.
- 
+
 If you do not currently program in HTML, CSS, and Javascript, [udemy.com](https://udemy.com) offers some great courses at reasonable prices. Jonas Schmedtmann is an excellent instructor. 

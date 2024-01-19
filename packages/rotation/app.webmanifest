@@ -1,0 +1,141 @@
+{
+  "name": "Aerovisualizer",
+  "short_name": "Aerovisual",
+  "icons" : [
+    {
+    "idiom" : "iphone",
+    "sizes" : "20x20",
+    "src" : "./static/img/icons/40.png",
+    "type": "image/png",
+    "scale" : "2x"
+    },
+    {
+    "idiom" : "iphone",
+    "sizes" : "20x20",
+    "src" : "./static/img/icons/60.png",
+    "type": "image/png",
+    "scale" : "3x"
+    },
+    {
+    "idiom" : "iphone",
+    "sizes" : "29x29",
+    "src" : "./static/img/icons/58.png",
+    "type": "image/png",
+    "scale" : "2x"
+    },
+    {
+    "idiom" : "iphone",
+    "sizes" : "29x29",
+    "src" : "./static/img/icons/87.png",
+    "type": "image/png",
+    "scale" : "3x"
+    },
+    {
+    "idiom" : "iphone",
+    "sizes" : "40x40",
+    "src" : "./static/img/icons/80.png",
+    "type": "image/png",
+    "scale" : "2x"
+    },
+    {
+    "idiom" : "iphone",
+    "sizes" : "40x40",
+    "src" : "./static/img/icons/120.png",
+    "type": "image/png",
+    "scale" : "3x"
+    },
+    {
+    "idiom" : "iphone",
+    "sizes" : "60x60",
+    "src" : "./static/img/icons/120.png",
+    "type": "image/png",
+    "scale" : "2x"
+    },
+    {
+    "idiom" : "iphone",
+    "sizes" : "60x60",
+    "src" : "./static/img/icons/180.png",
+    "type": "image/png",
+    "scale" : "3x"
+    },
+    {
+    "idiom" : "ipad",
+    "sizes" : "20x20",
+    "src" : "./static/img/icons/20.png",
+    "type": "image/png",
+    "scale" : "1x"
+    },
+    {
+    "idiom" : "ipad",
+    "sizes" : "20x20",
+    "src" : "./static/img/icons/40.png",
+    "type": "image/png",
+    "scale" : "2x"
+    },
+    {
+    "idiom" : "ipad",
+    "sizes" : "29x29",
+    "src" : "./static/img/icons/29.png",
+    "type": "image/png",
+    "scale" : "1x"
+    },
+    {
+    "idiom" : "ipad",
+    "sizes" : "29x29",
+    "src" : "./static/img/icons/58.png",
+    "type": "image/png",
+    "scale" : "2x"
+    },
+    {
+    "idiom" : "ipad",
+    "sizes" : "40x40",
+    "src" : "./static/img/icons/40.png",
+    "type": "image/png",
+    "scale" : "1x"
+    },
+    {
+    "idiom" : "ipad",
+    "sizes" : "40x40",
+    "src" : "./static/img/icons/80.png",
+    "type": "image/png",
+    "scale" : "2x"
+    },
+    {
+    "idiom" : "ipad",
+    "sizes" : "76x76",
+    "src" : "./static/img/icons/76.png",
+    "type": "image/png",
+    "scale" : "1x"
+    },
+    {
+    "idiom" : "ipad",
+    "sizes" : "76x76",
+    "src" : "./static/img/icons/152.png",
+    "type": "image/png",
+    "scale" : "2x"
+    },
+    {
+    "idiom" : "ipad",
+    "sizes" : "83.5x83.5",
+    "src" : "./static/img/icons/167.png",
+    "type": "image/png",
+    "scale" : "2x"
+    },
+    {
+    "idiom" : "ios-marketing",
+    "sizes" : "1024x1024",
+    "src" : "./static/img/icons/1024.png",
+    "type": "image/png",
+    "scale" : "1x"
+    }
+  ],
+  "start_url": "/index.html",
+  "scope":"/",
+  "display":"standalone",
+  "orientation":"any",
+  "background_color":"#ffffff",
+  "theme_color":"#5555ff",
+  "description":"Aerospace engineering on the go.",
+  "dir":"ltr",
+  "lang":"en-US"
+}

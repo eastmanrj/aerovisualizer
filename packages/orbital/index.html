@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="Aerovisualizer is a site for teaching concepts of aerospace engineering.">
+    <link rel="stylesheet" href="src/css/style.css">
+    <title>Aerovisualizer</title>
+    <link rel="manifest" href="app.webmanifest">
+    <script type="module" src="src/js/app.js"></script>
+
+    <!-- <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Aerovisualizer"> -->
+
+    <meta name="theme-color" content="#3f51b5">
+  </head>
+  <body>
+    <div class="container">
+      <div id="threeD-world"></div>
+      <div class="non-3D-world">
+        <div class="btn-group top-margin bottom-margin">
+          <button id="mu-btn" class="btn no-uppercase">&mu;</button>
+          <button id="a-e-btn" class="btn no-uppercase">a&nbsp;e</button>
+          <button id="orientation-btn" class="btn no-uppercase">&Omega;&nbsp;i&nbsp;&omega;</button>
+          <button id="nu-btn" class="btn no-uppercase">&nu;</button>
+          <button id="numerical-btn" class="btn no-uppercase">1&nbsp;2&nbsp;3</button>
+          <button id="main-return-btn" class="btn btn-with-icon" onclick="window.location.href='https://aerovisualizer.com'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" 
+            width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" 
+            stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M9 14l-4 -4l4 -4"></path>
+            <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
+            </svg>
+          </button>
+        </div>
+        <!-- <p class="span2 center-grid-item">Aerovisualizer - Orbital</p> -->
+        <div class="btn-group bottom-margin">
+          <button id="toggle-conic-btn" class="btn no-uppercase">ellipse&nbsp;/&nbsp;hyperbola</button>
+          <button id="preferences-btn" class="btn no-uppercase">preferences</button>
+          <button id="info-btn" class="btn center-grid-item">&nbsp;?&nbsp;</button>
+        </div>
+        <select id="time-scale-menu" class="menu span4 bottom-margin" name="time-scale-menu">
+          <option value="sec-equals-1sec">time scale:&nbsp;1&nbsp;second&nbsp;=&nbsp;1&nbsp;second</option>
+          <option value="sec-equals-1minute">time scale:&nbsp;1&nbsp;second&nbsp;=&nbsp;1&nbsp;minute</option>
+          <option value="sec-equals-5minutes">time scale:&nbsp;1&nbsp;second&nbsp;=&nbsp;5&nbsp;minutes</option>
+          <option value="sec-equals-15minutes">time scale:&nbsp;1&nbsp;second&nbsp;=&nbsp;15&nbsp;minutes</option>
+          <option value="sec-equals-1hour">time scale:&nbsp;1&nbsp;second&nbsp;=&nbsp;1&nbsp;hour</option>
+          <option value="sec-equals-1day">time scale:&nbsp;1&nbsp;second&nbsp;=&nbsp;1&nbsp;day</option>
+        </select>
+        <div class="elements mu-elements" id="central-body-elements">
+          <p class="span4 bottom-margin">Central Body: </p>
+          <select id="central-body-menu" class="menu span4 bottom-margin" name="central-body-menu">
+            <option value="sun1">sun (CDU = sun's radius)</option>
+            <option value="sun2">sun (CDU = 1 AU)</option>
+            <option value="Mercury">Mercury</option>
+            <option value="Venus">Venus</option>
+            <option value="Earth">Earth</option>
+            <option value="moon">moon</option>
+            <option value="Mars">Mars</option>
+            <option value="Jupiter">Jupiter</option>
+            <option value="Saturn">Saturn</option>
+            <option value="Uranus">Uranus</option>
+            <option value="Neptune">Neptune</option>
+          </select>
+          <p>&mu;</p><span id="mu">0</span>
+          <p>radius</p><span id="radius">0</span>
+          <p>v esc</p><span id="vesc">0</span>
+          <p>a</p><span id="a">0</span>
+          <p>e</p><span id="e">0</span>
+          <p>i</p><span id="i">0</span>
+          <p>&Omega;</p><span id="Omega">0</span>
+          <p>&omega;</p><span id="omega">0</span>
+        </div>
+        <div class="elements" id="a-e-elements">
+          <p class="center-grid-item"><span id="a-display">a: 1</span></p>
+          <input class="slider span3" type="range" min="0" max="149" value="0" id="a-slider">
+          <p class="center-grid-item"><span id="e-display">e: 0</span></p>
+          <input class="slider span3" type="range" min="0" max="149" value="0" id="e-slider">
+          <p id="periapse-warning" class="span4 center-grid-item warning">warning message</p>
+        </div>
+        <div class="elements" id="orientation-elements">
+          <p class="center-grid-item">&Omega;: <span id="lan-display">0</span>&deg;</p>
+          <input class="slider span2" type="range" min="-180" max="180" value="0" id="lan-slider">
+          <button id="zero-lan-btn" class="btn center-grid-item">zero</button>
+          <p class="center-grid-item">i: <span id="inc-display">0</span>&deg;</p>
+          <input class="slider span2" type="range" min="-180" max="180" value="0" id="inc-slider">
+          <button id="zero-inc-btn" class="btn center-grid-item">zero</button>
+          <p class="center-grid-item">&omega;: <span id="aop-display">0</span>&deg;</p>
+          <input class="slider span2" type="range" min="-180" max="180" value="0" id="aop-slider">
+          <button id="zero-aop-btn" class="btn center-grid-item">zero</button>
+        </div>
+        <div class="elements" id="nu-elements">
+          <input class="slider span3" type="range" min="-180" max="180" value="0" id="nu-slider">
+          <button id="zero-nu-btn" class="btn center-grid-item">zero</button>
+          <p class="span1 center-grid-item"><span id="nu-display">0</span>&deg;</p>
+          <p class="span1 center-grid-item"><span id="tap-display1">0</span></p>
+          <p class="span2 center-grid-item"><span id="tap-display2">0</span></p>
+        </div>
+        <div class="elements numerical" id="numerical-elements1">
+          <p id="units-display1" class="span4 center-grid-item">Aerovisualizer - Orbital Mech.</p>
+          <button id="cycle-numerical-btn1" class="btn large-font no-uppercase center-grid-item">1</button>
+          <button id="toggle-units-btn1" class="btn large-font no-uppercase center-grid-item">units</button>
+          <pre><span>t</span></pre><pre><span id="num-t">0</span></pre>
+          <pre class="left-border"><span>a</span></pre><pre><span id="num-a">0</span></pre>
+          <pre class="left-border"><span>h</span></pre><pre><span id="num-h">0</span></pre>
+          <pre><span>TP</span></pre><pre><span id="num-period">0.000</span></pre>
+          <pre class="left-border"><span>e</span></pre><pre><span id="num-e">0</span></pre>
+          <pre class="left-border"><span>spfc en</span></pre><pre><span id="num-sp-energy">0</span></pre>
+          <pre><span>nu</span></pre><pre><span id="num-nu">0</span></pre>
+          <pre class="left-border"><span>&Omega;</span></pre><pre><span id="num-Om">0</span></pre>
+          <pre class="left-border"><span>vel</span></pre><pre><span id="num-v">0.000</span></pre>
+          <pre><span>E</span></pre><pre><span id="num-E">0.000</span></pre>
+          <pre class="left-border"><span>i</span></pre><pre><span id="num-i">0</span></pre>
+          <pre class="left-border"><span>vcs</span></pre><pre><span id="num-vcs">0.000</span></pre>
+          <pre><span>F</span></pre><pre><span id="num-F">0.000</span></pre>
+          <pre class="left-border"><span>&omega;</span></pre><pre><span id="num-om">0</span></pre>
+          <pre class="left-border"><span>Q</span></pre><pre><span id="num-Q">0.000</span></pre>
+          <pre><span>M</span></pre><pre><span id="num-M">0.000</span></pre>
+          <pre class="left-border"><span>P</span></pre><pre><span id="num-p">0.000</span></pre>
+          <pre class="left-border"><span>vesc</span></pre><pre><span id="num-vesc">0.000</span></pre>
+          <pre><span>n</span></pre><pre><span id="num-n">0.000</span></pre>
+          <pre class="left-border"><span>&nbsp;</span></pre>
+          <pre><span>&nbsp;</span></pre>
+          <pre class="left-border"><span>C3</span></pre>
+          <pre><span id="num-c3">0.000</span></pre>
+        </div>
+        <div class="elements numerical" id="numerical-elements2">
+          <p id="units-display2" class="span4 center-grid-item">Aerovisualizer - Orbital Mech.</p>
+          <button id="cycle-numerical-btn2" class="btn large-font no-uppercase center-grid-item">2</button>
+          <button id="toggle-units-btn2" class="btn large-font no-uppercase center-grid-item">units</button>
+          <p class="align-right">IJK</p><p class="align-right">PQW</p><p class="align-right">UVW</p>
+          <p class="align-right left-border">IJK</p><p class="align-right">PQW</p><p class="align-right">UVW</p>
+          <p class="top-border span3">r vector</p>
+          <p class="top-border left-border span3">v vector</p>
+          <pre><span id="num-ri">0</span></pre>
+          <pre><span id="num-rp">0</span></pre>
+          <pre><span id="num-ru">0</span></pre>
+          <pre class="left-border"><span id="num-vi">0</span></pre>
+          <pre><span id="num-vp">0</span></pre>
+          <pre><span id="num-vu">0</span></pre>
+          <pre><span id="num-rj">0</span></pre>
+          <pre><span id="num-rq">0</span></pre>
+          <pre><span id="num-rv">0</span></pre>
+          <pre class="left-border"><span id="num-vj">0</span></pre>
+          <pre><span id="num-vq">0</span></pre>
+          <pre><span id="num-vv">0</span></pre>
+          <pre><span id="num-rk">0</span></pre>
+          <pre><span>0</span></pre>
+          <pre><span>0</span></pre>
+          <pre class="left-border"><span id="num-vk">0</span></pre>
+          <pre><span>0</span></pre>
+          <pre><span>0</span></pre>
+        </div>
+        <div class="elements numerical" id="numerical-elements3">
+          <p class="span4 center-grid-item">Aerovisualizer - Orbital Mech.</p>
+          <button id="cycle-numerical-btn3" class="btn large-font no-uppercase center-grid-item">3</button>
+          <p></p>
+          <p class="span3 top-border">DCM PQW->IJK</p>
+          <p class="span3 top-border left-border">DCM UVW->PQW</p><!-- matrix inverse is displayed -->
+          <pre><span id="dcm11-pqw-to-ijk">0</span></pre>
+          <pre><span id="dcm12-pqw-to-ijk">0</span></pre><pre><span id="dcm13-pqw-to-ijk">0</span></pre>
+          <pre class="left-border"><span id="dcm11-pqw-to-uvw">0</span></pre>
+          <pre><span id="dcm21-pqw-to-uvw">0</span></pre><pre><span id="dcm31-pqw-to-uvw">0</span></pre>
+          <pre><span id="dcm21-pqw-to-ijk">0</span></pre>
+          <pre><span id="dcm22-pqw-to-ijk">0</span></pre><pre><span id="dcm23-pqw-to-ijk">0</span></pre>
+          <pre class="left-border"><span id="dcm12-pqw-to-uvw">0</span></pre>
+          <pre><span id="dcm22-pqw-to-uvw">0</span></pre><pre><span id="dcm32-pqw-to-uvw">0</span></pre>
+          <pre><span id="dcm31-pqw-to-ijk">0</span></pre>
+          <pre><span id="dcm32-pqw-to-ijk">0</span></pre><pre><span id="dcm33-pqw-to-ijk">0</span></pre>
+          <pre class="left-border"><span id="dcm13-pqw-to-uvw">0</span></pre>
+          <pre><span id="dcm23-pqw-to-uvw">0</span></pre><pre><span id="dcm33-pqw-to-uvw">0</span></pre>
+        </div>
+        <div class="btn-group btn-group-fixed" id="play-reset-buttons-elements">
+          <button id="reset-btn" class="btn btn-with-icon">
+            <!-- <i class="material-icons">skip_previous</i> -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-skip-back-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M19.496 4.136l-12 7a1 1 0 0 0 0 1.728l12 7a1 1 0 0 0 1.504 -.864v-14a1 1 0 0 0 -1.504 -.864z" stroke-width="0" fill="currentColor"></path>
+              <path d="M4 4a1 1 0 0 1 .993 .883l.007 .117v14a1 1 0 0 1 -1.993 .117l-.007 -.117v-14a1 1 0 0 1 1 -1z" stroke-width="0" fill="currentColor"></path>
+            </svg>
+          </button>
+          <button id="play-pause-btn" class="btn btn-with-icon">
+            <!-- <i class="material-icons">play_arrow</i> -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" stroke-width="0" fill="currentColor"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="elements" id="prefs-elements">
+          <select id="main-prefs-menu" class="menu span4" name="main-prefs-menu">
+            <option value="general-preferences">general preferences</option>
+            <option value="inertial-vectors">inertial vectors</option>
+            <option value="orbit-fixed-vectors">orbit-fixed vectors</option>
+            <option value="orbiting-body-vectors">orbiting body vectors</option>
+          </select>
+        </div>
+        <div class="elements" id="general-prefs-elements">
+          <p class="span4">&nbsp;</p>
+          <p class="grid-item center-grid-item span3">central body transparency</p>
+          <p></p>
+          <input class="grid-item slider span3" type="range" min="0" max="100" value="100" id="central-body-transparency-slider">
+          <button id="default-reset-btn" class="btn center-grid-item">default settings</button>
+          <p class="span4">&nbsp;</p>
+          <div class="grid-item span4 checkbox center-grid-item">
+            <input type="checkbox" id="show-out-of-plane" name="show-out-of-plane-checkbox" value="yes">
+            <label for="show-out-of-plane">show out of plane (W) vectors</label>
+            <input type="checkbox" id="true-anomaly-option" name="true-anomaly-option-checkbox" value="yes">
+            <label for="true-anomaly-option">true anomaly 0&deg; to 360&deg;</label>
+          </div>
+        </div>
+        <div class="elements" id="inertial-vectors-elements">
+          <p class="span4">&nbsp;</p>
+          <p class="grid-item center-grid-item span2">vector choice:</p>
+          <p class="grid-item center-grid-item span2">vector color:</p>
+          <select id="inertial-vectors-menu" class="grid-item menu span2" name="inertial-vectors-menu">
+            <option value="i-j-k">i j k vectors</option>
+            <option value="no-inertial-vectors">no vectors</option>
+          </select>
+          <select id="inertial-vector-color-menu" class="grid-item menu span2" name="inertial-vector-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+          <p class="span4">&nbsp;</p>
+          <p class="grid-item center-grid-item span4">vector scale:</p>
+          <input class="grid-item slider span4" type="range" min="0" max="100" value="50" id="inertial-vector-scale-slider">
+        </div>
+        <div class="elements" id="orbit-fixed-vectors-elements">
+          <p class="span4">&nbsp;</p>
+          <p class="center-grid-item span2">vector choice:</p>
+          <p class="center-grid-item span2">vector color:</p>
+          <select id="orbit-fixed-vectors-menu" class="menu span2" name="orbit-fixed-vectors-menu">
+            <option value="h-and-e">both h and e</option>
+            <option value="h-only">h only</option>
+            <option value="e-only">e only</option>
+            <option value="p-q-w">perifocal frame</option>
+            <option value="no-orbit-fixed-vectors">no vectors</option>
+          </select>
+          <select id="orbit-fixed-vector-color-menu" class="menu span2" name="orbit-fixed-vector-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+          <p class="span4">&nbsp;</p>
+          <p class="center-grid-item span4">vector scale:</p>
+          <input class="slider span4" type="range" min="0" max="100" value="50" id="orbit-fixed-vector-scale-slider">
+        </div>
+        <div class="elements" id="orbiting-body-vectors-elements">
+          <p class="span4">&nbsp;</p>
+          <p class="center-grid-item">vector choice:</p>
+          <select id="orbiting-body-vectors-menu" class="menu" name="orbiting-body-vectors-menu">
+            <option value="r-only">r only</option>
+            <option value="v-only">v only</option>
+            <option value="uvw-only">UVW frame only</option>
+            <option value="r-and-v">r and v</option>
+            <option value="r-and-uvw">r and UVW frame</option>
+            <option value="v-and-uvw">v and UVW frame</option>
+            <option value="r-v-and-uvw">r, v, and UVW frame</option>
+            <option value="no-orbiting-body-vectors">no vectors</option>
+          </select>
+          <p class="center-grid-item">UVW color:</p>
+          <select id="uvw-vector-color-menu" class="menu" name="uvw-vector-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+          <p class="span4">&nbsp;</p>
+          <p class="center-grid-item">r color:</p>
+          <select id="r-vector-color-menu" class="menu" name="r-vector-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+          <p class="center-grid-item">v color:</p>
+          <select id="v-vector-color-menu" class="menu" name="v-vector-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+          <p class="span4">&nbsp;</p>
+          <p class="center-grid-item span4">vector scale:</p>
+          <input class="slider span4" type="range" min="0" max="100" value="50" id="orbiting-body-vector-scale-slider">
+        </div>
+        <div class="elements" id="info-elements">
+          <select id="info-menu" class="menu span4" name="info-menu">
+            <option value="info-intro">introduction</option>
+            <option value="info-how-to-use">how to use aerovisualizer - orbital mechanics</option>
+            <option value="info-mu">gravitational parameter &mu;</option>
+            <option value="info-a-and-e">orbital elements a & e</option>
+            <option value="info-Omega-i-omega">orbital elements &Omega;, i & &omega;</option>
+            <option value="info-nu">true anomaly &nu;</option>
+            <option value="info-numerical-1">numerical display 1</option>
+            <option value="info-numerical-2-3">numerical display 2 & 3</option>
+            <option value="info-ellipse-hyperbola">ellipse / hyperbola</option>
+            <option value="info-time-scale">time scale</option>
+            <option value="info-prefs-main">preferences</option>
+            <option value="info-prefs-general">preferences - general</option>
+            <option value="info-prefs-inertial-vectors">preferences - inertial vectors</option>
+            <option value="info-prefs-orbit-fixed-vectors">preferences - orbit-fixed vectors</option>
+            <option value="info-prefs-orbiting-body-vectors">preferences - orbiting body vectors</option>
+            <option value="info-contact-disclaimer">contact, disclaimer</option>
+          </select>
+          <p class="center-grid-item span4">&nbsp;</p>
+          <p id="info-text" class="p-normal span4">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Maiores, alias rerum quis reiciendis voluptas, autem harum sint vel eos ex neque odit est incidunt ratione tempore quam dolore cum quos laborum numquam! Amet est nisi vel omnis, doloribus obcaecati soluta nesciunt, rerum unde doloremque sunt! Officiis nobis eum officia sit?</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

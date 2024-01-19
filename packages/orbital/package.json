@@ -1,0 +1,14 @@
+{
+  "name": "@aerovisualizer/orbital",
+  "version": "1.0.0",
+  "description": "Aerovisualizer orbital mechanics",
+  "source": "index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build",
+    "startorbit": "export PORT=4321 && npm run start"
+  },
+  "keywords": [],
+  "author": "R Eastman",
+  "license": "ISC"
+}

@@ -1,0 +1,519 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-family: montserrat, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  background-color: #000;
+}
+
+.container {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1rem;
+  flex-direction: column;
+  cursor: pointer;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  justify-content:space-between;
+  touch-action: manipulation;
+}
+
+#threeD-world {
+  display: block;
+  top: 0;
+  left: 0;
+  /* width: 100vw; testing */
+  height: 100vw; /* testing keep */
+  pointer-events: all;
+  touch-action: none;
+  background-color: aqua;
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+
+.non-3D-world{
+  pointer-events: all;
+  background-color: #000;
+}
+
+p, span, select {
+  text-align: center;
+  width: 100%;
+  color: white;
+  /* padding: 0.5rem;
+  padding-bottom: 0.1rem; */
+}
+
+em {
+  font-weight: bold;
+}
+
+.p-normal {
+  display: block;
+  text-align:left;
+  font-family: inherit;
+  font-weight:100;
+  font-size: 1.7rem;
+  margin-bottom: 1rem;
+}
+
+li {
+  margin-bottom: 1rem;
+}
+
+label {
+  display: inline;
+  padding: 0.8rem;
+  padding-right: 2.5rem;
+  background: #000;
+  font-size: 1.8rem;
+  font-weight: 300;
+  cursor: pointer;
+  color: white;
+}
+
+.btn-group{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  column-gap: 1.15rem;
+}
+
+/* .btn-group > *{
+  flex: 1;
+} */
+
+.btn-group-fixed{
+  position: absolute;
+  right: 0%;
+  bottom: 3.5%;
+  width: 100%;
+}
+
+/* .btn-group-fixed{
+  position: absolute;
+  right: 0%;
+  bottom: 3%;
+  width: 100%;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 0;
+} */
+
+.menu {
+  display: block;
+  background-color: #5555ff;
+  color: rgb(235, 235, 255);
+  font-family: inherit;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border-width: 2px;
+  border-radius: 0.7rem;
+  border-color:orange;
+  cursor: pointer;
+  /* text-transform: uppercase; */
+  padding: 0.6rem 0.6rem;
+}
+
+.btn,
+.btn:link,
+.btn:visited {
+  display: block;
+  background-color: #5555ff;
+  color: rgb(225, 225, 255);
+  font-family: inherit;
+  font-weight: 600;
+  border-width: 2px;
+  border-radius: 0.7rem;
+  border-color:orange;
+  cursor: pointer;
+  /* text-transform: uppercase; */
+  padding: 0.5rem 0.7rem;
+  flex: 1 1 auto;
+  touch-action:manipulation;
+  margin-bottom: 0.5rem;
+}
+
+.btn:disabled,
+.btn[disabled],
+.btn.disabled:hover,
+.btn.disabled:active {
+  color:orange;
+  border-color:orange;
+}
+
+.btn-with-icon {
+  font-size: 0.5rem;
+  padding: 0.15rem 0.15rem;
+}
+
+.no-uppercase{
+  text-transform: none;
+}
+
+.slider {
+  width: 100%;
+ }
+
+.span2{
+  grid-column: span 2;
+  text-align: center;
+  justify-self: center;
+}
+
+.span3{
+  grid-column: span 3;
+  text-align: center;
+  justify-self: center;
+}
+
+.span4{
+  grid-column: span 4;
+  text-align: center;
+  justify-self: center;
+}
+
+.span6{
+  grid-column: span 6;
+  text-align: center;
+  justify-self: center;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.span8{
+  grid-column: span 8;
+  text-align: center;
+  justify-self: center;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.special-span{
+  grid-column: span 3;
+  text-align: center;
+  justify-self: center;
+}
+
+.grid-item{
+  margin: 1rem;
+  height: auto;
+}
+
+.center-grid-item{
+  justify-self: center;
+  align-self: center;
+}
+
+.right-grid-item{
+  justify-self: right;
+  align-self: center;
+}
+
+.top-margin{
+  margin-top: 0.25rem;
+}
+
+.bottom-margin{
+  margin-bottom: 0.9rem;
+}
+
+.left-border{
+  border-left: 1px solid #fff;
+}
+
+.top-border{
+  border-top: 1px solid #fff;
+}
+
+input[type="radio"] {
+  border: 0px;
+  height: 2rem;
+  width: 2rem;
+  /* transform: scale(2);
+  -webkit-transform: scale(2); */
+}
+
+input[type="checkbox"] {
+  border: 0px;
+  height: 2rem;
+  width: 2rem;
+  /* transform: scale(2); */
+}
+
+/********** Range Input Styles **********/
+/*Range Reset*/
+input[type="range"] {
+  -webkit-appearance: none;
+   appearance: none;
+   background: transparent;
+   cursor: pointer;
+   margin-top: 1.4rem;
+   margin-bottom: 1.4rem;
+}
+
+/* Removes default focus */
+input[type="range"]:focus {
+ outline: none;
+}
+
+/***** Chrome, Safari, Opera and Edge Chromium styles *****/
+/* slider track */
+input[type="range"]::-webkit-slider-runnable-track {
+  background-color: #5555ff;
+  border-radius: 0.5rem;
+  height: 0.5rem; /*testing*/
+  margin-bottom: 1.5rem;
+}
+
+/* slider thumb */
+input[type="range"]::-webkit-slider-thumb {
+ -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  margin-top: -10px; /* Centers thumb on the track */
+
+  /*custom styles*/
+  background-color: #5555ff;
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 50%;
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {   
+ border: 1px solid #053a5f;
+ outline: 3px solid #053a5f;
+ outline-offset: 0.125rem; 
+}
+
+.elements-group{
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.elements{
+  flex: 1 0 100%;
+  display: grid;
+  grid-template-columns: 2fr 3fr 3fr 2fr;
+  align-content: space-around;
+  /* align-items: stretch; */
+  padding-left: 1.5%;
+  padding-right: 1.5%;
+  padding-top: 1.5%;
+  row-gap: 1.5%;
+  column-gap: 5%;
+  touch-action: none;
+}
+
+.mu-elements{
+  grid-template-columns: 1fr 3fr 1fr 3fr;
+}
+
+.radio-elements{
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr ;
+}
+
+.large-font{
+  font-size:1.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.warning{
+  font-size:2.5rem;
+  color:red;
+}
+
+.numerical{
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  text-align: right;
+  font-family: monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.align-right{
+  text-align: right;
+}
+
+.grid-item{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content:center;
+  /* justify-content:flex-start; */
+  flex-wrap: nowrap;
+  /* padding-top: 1.5rem; */
+  margin: 0;
+}
+
+.grid-item-stretch{
+  justify-self: stretch;
+}
+
+.grid-item-start{
+  justify-self: start;
+}
+
+.grid-item-end{
+  justify-self: end;
+}
+
+/*******************************
+ * Device Orientation Landscape
+ *******************************/
+@media (orientation: landscape) {
+  #threeDWorld-world {
+    width: 100vh; /* testing keep*/
+    height: 100vh; /* testing keep*/
+  }
+  .container {
+    flex-direction: row;
+  }
+
+  .non-3D-world{
+    width: calc(100vw - 100vh);
+    height: 100%;/* testing not sure*/
+  }
+}
+
+/***************************************
+ * Device Orientation Portrait, iPhones
+ ***************************************/
+ @media (orientation: portrait) and (max-width: 450px) {
+  #threeD-world {
+    /* flex-basis: 80vh; */
+    width: 85vw;
+    height: 85vw;
+    align-self: center;
+  }
+
+  .non-3D-world{
+    width: 100%;/* test*/
+    height: calc(100vh - 85vw);/* test*/
+  }
+
+  .elements{
+    padding-top: 0.25%;
+    /* height: 15rem;test */
+  }
+
+  .numerical{
+    font-size: small;
+  }
+
+  .btn-group-fixed{
+    bottom: 1.5%;
+  }
+
+  .bottom-margin{
+    margin-bottom: 0.6rem;
+  }
+
+  .p-normal {
+    font-size: 1.15rem;
+    margin-bottom: 0.15rem;
+  }
+}
+
+/****************************************
+ * Device Orientation Landscape, iPhones
+ ****************************************/
+@media (orientation: landscape) and (max-width: 950px) {
+  .special-span{
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  }
+
+  #threeD-world {
+    width: 65vh;
+    height: 65vh;
+  }
+
+  .non-3D-world{
+    width: 100%;
+    /* width: calc(100vw - 60vh); */
+    height: 100%;/* testing not sure*/
+  }
+
+  label {
+    padding: 0.4rem;
+    padding-right: 0.5rem;
+  }
+
+  .container {
+    justify-content: start;
+    align-items:start;
+  }
+
+  .p-normal {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .elements{
+    padding-top: 1%;
+  }
+
+  .numerical{
+    font-size: small;
+  }
+
+  .bottom-margin{
+    margin-bottom: 0.4rem;
+  }
+}
+
+/************************************
+* Device Orientation Portrait, iPads
+*************************************/
+@media (orientation: portrait) and (min-width: 451px) {
+  #threeD-world {
+    /* flex-basis: 80vw; */
+    width: 70vw;
+    height: 70vw;
+    align-self: center;
+  }
+}
+
+/**************************************
+* Device Orientation Landscape, iPads
+**************************************/
+@media (orientation: landscape) and (min-width: 951px) {
+  #threeD-world {
+    /* flex-basis: 80vh; */
+    width: 80vh;
+    height: 80vh;
+  }
+
+  .non-3D-world{
+    width: 100%;
+    /* width: calc(100vw - 80vh); */
+    height: 100%;/* testing not sure*/
+  }
+}
+
+/**************************************
+* Desktops
+**************************************/
+@media (min-width: 1200px) {
+
+}
+
+/**************************
+ * Device Orientation     *
+(min-width:320px) smartphones, iPhone, portrait 480x320 phones
+(min-width:481px)  portrait e-readers, smaller tablets @ 600 or @ 640 wide.
+(min-width:641px)  portrait tablets, portrait iPad, landscape 800x480 or 854x480 phones
+(min-width:961px)  tablet, landscape iPad, lo-res laptops and desktops
+(min-width:1025px) big landscape tablets, laptops, and desktops
+(min-width:1281px) hi-res laptops and desktops
+ **************************/
+

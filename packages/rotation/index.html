@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="Aerovisualizer is a site for teaching concepts in aerospace engineering.">
+    <link rel="stylesheet" href="src/css/style.css">
+    <title>Aerovisualizer</title>
+    <link rel="manifest" href="app.webmanifest">
+    <script type="module" src="src/js/app.js"></script>
+
+    <!-- <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Aerovisualizer"> -->
+
+    <meta name="theme-color" content="#3f51b5">
+
+    <!-- Register the app's service worker. -->
+    <!-- <script type="module">
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register(new URL('sw.js', import.meta.url),{type: 'module', scope: '/'}).then(
+          (registration) => {
+            console.log("Service worker registration successful:", registration);
+          },
+          (error) => {
+            console.error(`Service worker registration failed: ${error}`);
+          },
+        );
+      } else {
+        console.error("Service workers are not supported.");
+      }
+    </script> -->
+  </head>
+  <body>
+    <div class="container">
+      <div id="sixDOF-world"></div>
+      <div class="non-sixDOF-world">
+        <div class="btn-group bottom-margin">
+          <button id="mass-prop-btn" class="btn no-uppercase">mass</button>
+          <button id="attitude-btn" class="btn no-uppercase">&psi;&nbsp;&theta;&nbsp;&phi;</button>
+          <button id="rotation-btn" class="btn no-uppercase">&omega;&nbsp;/&nbsp;H</button>
+          <button id="torque-btn" class="btn no-uppercase">&tau;</button>
+          <button id="numerical-btn" class="btn no-uppercase">1&nbsp;2&nbsp;3</button>
+          <button id="preferences-btn" class="btn no-uppercase">pref</button>
+          <button id="info-btn" class="btn">&nbsp;?&nbsp;</button>
+          <button id="main-return-btn" class="btn btn-with-icon" onclick="window.location.href='https://aerovisualizer.com'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" 
+            width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" 
+            stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M9 14l-4 -4l4 -4"></path>
+            <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
+          </svg>
+          <button id="default-btn" class="btn">default</button>
+          <button id="general-btn" class="btn">general</button>
+          <button id="object-btn" class="btn">object</button>
+          <button id="body-frame-btn" class="btn">body frame</button>
+          <button id="space-frame-btn" class="btn">space frame</button>
+          <button id="omega-btn" class="btn">angular velocity vector</button>
+          <button id="h-btn" class="btn">angular momentum vector</button>
+          <button id="torque-prefs-btn" class="btn">torque vector</button>
+          <button id="axis-orientation-btn" class="btn">axis orientation</button>
+          <button id="euler-angle-order-btn" class="btn">Euler angle order</button>
+          <button id="cones-btn" class="btn">space and body cones</button>
+          <button id="poinsot-btn" class="btn">Poinsot's construction</button>
+          <button id="prefs-return-btn" class="btn btn-with-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M9 14l-4 -4l4 -4"></path>
+            <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="elements" id="default-elements">
+          <label class="center-grid-item span3">reset to defaults?</label>
+          <label class="span3">&nbsp;</label>
+          <button id="default-do-reset-btn" class="btn span3 center-grid-item">yes</button>
+        </div>
+        <div class="elements radio-elements" id="axis-orientation-elements">
+          <div class="grid-item special-span">
+            <input type="radio" id="x-up" name="orientation-radio" value="X Up" class="radio">
+            <label for="x-up">x up</label>
+          </div>
+          <div class="grid-item special-span">
+            <input type="radio" id="x-down" name="orientation-radio" value="X Down" class="radio">
+            <label for="x-down">x down</label>
+          </div>
+          <div class="grid-item special-span">
+            <input type="radio" id="y-up" name="orientation-radio" value="Y Up" checked class="radio">
+            <label for="y-up">y up</label>
+          </div>
+          <div class="grid-item special-span">
+            <input type="radio" id="y-down" name="orientation-radio" value="Y Down" class="radio">
+            <label for="y-down">y down</label>
+          </div>
+          <div class="grid-item special-span">
+            <input type="radio" id="z-up" name="orientation-radio" value="Z Up" class="radio">
+            <label for="z-up">z up</label>
+          </div>
+          <div class="grid-item special-span">
+            <input type="radio" id="z-down" name="orientation-radio" value="Z Down" class="radio">
+            <label for="z-down">z down</label>
+          </div>
+        </div>
+        <div class="elements radio-elements" id="euler-angle-order-elements">
+          <div class="grid-item special-span">
+            <input type="radio" id="xyz" name="euler-order-radio" value="XYZ" checked class="radio">
+            <label for="xyz">XYZ</label>
+          </div>
+          <div class="grid-item special-span">
+            <input type="radio" id="xzy" name="euler-order-radio" value="XZY" class="radio">
+            <label for="xzy">XZY</label>
+          </div>
+          <div class="grid-item special-span">
+            <input type="radio" id="yxz" name="euler-order-radio" value="YXZ" class="radio">
+            <label for="yxz">YXZ</label>
+          </div>
+          <div class="grid-item special-span">
+            <input type="radio" id="yzx" name="euler-order-radio" value="YZX" class="radio">
+            <label for="yzx">YZX</label>
+          </div>
+          <div class="grid-item special-span">
+            <input type="radio" id="zxy" name="euler-order-radio" value="ZXY" class="radio">
+            <label for="zxy">ZXY</label>
+          </div>
+          <div class="grid-item special-span">
+            <input type="radio" id="zyx" name="euler-order-radio" value="ZYX" class="radio">
+            <label for="zyx">ZYX</label>
+          </div>
+        </div>
+        <div class="elements" id="info-elements">
+          <select id="info-menu" class="menu span3" name="info-menu">
+            <option value="info-intro">introduction</option>
+            <option value="info-how-to-use">how to use aerovisualizer</option>
+            <option value="info-mass-prop">mass properties</option>
+            <option value="info-attitude">Euler angles & quaternions</option>
+            <option value="info-angular-rates">angular velocity & momentum</option>
+            <option value="info-cones">space and body cones</option>
+            <option value="info-poinsot">Poinsot's construction</option>
+            <option value="info-torque-general">torque</option>
+            <option value="info-torque-no-torque">torque - no torque</option>
+            <option value="info-torque-space-body">torque - space and body frames</option>
+            <option value="info-torque-acs">torque - ACS stabilization</option>
+            <option value="info-torque-gg">torque - gravity gradient</option>
+            <option value="info-torque-top">torque - spinning top</option>
+            <option value="info-numerical">numerical display</option>
+            <option value="info-prefs-main">preferences</option>
+            <option value="info-prefs-default">preferences - default</option>
+            <option value="info-prefs-general">preferences - general</option>
+            <option value="info-prefs-trans-offset-color">preferences - transparency, offset, color</option>
+            <option value="info-prefs-axis-orientation">preferences - axis orientation</option>
+            <option value="info-prefs-euler-angle-order">preferences - Euler angle order</option>
+            <option value="info-units">units</option>
+            <option value="info-contact-disclaimer">contact, disclaimer</option>
+          </select>
+          <p class="center-grid-item span3">&nbsp;</p>
+          <p id="info-text" class="p-normal span3">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Maiores, alias rerum quis reiciendis voluptas, autem harum sint vel eos ex neque odit est incidunt ratione tempore quam dolore cum quos laborum numquam! Amet est nisi vel omnis, doloribus obcaecati soluta nesciunt, rerum unde doloremque sunt! Officiis nobis eum officia sit?</p>
+          <p class="center-grid-item span3">&nbsp;</p>
+          <p class="center-grid-item">&nbsp;</p>
+          <div class="btn-group">
+            <button id="info-return-btn" class="btn btn-with-icon center-grid-item"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M9 14l-4 -4l4 -4"></path>
+              <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
+           </svg></button>
+          </div>
+          <p class="center-grid-item">&nbsp;</p>
+        </div>
+        <div class="elements" id="general-elements">
+          <select id="object-appearance-choice-menu" class="menu span3" name="object-appearance-choice-menu">
+            <option value="axis-labels">skin: axis labels</option>
+            <option value="cessna-172">skin: Cessna 172 (set x=9,y=7,z=4)</option>
+            <option value="new-horizons">skin: New Horizons (set x=9,y=4,z=6)</option>
+          </select>
+          <select id="preset-mass-properties-menu" class="menu span3" name="preset-mass-properties-menu">
+            <option value="select-an-object">inertia matrix: user</option>
+            <option value="cessna-172">inertia matrix: Cessna 172</option>
+            <option value="new-horizons">inertia matrix: New Horizons</option>
+          </select>
+          <!-- Cessna dimensions (x:9 y:7 z:4)
+          New Horizons dimensions (x:9 y:4 z:6) -->
+          <p class="center-grid-item span3">environment:</p>
+          <div class="grid-item">
+            <input type="radio" id="environment-atmosphere" name="environment-radio" value="atmosphere">
+            <label for="environment-atmosphere">atmosphere</label>
+          </div>
+          <div class="grid-item span2">
+            <input type="radio" id="environment-space" name="environment-radio" value="space">
+            <label for="environment-space">space</label>
+          </div>
+          <p class="center-grid-item">max &vert;&omega;&vert; (&deg;/sec): <span id="max-omega-display">0</span></p>
+          <input class="slider span2" type="range" min="100" max="1000" value="0" id="max-omega">
+          <p class="center-grid-item">vector size: </p>
+          <input class="slider span2" type="range" min="2" max="10" value="5" id="vector-size">
+        </div>
+        <div class="elements" id="object-elements">
+          <p class="center-grid-item">transparency:&nbsp;<span id="transparency-block-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-block">
+          <div class="grid-item span3 checkbox center-grid-item">
+            <input type="checkbox" id="offset-object" name="offset-object-checkbox" value="no">
+            <label for="offset-object">offset</label>
+          </div>
+        </div>
+        <div class="elements" id="body-frame-elements">
+          <p class="center-grid-item">transparency:&nbsp;<span id="transparency-body-frame-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-body-frame">
+          <div class="grid-item checkbox center-grid-item">
+            <input type="checkbox" id="offset-body-frame" name="offset-body-frame-checkbox" value="no">
+            <label for="offset-body-frame">offset</label>
+          </div>
+          <label class="right-grid-item">color:</label>
+          <select id="body-frame-color-menu" class="menu" name="body-frame-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+          <div class="grid-item span3 center-grid-item">
+            <label>Show Vector</label>
+          </div>
+          <div class="grid-item checkbox center-grid-item">
+            <input type="checkbox" id="body-x" name="show-body-x-checkbox" value="no">
+            <label for="body-x">X</label>
+          </div>
+          <div class="grid-item checkbox center-grid-item">
+            <input type="checkbox" id="body-y" name="show-body-y-checkbox" value="no">
+            <label for="body-y">Y</label>
+          </div>
+          <div class="grid-item checkbox center-grid-item">
+            <input type="checkbox" id="body-z" name="show-body-z-checkbox" value="no">
+            <label for="body-z">Z</label>
+          </div>
+        </div>
+        <div class="elements" id="space-frame-elements">
+          <p class="center-grid-item">transparency:&nbsp;<span id="transparency-space-frame-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-space-frame">
+          <div class="grid-item checkbox center-grid-item">
+            <input type="checkbox" id="offset-space-frame" name="offset-space-frame-checkbox" value="no">
+            <label for="offset-space-frame">offset</label>
+          </div>
+          <label class="right-grid-item">color:</label>
+          <select id="space-frame-color-menu" class="menu" name="space-frame-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+        </div>
+        <div class="elements" id="omega-elements">
+          <p class="center-grid-item">transparency:&nbsp;<span id="transparency-omega-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-omega">
+          <div class="grid-item checkbox center-grid-item">
+            <input type="checkbox" id="offset-omega" name="offset-omega-checkbox" value="no">
+            <label for="offset-omega">offset</label>
+          </div>
+          <label class="right-grid-item">color:</label>
+          <select id="omega-color-menu" class="menu" name="omega-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+        </div>
+        <div class="elements" id="h-elements">
+          <p class="center-grid-item">transparency:&nbsp;<span id="transparency-h-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-h">
+          <div class="grid-item checkbox center-grid-item">
+            <input type="checkbox" id="offset-h" name="offset-h-checkbox" value="no">
+            <label for="offset-h">offset</label>
+          </div>
+          <label class="right-grid-item">color:</label>
+          <select id="h-color-menu" class="menu" name="h-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+        </div>
+        <div class="elements" id="torque-elements">
+          <p class="center-grid-item">transparency:&nbsp;<span id="transparency-torque-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-torque">
+          <div class="grid-item checkbox center-grid-item">
+            <input type="checkbox" id="offset-torque" name="offset-torque-checkbox" value="no">
+            <label for="offset-torque">offset</label>
+          </div>
+          <label class="right-grid-item">color:</label>
+          <select id="torque-color-menu" class="menu" name="torque-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+        </div>
+        <div class="elements" id="cones-elements">
+          <p class="center-grid-item">transparency:&nbsp;<span id="transparency-cones-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-cones">
+          <div class="grid-item checkbox span3 center-grid-item">
+            <input type="checkbox" id="offset-cones" name="offset-cones-checkbox" value="no">
+            <label for="offset-cones">offset</label>
+          </div>
+          <label class="span2 center-grid-item">Body Cone color:</label>
+          <select id="body-cone-color-menu" class="menu" name="body-cone-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+          <label class="span2 center-grid-item">Space Cone color:</label>
+          <select id="space-cone-color-menu" class="menu" name="space-cone-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+        </div>
+        <div class="elements" id="poinsot-elements">
+          <p class="center-grid-item">transparency:&nbsp;<span id="transparency-poinsot-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-poinsot">
+          <div class="grid-item checkbox span3 center-grid-item">
+            <input type="checkbox" id="offset-poinsot" name="offset-poinsot-checkbox" value="no">
+            <label for="offset-poinsot">offset</label>
+          </div>
+          <label class="span2 center-grid-item">Ellipsoid color:</label>
+          <select id="inertia-ellipsoid-color-menu" class="menu" name="inertia-ellipsoid-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+          <label class="span2 center-grid-item">Plane color:</label>
+          <select id="invariable-plane-color-menu" class="menu" name="invariable-plane-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+        </div>
+        <div class="elements-group">
+          <div class="elements numerical" id="numerical-elements-general">
+            <p class="span2 top-border">moi</p><p class="span2 top-border left-border">&omega;</p>
+            <p class="span2 top-border left-border">H</p><p class="span2 top-border left-border">&tau;</p>
+            <p>Ixx</p><pre><span id="ixx-number"></span></pre>
+            <p class="left-border">P</p><pre><span id="omega-P-number"></span></pre>
+            <p class="left-border">Hx</p><pre><span id="hx-number"></span></pre>
+            <p class="left-border">L</p><pre><span id="tau-L-number">0</span></pre>
+            <p>Iyy</p><pre><span id="iyy-number"></span></pre>
+            <p class="left-border">Q</p><pre><span id="omega-Q-number"></span></pre>
+            <p class="left-border">Hy</p><pre><span id="hy-number"></span></pre>
+            <p class="left-border">M</p><pre><span id="tau-M-number">0</span></pre>
+            <p>Izz</p><pre><span id="izz-number"></span></pre>
+            <p class="left-border">R</p><pre><span id="omega-R-number"></span></pre>
+            <p class="left-border">Hz</p><pre><span id="hz-number"></span></pre>
+            <p class="left-border">N</p><pre><span id="tau-N-number">0</span></pre>
+            <p class="span4 top-border">DCM body->space</p>
+            <p class="span4 top-border left-border">quat</p>
+            <pre class="span4"><span id="dcm11-number"></span><span id="dcm12-number"></span><span id="dcm13-number"></span></pre><p class="left-border">x</p><pre><span id="quatX-number">0</span></pre><p>z</p><pre><span id="quatZ-number">0</span></pre>
+            <pre class="span4"><span id="dcm21-number"></span><span id="dcm22-number"></span><span id="dcm23-number"></span></pre><p class="left-border">y</p><pre><span id="quatY-number">0</span></pre><p>w</p><pre><span id="quatW-number">0</span></pre>
+            <pre class="span4"><span id="dcm31-number"></span><span id="dcm32-number"></span><span id="dcm33-number"></span></pre><p class="span3 left-border top-border">KE</p><pre><span class="top-border " id="kinetic-energy-number">0</span></pre>
+          </div>
+          <div class="elements" id="attitude-euler-elements">
+            <button id="attitude-input-btn1" class="btn span2 grid-item-stretch bottom-margin">Euler / quat</button>
+            <p class="center-grid-item">Euler</p>
+            <p class="center-grid-item">&psi;: <span id="euler1-display">0</span>&deg;</p>
+            <input class="slider" type="range" min="-180" max="179" value="0" id="euler1-slider">
+            <button id="zero-euler1-btn" class="btn center-grid-item">zero</button>
+            <p class="center-grid-item">&theta;: <span id="euler2-display">0</span>&deg;</p>
+            <input class="slider" type="range" min="-90" max="90" value="0" id="euler2-slider">
+            <button id="zero-euler2-btn" class="btn center-grid-item">zero</button>
+            <p class="center-grid-item">&phi;: <span id="euler3-display">0</span>&deg;</p>
+            <input class="slider" type="range" min="-180" max="179" value="0" id="euler3-slider">
+            <button id="zero-euler3-btn" class="btn center-grid-item">zero</button>
+          </div>
+          <div class="elements" id="attitude-quaternion-elements">
+            <button id="attitude-input-btn2" class="btn span2 grid-item-stretch bottom-margin">Euler / quat</button>
+            <p class="center-grid-item">quat</p>
+            <p class="center-grid-item">&theta;: <span id="quat-angle-display">0</span>&deg;</p>
+            <input class="slider" type="range" min="-180" max="179" value="0" id="quat-angle">
+            <button id="zero-quat-angle-btn" class="btn center-grid-item">zero</button>
+            <p class="center-grid-item">i&#770;: <span id="quat-ihat-display">0</span></p>
+            <input class="slider" type="range" min="-100" max="100" value="100" id="quat-ihat-slider">
+            <button id="zero-quatX-btn" class="btn center-grid-item">zero</button>
+            <p class="center-grid-item">j&#770;: <span id="quat-jhat-display">0</span></p>
+            <input class="slider" type="range" min="-100" max="100" value="100" id="quat-jhat-slider">
+            <button id="zero-quatY-btn" class="btn center-grid-item">zero</button>
+            <p class="center-grid-item">k&#770;: <span id="quat-khat-display">0</span></p>
+            <input class="slider" type="range" min="-100" max="100" value="100" id="quat-khat-slider">
+            <button id="zero-quatZ-btn" class="btn center-grid-item">zero</button>
+            <p class="span3 top-margin">w: <span id="quatW-display">0</span> x: <span id="quatX-display">0</span> y: <span id="quatY-display">0</span> z: <span id="quatZ-display">0</span></p>
+          </div>
+          <div class="elements" id="mass-prop-elements">
+            <p class="center-grid-item">mass: <span id="mass-display">0</span></p>
+            <input class="slider span2" type="range" min="0" max="9" value="0" id="mass-slider" oninput="mass.innerText = this.value">
+            <p class="center-grid-item">X-dim: <span id="dimX-display">0</span></p>
+            <input class="slider span2" type="range" min="0" max="10" value="6" id="dimX-slider" oninput="dimX.innerText = this.value">
+            <p class="center-grid-item">Y-dim: <span id="dimY-display">0</span></p>
+            <input class="slider span2" type="range" min="0" max="10" value="6" id="dimY-slider" oninput="dimY.innerText = this.value">
+            <p class="center-grid-item">Z-dim: <span id="dimZ-display">0</span></p>
+            <input class="slider span2" type="range" min="0" max="10" value="4" id="dimZ-slider" oninput="dimZ.innerText = this.value">
+            <p class="span3 top-margin">Ixx: <span id="ixx-display">0</span> Iyy: <span id="iyy-display">0</span> Izz: <span id="izz-display">0</span></p>        
+          </div>
+          <div class="elements" id="rotation-elements">
+            <div class="grid-item grid-item-end">
+              <input type="radio" id="omega-or-H-omega" name="omega-or-H-radio" value="omega" class="radio">
+              <label for="omega-or-H-omega">&omega;</label>
+            </div>
+            <p class="center-grid-item">&vert;&omega;&vert;: <span id="omegaMag-display">0</span>&nbsp;&nbsp;&nbsp;&vert;H&vert;: <span id="hMag-display">0</span></p>
+            <div class="grid-item grid-item-start">
+              <input type="radio" id="omega-or-H-H" name="omega-or-H-radio" value="H" class="radio">
+              <label for="omega-or-H-H">H</label>
+            </div>
+            <input class="slider span3" type="range" min="0" max="100" value="20" id="omegaMag">
+            <p class="center-grid-item">i&#770;: <span id="omega-ihat-display">0</span></p>
+            <input class="slider" type="range" min="-100" max="100" value="100" id="omegaIhat">
+            <button id="zero-omegax-btn" class="btn center-grid-item">zero</button>
+            <p class="center-grid-item">j&#770;: <span id="omega-jhat-display">0</span></p>
+            <input class="slider" type="range" min="-100" max="100" value="100" id="omegaJhat">
+            <button id="zero-omegay-btn" class="btn center-grid-item">zero</button>
+            <p class="center-grid-item">k&#770;: <span id="omega-khat-display">0</span></p>
+            <input class="slider" type="range" min="-100" max="100" value="100" id="omegaKhat">
+            <button id="zero-omegaz-btn" class="btn center-grid-item">zero</button>
+            <p class="span3 top-margin">P: <span id="omegaP-display">0</span> Q: <span id="omegaQ-display">0</span> R: <span id="omegaR-display">0</span></p>
+          </div>
+          <div class="elements" id="torque-option-elements">
+            <select id="torque-option-menu" class="menu span3" name="torque-option-menu">
+              <option value="no-torque">no torque</option>
+              <option value="space-frame">space frame torque</option>
+              <option value="body-frame">body frame torque</option>
+              <option value="ACS-stabilization">ACS stabilization torque</option>
+              <option value="gravity-gradient">gravity gradient torque</option>
+              <option value="top">spinning top torque</option>
+            </select>
+          </div>
+          <div class="elements" id="torque-frame-elements">
+            <p class="center-grid-item">&vert;&tau;&vert;: <span id="torqueMag-display">0</span></p>
+            <input class="slider span2" type="range" min="0" max="50" value="10" id="torqueMag">
+            <p class="center-grid-item">i&#770;: <span id="torqueIhat-display">0</span></p>
+            <input class="slider" type="range" min="-100" max="100" value="100" id="torqueIhat">
+            <button id="zero-torqueIhat-btn" class="btn center-grid-item">zero</button>
+            <p class="center-grid-item">j&#770;: <span id="torqueJhat-display">0</span></p>
+            <input class="slider" type="range" min="-100" max="100" value="0" id="torqueJhat">
+            <button id="zero-torqueJhat-btn" class="btn center-grid-item">zero</button>
+            <p class="center-grid-item">k&#770;: <span id="torqueKhat-display">0</span></p>
+            <input class="slider" type="range" min="-100" max="100" value="0" id="torqueKhat">
+            <button id="zero-torqueKhat-btn" class="btn center-grid-item">zero</button>
+          </div>
+          <div class="elements" id="acs-elements">
+            <p>&omega;&nbsp;dead zone: <span id="acs-omega-dead-zone">0</span></p>
+            <input class="slider span2" type="range" min="1" max="100" value="10" id="acs-omega-dead-zone-slider">
+            <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+            <p>Torque: <span id="acs-torque-magnitude">0</span></p>
+            <input class="slider span2" type="range" min="0" max="100" value="10" id="acs-torque-magnitude-slider">
+          </div>
+          <div class="elements" id="torque-gg-elements">
+            <p class="span3">&mu;&nbsp;/&nbsp;R&sup3;&nbsp;=&nbsp;<span id="torque-muOverR3-display">0</span></p>
+            <input class="slider span3" type="range" min="0" max="7" value="5" id="torque-muOverR3">
+          </div>
+          <div class="elements" id="torque-top-elements">
+            <p>r: <span id="torque-top-rdistance-display">0</span></p>
+            <input class="slider span2" type="range" min="-10" max="10" value="1" id="torque-top-rdistance">
+            <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+            <p>g: <span id="torque-top-gravity-display">0</span></p>
+            <input class="slider span2" type="range" min="0" max="5" value="1" id="torque-top-gravity">
+          </div>
+        </div>
+        <div class="btn-group btn-group-fixed">
+          <button id="reset-btn" class="btn btn-with-icon">
+            <!-- <i class="material-icons">skip_previous</i> -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-skip-back-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M19.496 4.136l-12 7a1 1 0 0 0 0 1.728l12 7a1 1 0 0 0 1.504 -.864v-14a1 1 0 0 0 -1.504 -.864z" stroke-width="0" fill="currentColor"></path>
+              <path d="M4 4a1 1 0 0 1 .993 .883l.007 .117v14a1 1 0 0 1 -1.993 .117l-.007 -.117v-14a1 1 0 0 1 1 -1z" stroke-width="0" fill="currentColor"></path>
+           </svg>
+          </button>
+          <button id="play-pause-btn" class="btn btn-with-icon">
+            <!-- <i class="material-icons">play_arrow</i> -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play-filled" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" stroke-width="0" fill="currentColor"></path>
+           </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

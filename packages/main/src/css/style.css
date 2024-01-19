@@ -1,0 +1,168 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-family: montserrat, sans-serif;
+  background-color: #000;
+  width:100vw;
+  height:100vh;
+}
+
+h1 {
+  display: block;
+  font-family: inherit;
+  font-size: 3rem;
+  font-weight: 800;
+  color: rgb(225, 225, 255);
+  text-align:center;
+}
+
+h3 {
+  display: block;
+  font-family: inherit;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: rgb(225, 225, 255);
+  text-align:center;
+}
+
+p {
+  display: block;
+  font-family: inherit;
+  font-size: 2rem;
+  font-weight: 300;
+  color: rgb(225, 225, 255);
+  text-align: left;
+  /* align-self: auto;
+  justify-self: auto; */
+  margin-left:2rem;
+  margin-right:2rem;
+  margin-top:0;
+  margin-bottom:3rem;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  flex: 0 1 20%;
+}
+
+.container {
+  width:100%;
+  height:100%;
+  margin:5%;
+  cursor: pointer;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  pointer-events: all;
+  touch-action:manipulation;
+}
+
+.grid {
+  display: grid;
+  row-gap: 5%;
+  grid-auto-flow: column;
+  grid-auto-columns: 100px;
+  grid-template-rows: 5rem 5rem 9rem 9rem 9rem;
+  /* grid-template-rows: repeat(auto-fit, minmax(9rem, 1fr)); */
+  justify-items: center;
+  justify-content: center;
+}
+
+.complete-row-grid-item {
+  grid-column-start: 1;
+}
+
+.flex {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content:flex-start;
+  flex-wrap: nowrap;
+  margin: 0;
+}
+
+.btn{
+  display: block;
+  background-color:blue;
+  color: rgb(225, 225, 255);
+  font-family: inherit;
+  font-size: 2rem;
+  font-weight: 800;
+  border-width: 4px;
+  border-radius: 3rem;
+  border-color:orange;
+  cursor: pointer;
+  padding: 0.5rem 2rem;
+  touch-action:manipulation;
+}
+
+@media (orientation: landscape) {
+  p {
+    font-size: 1.5rem;
+    margin-left:0;
+    margin-right:1rem;
+    margin-top:1rem;
+    margin-bottom:1rem;
+  }
+
+  .grid {
+    column-gap: 5%;
+    grid-auto-flow: row;
+    grid-auto-rows: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr ;
+  }
+  
+  .complete-row-grid-item {
+    grid-column-start: 1;
+    grid-column-end: span 3;
+  }
+
+  .flex {
+    flex-direction: row;
+  }
+}
+
+/***************************************
+ * Device Orientation Portrait, iPhones
+ ***************************************/
+ @media (orientation: portrait) and (max-width: 400px) {
+  p {
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-left:2rem;
+    margin-right:2rem;
+    margin-top:0;
+    margin-bottom:3rem;
+    flex: 0 1 15%;
+  }
+  
+  .container {
+    margin:2%;
+  }
+}
+
+/****************************************
+ * Device Orientation Landscape, iPhones
+ ****************************************/
+@media (orientation: landscape) and (min-width: 400px) {  
+  p {
+    font-size: 1rem;
+    font-weight: 300;
+    margin-left:1rem;
+    margin-right:1rem;
+    margin-top:0;
+    margin-bottom:3rem;
+    flex: 0 1 15%;
+  }
+  
+  .container {
+    margin:5%;
+  }
+}

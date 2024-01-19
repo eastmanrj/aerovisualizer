@@ -1,0 +1,14 @@
+{
+  "name": "@aerovisualizer/main",
+  "version": "1.0.0",
+  "description": "Aerovisualizer main",
+  "source": "index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build",
+    "startmain": "export PORT=4025 && npm run start"
+  },
+  "keywords": [],
+  "author": "R Eastman",
+  "license": "ISC"
+}

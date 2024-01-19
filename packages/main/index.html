@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="Aerovisualizer is a site for teaching concepts of aerospace engineering.">
+    <link rel="stylesheet" href="src/css/style.css">
+    <title>Aerovisualizer</title>
+    <link rel="manifest" href="app.webmanifest">
+    <script type="module" src="src/js/main.js"></script>
+    <meta name="theme-color" content="#3f51b5">
+  </head>
+  <body>
+    <div id="btn-elements" class="container">
+      <div class="grid">
+        <h1 class="complete-row-grid-item">Aerovisualizer</h1>
+        <h3 class="complete-row-grid-item">v0.0.152 beta</h3>
+        <button class="btn" onclick="window.location.href='https://rotation.aerovisualizer.com'">
+          Rotational Dynamics
+        </button>  
+        <button class="btn" onclick="window.location.href='https://orbital.aerovisualizer.com'">
+          Orbital Mechanics
+        </button>
+        <button id="info-btn" class="btn">
+          &nbsp;?&nbsp;
+        </button>
+      </div>
+    </div>
+    <div id="info-elements" class="container">
+      <div class="flex">
+        <p>
+          Aerovisualizer was made for students and teachers of aerospace engineering.  Its purpose is to reinforce concepts by presenting them in interesting and engaging ways and to complement the dry equations found in textbooks and online.
+        </p>
+        <p>
+          Currently, Aerovisualizer requires a browser and an internet connection.  Add it to your mobile device's home screen for easy use.  Download the free source code at
+          <a href="https://github.com/eastmanrj/aerovisualizer">github.com/eastmanrj/aerovisualizer</a>.  If you like Aerovisualizer, please give it a star!
+        </p>
+        <p>
+          Send bug reports or suggestions to eastmanrj@users.noreply.github.com.  Please include "Aerovisualizer" in the subject.
+        </p>
+        <button id="info-return-btn" class="btn btn-with-icon center-grid-item">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M9 14l-4 -4l4 -4"></path>
+            <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  </body>
+</html>

@@ -4,6 +4,21 @@ import Vectors from './Vectors.js';
 import PoinsotAndCones from './PoinsotAndCones.js';
 import {OrbitControls} from './OrbitControls.js';
 
+/**
+The purpose of Aerovisualizer is to assist in the teaching and 
+reinforcement of concepts in aerospace engineering by presenting 
+them in interesting and engaging ways.  3D animations are displayed 
+to complement the dry equations found in textbooks and online, and 
+controls are also provided to manipulate the displays.
+
+One of the concepts is rotational dynamics, and this file contains the 
+main code for it.
+
+ Revision History
+ Date    Name                  Description
+ 1/19/24 R. Eastman            v0.1 beta
+*/
+
 let scene, camera, renderer;
 let background = null;
 let jupiter = null;

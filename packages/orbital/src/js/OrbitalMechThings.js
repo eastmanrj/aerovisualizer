@@ -15,8 +15,8 @@ import {TextGeometry} from './TextGeometry.js';
  the way C and other languages do, so "private" variables are actually public.
 
  Revision History
- Date   Name                  Description
- 1/6/24 R. Eastman            v0.0.144 beta
+ Date    Name                  Description
+ 1/19/24 R. Eastman            v0.1 beta
 **/
 
 const piOver180 = Math.PI / 180;
@@ -677,7 +677,6 @@ class OrbitalMechThings {
     if (tSeconds < this._previousTime){
       this._numApoapsePasses += 1;
     }
-console.log('omt t/period: ',tSeconds/rotationPeriodSeconds);
 
     this._previousTime = tSeconds;
     this._planetQuat1.setFromAxisAngle(this._zunit,
@@ -875,8 +874,8 @@ console.log('omt t/period: ',tSeconds/rotationPeriodSeconds);
     // IMPORTANT: The FontLoader.load function generates a Javascript promise
     // which results in asynchronous code execution.  The variable
     // constructionComplete is initialized to false but is set to true once
-    // the asynchronous code is complete.  Until then, do not allow the 
-    // refresh function and most other things to execute.
+    // the asynchronous code is complete.  Until then, do not allow 
+    // most other things to execute.
 
     THREE.Cache.enabled = true;
     let font = undefined;
@@ -1255,8 +1254,9 @@ console.log('omt t/period: ',tSeconds/rotationPeriodSeconds);
     texture = new THREE.TextureLoader().load(sun.pathname);
     material = new THREE.MeshPhongMaterial({map: texture});
     this._planetMeshArray[0] = new THREE.Mesh(geometry, material);
-    //sun twice, once for CDU = sun radius, once for CDU = 1 AU,
-    //although for the second one the sun is actually too small to see
+    // sun twice, once for CDU = sun radius, once for CDU = 1 AU,
+    // although for the second one the sun is actually too small to see,
+    // we render it anyway
     this._planetMeshArray[1] = this._planetMeshArray[0];
     texture = new THREE.TextureLoader().load(mercury.pathname);
     material = new THREE.MeshPhongMaterial({map: texture});

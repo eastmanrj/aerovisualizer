@@ -44,3 +44,21 @@ If you know HTML, CSS, or Javascript and would like to contribute directly to ou
 - Know how to use Git and GitHub.  Fork Aerovisualizer, clone it, checkout a new branch, make your changes, add and commit, push to your fork, and open a pull request.
 
 If you do not currently program in HTML, CSS, and Javascript, [udemy.com](https://udemy.com) offers some great courses at reasonable prices. Jonas Schmedtmann is an excellent instructor. 
+
+### Dependencies
+
+Aerovisualizer is designed to have a minimal number of code dependencies.  If you clone the repository, you must install the dependencies for it to work.  First make sure you have Node Package Manager (npm) installed on your computer.  Check this by typing the following at the command line:
+
+npm list -g -depth 0
+
+If npm is not listed, install it from nodejs.org.  Then, on the command line, cd into the top level of the clone file.  Type the following:
+
+npm install --save three
+
+Then, create a local server by going into one of the packages and run one of the scripts located in the package.json file there.  For example, packages/orbital contains a package.json file with the script, startorbit.  You would create a local server by typing the following at the command line:
+
+npm run startorbit
+
+Then go to your browser and type "localhost:xxxx", where xxxx is given to you.
+
+

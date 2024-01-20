@@ -9,7 +9,8 @@ them in interesting and engaging ways.  3D animations are displayed
 to complement the dry equations found in textbooks and online, and 
 controls are also provided to manipulate the displays.
 
-This file ...
+One of the concepts is orbital mechanics, and this file contains the 
+main code for it.
 
  References
 
@@ -17,8 +18,8 @@ This file ...
  Dover Publications (Bate)
 
  Revision History
- Date   Name                  Description
- 1/6/24 R. Eastman            v0.0.144 beta
+ Date    Name                  Description
+ 1/19/24 R. Eastman            v0.1 beta
 */
 
 const piOver180 = Math.PI/180;
@@ -52,12 +53,12 @@ const defaultConicSection = 'ellipse';
 // to a highly inclined geosynchronous orbit from 160 km above
 // Cape Canaveral
 const defaultA = 20;// index of aArray corresponding to a = 3.822
-const defaultE = 100;// index of aArray corresponding to e = 0.7318
+const defaultE = 100;// index of eArray corresponding to e = 0.7318
 const defaultLan = 0;// degrees
 const defaultInclination = -28;// degrees
 const defaultAop = -81;// degrees
 
-const defaultDelta = Math.PI/2;// 90 degrees for "square" hyperbola
+const defaultDelta = Math.PI/2;// 90 degrees for a unit hyperbola
 
 const defaultInertialVectorsChoice = 'no-inertial-vectors';
 const defaultOrbitFixedVectorsChoice = 'h-and-e';
@@ -221,13 +222,12 @@ let trajArray = [];// array of objects containing the position,
 // orbiting body is computed by interpolating between adjacent 
 // elements
 const trajArraySize = 181;
-  // trajArraySize is the size of trajArray. 361 seems to be a good
+  // trajArraySize is the size of trajArray. 181 seems to be a good
   // enough size.  Try to use the smallest number that you can 
   // get away with due to computer memory issues. The ellipses and 
   // hyperbolas are approximated as polyhedrons with the number of 
   // sides equal to trajArraySize MINUS 1.  Lower numbers cause the 
-  // animation to appear segmented around periapse and the numbers 
-  // to be less accurate
+  // animation to appear segmented and the numbers to be less accurate
 let iTraj0;// this is the index of trajArray that corresponds to 
 // before timeAfterPeriapseInSeconds during animation
 let iTraj1 = iTraj0;// this is the index of trajArray that corresponds to 
@@ -259,7 +259,7 @@ let needToComputeTrajArray = false;
 let period = tp;// period is the orbital period for elliptical orbits
 // in canonical units.  For hyperbolic trajectories, it is the time we
 // establish to go from one extreme to the other, also in canonical units
-let periodInSeconds = period*ctu;// this is 0 here because ctu is 0
+let periodInSeconds = period*ctu;// this is 0 here because ctu is currently 0
 
 let inertialVectorsChoice = defaultInertialVectorsChoice;
 let orbitFixedVectorsChoice = defaultOrbitFixedVectorsChoice;
@@ -503,7 +503,7 @@ Trev = Revolution period (days) 27.3217
 incEcl = Inclination to ecliptic (deg) 5.145
 
 according to https://archive.aoe.vt.edu/lutze/AOE2104/consts.pdf
-for Earth:
+for Earth orbit:
 JGM-2
 CTU=13.44684985511 min
 CDU/CTU = 7.905366149846 km/s
@@ -970,7 +970,7 @@ const computeDelta = function(){
 }
 
 const doTwoSunOptionChoice = function(){
-  // 'sun1' is the sun with its radius as the canonical distance unit.
+  // 'sun1' uses the sun's radius as the canonical distance unit (CDU).
   // 'sun2' uses 1 AU as the CDU, and we need to scale the size of the  
   // sun additionally by a factor of the ratio of 1 AU to the radius of  
   // the sun (ratio=214.9...).  sun2 is needed to allow the 'a' slider 
@@ -1304,7 +1304,6 @@ const doNu = function(value, precise = false){
   haltPlay();
 
   if (!trajArray){
-    console.log('TRAJARRAY NOT VALID!!!')
     return;
   }
 
@@ -1333,8 +1332,7 @@ const doNu = function(value, precise = false){
   }
 
   syncTrajState();
-//blah
-  console.log('timeAfterPeriapseInSeconds: ',timeAfterPeriapseInSeconds);
+
   if (trueAnomaly360){
     if (value > 0){
       omt.rotatePlanet1(timeAfterPeriapseInSeconds+periodInSeconds, planetRotationPeriodInSeconds);
@@ -1353,9 +1351,6 @@ const doNu = function(value, precise = false){
 nuSlider.oninput = function(){
   doNu(Number(this.value));
 }
-
-// nuSlider.onpointerup = function(){
-// }
 
 zeroNuButton.addEventListener('click', () => {
   nuDegrees = 0;
@@ -1432,10 +1427,8 @@ const computeTrajArray = function(){
   // orbital period (tp) equals twoPi canonical time units (TU or CTU)
   // which equals 'period'.  For a hyperbolic flyby, 'period'
   // equals the time span computed in doASliderOnInput()
-
-  // let t = -period/2;
-
   let t;
+
   let E;
   let E1;
   let F;
@@ -1547,10 +1540,6 @@ const computeTrajArray = function(){
     trajPoint.gdot = 1 - x*x*c/r;
     
     trajArray.push(trajPoint);
-
-    // t is incremented uniformly.  An alternative to this might be to 
-    // have more data points around periapse, where nu changes the fastest
-    // t += period/(trajArraySize+1);
     // console.log(f*trajPoint.gdot - g*trajPoint.fdot); // this should be near 1
   }
   
@@ -1559,159 +1548,6 @@ const computeTrajArray = function(){
     trajArray[0].nu = -180;
   }
 }
-
-// const computeTrajArrayOld = function(){
-//   let tn;
-//   let dtdx;
-//   let xFirstGuess;
-//   let x;
-//   let z;
-//   let c;
-//   let s;
-//   let r;
-//   let f;
-//   let g;
-//   let i;
-//   let rx;
-//   let ry;
-
-//   if (!needToComputeTrajArray){
-//     return;
-//   }
-
-//   needToComputeTrajArray = false;
-//   // set needToComputeTrajArray to true whenever a or e changes
-//   // but don't call this function until pointerup.  Also, call this
-//   // immediately when switching between conic section types or when 
-//   // changing the central body
-
-//   const t0 = 0;
-//   // we set r0 to be at periapse, so t0 = timeAfterPeriapse = 0.
-//   // Otherwise, we would set t0 equal to timeAfterPeriapse
-
-//   const r0 = rp;
-//   // we set r0 to be at periapse, so we set it to rp, which
-//   // was set equal to a*(1-e) in either aSlider.onpointerup
-//   // or eSlider.onpointerup.  Otherwise, we would set r0 to 
-//   // rVector.length(), where rVector is some THREE.Vector3 object
-
-//   const r0DotV0 = 0;
-//   // we set r0 and v0 to be at periapse, so their dot product
-//   // is 0.  Otherwise, we would set r0DotV0 equal to 
-//   // rVector.dot(vVector), where rVector and vVector are some 
-//   // THREE.Vector3 objects, and where rVector would be set from 
-//   // r = p/(1 + e*cos(nu)), and so rVector.x would equal r*cos(nu),
-//   // rVector.y would equal r*sin(nu), vVector.x would equal 
-//   // -sqrtMuOverP*sin(nu), and vVector.y would equal 
-//   // sqrtMuOverP*(e + cos(nu)) from Bate pp. 72, 73
-
-//   const sqrtA = Math.sqrt(Math.abs(a));
-
-//   // clear the trajArray of any entries that exist
-//   while (trajArray.length){
-//     trajArray.pop();
-//   }
-
-//   // trajPoint stores an object to be pushed on to trajArray
-//   let trajPoint;
-
-//   // t is the time in canonical time units.  For elliptical orbits, an 
-//   // orbital period (tp) equals twoPi canonical time units (TU or CTU)
-//   // which equals 'period'.  For a hyperbolic flyby, 'period'
-//   // equals the time span computed in doASliderOnInput()
-//   let t = -period/2;
-
-//   for (let k=0; k<trajArraySize; k+=2){
-//     // Bate p. 206 for first guess of x
-//     if (e < 1){
-//       // ellipse
-//       xFirstGuess = Math.sqrt(muCanonical)*(t - t0)/a;
-//     }else{
-//       // hyperbola
-//       if (t !== t0){
-//         xFirstGuess = Math.sign(t - t0)*sqrtA*Math.log(-2*muCanonical*(t - t0)
-//         / (a*(r0DotV0 + Math.sign(t - t0)*sqrtMuCanonical*sqrtA*
-//         (1 - r0/a))));
-//       }else{
-//         xFirstGuess = 0;
-//       }
-//     }
-
-//     x = xFirstGuess;
-
-//     // iterate to find x at time t.  The loop count limit is arbitrary
-//     // but is designed to handle extreme cases.  It should usually
-//     // break out of the loop way before i reaches its maximum.  Tests of
-//     // this have shown that i can get up to around 30 for eccentricities
-//     // near 1 (parabolic orbit).  Eccentricities from 0.98 to 1.02 
-//     // are not allowed to prevent i from being too large and affecting 
-//     // computer performance
-//     for (i=0; i<50; i++){
-//       // Bate p. 195
-//       z = x*x/a;
-      
-//       // Bate p. 208
-//       if (z > 0){
-//         let sqrtZ;
-
-//         sqrtZ = Math.sqrt(z);
-//         c = (1 - Math.cos(sqrtZ))/z;
-//         s = (sqrtZ - Math.sin(sqrtZ))/(sqrtZ*sqrtZ*sqrtZ);
-//       }else if (z < 0){
-//         let sqrtMinusZ;
-
-//         sqrtMinusZ = Math.sqrt(-z);
-//         c = (1 - Math.cosh(sqrtMinusZ))/z;
-//         s = (Math.sinh(sqrtMinusZ) - sqrtMinusZ)/(sqrtMinusZ*sqrtMinusZ*sqrtMinusZ);
-//       }
-
-//       // Bate pp. 197-8, use equations 4.4-14 and 4.4-17
-//       tn = (r0DotV0*x*x*c/sqrtMuCanonical +
-//        (1 - r0/a)*x*x*x*s + r0*x)/sqrtMuCanonical;
-//       dtdx = (x*x*c + r0DotV0*x*(1 - z*s)/sqrtMuCanonical +
-//        r0*(1 - z*c))/sqrtMuCanonical;      
-//       x = x + (t - tn)/dtdx;
-
-//       // break out of the loop if "close enough", i is usually 
-//       // way below its max, especially for eccentricities far from 1
-//       if (Math.abs(t - tn) < 0.001){
-//         break;
-//       }
-//     }
-    
-//     if (i >= 50){
-//       periapseWarning.innerHTML = 'problem generating trajectory';
-//     }
-
-//     // Bate pp. 201-2
-//     trajPoint = new Object();
-//     trajPoint.t = t;
-//     f = 1 - x*x*c/r0;
-//     g = t - x*x*x*s/sqrtMuCanonical;
-//     trajPoint.f = f;
-//     trajPoint.g = g;
-//     // below, r is computed under the assumption that r0 and v0 are
-//     // at the periapse, which is mentioned earlier
-//     rx = f*rp;
-//     ry = g*sqrtMuOverP*(e + 1);
-//     r = Math.sqrt(rx*rx + ry*ry);
-//     trajPoint.nu = Math.atan2(ry, rx)/piOver180;
-//     trajPoint.fdot = sqrtMuCanonical*x*(z*s - 1)/(r0*r);
-//     trajPoint.gdot = 1 - x*x*c/r;
-    
-//     trajArray.push(trajPoint);
-
-//     // t is incremented uniformly.  An alternative to this might be to 
-//     // have more data points around periapse, where nu changes the fastest
-//     t += period/(trajArraySize+1);
-//     // console.log(f*trajPoint.gdot - g*trajPoint.fdot); // this should be near 1
-//   }
-  
-//   if (trajArray[0].nu > 179.999999){
-//     // set the first nu to -180 for elliptical orbits.  atan2 sets it to +180
-//     trajArray[0].nu = -180;
-//   }
-// }
 
 const syncTrajState = function(){
   // sync everything to correspond to the trajectory state stored
@@ -1824,7 +1660,7 @@ const handlePlanetChange = function(){
   theCB = centralBodyData.find(x => x.name === centralBody);
   ctu = theCB.CTU;
   cdu = theCB.CDU;
-  periodInSeconds = period*ctu;// do this again at initialization, period is not set yet there
+  periodInSeconds = period*ctu;
   planetRotationPeriodInSeconds = 3600*theCB.srp;
   muDisplay.innerHTML = `${Number(+theCB.mu*1e6).toExponential(6).toString()} km&sup3;/s&sup2;`;// GM
   radiusDisplay.innerHTML = `${theCB.radius} km`;// radius
@@ -1836,7 +1672,6 @@ const handlePlanetChange = function(){
   omegaDisplay.innerHTML = `${theCB.om}&deg;`;// longitude of perihelion
   omt.setPlanet(theCB.id);
 
-
   doESliderOnInput(+eSlider.value);
   doASliderOnInput(+aSlider.value);
   rp = Number(a*(1-e));
@@ -1844,7 +1679,6 @@ const handlePlanetChange = function(){
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
   computeTrajArray();
-
 
   doNu(nuDegrees);
   handlePeriapseCheck();
@@ -2556,9 +2390,6 @@ const initialize = function(data, camera){
           case 'argument-of-periapsis':
             aopDegrees  = Number(o.value);
             break;
-          // case 'true-anomaly': deprecated
-          //   nuDegrees  = Number(o.value);
-          //   break;
           case 'inertialVectorsChoice':
             inertialVectorsChoice  = o.value;
             break;
@@ -2627,7 +2458,7 @@ const initialize = function(data, camera){
   theCB = centralBodyData.find(x => x.name === centralBody);
   ctu = theCB.CTU;
   cdu = theCB.CDU;
-  periodInSeconds = period*ctu;// do this again at initialization, period is not set yet there
+  periodInSeconds = period*ctu;
   planetRotationPeriodInSeconds = 3600*theCB.srp;
   muDisplay.innerHTML = `${Number(+theCB.mu*1e6).toExponential(6).toString()} km&sup3;/s&sup2;`;// GM
   radiusDisplay.innerHTML = `${theCB.radius} km`;// radius
@@ -2647,7 +2478,7 @@ const initialize = function(data, camera){
   ra = Number(a*(1+e));
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
-  computeTrajArray();//blah
+  computeTrajArray();
   nuDegrees = 0;
   doNu(nuDegrees, true);
   handlePeriapseCheck();
@@ -2775,13 +2606,12 @@ resetButton.addEventListener('click', () => {
   nuDegrees = nuSlider.value;
   doNu(nuDegrees);
   displayNumerical();
-  omt.resetPlanetRotationParameters();//blah
+  omt.resetPlanetRotationParameters();
 });
 
 const tick = function(){
   deltaT = timeScale*clock.getDelta();
   timeAfterPeriapseInSeconds += deltaT;// deltaT for 60 fps is 0.01666
-  // console.log('tick t/period: ',timeAfterPeriapseInSeconds/planetRotationPeriodInSeconds);//blah
   timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
 
   if (timeAfterPeriapseInSeconds >= timeAfterPeriapseInSeconds1){
@@ -2806,7 +2636,6 @@ const tick = function(){
     syncTrajState();
     deltaT = timeScale*clock.getDelta();
     timeAfterPeriapseInSeconds += deltaT;// deltaT for 60 fps is 0.01666
-    console.log('tick t/period: ',timeAfterPeriapseInSeconds/planetRotationPeriodInSeconds);//blah
     timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
   }
 
@@ -2822,7 +2651,7 @@ const tick = function(){
   nu = nuDegrees*piOver180;
   omt.setR(px, py, 0, a);
   omt.setV(vx, vy, 0);
-  omt.rotatePlanet2(timeAfterPeriapseInSeconds, planetRotationPeriodInSeconds, period*ctu);//blah
+  omt.rotatePlanet2(timeAfterPeriapseInSeconds, planetRotationPeriodInSeconds, period*ctu);
   displayNumerical();
   omt.needsRefresh = true;
 }
@@ -2869,47 +2698,3 @@ if (data){
     animate();
   }
 }
-
-/*
-function exit(status){
-  // http://kevin.vanzonneveld.net
-  // +   original by: Brett Zamir (http://brettz9.blogspot.com)
-  // +      input by: Paul
-  // +   bugfixed by: Hyam Singer (http://www.impact-computing.com/)
-  // +   improved by: Philip Peterson
-  // +   bugfixed by: Brett Zamir (http://brettz9.blogspot.com)
-  // %        note 1: Should be considered expirimental. Please comment on this function.
-  // *     example 1: exit();
-  // *     returns 1: null
-
-  var i;
-
-  if (typeof status === 'string'){
-      alert(status);
-  }
-
-  window.addEventListener('error', function (e) {e.preventDefault();e.stopPropagation();}, false);
-
-  var handlers = [
-      'copy', 'cut', 'paste',
-      'beforeunload', 'blur', 'change', 'click', 'contextmenu', 'dblclick', 'focus', 'keydown', 'keypress', 'keyup', 'mousedown', 'mousemove', 'mouseout', 'mouseover', 'mouseup', 'resize', 'scroll',
-      'DOMNodeInserted', 'DOMNodeRemoved', 'DOMNodeRemovedFromDocument', 'DOMNodeInsertedIntoDocument', 'DOMAttrModified', 'DOMCharacterDataModified', 'DOMElementNameChanged', 'DOMAttributeNameChanged', 'DOMActivate', 'DOMFocusIn', 'DOMFocusOut', 'online', 'offline', 'textInput',
-      'abort', 'close', 'dragdrop', 'load', 'paint', 'reset', 'select', 'submit', 'unload'
-  ];
-
-  function stopPropagation (e){
-      e.stopPropagation();
-      // e.preventDefault(); // Stop for the form controls, etc., too?
-  }
-
-  for (i=0; i < handlers.length; i++){
-      window.addEventListener(handlers[i], function (e) {stopPropagation(e);}, true);
-  }
-
-  if (window.stop){
-      window.stop();
-  }
-
-  throw '';
-}
-*/

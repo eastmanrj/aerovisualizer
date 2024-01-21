@@ -22,10 +22,10 @@ After an idea for enhancement has been accepted, you can contribute in a couple 
 
 ### Submit Code from Python, Matlab, C, Fortran, Other Languages
 
-Aerovisualizer is written in Javascript. Even so, if you have some "back end" source code hidden away as part of a desktop program somewhere, just send it to us and we will adapt it to Javascript as long as you follow these guidelines:
+Aerovisualizer is written in Javascript. Even so, if you have some "back end" source code hidden away as part of a desktop program somewhere, you can adapt it to Javascript as long as you follow these guidelines:
 
 - Read the discussion in [issues](https://github.com/eastmanrj/aerovisualizer/labels/enhancement) and understand how your code could fit into the final design.
-- Know your code.  That is, know exactly what it is attempting to do.  No black boxes allowed!
+- Know your code.  That is, know exactly what it is attempting to do.  No black boxes are allowed!
 - If your SLOC (software lines of code) is large, please break it up into smaller independent parts to submit separately.
 - Comment your code thoroughly (but not excessively).  This is for everyone's benefit, including yours!
 - DON'T PLAGIARIZE. People spend a lot of time and effort creating source code.  Please give them credit for it.  Small code snippets are fine.  DO NOT USE PROPRIETARY CODE.
@@ -36,29 +36,27 @@ If you know HTML, CSS, or Javascript and would like to contribute directly to ou
 
 - All of the previous guidelines still apply.
 - Code must be HTML, CSS, and Javascript only.
-- Straight "vanilla" Javascript is preferred (no frameworks like React, Vue, or Angular).  If you really think that a Aerovisualizer would benefit from a framework and you know what your are doing, let us know. 
-- Avoid importing third party modules.  This adds bloat and also dependencies.
+- Straight "vanilla" Javascript is preferred for now, but if you think that Aerovisualizer would benefit from a framework such as React, Vue, or Angular, and you know what you are doing, let us know. 
+- Avoid importing third party modules.  This adds bloat and dependencies.
 - New code cannot break old code.
 - Follow the established style.
-- If your code requires 2D or 3D rendering, learn how to use the very popular [THREE.js](https://threejs.org) framework.  All 2D and 3D will use this.
-- Know how to use Git and GitHub.  Fork Aerovisualizer, clone it, checkout a new branch, make your changes, add and commit, push to your fork, and open a pull request.
+- If your code requires 2D or 3D rendering, learn how to use the very popular [THREE.js](https://threejs.org) framework.  All 2D and 3D stuff uses this.
+- Know how to use Git and GitHub.  Clone Aerovisualizer, create a new branch, make your changes, add and commit, and open a pull request.
 
 If you do not currently program in HTML, CSS, and Javascript, [udemy.com](https://udemy.com) offers some great courses at reasonable prices. Jonas Schmedtmann is an excellent instructor. 
 
 ### Dependencies
 
-Aerovisualizer is designed to have a minimal number of code dependencies.  If you clone the repository, you must install the dependencies for it to work.  First make sure you have Node Package Manager (npm) installed on your computer.  Check this by typing the following at the command line:
+Aerovisualizer is designed to have a minimal number of code dependencies.  If you clone the repository, you must install the dependencies for it to work.  First make sure to have Node Package Manager (npm) installed on your computer.  Check this by typing the following at the command line:
 
 npm list -g -depth 0
 
-If npm is not listed, install it from nodejs.org.  Then, on the command line, cd into the top level of the clone file.  Type the following:
+If npm is not listed, install it from nodejs.org.  Then, at the command line, cd into the top level of the cloned directory.  Type the following:
 
 npm install --save three
 
-Then, create a local server by going into one of the packages and run one of the scripts located in the package.json file there.  For example, packages/orbital contains a package.json file with the script, startorbit.  You would create a local server by typing the following at the command line:
+Then, cd into one of the packages and run one of the scripts located in the package.json file there to start a local server.  For example, packages/orbital contains a package.json file with the script, startorbit.  You would create a local server by typing the following at the command line:
 
 npm run startorbit
 
 Then go to your browser and type "localhost:xxxx", where xxxx is given to you.
-
-

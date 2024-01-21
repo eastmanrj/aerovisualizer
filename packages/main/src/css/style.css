@@ -132,7 +132,7 @@ p {
 /***************************************
  * Device Orientation Portrait, iPhones
  ***************************************/
- @media (orientation: portrait) and (max-width: 400px) {
+ @media (orientation: portrait) and (max-width: 450px) {
   p {
     font-size: 1.5rem;
     font-weight: 300;
@@ -151,9 +151,9 @@ p {
 /****************************************
  * Device Orientation Landscape, iPhones
  ****************************************/
-@media (orientation: landscape) and (min-width: 400px) {  
+@media (orientation: landscape) and (max-width: 900px) {
   p {
-    font-size: 1rem;
+    font-size: 1.5rem;
     font-weight: 300;
     margin-left:1rem;
     margin-right:1rem;
@@ -164,5 +164,30 @@ p {
   
   .container {
     margin:5%;
+  }
+}
+
+/************************************
+* Device Orientation Portrait, iPads
+*************************************/
+/* @media (orientation: portrait) and (min-width: 451px) {
+
+} */
+
+/**************************************
+* Device Orientation Landscape, iPads
+**************************************/
+@media (orientation: landscape) and (min-width: 951px) {
+  p {
+    font-size: 2rem;
+  }
+}
+
+/**************************************
+* Desktops
+**************************************/
+@media (min-width: 1200px) {
+  p {
+    font-size: 2rem;
   }
 }

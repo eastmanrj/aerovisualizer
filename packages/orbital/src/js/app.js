@@ -20,6 +20,7 @@ main code for it.
  Revision History
  Date    Name                  Description
  1/19/24 R. Eastman            v0.1 beta
+ 1/21/24 R. Eastman            v0.1.1 beta, cosmetic changes
 */
 
 const piOver180 = Math.PI/180;
@@ -1436,6 +1437,7 @@ const computeTrajArray = function(){
   let nu;
   let cosnu;
   let M;
+  const th = Math.PI/10;
 
   for (let nuDeg=-180; nuDeg<trajArraySize; nuDeg+=2){
     // Bate pp. 182-188
@@ -1450,7 +1452,7 @@ const computeTrajArray = function(){
       t = M/meanMotion;// meanMotion is computed in doASliderOnInput 
     }else{
       // hyperbola
-      if (!(nu > (Math.PI + delta)/2 || nu < -(Math.PI + delta)/2)){
+      if (!(nu > (Math.PI + delta)/2 - th || nu < -(Math.PI + delta)/2) + th){
         coshF = (e + cosnu)/(1 + e*cosnu);
         F = Math.log(coshF + Math.sqrt(coshF*coshF - 1));
         F = nu < 0 ? -F : F;
@@ -2232,7 +2234,7 @@ const handleInfoMenuChoice = function(choice){
     case 'info-prefs-general':
       infoText.innerHTML = `<p class="p-normal">Under <em>general preferences</em>, use the slider to set the 
       transparency of the sun/moon/planet.  Use the first checkbox to specify whether or not to show 
-      the out of plane vectors (W) of the PWQ and UVW frames.  Use the second checkbox to specify that 
+      the out of plane vectors (W) of the PQW and UVW frames.  Use the second checkbox to specify that 
       the true/eccentric/hyperbolic/mean anomalies range from 0 to 360&deg; rather than -180&deg; 
       to 180&deg;.</p>`;
       break;
@@ -2615,14 +2617,11 @@ const tick = function(){
   timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
 
   if (timeAfterPeriapseInSeconds >= timeAfterPeriapseInSeconds1){
-    let safety = 0;
-
-    while (timeAfterPeriapseInSeconds >= timeAfterPeriapseInSeconds1 && safety<10){
-      safety++;
+    while (timeAfterPeriapseInSeconds >= timeAfterPeriapseInSeconds1){
       iTraj0 = iTraj1;
       iTraj1 = iTraj0 + 1;
 
-      // wrap around at apoapse or near the hyperbolic asymptote
+      // wrap around at apoapse for elliptical orbits
       if (iTraj1 >= Number(trajArraySize)){
         iTraj0 = 0;
         iTraj1 = 1;

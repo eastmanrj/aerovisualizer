@@ -1,0 +1,14 @@
+{
+  "name": "@aerovisualizer/shockwaves",
+  "version": "1.0.0",
+  "description": "Aerovisualizer oblique shockwaves ",
+  "source": "index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build",
+    "startshockwaves": "export PORT=4444 && npm run start"
+  },
+  "keywords": [],
+  "author": "R Eastman",
+  "license": "ISC"
+}

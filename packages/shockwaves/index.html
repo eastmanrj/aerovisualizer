@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="Aerovisualizer is a site for teaching concepts in aerospace engineering.">
+    <link rel="stylesheet" href="src/css/style.css">
+    <title>Aerovisualizer</title>
+    <link rel="manifest" href="app.webmanifest">
+    <script type="module" src="src/js/app.js"></script>
+
+    <!-- <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Aerovisualizer"> -->
+
+    <meta name="theme-color" content="#3f51b5">
+
+    <!-- Register the app's service worker. -->
+    <!-- <script type="module">
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register(new URL('sw.js', import.meta.url),{type: 'module', scope: '/'}).then(
+          (registration) => {
+            console.log("Service worker registration successful:", registration);
+          },
+          (error) => {
+            console.error(`Service worker registration failed: ${error}`);
+          },
+        );
+      } else {
+        console.error("Service workers are not supported.");
+      }
+    </script> -->
+  </head>
+  <body>
+    <div class="container">
+      <div id="threeD-world"></div>
+      <div class="non-threeD-world">
+        <div class="btn-group bottom-margin">
+          <button id="rho-t-p-btn" class="btn no-uppercase">&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub></button>
+          <button id="mach-btn" class="btn no-uppercase">Mach&nbsp;#</button>
+          <button id="delta-btn" class="btn no-uppercase">deflection</button>
+          <button id="preferences-btn" class="btn no-uppercase">pref</button>
+          <button id="info-btn" class="btn">&nbsp;?&nbsp;</button>
+          <button id="main-return-btn" class="btn btn-with-icon" onclick="window.location.href='https://aerovisualizer.com'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" 
+            width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" 
+            stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M9 14l-4 -4l4 -4"></path>
+            <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
+          </svg>
+          <button id="transparency-pref-btn" class="btn">transparency</button>
+          <button id="color-pref-btn" class="btn">color</button>
+          <button id="misc-pref-btn" class="btn">misc</button>
+          <button id="prefs-return-btn" class="btn btn-with-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M9 14l-4 -4l4 -4"></path>
+            <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="elements" id="info-elements">
+          <select id="info-menu" class="menu span3" name="info-menu">
+            <option value="info-intro">introduction</option>
+            <option value="info-how-to-use">how to use aerovisualizer</option>
+            <option value="info-mach-number">mach number</option>
+            <option value="info-prefs-main">prefs - main</option>
+            <option value="info-prefs-transparency">prefs - transparency</option>
+            <option value="info-prefs-color">prefs - color</option>
+            <option value="info-prefs-misc">prefs - misc</option>
+            <option value="info-contact-disclaimer">contact, disclaimer</option>
+          </select>
+          <p class="center-grid-item span3">&nbsp;</p>
+          <p id="info-text" class="p-normal span3">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Maiores, alias rerum quis reiciendis voluptas, autem harum sint vel eos ex neque odit est incidunt ratione tempore quam dolore cum quos laborum numquam! Amet est nisi vel omnis, doloribus obcaecati soluta nesciunt, rerum unde doloremque sunt! Officiis nobis eum officia sit?</p>
+          <p class="center-grid-item span3">&nbsp;</p>
+          <p class="center-grid-item">&nbsp;</p>
+          <div class="btn-group span3">
+            <button id="info-return-btn" class="btn btn-with-icon center-grid-item"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M9 14l-4 -4l4 -4"></path>
+              <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
+           </svg></button>
+          </div>
+          <p class="center-grid-item">&nbsp;</p>
+        </div>
+        <div class="elements" id="transparency-pref-elements">
+          <p class="center-grid-item span3">transparency</p>
+          <p class="left-grid-item">flying object:&nbsp;<span id="transparency-ufo-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-ufo">
+          <p class="left-grid-item">forward shock:&nbsp;<span id="transparency-forward-shock-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-forward-shock">
+          <p class="left-grid-item">aft shock:&nbsp;<span id="transparency-aft-shock-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-aft-shock">
+          <p class="left-grid-item">number labels:&nbsp;<span id="transparency-labels-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-labels">
+        </div>
+        <div class="elements" id="color-pref-elements">
+          <label class="center-grid-item span3">color</label>
+          <label class="center-grid-item">flying object:</label>
+          <select id="ufo-color-menu" class="menu span2" name="ufo-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+          <label class="center-grid-item">forward shock:</label>
+          <select id="forward-shock-color-menu" class="menu span2" name="forward-shock-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+          <label class="center-grid-item">aft shock:</label>
+          <select id="aft-shock-color-menu" class="menu span2" name="aft-shock-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+          <label class="center-grid-item">number labels:</label>
+          <select id="labels-color-menu" class="menu span2" name="labels-color-menu">
+            <option value="select-a-color">select a color</option>
+            <option value="red">red</option>
+            <option value="yellow">yellow</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="purple">purple</option>
+            <option value="orange">orange</option>
+          </select>
+        </div>
+        <div class="elements" id="misc-elements">
+          <div class="grid-item checkbox center-grid-item span3">
+            <input type="checkbox" id="altitude-feet" name="altitude-feet-checkbox" value="no">
+            <label for="altitude-feet">Altitude in feet</label>
+          </div>
+          <label class="center-grid-item span3">density units</label>
+          <select id="density-units-menu" class="menu span2" name="density-menu">
+            <option value="kg-per-m3">kg/m³</option>
+            <option value="lbm-per-ft3">lbm/ft³</option>
+            <option value="slugs-per-ft3">slugs/ft³</option>
+          </select>
+          <label class="center-grid-item span3">temperature scale</label>
+          <select id="temperature-scale-menu" class="menu span2" name="temperature-scale-menu">
+            <option value="celsius">Celsius</option>
+            <option value="kelvin">Kelvin</option>
+            <option value="fahrenheit">Fahrenheit</option>
+            <option value="rankine">Rankine</option>
+          </select>
+          <label class="center-grid-item span3">pressure units</label>
+          <select id="pressure-units-menu" class="menu span2" name="pressure-menu">
+            <option value="pascal">Pa (N/m²)</option>
+            <option value="bar">bar</option>
+            <option value="kilo-pascal">kPa</option>
+            <option value="mega-pascal">MPa</option>
+            <option value="psi">psi</option>
+            <option value="kgf-per-cm2">kg(f)/cm²</option>
+            <option value="inches-mercury">inHg</option>
+            <option value="barye">Ba</option>
+            <option value="hectopascal">hPa (millibar)</option>
+            <option value="standard-atmosphere">atm</option>
+            <option value="torr">Torr</option>
+          </select>
+          <label class="center-grid-item span3">speed units</label>
+          <select id="speed-units-menu" class="menu span2" name="speed-menu">
+            <option value="meters-per-second">m/s</option>
+            <option value="knots">knots</option>
+            <option value="feet-per-second">ft/s</option>
+            <option value="kilometers-per-hour">km/h</option>
+            <option value="miles-per-hour">mph</option>
+          </select>
+        </div>
+        <div class="elements-group">
+          <div class="elements" id="mach-elements">
+            <p class="center-grid-item"><span id="mach-slider-display">0</span></p>
+            <input class="slider" type="range" min="1.1" max="30" value="1.1" step="0.1" id="mach-slider">
+          </div>
+          <div class="elements" id="delta-elements">
+            <select id="delta-menu" class="menu span3" name="delta-menu">
+              <option value="forward">forward cone half angle</option>
+              <option value="aft">aft cone half angle</option>
+            </select>
+            <p class="center-grid-item"><span id="delta-slider-display">0</span></p>
+            <input class="slider" type="range" min="1" max="75" value="15" id="delta-slider">
+          </div>
+          <div class="elements" id="gas-prop-elements">
+            <p class="center-grid-item span3"><span id="r-gamma-a-display">0</span></p>
+            <p class="center-grid-item span3"><span id="dens-temp-pres-display">0</span></p>
+            <p class="center-grid-item"><span>gas medium:</span></p>
+            <select id="gas-medium-menu" class="menu span2" name="gas-medium-menu">
+              <option value="dry_air_MINUS15">dry air -15&deg;C</option>
+              <option value="dry_air_0">dry air 0&deg;C</option>
+              <option value="dry_air_20">dry air 20&deg;C</option>
+              <option value="dry_air_200">dry air 200&deg;C</option>
+              <option value="dry_air_400">dry air 400&deg;C</option>
+              <option value="dry_air_1000">dry air 1000&deg;C</option>
+              <option value="ammonia_15">ammonia 15&deg;C</option>
+              <option value="argon_MINUS180">argon -180&deg;C</option>
+              <option value="argon_20">argon 20&deg;C</option>
+              <option value="carbon_dioxide_0">carbon dioxide 0&deg;C</option>
+              <option value="carbon_dioxide_20">carbon dioxide 20&deg;C</option>
+              <option value="carbon_dioxide_100">carbon dioxide 100&deg;C</option>
+              <option value="carbon_dioxide_400">carbon dioxide 400&deg;C</option>
+              <option value="carbon_dioxide_1000">carbon dioxide 1000&deg;C</option>
+              <option value="carbon_monoxide_20">carbon monoxide 20&deg;C</option>
+              <option value="chlorine_20">chlorine 20&deg;C</option>
+              <option value="ethane_15">ethane 15&deg;C</option>
+              <option value="helium_20">helium 20&deg;C</option>
+              <option value="hydrogen_MINUS181">hydrogen -181&deg;C</option>
+              <option value="hydrogen_MINUS76">hydrogen -76&deg;C</option>
+              <option value="hydrogen_20">hydrogen 20&deg;C</option>
+              <option value="hydrogen_100">hydrogen 100&deg;C</option>
+              <option value="hydrogen_400">hydrogen 400&deg;C</option>
+              <option value="hydrogen_1000">hydrogen 1000&deg;C</option>
+              <option value="hydrogen_2000">hydrogen 2000&deg;C</option>
+              <option value="krypton_19">krypton 19&deg;C</option>
+              <option value="methane_MINUS115">methane -115&deg;C</option>
+              <option value="methane_MINUS74">methane -74&deg;C</option>
+              <option value="methane_20">methane 20&deg;C</option>
+              <option value="neon_19">neon 19&deg;C</option>
+              <option value="nitrogen_MINUS181">nitrogen -181&deg;C</option>
+              <option value="nitrous_oxide_20">nitrous oxide 20&deg;C</option>
+              <option value="oxygen_MINUS181">oxygen -181&deg;C</option>
+              <option value="oxygen_MINUS76">oxygen -76&deg;C</option>
+              <option value="oxygen_20">oxygen 20&deg;C</option>
+              <option value="oxygen_100">oxygen 100&deg;C</option>
+              <option value="oxygen_200">oxygen 200&deg;C</option>
+              <option value="oxygen_400">oxygen 400&deg;C</option>
+              <option value="propane_16">propane 16&deg;C</option>
+              <option value="sulfur_dioxide_15">sulfur dioxide 15&deg;C</option>
+              <option value="water_vapor_20">water vapor 20&deg;C</option>
+              <option value="water_vapor_100">water vapor 100&deg;C</option>
+              <option value="water_vapor_200">water vapor 200&deg;C</option>
+              <option value="xenon_19">xenon 19&deg;C</option>
+            </select>
+            <p class="center-grid-item"><span>&rho; T P option:</span></p>
+            <select id="rhoTP-menu" class="menu span2" name="rhoTP-menu">
+              <option value="1">1- set altitude, look up standard &rho;, T, and P for dry air</option>
+              <option value="2">2- set &rho; and P, compute T</option>
+              <option value="3">3- set P and T, compute &rho;</option>
+              <option value="4">4- set T and &rho;, compute P</option>
+            </select>
+            <p class="center-grid-item"><span id="rhoTP1-slider-display">0</span></p>
+            <input class="slider span2" type="range" min="0" max="75" value="0" id="rhoTP1-slider">
+            <!-- <div class="elements numerical span3"> -->
+              <p class="center-grid-item"><span id="rhoTP2-slider-display">0</span></p>
+              <input class="slider span2" type="range" min="0" max="75" value="0" id="rhoTP2-slider">
+            <!-- </div> -->
+          </div>
+          <div class="elements numerical" id="numerical-btns-elements">
+            <button id="toggle-mach-speed-btn" class="btn large-font no-uppercase center-grid-item span4">Mach/speed</button>
+            <button id="cycle-numbers-btn" class="btn large-font no-uppercase center-grid-item span4">data 1</button>
+          </div>
+          <div class="elements numerical" id="numerical1-elements">
+            <p>N&nbsp;</p><pre><span id="mach-speed-label-display1"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="pres-label-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="p0-label-display">P<sub>0</sub></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="q-label-display"></span></pre>
+            <p class="bottom-border span8 height-small"></p>
+            <p>1&nbsp;</p><pre><span id="mach1-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="p1-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="p01-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="q1-display"></span></pre>
+            <p>2&nbsp;</p><pre><span id="mach2-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="p2-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="p02-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="q2-display"></span></pre>
+            <p>3&nbsp;</p><pre><span id="mach3-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="p3-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="p03-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="q3-display"></span></pre>
+            <p>4&nbsp;</p><pre><span id="mach4-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="p4-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="p04-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="q4-display"></span></pre>
+            <p>5&nbsp;</p><pre><span id="mach5-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="p5-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="p05-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="q5-display"></span></pre>
+          </div>
+          <div class="elements numerical" id="numerical2-elements">
+            <p>N&nbsp;</p><pre><span id="mach-speed-label-display2"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="temp-label-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="t0-label-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="a-label-display"></span></pre>
+            <p class="bottom-border span8 height-small"></p>
+            <p>1&nbsp;</p><pre><span id="mach1-display2"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="t1-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="t01-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="a1-display"></span></pre>
+            <p>2&nbsp;</p><pre><span id="mach2-display2"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="t2-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="t02-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="a2-display"></span></pre>
+            <p>3&nbsp;</p><pre><span id="mach3-display2"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="t3-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="t03-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="a3-display"></span></pre>
+            <p>4&nbsp;</p><pre><span id="mach4-display2"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="t4-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="t04-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="a4-display"></span></pre>
+            <p>5&nbsp;</p><pre><span id="mach5-display2"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="t5-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="t05-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="a5-display"></span></pre>
+          </div>
+          <div class="elements numerical" id="numerical3-elements">
+            <p>N&nbsp;</p><pre><span id="mach-speed-label-display3"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="dens-label-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="rho0-label-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span>Mach angle &deg;</span></pre>
+            <p class="bottom-border span8 height-small"></p>
+            <p>1&nbsp;</p><pre><span id="mach1-display3"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="rho1-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="rho01-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="mach-angle-1"></span></pre>
+            <p>2&nbsp;</p><pre><span id="mach2-display3"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="rho2-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="rho02-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="mach-angle-2"></span></pre>
+            <p>3&nbsp;</p><pre><span id="mach3-display3"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="rho3-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="rho03-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="mach-angle-3"></span></pre>
+            <p>4&nbsp;</p><pre><span id="mach4-display3"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="rho4-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="rho04-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="mach-angle-4"></span></pre>
+            <p>5&nbsp;</p><pre><span id="mach5-display3"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="rho5-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="rho05-display"></span></pre>
+            <p class="left-border">&nbsp;</p><pre><span id="mach-angle-5"></span></pre>
+            <!-- 
+            id="num2-wave-drag-display"
+            id="num2-1mach-normal-display"
+            id="num2-2mach-normal-display"
+            id="num2-4mach-normal-display"
+            id="num2-5mach-normal-display"
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+            <!-- 
+            id="num2-wave-drag-display"
+            id="num2-1mach-normal-display" -->

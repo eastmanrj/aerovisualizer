@@ -6,7 +6,8 @@
   "workspaces": [
     "packages/main",
     "packages/rotation",
-    "packages/orbital"
+    "packages/orbital",
+    "packages/shockwaves"
   ],
   "scripts": {
     "build": "parcel build -ws"

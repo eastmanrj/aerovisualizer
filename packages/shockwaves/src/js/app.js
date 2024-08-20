@@ -995,7 +995,7 @@ const setRhoTP = function(sliderNumber = 0){
       break;
   }
 
-  const [dens10, temp10, pres10, rho0OverRho, t0OverT, p0OverP] = computeStagnationDensTempPres(mach1, dens1, temp1, pres1);
+  const [dens10, temp10, pres10] = computeStagnationDensTempPres(mach1, dens1, temp1, pres1);
   stagDens1 = dens10;
   stagTemp1 = temp10;
   stagPres1 = pres10;
@@ -1801,7 +1801,7 @@ const computeStagnationDensTempPres = function(m, rho, t, p){
   const t0 = t*t0OverT;
   const p0 = p*p0OverP;
 
-  return [rho0, t0, p0, rho0OverRho, t0OverT, p0OverP];
+  return [rho0, t0, p0];
 }
 
 const computeDensTempPresRatios = function(m1, m2){
@@ -1829,7 +1829,7 @@ const computeAllFlow = function(){
   dens2 = dens1*rho21;
   temp2 = temp1*t21;
   pres2 = pres1*p21;
-  const [dens20, temp20, pres20, rho0OverRho, t0OverT, p0OverP] = computeStagnationDensTempPres(mach2, dens2, temp2, pres2);
+  const [dens20, temp20, pres20] = computeStagnationDensTempPres(mach2, dens2, temp2, pres2);
   stagDens2 = dens20;
   stagTemp2 = temp20;
   stagPres2 = pres20;
@@ -1850,7 +1850,7 @@ const computeAllFlow = function(){
   temp3 = temp2*t32;
   pres3 = pres2*p32;
 
-  const [dens30, temp30, pres30, rho0OverRho, t0OverT, p0OverP] = computeStagnationDensTempPres(mach3, dens3, temp3, pres3);
+  const [dens30, temp30, pres30] = computeStagnationDensTempPres(mach3, dens3, temp3, pres3);
   stagDens3 = dens30;
   stagTemp3 = temp30;
   stagPres3 = pres30;
@@ -1870,7 +1870,7 @@ const computeAllFlow = function(){
   temp4 = temp3*t43;
   pres4 = pres3*p43;
 
-  const [dens40, temp40, pres40, rho0OverRho, t0OverT, p0OverP] = computeStagnationDensTempPres(mach4, dens4, temp4, pres4);
+  const [dens40, temp40, pres40] = computeStagnationDensTempPres(mach4, dens4, temp4, pres4);
   stagDens4 = dens40;
   stagTemp4 = temp40;
   stagPres4 = pres40;
@@ -1885,7 +1885,7 @@ const computeAllFlow = function(){
   temp5 = temp4*t54;
   pres5 = pres4*p54;
 
-  const [dens50, temp50, pres50, rho0OverRho, t0OverT, p0OverP] = computeStagnationDensTempPres(mach5, dens5, temp5, pres5);
+  const [dens50, temp50, pres50] = computeStagnationDensTempPres(mach5, dens5, temp5, pres5);
   stagDens5 = dens50;
   stagTemp5 = temp50;
   stagPres5 = pres50;

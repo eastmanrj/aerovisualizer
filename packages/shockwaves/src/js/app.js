@@ -1837,9 +1837,10 @@ const computeAllFlow = function(){
   a2 = Math.sqrt(gamma*gasConstant*temp2);
 
   mach3 = NaN;
+  let nu;
 
   if (mach2 != NaN){
-    let nu = prandtlMeyer(mach2,gamma) + forwardDelta*piOver180;
+    nu = prandtlMeyer(mach2,gamma) + forwardDelta*piOver180;
     mach3 = inversePrandtlMeyer(nu, gamma);
     machAngle3Display.innerHTML = Number(Math.asin(1/mach3)/piOver180).toFixed(1).toString();
   }

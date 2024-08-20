@@ -404,7 +404,7 @@ const speedOfSoundForAltitude =
 //gas constants from www.engineeringtoolbox.com
 // units J/Kg K
 // air (dry) is 78.08% N, 20.95% O, 0.93% Ar, 0.04% other
-rData = {dry_air_MINUS15:287.05, dry_air_0:287.05, dry_air_20:287.05, 
+const rData = {dry_air_MINUS15:287.05, dry_air_0:287.05, dry_air_20:287.05, 
   dry_air_200:287.05, dry_air_400:287.05, dry_air_1000:287.05, 
   ammonia_15:488.21, argon_MINUS180:208.13, argon_20:208.13, 
   carbon_dioxide_0:188.92, carbon_dioxide_20:188.92, 
@@ -422,7 +422,7 @@ rData = {dry_air_MINUS15:287.05, dry_air_0:287.05, dry_air_20:287.05,
   sulfur_dioxide_15:129.78, water_vapor_20:461.52,
   water_vapor_100:461.52, water_vapor_200:461.52, xenon_19:63.33};
 
-gammaData = {dry_air_MINUS15:1.404, dry_air_0:1.403, dry_air_20:1.400, 
+const gammaData = {dry_air_MINUS15:1.404, dry_air_0:1.403, dry_air_20:1.400, 
   dry_air_200:1.398, dry_air_400:1.393, dry_air_1000:1.365, 
   ammonia_15:1.310, argon_MINUS180:1.760, argon_20:1.670, 
   carbon_dioxide_0:1.310, carbon_dioxide_20:1.300, 

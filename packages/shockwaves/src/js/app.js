@@ -995,7 +995,7 @@ const setRhoTP = function(sliderNumber = 0){
       break;
   }
 
-  [dens10, temp10, pres10, rho0OverRho, t0OverT, p0OverP] = computeStagnationDensTempPres(mach1, dens1, temp1, pres1);
+  const [dens10, temp10, pres10, rho0OverRho, t0OverT, p0OverP] = computeStagnationDensTempPres(mach1, dens1, temp1, pres1);
   stagDens1 = dens10;
   stagTemp1 = temp10;
   stagPres1 = pres10;

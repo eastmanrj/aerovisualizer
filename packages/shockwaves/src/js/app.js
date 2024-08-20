@@ -1200,9 +1200,7 @@ const toggleShowInfo = function(){
     setNumericalDisplay();
     infoElements.style.display = 'none';
     doWindowResizeOrOrientationChange();
-    // debugger;
     handleMainButtons(currentMainButton);
-    // console.log('blahA');
   }else{
     threeDWorld.style.display = 'none';
     rhoTPButton.style.display = 'none';
@@ -1217,7 +1215,6 @@ const toggleShowInfo = function(){
     numerical3Elements.style.display = 'none';
     infoElements.style.display = 'grid';
     handleMainButtons('none');
-    // console.log('blahB');
   }
 }
 

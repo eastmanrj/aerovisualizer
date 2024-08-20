@@ -1017,7 +1017,6 @@ const setRhoTP = function(sliderNumber = 0){
   q1 = stagPres1 - pres1;
 
   a1 = Math.sqrt(gamma*gasConstant*temp1);
-  // console.log('dens10: ',dens10,', temp10: ',temp10,', pres10: ',pres10);
   densTempPresDisplay.innerHTML = `&rho;<sub>&infin;</sub> = ${densityForMetric(dens1)}&nbsp;&nbsp;&nbsp;&nbsp;T<sub>&infin;</sub> = ${temperatureForKelvin(temp1)}&nbsp;&nbsp;&nbsp;&nbsp;P<sub>&infin;</sub> = ${pressureForPascals(pres1)}`;
   displayRGammaA();
 }
@@ -1836,7 +1835,6 @@ const computeAllFlow = function(){
   stagPres2 = pres20;
   q2 = stagPres2 - pres2;
   a2 = Math.sqrt(gamma*gasConstant*temp2);
-  // console.log('dens20: ',dens20,', temp20: ',temp20,', pres20: ',pres20);
 
   mach3 = NaN;
 

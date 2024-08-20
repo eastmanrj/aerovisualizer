@@ -39,9 +39,9 @@
       <div id="threeD-world"></div>
       <div class="non-threeD-world">
         <div class="btn-group bottom-margin">
-          <button id="rho-t-p-btn" class="btn no-uppercase">&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub></button>
+          <button id="rho-t-p-btn" class="btn no-uppercase">&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub></button>
           <button id="mach-btn" class="btn no-uppercase">Mach&nbsp;#</button>
-          <button id="delta-btn" class="btn no-uppercase">deflection</button>
+          <button id="delta-btn" class="btn no-uppercase">defl</button>
           <button id="preferences-btn" class="btn no-uppercase">pref</button>
           <button id="info-btn" class="btn">&nbsp;?&nbsp;</button>
           <button id="main-return-btn" class="btn btn-with-icon" onclick="window.location.href='https://aerovisualizer.com'">
@@ -67,6 +67,7 @@
           <select id="info-menu" class="menu span3" name="info-menu">
             <option value="info-intro">introduction</option>
             <option value="info-how-to-use">how to use aerovisualizer</option>
+            <option value="info-flow-regions">flow regions</option>
             <option value="info-mach-number">mach number</option>
             <option value="info-prefs-main">prefs - main</option>
             <option value="info-prefs-transparency">prefs - transparency</option>
@@ -89,14 +90,18 @@
         </div>
         <div class="elements" id="transparency-pref-elements">
           <p class="center-grid-item span3">transparency</p>
-          <p class="left-grid-item">flying object:&nbsp;<span id="transparency-ufo-display">0</span>&nbsp;&nbsp;</p>
-          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-ufo">
-          <p class="left-grid-item">forward shock:&nbsp;<span id="transparency-forward-shock-display">0</span>&nbsp;&nbsp;</p>
-          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-forward-shock">
-          <p class="left-grid-item">aft shock:&nbsp;<span id="transparency-aft-shock-display">0</span>&nbsp;&nbsp;</p>
-          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-aft-shock">
-          <p class="left-grid-item">number labels:&nbsp;<span id="transparency-labels-display">0</span>&nbsp;&nbsp;</p>
-          <input class="slider span2" type="range" min="0" max="100" value="0" id="transparency-labels">
+          <div class="span3">&nbsp;</div>
+          <p class="left-grid-item span3">flying object&nbsp;<span id="transparency-ufo-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span3" type="range" min="0" max="100" value="0" id="transparency-ufo">
+          <div class="span3">&nbsp;</div>
+          <p class="left-grid-item span3">forward shock&nbsp;<span id="transparency-forward-shock-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span3" type="range" min="0" max="100" value="0" id="transparency-forward-shock">
+          <div class="span3">&nbsp;</div>
+          <p class="left-grid-item span3">aft shock&nbsp;<span id="transparency-aft-shock-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span3" type="range" min="0" max="100" value="0" id="transparency-aft-shock">
+          <div class="span3">&nbsp;</div>
+          <p class="left-grid-item span3">number labels&nbsp;<span id="transparency-labels-display">0</span>&nbsp;&nbsp;</p>
+          <input class="slider span3" type="range" min="0" max="100" value="0" id="transparency-labels">
         </div>
         <div class="elements" id="color-pref-elements">
           <label class="center-grid-item span3">color</label>
@@ -146,12 +151,14 @@
             <input type="checkbox" id="altitude-feet" name="altitude-feet-checkbox" value="no">
             <label for="altitude-feet">Altitude in feet</label>
           </div>
+          <div class="span3">&nbsp;</div>
           <label class="center-grid-item span3">density units</label>
           <select id="density-units-menu" class="menu span2" name="density-menu">
             <option value="kg-per-m3">kg/m³</option>
             <option value="lbm-per-ft3">lbm/ft³</option>
             <option value="slugs-per-ft3">slugs/ft³</option>
           </select>
+          <div class="span3">&nbsp;</div>
           <label class="center-grid-item span3">temperature scale</label>
           <select id="temperature-scale-menu" class="menu span2" name="temperature-scale-menu">
             <option value="celsius">Celsius</option>
@@ -159,6 +166,7 @@
             <option value="fahrenheit">Fahrenheit</option>
             <option value="rankine">Rankine</option>
           </select>
+          <div class="span3">&nbsp;</div>
           <label class="center-grid-item span3">pressure units</label>
           <select id="pressure-units-menu" class="menu span2" name="pressure-menu">
             <option value="pascal">Pa (N/m²)</option>
@@ -173,6 +181,7 @@
             <option value="standard-atmosphere">atm</option>
             <option value="torr">Torr</option>
           </select>
+          <div class="span3">&nbsp;</div>
           <label class="center-grid-item span3">speed units</label>
           <select id="speed-units-menu" class="menu span2" name="speed-menu">
             <option value="meters-per-second">m/s</option>
@@ -184,22 +193,27 @@
         </div>
         <div class="elements-group">
           <div class="elements" id="mach-elements">
-            <p class="center-grid-item"><span id="mach-slider-display">0</span></p>
-            <input class="slider" type="range" min="1.1" max="30" value="1.1" step="0.1" id="mach-slider">
+            <p class="center-grid-item span3"><span id="mach-slider-display">0</span></p>
+            <input class="slider span3" type="range" min="1.1" max="30" value="1.1" step="0.1" id="mach-slider">
           </div>
           <div class="elements" id="delta-elements">
             <select id="delta-menu" class="menu span3" name="delta-menu">
+              <div class="span3">&nbsp;</div>
               <option value="forward">forward cone half angle</option>
               <option value="aft">aft cone half angle</option>
             </select>
+            <div class="span3">&nbsp;</div>
             <p class="center-grid-item"><span id="delta-slider-display">0</span></p>
             <input class="slider" type="range" min="1" max="75" value="15" id="delta-slider">
+            <div class="span3">&nbsp;</div>
           </div>
           <div class="elements" id="gas-prop-elements">
-            <p class="center-grid-item span3"><span id="r-gamma-a-display">0</span></p>
-            <p class="center-grid-item span3"><span id="dens-temp-pres-display">0</span></p>
-            <p class="center-grid-item"><span>gas medium:</span></p>
-            <select id="gas-medium-menu" class="menu span2" name="gas-medium-menu">
+            <p class="center-grid-item span3"><span id="r-gamma-display">0</span></p>
+            <p class="center-grid-item span3"><span id="temp-a-display">0</span></p>
+            <p class="center-grid-item span3"><span id="pres-dens-display">0</span></p>
+            <div class="span3">&nbsp;</div>
+            <p class="center-grid-item span3"><span>gas medium</span></p>
+            <select id="gas-medium-menu" class="menu span3" name="gas-medium-menu">
               <option value="dry_air_MINUS15">dry air -15&deg;C</option>
               <option value="dry_air_0">dry air 0&deg;C</option>
               <option value="dry_air_20">dry air 20&deg;C</option>
@@ -245,19 +259,20 @@
               <option value="water_vapor_200">water vapor 200&deg;C</option>
               <option value="xenon_19">xenon 19&deg;C</option>
             </select>
-            <p class="center-grid-item"><span>&rho; T P option:</span></p>
-            <select id="rhoTP-menu" class="menu span2" name="rhoTP-menu">
+            <div class="span3">&nbsp;</div>
+            <p class="center-grid-item span3"><span>&rho; T P option</span></p>
+            <select id="rhoTP-menu" class="menu span3" name="rhoTP-menu">
               <option value="1">1- set altitude, look up standard &rho;, T, and P for dry air</option>
               <option value="2">2- set &rho; and P, compute T</option>
               <option value="3">3- set P and T, compute &rho;</option>
               <option value="4">4- set T and &rho;, compute P</option>
             </select>
-            <p class="center-grid-item"><span id="rhoTP1-slider-display">0</span></p>
-            <input class="slider span2" type="range" min="0" max="75" value="0" id="rhoTP1-slider">
-            <!-- <div class="elements numerical span3"> -->
-              <p class="center-grid-item"><span id="rhoTP2-slider-display">0</span></p>
-              <input class="slider span2" type="range" min="0" max="75" value="0" id="rhoTP2-slider">
-            <!-- </div> -->
+            <div class="span3">&nbsp;</div>
+            <p class="center-grid-item span3"><span id="rhoTP1-slider-display">0</span></p>
+            <input class="slider span3" type="range" min="0" max="75" value="0" id="rhoTP1-slider">
+            <div class="span3">&nbsp;</div>
+            <p class="center-grid-item span3"><span id="rhoTP2-slider-display">0</span></p>
+            <input class="slider span3" type="range" min="0" max="75" value="0" id="rhoTP2-slider">
           </div>
           <div class="elements numerical" id="numerical-btns-elements">
             <button id="toggle-mach-speed-btn" class="btn large-font no-uppercase center-grid-item span4">Mach/speed</button>

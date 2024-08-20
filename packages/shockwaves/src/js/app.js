@@ -191,8 +191,9 @@ const rhoTP1Slider = document.getElementById('rhoTP1-slider');
 const rhoTP1SliderDisplay = document.getElementById('rhoTP1-slider-display');
 const rhoTP2Slider = document.getElementById('rhoTP2-slider');
 const rhoTP2SliderDisplay = document.getElementById('rhoTP2-slider-display');
-const rGammaADisplay = document.getElementById('r-gamma-a-display');
-const densTempPresDisplay = document.getElementById('dens-temp-pres-display');
+const rGammaDisplay = document.getElementById('r-gamma-display');
+const tempADisplay = document.getElementById('temp-a-display');
+const presDensDisplay = document.getElementById('pres-dens-display');
 
 const transparencyPrefButton = document.getElementById('transparency-pref-btn');
 const colorPrefButton = document.getElementById('color-pref-btn');
@@ -1017,7 +1018,8 @@ const setRhoTP = function(sliderNumber = 0){
   q1 = stagPres1 - pres1;
 
   a1 = Math.sqrt(gamma*gasConstant*temp1);
-  densTempPresDisplay.innerHTML = `&rho;<sub>&infin;</sub> = ${densityForMetric(dens1)}&nbsp;&nbsp;&nbsp;&nbsp;T<sub>&infin;</sub> = ${temperatureForKelvin(temp1)}&nbsp;&nbsp;&nbsp;&nbsp;P<sub>&infin;</sub> = ${pressureForPascals(pres1)}`;
+  tempADisplay.innerHTML = `T<sub>&infin;</sub> = ${temperatureForKelvin(temp1)}&nbsp;&nbsp;&nbsp;&nbsp;a = &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span> = ${speedForMetric(a1,2)}`;
+  presDensDisplay.innerHTML = `P<sub>&infin;</sub> = ${pressureForPascals(pres1)}&nbsp;&nbsp;&nbsp;&nbsp;&rho;<sub>&infin;</sub> = ${densityForMetric(dens1)}`;
   displayRGammaA();
 }
 
@@ -1054,7 +1056,7 @@ gasMediumMenu.addEventListener('change', () => {
 });
 
 const displayRGammaA = function(){
-  rGammaADisplay.innerHTML = `R = ${Number(gasConstant).toFixed(2).toString()} J/kg/&deg;K&nbsp;&nbsp;&nbsp;&nbsp;&gamma; = ${Number(gamma).toFixed(3).toString()}&nbsp;&nbsp;&nbsp;&nbsp;a = &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span> = ${speedForMetric(a1,2)}`;
+  rGammaDisplay.innerHTML = `R = ${Number(gasConstant).toFixed(2).toString()} J/kg/&deg;K&nbsp;&nbsp;&nbsp;&nbsp;&gamma; = ${Number(gamma).toFixed(3).toString()}`;
 }
 
 const handleGasMediumOnChange = function(){
@@ -1229,57 +1231,62 @@ const handleInfoMenuChoice = function(choice){
   switch (choice){
     case 'info-intro': //Introduction
       infoText.innerHTML = `<p class="p-normal">The purpose of Aerovisualizer is to 
-      assist in teaching or reinforcing concepts in aerospace engineering by presenting 
-      them in interesting and engaging ways.  Subjects are displayed as 2D and 3D 
-      animations to complement the dry equations found in textbooks and online.  Controls
-      are also provided to manipulate the displays.</p>
+      assist in the teaching of concepts in aerospace engineering by presenting 
+      them in interesting and engaging ways.  Subjects are displayed in 3D to 
+      complement the dry equations found in textbooks and online.  Buttons and sliders 
+      are also provided for even more interaction.</p>
       
       <p class="p-normal"><em>Aerovisualizer - Oblique Shocks</em> focuses on the formation 
-      of oblique shock waves around a flying object traveling supersonically.  It is assumed 
-      that the user has taken or is currently taking a course on this subject.</p>
+      of oblique shock waves around a pointed UFO flying supersonically.  It is assumed 
+      that the user has taken or is currently taking a course covering oblique shock waves.</p>
 
-      <p class="p-normal">For simplicity, the (identified) flying object has no wings nor 
+      <p class="p-normal">For simplicity, the UFO has no wings nor 
       apparent means of propulsion nor stabilization.  It consists of three sections: a 
-      forward cone, a middle cylinder, and an aft cone.  The pointed cones allow for the 
-      formation of attached oblique shock waves at the forward and aft ends.  The object 
-      flies at zero angle of attack.  Two Prandtl-Meyer expansion fans form where the cones 
-      join the cylinder, but these are not rendered.  Detached shock waves are also not 
-      rendered if and when they occur.  Boundary layer effects are not modeled, and 
-      the turbulent wake is not rendered.</p>
-
-      <p class="p-normal">Five flow regions are defined as follows:
-      1) before the forward (bow) shock,
-      2) after the forward shock but before the first expansion fan,
-      3) after the first expansion fan but before the second one,
-      4) after second expansion fan but before the aft shock, and
-      5) after the aft shock.
-      </p>
-      <p class="p-normal"><em>IMPORTANT: In real life, the density (&rho;<sub>&infin;</sub>), 
-      temperature (T<sub>&infin;</sub>), and pressure (P<sub>&infin;</sub>) are boundary 
-      conditions that must match between regions 1 and 5.  Any differences between 
-      them are due to computational errors.  The errors can be reduced by flying at low Mach 
-      numbers and with small deflection angles.</em></p>`;
+      forward cone, a middle cylinder, and an aft cone.  Oblique shocks form at the forward 
+      and aft ends.  The UFO flies at zero angle of attack.</p>
+      
+      <p class="p-normal">The Prandtl-Meyer expansion fans that form where the cones 
+      join the cylinder are not rendered.  Detached shock waves are also not rendered, nor 
+      is the turbulent wake.  Boundary layer effects are not considered.</p>`;
       break;
 
       case 'info-how-to-use': //how to use aerovisualizer
       infoText.innerHTML = `
-      <p class="p-normal">1) Click the button labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub></em>.  
-      Set the gas constant (R) and heat capacity ratio (&gamma;) by specifying the gas that the object 
-      is flying through.  The value of &gamma; varies slightly with temperature.  Choose the method of setting the density (&rho;), 
-      temperature (T), and pressure (P) of the unperturbed gas.  The first method uses data from www.pdas.com for 
-      the 1976 Standard Atmosphere.  The other methods let you choose &rho;, P, and T while enforcing 
-      the equation P=&rho;RT for the chosen value of R.</p>
-      <p class="p-normal">2) Click <em>Mach #</em> to set the Mach number of the flying object.</p>
+      <p class="p-normal">1) Click the button labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub></em>.  
+      Use the first menu to specify the gas medium that the UFO flies through.  This sets the gas constant 
+      (R) and the heat capacity ratio (&gamma;).  The value of &gamma; varies with temperature.</p>
+      <p class="p-normal">Use the second menu to choose how you want to set the ambient density (&rho;<sub>&infin;</sub>), 
+      temperature (T<sub>&infin;</sub>), and pressure (P<sub>&infin;</sub>).  Set them using data from the 1976 Standard 
+      Atmosphere (see www.pdas.com).  Alternatively, set &rho;<sub>&infin;</sub>, P<sub>&infin;</sub>, and T<sub>&infin;</sub> 
+      individually while enforcing the equation P=&rho;RT.</p>
+      <p class="p-normal">2) Click <em>Mach #</em> to set the Mach number or speed of the UFO.</p>
       <p class="p-normal">3) Click <em>deflection</em> to set the half cone angles of the cones at the forward 
-      and aft ends of the flying object.</p>
-      <p class="p-normal">Observe the shock wave cones and note how they change in response to 
-      changes in Mach number and deflection angles.  Note the density, temperature, and pressure 
-      of the gas in the 5 flow regions around the object.</p>`;
+      and aft ends of the UFO.</p>
+      <p class="p-normal">Observe how the shock waves change in response to changes in Mach number 
+      and deflection angles.  Note the static &rho;, T, P, the stagnation &rho;<sub>0</sub>, T<sub>0</sub>, 
+      P<sub>0</sub>, the dynamic pressure (q), the speed of sound (a), and the Mach angles in the 5 flow regions 
+      around the UFO.</p>`;
+      break;
+
+      case 'info-flow-regions': // flow regions
+      infoText.innerHTML = `<p class="p-normal">
+      There are 5 flow regions:</p>
+      <p class="p-normal">1- before the forward shock,</p>
+      <p class="p-normal">2- after the forward shock but before the first expansion fan,</p>
+      <p class="p-normal">3- after the first expansion fan but before the second one,</p>
+      <p class="p-normal">4- after second expansion fan but before the aft shock, and</p>
+      <p class="p-normal">5- after the aft shock.</p><p></p>
+      <p class="p-normal"><em>IMPORTANT: &rho;, T, and P for region 1 matches the boundary 
+      conditions (&rho;<sub>&infin;</sub>, T<sub>&infin;</sub>, and P<sub>&infin;</sub>).  
+      Ideally, region 5 should match region 1.  Differences between them are due to 
+      computational errors which will be addressed at a later date.  For now, reduce this by 
+      lowering the Mach number and deflection angles.</em></p>`;
       break;
 
       case 'info-mach-number': // Mach number
-      infoText.innerHTML = `<p class="p-normal">The Mach number is the ratio of the speed of the 
-      flyig object to the local? undisturbed speed of sound (a).  ...</p>
+      infoText.innerHTML = `<p class="p-normal">The Mach number (M) is the ratio of the speed 
+      of the flow (v) to the speed of sound (a).  Both v and a ... and so the mach number changes also
+      <em>a</em> is a function of gamma, R and T (a=sqrtgammaRT).  R is larger for lighter gases like hydrogen.  Gamma is larger for gases containing monatomic molecules such as helium  gamma is a function of the degrees of freedom....</p>
 
       <p class="p-normal">  
       Choose the <em>Mach #</em> and use the slider to set the Mach number and 

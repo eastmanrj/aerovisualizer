@@ -249,6 +249,10 @@ label {
   padding: 0;
 }
 
+.small-font{
+  font-size: small;
+}
+
 input[type="radio"] {
   border: 0px;
   height: 2rem;
@@ -455,6 +459,10 @@ input[type="range"]:focus::-webkit-slider-thumb {
 
   .numerical{
     font-size: small;
+  }
+
+  .top-margin{
+    margin-top: 0.7rem;
   }
 }
 

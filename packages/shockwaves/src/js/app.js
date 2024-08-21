@@ -54,7 +54,7 @@ const defaultLabelsTransparency = 0;
 const defaultUFOColor = 'orange';
 const defaultForwardShockColor = 'blue';
 const defaultAftShockColor = 'blue';
-const defaultLabelsColor = 'yellow';
+const defaultLabelsColor = 'orange';
 const defaultAltitudeIsInFeet = false;
 
 //aerovisualizerData is modified and saved to local storage when preferences are 

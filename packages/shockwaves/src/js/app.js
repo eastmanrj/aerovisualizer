@@ -597,7 +597,7 @@ machSlider.oninput = function(){
 machSlider.onpointerup = function(){
   setRhoTP();
   computeAllFlow();
-  displayMachOrSpeed();
+  // displayMachOrSpeed();
   replaceAerovisualizerData('mach-number',mach1);
   saveToLocalStorage();
 }
@@ -1490,7 +1490,7 @@ speedUnitsMenu.addEventListener('change', () => {
   speedUnitsMenuSelection = speedUnitsMenu.value;
   setRhoTP();
   updateDisplay();
-  displayMachOrSpeed();
+  // displayMachOrSpeed();
   replaceAerovisualizerData('speed-units-menu-selection',speedUnitsMenuSelection);
   saveToLocalStorage();
 });
@@ -1829,6 +1829,13 @@ const computeDensTempPresRatios = function(m1, m2){
 
 const computeAllFlow = function(){
   let [forwardShockHalfConeAngle,m2,m0Norm,m1Norm,rho21,t21,p21,p021] = shock(mach1,forwardDelta,gamma);
+
+  if (!m2){
+    updateDisplay(true);
+    return;
+    //blah
+  }
+
   machAngle1Display.innerHTML = Number(Math.asin(1/mach1)/piOver180).toFixed(1).toString();
   mach2 = m2;
   machAngle2Display.innerHTML = Number(Math.asin(1/mach2)/piOver180).toFixed(1).toString();
@@ -2057,6 +2064,10 @@ const displayDensTempPresLabels = function(){
 }
 
 const displayMachOrSpeed = function(){
+  if (shockIsDetached){
+    return;
+  }
+
   let m1d;
   let m2d;
   let m3d;
@@ -2137,39 +2148,105 @@ toggleMachSpeedButton.addEventListener('click', () => {
 cycleNumbersButton.addEventListener('click', () => {
   setNumericalDisplay(true);
 });
+//blah
+const updateDisplay = function(detachedShock = false){
+  shockIsDetached = false;
 
-const updateDisplay = function(){
-  rho1Display.innerHTML = densityForMetric(dens1,3,false);
+  if (detachedShock){
+    shockIsDetached = true;
+    rho1Display.innerHTML = "or";
+    rho2Display.innerHTML = "reduce";
+    rho3Display.innerHTML = "the";
+    rho4Display.innerHTML = "deflection.";
+    rho5Display.innerHTML = "";
+    p1Display.innerHTML = "or";
+    p2Display.innerHTML = "reduce";
+    p3Display.innerHTML = "the";
+    p4Display.innerHTML = "deflection.";
+    p5Display.innerHTML = "";
+    t1Display.innerHTML = "or";
+    t2Display.innerHTML = "reduce";
+    t3Display.innerHTML = "the";
+    t4Display.innerHTML = "deflection.";
+    t5Display.innerHTML = "";
+    stagnationPressure1Display.innerHTML = "";
+    stagnationPressure2Display.innerHTML = "";
+    stagnationPressure3Display.innerHTML = "";
+    stagnationPressure4Display.innerHTML = "";
+    stagnationPressure5Display.innerHTML = "";
+    dynamicPressure1Display.innerHTML = "";
+    dynamicPressure2Display.innerHTML = "";
+    dynamicPressure3Display.innerHTML = "";
+    dynamicPressure4Display.innerHTML = "";
+    dynamicPressure5Display.innerHTML = "";
+    mach1Display.innerHTML = "Detached";
+    mach2Display.innerHTML = "shock.";
+    mach3Display.innerHTML = "Increase";
+    mach4Display.innerHTML = "the";
+    mach5Display.innerHTML = "Mach #";
+    mach1Display2.innerHTML = "Detached";
+    mach2Display2.innerHTML = "shock.";
+    mach3Display2.innerHTML = "Increase";
+    mach4Display2.innerHTML = "the";
+    mach5Display2.innerHTML = "Mach #";
+    mach1Display3.innerHTML = "Detached";
+    mach2Display3.innerHTML = "shock.";
+    mach3Display3.innerHTML = "Increase";
+    mach4Display3.innerHTML = "the";
+    mach5Display3.innerHTML = "Mach #";
+    speedOfSound1Display.innerHTML = "";
+    speedOfSound2Display.innerHTML = "";
+    speedOfSound3Display.innerHTML = "";
+    speedOfSound4Display.innerHTML = "";
+    speedOfSound5Display.innerHTML = "";
+    machAngle1Display.innerHTML = "";
+    machAngle2Display.innerHTML = "";
+    machAngle3Display.innerHTML = "";
+    machAngle4Display.innerHTML = "";
+    machAngle5Display.innerHTML = "";
+    stagnationTemperature1Display.innerHTML = "";
+    stagnationTemperature2Display.innerHTML = "";
+    stagnationTemperature3Display.innerHTML = "";
+    stagnationTemperature4Display.innerHTML = "";
+    stagnationTemperature5Display.innerHTML = "";
+    stagnationDensity1Display.innerHTML = "";
+    stagnationDensity2Display.innerHTML = "";
+    stagnationDensity3Display.innerHTML = "";
+    stagnationDensity4Display.innerHTML = "";
+    stagnationDensity5Display.innerHTML = "";
+    return;
+  }
+
   p1Display.innerHTML = pressureForPascals(pres1,4,false);
-  t1Display.innerHTML = temperatureForKelvin(temp1,1,false);
-  rho2Display.innerHTML = densityForMetric(dens2,3,false);
   p2Display.innerHTML = pressureForPascals(pres2,4,false);
-  t2Display.innerHTML = temperatureForKelvin(temp2,1,false);
-  rho3Display.innerHTML = densityForMetric(dens3,3,false);
   p3Display.innerHTML = pressureForPascals(pres3,4,false);
-  t3Display.innerHTML = temperatureForKelvin(temp3,1,false);
-  rho4Display.innerHTML = densityForMetric(dens4,3,false);
   p4Display.innerHTML = pressureForPascals(pres4,4,false);
-  t4Display.innerHTML = temperatureForKelvin(temp4,1,false);
-  rho5Display.innerHTML = densityForMetric(dens5,3,false);
   p5Display.innerHTML = pressureForPascals(pres5,4,false);
-  t5Display.innerHTML = temperatureForKelvin(temp5,1,false);
-  
-  dynamicPressure1Display.innerHTML = pressureForPascals(q1,4,false);
-  dynamicPressure2Display.innerHTML = pressureForPascals(q2,4,false);
-  dynamicPressure3Display.innerHTML = pressureForPascals(q3,4,false);
-  dynamicPressure4Display.innerHTML = pressureForPascals(q4,4,false);
-  dynamicPressure5Display.innerHTML = pressureForPascals(q5,4,false);
   stagnationPressure1Display.innerHTML = pressureForPascals(stagPres1,4,false);
   stagnationPressure2Display.innerHTML = pressureForPascals(stagPres2,4,false);
   stagnationPressure3Display.innerHTML = pressureForPascals(stagPres3,4,false);
   stagnationPressure4Display.innerHTML = pressureForPascals(stagPres4,4,false);
   stagnationPressure5Display.innerHTML = pressureForPascals(stagPres5,4,false);
+  dynamicPressure1Display.innerHTML = pressureForPascals(q1,4,false);
+  dynamicPressure2Display.innerHTML = pressureForPascals(q2,4,false);
+  dynamicPressure3Display.innerHTML = pressureForPascals(q3,4,false);
+  dynamicPressure4Display.innerHTML = pressureForPascals(q4,4,false);
+  dynamicPressure5Display.innerHTML = pressureForPascals(q5,4,false);
+  t1Display.innerHTML = temperatureForKelvin(temp1,1,false);
+  t2Display.innerHTML = temperatureForKelvin(temp2,1,false);
+  t3Display.innerHTML = temperatureForKelvin(temp3,1,false);
+  t4Display.innerHTML = temperatureForKelvin(temp4,1,false);
+  t5Display.innerHTML = temperatureForKelvin(temp5,1,false);
   stagnationTemperature1Display.innerHTML = temperatureForKelvin(stagTemp1,1,false);
   stagnationTemperature2Display.innerHTML = temperatureForKelvin(stagTemp2,1,false);
   stagnationTemperature3Display.innerHTML = temperatureForKelvin(stagTemp3,1,false);
   stagnationTemperature4Display.innerHTML = temperatureForKelvin(stagTemp4,1,false);
   stagnationTemperature5Display.innerHTML = temperatureForKelvin(stagTemp5,1,false);
+  rho1Display.innerHTML = densityForMetric(dens1,3,false);
+  rho2Display.innerHTML = densityForMetric(dens2,3,false);
+  rho3Display.innerHTML = densityForMetric(dens3,3,false);
+  rho4Display.innerHTML = densityForMetric(dens4,3,false);
+  rho5Display.innerHTML = densityForMetric(dens5,3,false);
   stagnationDensity1Display.innerHTML = densityForMetric(stagDens1,3,false);
   stagnationDensity2Display.innerHTML = densityForMetric(stagDens2,3,false);
   stagnationDensity3Display.innerHTML = densityForMetric(stagDens3,3,false);

@@ -165,6 +165,7 @@ let altitudeIsInFeet = defaultAltitudeIsInFeet;
 let machSpeedState = 1;//display Mach #, not speed
 let currentMainButton = "rhoTP";
 let numericalDisplayOption = 1;
+let shockIsDetached = false;
 
 const threeDWorld = document.getElementById('threeD-world');
 

@@ -464,6 +464,12 @@ input[type="range"]:focus::-webkit-slider-thumb {
   .top-margin{
     margin-top: 0.7rem;
   }
+
+  .btn{
+    font-size: 1.1rem;
+    padding: 0.3rem 0.5rem;
+    margin-bottom: 0.3rem;
+  }
 }
 
 /************************************

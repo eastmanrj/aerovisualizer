@@ -1059,7 +1059,7 @@ gasMediumMenu.addEventListener('change', () => {
 });
 
 const displayRGammaACD = function(){
-  rGammaDisplay.innerHTML = `R = ${Number(gasConstant).toFixed(2).toString()} J/kg/&deg;K&nbsp;&nbsp;&nbsp;&nbsp;&gamma; = ${Number(gamma).toFixed(3).toString()} C<sub>Dwave</sub> = ${Number(waveDragCoef).toExponential(3).toString()}`;
+  rGammaDisplay.innerHTML = `R = ${Number(gasConstant).toFixed(2).toString()} J/kg/&deg;K&nbsp;&nbsp;&nbsp;&nbsp;&gamma; = ${Number(gamma).toFixed(3).toString()}&nbsp;&nbsp;&nbsp;&nbsp;C<sub>Dwave</sub> = ${Number(waveDragCoef).toExponential(3).toString()}`;
 }
 
 const handleGasMediumOnChange = function(){

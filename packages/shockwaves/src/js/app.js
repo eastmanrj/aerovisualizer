@@ -1249,9 +1249,9 @@ const handleInfoMenuChoice = function(choice){
       
       <p class="p-normal"><em>Aerovisualizer - Oblique Shocks</em> focuses on the formation 
       of oblique shock waves.  It is assumed that the user has taken or is currently taking 
-      a course covering oblique shock waves.</p>
+      a course covering this topic.</p>
 
-      <p class="p-normal">Here, shock waves form around a pointed shaped UFO flying supersonically.  
+      <p class="p-normal">In Aerovisualizer, shock waves form around a pointed shaped UFO flying supersonically.  
       For simplicity, the UFO has no wings nor apparent means of propulsion nor stabilization.  
       It consists of three sections: a forward cone, a middle cylinder, and an aft cone.  
       Oblique shocks form at the forward and aft ends.  The UFO flies at zero angle of attack.</p>
@@ -1263,15 +1263,15 @@ const handleInfoMenuChoice = function(choice){
 
     case 'info-how-to-use': //how to use aerovisualizer
       infoText.innerHTML = `
-      <p class="p-normal">Click or tap the buttons labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub>
-      , Mach #, and defl</em>. Manipulate the buttons, menus, and sliders that appear.  Observe 
-      how the shock waves and the displayed data change in response.</p>`;
+      <p class="p-normal">Click or tap the buttons labeled <em>"&gamma;R&rho;<sub>&infin;</sub>T<sub>&infin;</sub>P<sub>&infin;</sub>"
+      , "Mach #", and "defl"</em>. Manipulate the buttons, menus, and sliders that appear.  Observe 
+      how the shock waves and data change in response.</p>`;
       break;
 
     case 'info-how-to-use-rhoTP-btn-gas-menu': //gas medium menu
-      infoText.innerHTML = `<p class="p-normal">After clicking or tapping the button labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub></em>
-      , use the top menu to specify the gas medium that the UFO flies through.  This establishes the <em>gas constant, R</em>, and the <em>heat capacity ratio, &gamma;</em>.</p>
-      <p class="p-normal">R is larger for lighter gases like hydrogen and smaller for heavier gases like xenon. The speed of sound, <em>a</em>, is 
+      infoText.innerHTML = `<p class="p-normal">After clicking or tapping the button labeled <em>&gamma;R&rho;<sub>&infin;</sub>T<sub>&infin;</sub>P<sub>&infin;</sub></em>
+      , use the top menu to specify the gas that the UFO flies through.  This establishes the <em>gas constant</em>, <em>R</em>, and the <em>heat capacity ratio</em>, <em>&gamma;</em>.</p>
+      <p class="p-normal">R is larger for lighter gases like hydrogen and smaller for heavier ones like xenon. The speed of sound, <em>a</em>, is 
       proportional to &Sqrt;<span STYLE="text-decoration:overline">R</span>.</p>
       <p class="p-normal">&gamma; is a function of the degrees of freedom of the individual gas molecules.  It is larger for monatomic molecules 
       such as helium and smaller for more complex ones such as propane.  The vibrational degrees of freedom are less 
@@ -1280,31 +1280,32 @@ const handleInfoMenuChoice = function(choice){
       break;
 
     case 'info-how-to-use-rhoTP-btn-rhotp-menu': //rho, T, P menu
-      infoText.innerHTML = `<p class="p-normal">After clicking or tapping the button labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub></em>
-      , use the second menu to specify the way you want to set the <em>ambient density (&rho;<sub>&infin;</sub>), temperature (T<sub>&infin;</sub>), and pressure (P<sub>&infin;</sub>)</em> of 
-      the gas medium.</p>
-      <p class="p-normal">Use the first menu option to set the altitude.  This uses data from the 1976 Standard Atmosphere (see www.pdas.com).  Use the first slider to specify the altitude.  
+      infoText.innerHTML = `<p class="p-normal">After clicking or tapping the button labeled <em>&gamma;R&rho;<sub>&infin;</sub>T<sub>&infin;</sub>P<sub>&infin;</sub></em>
+      , use the second menu to specify the way you want to set the <em>ambient density (&rho;<sub>&infin;</sub>)</em>, <em>temperature (T<sub>&infin;</sub>)</em>, and <em>pressure (P<sub>&infin;</sub>)</em> of 
+      the gas.</p>
+      <p class="p-normal">Use the first menu option to set the values by altitude using data from the 1976 Standard Atmosphere (see www.pdas.com).  Use the first slider to specify the altitude.  
       This option only applies to dry air.</p>
-      <p class="p-normal">Use the other menu options to set two of &rho;<sub>&infin;</sub>, P<sub>&infin;</sub>, and T<sub>&infin;</sub> individually while enforcing the equation <em>P=&rho;RT</em>.  
-      Use the two sliders to set the values.  <em>Important:</em> Extremely high and low temperatures and pressures are allowed by Aerovisualizer.  Since gases can become 
-      a plasma or a liquid or a solid under the right conditions, these conditions should be considered when viewing the displayed data.</p>`;
+      <p class="p-normal">Use the other menu options to set two of either &rho;<sub>&infin;</sub>, P<sub>&infin;</sub>, or T<sub>&infin;</sub> individually while enforcing the equation <em>P=&rho;RT</em>.  
+      Use the two sliders to set the values.</p>
+      <p class="p-normal"><em>Important:</em> Extremely high and low temperatures and pressures are allowed by Aerovisualizer.  Since gases can become 
+      a plasma or a liquid or a solid under the right conditions, these conditions should be considered when viewing and interpreting the data.</p>`;
       break;
 
     case 'info-how-to-use-mach-num-btn': // Mach number
       infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>Mach #</em>
-      to set the Mach number of the UFO as it flies through the abient gas.  The Mach number, <em>(M)</em>, is the ratio of the speed of 
-      the local airflow to the local speed of sound.  Use the slider to set the Mach number of the UFO (the Mach number of the airflow in region 1).  
-      In <em>Aerovisualizer</em>, Mach numbers range from 1.1 to 10.</p>
+      to set the Mach number of the UFO as it flies through the abient gas.  The Mach number, <em>M</em>, is the ratio of the speed of 
+      the local airflow to the local speed of sound.  Use the slider to set M for the UFO (same as M for the airflow in region 1).  
+      In Aerovisualizer, M ranges from 1.1 to 10.</p>
 
-      <p class="p-normal">The speed of sound equals <em>&Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span></em>.  
-      Shock waves form in <em>supersonic flow (M > 1)</em>, and thus they occur at lower airflow rates in gases with complex molecules such as propane, 
+      <p class="p-normal">The <em>speed of sound</em>, <em>a</em>, equals &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span>.  
+      Shock waves form in <em>supersonic flow (M > 1)</em>, and thus they appear at lower airflow rates in gases with complex molecules such as propane, 
       in heavy gases such as xenon, and at low temperatures (absolute scales) for all gases.</p>`;
       break;
 
     case 'info-how-to-use-defl-btn': // deflection angle
       infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>defl</em> to set the half cone angles 
-      of the cones at the forward and aft ends of the UFO.  This also sets boundary conditions on the flow, and thus the 
-      deflection angles for the two shock waves and two Prandtl-Meyer expansion fans.</p>
+      of the cones at the forward and aft ends of the UFO.  This sets boundary conditions on the flow, and thus the 
+      <em>deflection angles</em> for the two shock waves and two Prandtl-Meyer expansion fans.</p>
       
       <p class="p-normal">Use the menu to specify whether to modify the forward cone or the aft cone.  Use the slider 
       to set the value (from 1&deg; to 30&deg;).</p>`;
@@ -1313,16 +1314,16 @@ const handleInfoMenuChoice = function(choice){
     case 'info-how-to-use-display-toggle-cycle-btns': // display toggle and cycle buttons
       infoText.innerHTML = `<p class="p-normal">After clicking or tapping either the button labeled <em>Mach #</em> or <em>defl</em>
       , click or tap the button labeled <em>Mach/speed</em> to toggle the display between Mach number and speed.  The speed of the 
-      flow in a region equals the local Mach number times the speed of sound for the flow in that region.</p>
+      flow in a region equals the local value of <em>M</em> times <em>a</em>.</p>
 
-      <p class="p-normal">Click or tap the button labeled either <em>P&nbsp;&rarr;&nbsp;T</em>, <em>T&nbsp;&rarr;&nbsp;&rho;</em>, or <em>&rho;&nbsp;&rarr;&nbsp;P</em>. 
+      <p class="p-normal">Click or tap the button labeled either <em>P&rarr;T</em>, <em>T&rarr;&rho;</em>, or <em>&rho;&rarr;P</em>. 
       The displayed data changes to one of three options:</p>
       
       <p class="p-normal"><em>1-</em> static pressure (P), stagnation pressure (P<sub>0</sub>), and dynamic pressure (q),</p>
       <p class="p-normal"><em>2-</em> static temperature (T), stagnation pressure (T<sub>0</sub>), and the speed of sound (a),</p>
-      <p class="p-normal"><em>3-</em> static density (&rho;), stagnation density (&rho;<sub>0</sub>), and the Mach angle (&deg;).</p>
+      <p class="p-normal"><em>3-</em> static density (&rho;), stagnation density (&rho;<sub>0</sub>), and the Mach angle in degrees.</p>
 
-      <p class="p-normal"><em>Note 1:</em> Dynamic pressure, q, for compressed gas does <em>not</em> equal &half;&rho;v<sup>2</sup>.  It is simply P<sub>0</sub> minus P.</p>
+      <p class="p-normal"><em>Note 1:</em> The <em>dynamic pressure</em>, <em>q</em>, for compressed gas does <em>not</em> equal &half;&rho;v<sup>2</sup>.  It is simply P<sub>0</sub> minus P.</p>
       <p class="p-normal"><em>Note 2:</em> The <em>Mach angle</em> equals sin<sup>-1</sup>(1/M).</p>`;
       break;
 
@@ -1335,49 +1336,53 @@ const handleInfoMenuChoice = function(choice){
       <p class="p-normal"><em>4-</em> after second expansion fan but before the aft shock, and</p>
       <p class="p-normal"><em>5-</em> after the aft shock.</p><p></p>
       <p class="p-normal"><em>IMPORTANT:</em> In region 1, &rho;&equals;&rho;<sub>&infin;</sub>, T&equals;T<sub>&infin;</sub>, 
-      and P&equals;P<sub>&infin;</sub> (the boundary conditions).  These boundary conditions also apply to region 5.  
-      Any differences between regions 1 and 5 are due to computational errors.  These errors will be addressed in the future, 
-      but or now, reduce this by lowering the Mach number or the deflection angles.</p>`;
+      and P&equals;P<sub>&infin;</sub> (the boundary conditions).  <em>These boundary conditions must also apply to region 5!</em> 
+      Differences between them are due to possible linear assumptions that are not completely understood by the programmer.  
+      Aerovisualizer is an open source project, so if you know the solution, please let us know!  
+      For now, reduce this error by lowering the Mach number or the deflection angles.</p>`;
       break;
 
     case 'info-prefs-main': //preferences
       infoText.innerHTML = `<p class="p-normal">Click <em>pref</em>.  Buttons appear 
       labeled as below:</p>
-      <p class="p-normal">transparency, color, and misc.</p>`;
+      <p class="p-normal"><em>transparency</em></p>
+      <p class="p-normal"><em>color</em>, and</p>
+      <p class="p-normal"><em>misc</em>.</p>`;
       break;
 
     case 'info-prefs-transparency': //preferences - transparency
       infoText.innerHTML = `<p class="p-normal">Use the sliders to set the <em>transparency</em> 
-      (visibility) of the flying object, the two shock waves, and the number labels.  Move 
-      sliders completely to the right to make objects completely disappear.</p>`;
+      (visibility) of the UFO, the two shock waves, and the number labels for the 5 flow regions.  
+      Move the sliders completely to the right to make objects disappear.</p>`;
       break;
 
     case 'info-prefs-color': //preferences - color
-      infoText.innerHTML = `<p class="p-normal">Use the menus to choose the <em>colors</em> of 
-      the flying object, the two shock waves, and the number labels.</p>`;
+      infoText.innerHTML = `<p class="p-normal">Use the menus to choose the <em>color</em> of 
+      the UFO, the two shock waves, and the number labels for the 5 flow regions.</p>`;
       break;
 
     case 'info-prefs-misc': //preferences - miscellaneous
-      infoText.innerHTML = `<p class="p-normal">Click the checkbox to display altitude in units of 
-      feet.  Otherwise, the altitude is displayed in kilometers.</p>
-      <p class="p-normal">Use the menus to specify the units of the following:</p>
-      <p class="p-normal">Density - kg/m³, lbm/ft³, slugs/ft³,</p>
-      <p class="p-normal">Temperature - degrees Celsius, Kelvin, Fahrenheit, Rankine,</p>
-      <p class="p-normal">Pressure - Pascals (Pa, N/m²), bar, kPa, MPa, pounds per square inch (psi), kg(force)/cm², 
-      inches of Mercury (inHg), Ba, hectopascals (hPa, millibar), Standard Atmospheres (atm), Torr,</p>
-      <p class="p-normal">Speed - meters per second (m/s), knots, feet per second (ft/s), kilometers per hour (km/h), miles per hour (mph).</p>`;
+      infoText.innerHTML = `<p class="p-normal">Use the menus to specify the <em>units</em> for the following:</p>
+      <p class="p-normal"><em>Density</em> - kg/m³, lbm/ft³, slugs/ft³,</p>
+      <p class="p-normal"><em>Temperature</em> - degrees Celsius, Kelvin, Fahrenheit, Rankine,</p>
+      <p class="p-normal"><em>Pressure</em> - Pascals (Pa, N/m²), bar, kPa, MPa, pounds per square inch (psi), kg(force)/cm², 
+      inches of Mercury (inHg), Ba, hectopascals (hPa, millibar), Standard Atmospheres (atm), Torr, and</p>
+      <p class="p-normal"><em>Speed</em> - meters per second (m/s), knots, feet per second (ft/s), kilometers per hour (km/h), miles per hour (mph).</p>
+      <p class="p-normal">Click the checkbox to display the <em>altitude</em> in units of 
+      feet (default is kilometers).</p>`;
       break;
 
     case 'info-contact-disclaimer':
       infoText.innerHTML = `<p class="p-normal">Aerovisualizer is an open source 
       project.  To report bugs or suggestions or to contribute to its development, 
-      please contact us at github.com/eastmanrj/aerovisualizer.</p>
+      please contact us at github.com/eastmanrj/aerovisualizer.  The source code is 
+      free to download.</p>
 
       <p class="p-normal">We do not take responsibility for missed problems on 
-      quizes, tests, projects, or homework due to software bugs or the 
+      quizes, tests, projects, or homework due to software errors or the 
       misinterpretation of displays in Aerovisualizer.  Do not use Aerovisualizer 
       for hardware or software qualification in aerospace or other industries nor 
-      in any other applications.</p>`;
+      in any other applications except as a learning aid.</p>`;
       break;
   }
 }

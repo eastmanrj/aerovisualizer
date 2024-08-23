@@ -178,6 +178,10 @@ class UFO {
     this._cylinderScale.set(this._scaleXZ, 1, this._scaleXZ);
     this._forwardConeScale.set(this._scaleXZ, this._forwardScaleY, this._scaleXZ);
     this._aftConeScale.set(this._scaleXZ, this._aftScaleY, this._scaleXZ);
+
+    const rToLRatio = this._scaleXZ/(this._forwardScaleY + this._scaleXZ + this._aftScaleY);
+    const waveDragCoef = 9*Math.PI*Math.PI*rToLRatio*rToLRatio/2;//from en.wikipedia.org/wiki/Sears–Haack_body
+    return waveDragCoef;
   }
 
   setShockWaveHalfConeAngles(forwardHCA, aftHCA){

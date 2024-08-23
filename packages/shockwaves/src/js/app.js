@@ -48,8 +48,8 @@ const defaultDensitySliderIndex = 0;
 const defaultTemperatureSliderIndex = 0;
 const defaultPressureSliderIndex = 0;
 const defaultUFOTransparency = 0;
-const defaultForwardShockTransparency = 80;
-const defaultAftShockTransparency = 80;
+const defaultForwardShockTransparency = 85;
+const defaultAftShockTransparency = 85;
 const defaultLabelsTransparency = 0;
 const defaultUFOColor = 'orange';
 const defaultForwardShockColor = 'blue';
@@ -166,6 +166,7 @@ let machSpeedState = 1;//display Mach #, not speed
 let currentMainButton = "rhoTP";
 let numericalDisplayOption = 1;
 let shockIsDetached = false;
+let waveDragCoef = 0;
 
 const threeDWorld = document.getElementById('threeD-world');
 
@@ -632,7 +633,8 @@ const handleDeltaOnInput = function(){
       break;
   }
 
-  ufo.setHalfConeAngles(forwardDelta,aftDelta);
+  waveDragCoef = ufo.setHalfConeAngles(forwardDelta,aftDelta);
+  displayRGammaACD();
   ufo.needsRefresh = true;
 }
 
@@ -1021,7 +1023,7 @@ const setRhoTP = function(sliderNumber = 0){
   a1 = Math.sqrt(gamma*gasConstant*temp1);
   tempADisplay.innerHTML = `T<sub>&infin;</sub> = ${temperatureForKelvin(temp1)}&nbsp;&nbsp;&nbsp;&nbsp;a = &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span> = ${speedForMetric(a1,2)}`;
   presDensDisplay.innerHTML = `P<sub>&infin;</sub> = ${pressureForPascals(pres1)}&nbsp;&nbsp;&nbsp;&nbsp;&rho;<sub>&infin;</sub> = ${densityForMetric(dens1)}`;
-  displayRGammaA();
+  displayRGammaACD();
 }
 
 rhoTP1Slider.oninput = function(){
@@ -1056,8 +1058,8 @@ gasMediumMenu.addEventListener('change', () => {
   saveToLocalStorage();
 });
 
-const displayRGammaA = function(){
-  rGammaDisplay.innerHTML = `R = ${Number(gasConstant).toFixed(2).toString()} J/kg/&deg;K&nbsp;&nbsp;&nbsp;&nbsp;&gamma; = ${Number(gamma).toFixed(3).toString()}`;
+const displayRGammaACD = function(){
+  rGammaDisplay.innerHTML = `R = ${Number(gasConstant).toFixed(2).toString()} J/kg/&deg;K&nbsp;&nbsp;&nbsp;&nbsp;&gamma; = ${Number(gamma).toFixed(3).toString()} C<sub>Dwave</sub> = ${Number(waveDragCoef).toExponential(3).toString()}`;
 }
 
 const handleGasMediumOnChange = function(){
@@ -1099,7 +1101,7 @@ const handleGasMediumOnChange = function(){
 
   setRhoTP();
   computeAllFlow();
-  // displayRGammaA();
+  // displayRGammaACD();
 }
 
 const setTransparency = function(thing, transparency){
@@ -1228,6 +1230,14 @@ infoReturnButton.addEventListener('click', () => {
   toggleShowInfo();
 });
 
+//Note the static &rho;, T, P, the stagnation &rho;<sub>0</sub>, 
+//T<sub>0</sub>, P<sub>0</sub>, the dynamic pressure (q), the speed of sound (a), and the Mach angles in the 5 flow regions around the UFO.
+//<p class="p-normal">2) Click <em>Mach #</em> to set the Mach number or speed of the UFO.</p>
+//<p class="p-normal">  Choose the <em>Mach #</em> and use the slider to set the Mach number and 
+//      <p class="p-normal">Use the second menu to choose how you want to set the ambient density (&rho;<sub>&infin;</sub>), 
+//temperature (T<sub>&infin;</sub>), and pressure (P<sub>&infin;</sub>).  Set them using 
+//      <p class="p-normal">Oblique shock waves form in the shape of a cone.</p>
+
 const handleInfoMenuChoice = function(choice){
   switch (choice){
     case 'info-intro': //Introduction
@@ -1238,60 +1248,85 @@ const handleInfoMenuChoice = function(choice){
       are also provided for even more interaction.</p>
       
       <p class="p-normal"><em>Aerovisualizer - Oblique Shocks</em> focuses on the formation 
-      of oblique shock waves around a pointed UFO flying supersonically.  It is assumed 
-      that the user has taken or is currently taking a course covering oblique shock waves.</p>
+      of oblique shock waves.  It is assumed that the user has taken or is currently taking 
+      a course covering oblique shock waves.</p>
 
-      <p class="p-normal">For simplicity, the UFO has no wings nor 
-      apparent means of propulsion nor stabilization.  It consists of three sections: a 
-      forward cone, a middle cylinder, and an aft cone.  Oblique shocks form at the forward 
-      and aft ends.  The UFO flies at zero angle of attack.</p>
+      <p class="p-normal">The shock waves around a pointed shaped UFO flying supersonically.  
+      For simplicity, the UFO has no wings nor apparent means of propulsion nor stabilization.  
+      It consists of three sections: a forward cone, a middle cylinder, and an aft cone.  
+      Oblique shocks form at the forward and aft ends.  The UFO flies at zero angle of attack.</p>
       
       <p class="p-normal">The Prandtl-Meyer expansion fans that form where the cones 
-      join the cylinder are not rendered.  Detached shock waves are also not rendered, nor 
+      join the cylinder are not rendered.  Also, detached shock waves are not modeled or rendered, nor 
       is the turbulent wake.  Boundary layer effects are not considered.</p>`;
       break;
 
-      case 'info-how-to-use': //how to use aerovisualizer
+    case 'info-how-to-use': //how to use aerovisualizer
       infoText.innerHTML = `
-      <p class="p-normal">1) Click the button labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub></em>.  
-      Use the first menu to specify the gas medium that the UFO flies through.  This sets the gas constant 
-      (R) and the heat capacity ratio (&gamma;).  The value of &gamma; varies with temperature.</p>
-      <p class="p-normal">Use the second menu to choose how you want to set the ambient density (&rho;<sub>&infin;</sub>), 
-      temperature (T<sub>&infin;</sub>), and pressure (P<sub>&infin;</sub>).  Set them using data from the 1976 Standard 
-      Atmosphere (see www.pdas.com).  Alternatively, set &rho;<sub>&infin;</sub>, P<sub>&infin;</sub>, and T<sub>&infin;</sub> 
-      individually while enforcing the equation P=&rho;RT.</p>
-      <p class="p-normal">2) Click <em>Mach #</em> to set the Mach number or speed of the UFO.</p>
-      <p class="p-normal">3) Click <em>deflection</em> to set the half cone angles of the cones at the forward 
-      and aft ends of the UFO.</p>
-      <p class="p-normal">Observe how the shock waves change in response to changes in Mach number 
-      and deflection angles.  Note the static &rho;, T, P, the stagnation &rho;<sub>0</sub>, T<sub>0</sub>, 
-      P<sub>0</sub>, the dynamic pressure (q), the speed of sound (a), and the Mach angles in the 5 flow regions 
-      around the UFO.</p>`;
+      <p class="p-normal">Click or tap the buttons labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub>
+      , Mach #, and defl</em>. Manipulate the buttons, menus, and sliders 
+      that appear.  Observe how the shock waves and the displayed data change in response.</p>`;
       break;
 
-      case 'info-flow-regions': // flow regions
+    case 'info-how-to-use-rhoTP-btn-gas-menu':
+      infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub></em>.  
+      Use the top menu to specify the gas medium that the UFO flies through.  This establishes the gas constant, <em>R</em>, and the heat capacity ratio, <em>&gamma;</em>.</p>
+      <p class="p-normal">R is larger for lighter gases like hydrogen and smaller for heavier gases like xenon. The speed of sound is 
+      proportional to &Sqrt;<span STYLE="text-decoration:overline">R</span>.</p>
+      <p class="p-normal">&gamma; is a function of the degrees of freedom of the individual molecules.  It is larger for monatomic molecules 
+      such as helium and smaller for more complex molecules such as propane.  The vibrational degrees of freedom are less 
+      prominent than the translational and rotational ones, but come more into play at higher temperatures.  Rotational  degrees of freedom 
+      predominate more at low temperatures.</p>`;
+      break;
+
+    case 'info-how-to-use-rhoTP-btn-rhotp-menu':
+      infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub></em>
+      .  Use the second menu to specify the way you want to set the ambient density (&rho;<sub>&infin;</sub>), temperature (T<sub>&infin;</sub>), and pressure (P<sub>&infin;</sub>) of 
+      the gas medium.</p>
+      <p class="p-normal">Use the first option to use data from the 1976 Standard Atmosphere (see www.pdas.com).  Use the first slider to specify the altitude.  This option only applies to dry air.</p>
+      <p class="p-normal">Use the other options to set &rho;<sub>&infin;</sub>, P<sub>&infin;</sub>, and T<sub>&infin;</sub> individually while enforcing the equation P=&rho;RT.  Use the two sliders to 
+      set the values.  <em>Note:</em> Extremely high temperatures are allowed, but since gases become 
+      a plasma at extreme temperatures, the displayed data would obviously be highly inaccurate.</p>`;
+      break;
+
+    case 'info-how-to-use-mach-num-btn': // Mach number
+      infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>Mach #</em>
+      to set the Mach number of the UFO flying through the abient gas.  The Mach number (M) is the ratio of the speed of 
+      the local airflow to the local speed of sound (a).  Use the slider to set the Mach number of the UFO (also the Mach number of the airflow for region 1).  
+      The Mach number ranges from 1.1 to 10.</p>
+      
+      <p class="p-normal">Click or tap the button labeled <em>Mach/speed</em> to toggle the display 
+      between Mach number and speed for the 5 regions.</p>
+
+      <p class="p-normal">Click or tap the button labeled either <em>P&nbsp;&rarr;&nbsp;T</em>, <em>T&nbsp;&rarr;&nbsp;&rho;</em>, or <em>&rho;&nbsp;&rarr;&nbsp;P</em> to 
+      cycle the display. See ...</p>
+
+      <p class="p-normal">The speed of sound equals &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span>.  
+      Shock waves form in supersonic flow (M > 1), and thus they occur at lower airflow rates in heavy gases such as 
+      xenon, gases with complex molecules such as propane, and at low temperatures for all gases.</p>`;
+      break;
+
+    case 'info-how-to-use-defl-btn': // deflection angle
+      infoText.innerHTML = `<p class="p-normal">Click <em>defl</em> to set the half cone angles of the cones at the forward 
+      and aft ends of the UFO.  This is also sets boundary conditions on the flow, and thus the 
+      deflection angles for both shock waves and both Prandtl-Meyer expansion fans.</p>
+      
+      <p class="p-normal">Use the menu to specify whether to modify 
+      the forward cone or the aft cone.  Use the slider to set the value in degrees.  The range is 1&deg; to 30&deg;.</p>`;
+      break;
+
+    case 'info-flow-regions': // flow regions
       infoText.innerHTML = `<p class="p-normal">
-      There are 5 flow regions:</p>
-      <p class="p-normal">1- before the forward shock,</p>
-      <p class="p-normal">2- after the forward shock but before the first expansion fan,</p>
-      <p class="p-normal">3- after the first expansion fan but before the second one,</p>
-      <p class="p-normal">4- after second expansion fan but before the aft shock, and</p>
-      <p class="p-normal">5- after the aft shock.</p><p></p>
-      <p class="p-normal"><em>IMPORTANT: &rho;, T, and P for region 1 matches the boundary 
-      conditions (&rho;<sub>&infin;</sub>, T<sub>&infin;</sub>, and P<sub>&infin;</sub>).  
-      Ideally, region 5 should match region 1.  Differences between them are due to 
-      computational errors which will be addressed at a later date.  For now, reduce this by 
-      lowering the Mach number and deflection angles.</em></p>`;
-      break;
-
-      case 'info-mach-number': // Mach number
-      infoText.innerHTML = `<p class="p-normal">The Mach number (M) is the ratio of the speed 
-      of the flow (v) to the speed of sound (a).  Both v and a ... and so the mach number changes also
-      <em>a</em> is a function of gamma, R and T (a=sqrtgammaRT).  R is larger for lighter gases like hydrogen.  Gamma is larger for gases containing monatomic molecules such as helium  gamma is a function of the degrees of freedom....</p>
-
-      <p class="p-normal">  
-      Choose the <em>Mach #</em> and use the slider to set the Mach number and 
-      observe how the...`;
+      <em>There are 5 flow regions:</em></p>
+      <p class="p-normal"><em>1-</em> before the forward shock,</p>
+      <p class="p-normal"><em>2-</em> after the forward shock but before the first expansion fan,</p>
+      <p class="p-normal"><em>3-</em> after the first expansion fan but before the second one,</p>
+      <p class="p-normal"><em>4-</em> after second expansion fan but before the aft shock, and</p>
+      <p class="p-normal"><em>5-</em> after the aft shock.</p><p></p>
+      <p class="p-normal"><em>IMPORTANT:</em> In region 1, &rho;&equals;&rho;<sub>&infin;</sub>, T&equals;T<sub>&infin;</sub>, 
+      and P&equals;P<sub>&infin;</sub> (the boundary conditions).  These boundary conditions also apply to region 5.  
+      Any differences between regions 1 and 5 are due to computational errors.  These errors will be addressed in the future, 
+      but or now, reduce this by lowering the Mach number or the deflection angles.</p>`;
       break;
 
     case 'info-prefs-main': //preferences
@@ -1300,18 +1335,18 @@ const handleInfoMenuChoice = function(choice){
       <p class="p-normal">transparency, color, and misc.</p>`;
       break;
 
-      case 'info-prefs-transparency': //preferences - transparency
+    case 'info-prefs-transparency': //preferences - transparency
       infoText.innerHTML = `<p class="p-normal">Use the sliders to set the <em>transparency</em> 
       (visibility) of the flying object, the two shock waves, and the number labels.  Move 
       sliders completely to the right to make objects completely disappear.</p>`;
       break;
 
-      case 'info-prefs-color': //preferences - color
+    case 'info-prefs-color': //preferences - color
       infoText.innerHTML = `<p class="p-normal">Use the menus to choose the <em>colors</em> of 
       the flying object, the two shock waves, and the number labels.</p>`;
       break;
 
-      case 'info-prefs-misc': //preferences - miscellaneous
+    case 'info-prefs-misc': //preferences - miscellaneous
       infoText.innerHTML = `<p class="p-normal">Click the checkbox to display altitude in units of 
       feet.  Otherwise, the altitude is displayed in kilometers.</p>
       <p class="p-normal">Use the menus to specify the units of the following:</p>
@@ -1335,74 +1370,6 @@ const handleInfoMenuChoice = function(choice){
       break;
   }
 }
-
-
-//     case 'info-attitude': //Euler angles & quaternions
-//       infoText.innerHTML = `<p class="p-normal">The two most common ways 
-//       to specify orientation are 1) Euler angles, and 2) quaternions.  
-//       Click <em>&psi;&nbsp;&theta;&nbsp;&phi;</em>, and use the button that appears 
-//       to toggle between Euler angles and quaternions.</p>
-
-//       <p class="p-normal"><em>Quaternions</em>: Use the sliders to set the 
-//       rotation angle of the object in degrees and also the components of the unit 
-//       vector &lambda; about which the rotation is made.  Use the buttons to set 
-//       the values to zero.  The components of the quaternion are displayed as 
-//       w, x, y, and z.</p>`;
-//       break;
-
-//     case 'info-angular-rates': //angular velocity & momentum
-//       infoText.innerHTML = `<p class="p-normal">Click <em>&omega;&nbsp;/&nbsp;H</em>  
-//       and use the radio buttons to select either &omega; (angular velocity) or H 
-//       (angular momentum).</p>
-
-//     case 'info-cones': //space and body cones
-//       infoText.innerHTML = `<p class="p-normal">Rigid bodies for which 2 of 
-//       the 3 principal moments of inertia at the center of mass are equal are 
-//       said to be axially symmetric whether or not the mass distribution is 
-//       symmetrical.  Such bodies exhibit a characteristic behavior while 
-//       rotating without torque.</p>
-
-
-//     case 'info-torque-general': //torque - general
-//       infoText.innerHTML = `<p class="p-normal">Click <em>&tau;</em> and use the menu 
-//       that appears to choose from the following torque options:</p>
-      
-//       <p class="p-normal">1) no torque, 2) space frame, 3) body frame, 4) ACS stabilization, 
-//       5) gravity gradient, and 6) spinning top.</p>`;
-//       break;
-
-//     case 'info-torque-no-torque': //torque - no torque
-//       infoText.innerHTML = `<p class="p-normal">Choose <em>no torque</em>. Set the 
-//       initial attitude and rotation rate.  Click the <em>play</em> button.</p>
-      
-//       <p class="p-normal"><em>Note</em>: Space and body cones and Poinsot's 
-//       construction only appear when using this option.
-//       </p>`;
-//       break;
-
-//     case 'info-torque-gg': //torque - gravity gradient
-//       infoText.innerHTML = `<p class="p-normal">The gravity gradient torque 
-//       results from the difference in the pull of gravity along the gravitational 
-//       potential field gradient going from one end of the rotating body to the other.  
-//       It is most pronounced for long thin objects whose long direction is at a 
-//       45&deg; angle to the local vertical.</p>
-
-//       <p class="p-normal">This torque is proportional to &mu;&nbsp;/&nbsp;R&sup3;, 
-//       where &mu; is the gravitational constant of the planet, and R is the 
-//       distance to the center of the planet.  Because the gravity gradient effect is 
-//       very small for earth-orbiting objects, Aerovisualizer lets you exagerate 
-//       this effect up to 1 million times the value for low earth orbit.  The gravity 
-//       gradient torque is also a function of the orbital period, but this effect is 
-//       ignored.</p>
-
-//     case 'info-numerical': //numerical display
-//       infoText.innerHTML = `<p class="p-normal">Click <em>1 2 3</em> to show a numerical  
-//       display of the current state of the object. It consists of the 
-//       following:</p>
-      
-//       <p class="p-normal">the moments of inertia, ...</p>`;
-//       break;
-
 
 infoMenu.addEventListener('change', () => {
   const choice = infoMenu.value;
@@ -1834,7 +1801,6 @@ const computeAllFlow = function(){
   if (!m2){
     updateDisplay(true);
     return;
-    //blah
   }
 
   machAngle1Display.innerHTML = Number(Math.asin(1/mach1)/piOver180).toFixed(1).toString();
@@ -1894,7 +1860,7 @@ const computeAllFlow = function(){
   a4 = Math.sqrt(gamma*gasConstant*temp4);
 
   let [aftShockHalfConeAngle,m5,m3Norm,m4Norm,rho54,t54,p54,p054] = shock(mach4,aftDelta,gamma);
-  
+
   mach5 = m5;
   machAngle5Display.innerHTML = Number(Math.asin(1/mach5)/piOver180).toFixed(1).toString();
   dens5 = dens4*rho54;
@@ -1912,6 +1878,11 @@ const computeAllFlow = function(){
   ufo.setShockWaveHalfConeAngles(forwardShockHalfConeAngle,aftShockHalfConeAngle);
   ufo.needsRefresh = true;
   updateDisplay();
+
+  if (!m5){
+    displayForDetachedShockForRegion5();
+    return;
+  }
 }
 
 const shock = function(m1,deltaDegrees,gamma){
@@ -2149,72 +2120,72 @@ toggleMachSpeedButton.addEventListener('click', () => {
 cycleNumbersButton.addEventListener('click', () => {
   setNumericalDisplay(true);
 });
-//blah
+
 const updateDisplay = function(detachedShock = false){
   shockIsDetached = false;
 
   if (detachedShock){
     shockIsDetached = true;
-    rho1Display.innerHTML = "or";
-    rho2Display.innerHTML = "reduce";
-    rho3Display.innerHTML = "the";
-    rho4Display.innerHTML = "deflection.";
-    rho5Display.innerHTML = "";
-    p1Display.innerHTML = "or";
-    p2Display.innerHTML = "reduce";
-    p3Display.innerHTML = "the";
-    p4Display.innerHTML = "deflection.";
-    p5Display.innerHTML = "";
-    t1Display.innerHTML = "or";
-    t2Display.innerHTML = "reduce";
-    t3Display.innerHTML = "the";
-    t4Display.innerHTML = "deflection.";
-    t5Display.innerHTML = "";
-    stagnationPressure1Display.innerHTML = "";
-    stagnationPressure2Display.innerHTML = "";
-    stagnationPressure3Display.innerHTML = "";
-    stagnationPressure4Display.innerHTML = "";
-    stagnationPressure5Display.innerHTML = "";
-    dynamicPressure1Display.innerHTML = "";
-    dynamicPressure2Display.innerHTML = "";
-    dynamicPressure3Display.innerHTML = "";
-    dynamicPressure4Display.innerHTML = "";
-    dynamicPressure5Display.innerHTML = "";
     mach1Display.innerHTML = "Detached";
-    mach2Display.innerHTML = "shock.";
-    mach3Display.innerHTML = "Increase";
-    mach4Display.innerHTML = "the";
-    mach5Display.innerHTML = "Mach #";
+    mach2Display.innerHTML = "Increase";
+    mach3Display.innerHTML = "or";
+    mach4Display.innerHTML = "reduce";
+    mach5Display.innerHTML = "";
     mach1Display2.innerHTML = "Detached";
-    mach2Display2.innerHTML = "shock.";
-    mach3Display2.innerHTML = "Increase";
-    mach4Display2.innerHTML = "the";
-    mach5Display2.innerHTML = "Mach #";
+    mach2Display2.innerHTML = "Increase";
+    mach3Display2.innerHTML = "or";
+    mach4Display2.innerHTML = "reduce";
+    mach5Display2.innerHTML = "";
     mach1Display3.innerHTML = "Detached";
-    mach2Display3.innerHTML = "shock.";
-    mach3Display3.innerHTML = "Increase";
-    mach4Display3.innerHTML = "the";
-    mach5Display3.innerHTML = "Mach #";
-    speedOfSound1Display.innerHTML = "";
-    speedOfSound2Display.innerHTML = "";
-    speedOfSound3Display.innerHTML = "";
-    speedOfSound4Display.innerHTML = "";
-    speedOfSound5Display.innerHTML = "";
-    machAngle1Display.innerHTML = "";
-    machAngle2Display.innerHTML = "";
-    machAngle3Display.innerHTML = "";
-    machAngle4Display.innerHTML = "";
-    machAngle5Display.innerHTML = "";
+    mach2Display3.innerHTML = "Increase";
+    mach3Display3.innerHTML = "or";
+    mach4Display3.innerHTML = "reduce";
+    mach5Display3.innerHTML = "";
+    p1Display.innerHTML = "shock.";
+    p2Display.innerHTML = "the";
+    p3Display.innerHTML = "";
+    p4Display.innerHTML = "the";
+    p5Display.innerHTML = "";
+    t1Display.innerHTML = "shock.";
+    t2Display.innerHTML = "the";
+    t3Display.innerHTML = "";
+    t4Display.innerHTML = "the";
+    t5Display.innerHTML = "";
+    rho1Display.innerHTML = "shock.";
+    rho2Display.innerHTML = "the";
+    rho3Display.innerHTML = "";
+    rho4Display.innerHTML = "the";
+    rho5Display.innerHTML = "";
+    stagnationPressure1Display.innerHTML = "";
+    stagnationPressure2Display.innerHTML = "Mach";
+    stagnationPressure3Display.innerHTML = "";
+    stagnationPressure4Display.innerHTML = "deflection.";
+    stagnationPressure5Display.innerHTML = "";
     stagnationTemperature1Display.innerHTML = "";
-    stagnationTemperature2Display.innerHTML = "";
+    stagnationTemperature2Display.innerHTML = "Mach";
     stagnationTemperature3Display.innerHTML = "";
-    stagnationTemperature4Display.innerHTML = "";
+    stagnationTemperature4Display.innerHTML = "deflection";
     stagnationTemperature5Display.innerHTML = "";
     stagnationDensity1Display.innerHTML = "";
-    stagnationDensity2Display.innerHTML = "";
+    stagnationDensity2Display.innerHTML = "Mach";
     stagnationDensity3Display.innerHTML = "";
-    stagnationDensity4Display.innerHTML = "";
+    stagnationDensity4Display.innerHTML = "deflection";
     stagnationDensity5Display.innerHTML = "";
+    dynamicPressure1Display.innerHTML = "";
+    dynamicPressure2Display.innerHTML = "number";
+    dynamicPressure3Display.innerHTML = "";
+    dynamicPressure4Display.innerHTML = "angle.";
+    dynamicPressure5Display.innerHTML = "";
+    speedOfSound1Display.innerHTML = "";
+    speedOfSound2Display.innerHTML = "number";
+    speedOfSound3Display.innerHTML = "";
+    speedOfSound4Display.innerHTML = "angle.";
+    speedOfSound5Display.innerHTML = "";
+    machAngle1Display.innerHTML = "";
+    machAngle2Display.innerHTML = "number";
+    machAngle3Display.innerHTML = "";
+    machAngle4Display.innerHTML = "angle.";
+    machAngle5Display.innerHTML = "";
     return;
   }
 
@@ -2254,6 +2225,21 @@ const updateDisplay = function(detachedShock = false){
   stagnationDensity4Display.innerHTML = densityForMetric(stagDens4,3,false);
   stagnationDensity5Display.innerHTML = densityForMetric(stagDens5,3,false);
   displayMachOrSpeed();
+}
+
+const displayForDetachedShockForRegion5 = function(){
+  mach5Display.innerHTML = "Detached";
+  mach5Display2.innerHTML = "Detached";
+  mach5Display3.innerHTML = "Detached";
+  p5Display.innerHTML = "shock.";
+  t5Display.innerHTML = "shock.";
+  rho5Display.innerHTML = "shock.";
+  stagnationPressure5Display.innerHTML = "Reduce aft";
+  stagnationTemperature5Display.innerHTML = "Reduce aft";
+  stagnationDensity5Display.innerHTML = "Reduce aft";
+  dynamicPressure5Display.innerHTML = "defl angle.";
+  speedOfSound5Display.innerHTML = "defl angle.";
+  machAngle5Display.innerHTML = "defl angle.";
 }
 
 // localStorage.clear();

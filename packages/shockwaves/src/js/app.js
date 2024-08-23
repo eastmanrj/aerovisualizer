@@ -1240,79 +1240,90 @@ infoReturnButton.addEventListener('click', () => {
 
 const handleInfoMenuChoice = function(choice){
   switch (choice){
-    case 'info-intro': //Introduction
-      infoText.innerHTML = `<p class="p-normal">The purpose of Aerovisualizer is to 
+    case 'info-intro': //introduction
+      infoText.innerHTML = `<p class="p-normal">The purpose of <em>Aerovisualizer</em> is to 
       assist in the teaching of concepts in aerospace engineering by presenting 
       them in interesting and engaging ways.  Subjects are displayed in 3D to 
       complement the dry equations found in textbooks and online.  Buttons and sliders 
-      are also provided for even more interaction.</p>
+      are provided for user interaction.</p>
       
       <p class="p-normal"><em>Aerovisualizer - Oblique Shocks</em> focuses on the formation 
       of oblique shock waves.  It is assumed that the user has taken or is currently taking 
       a course covering oblique shock waves.</p>
 
-      <p class="p-normal">The shock waves around a pointed shaped UFO flying supersonically.  
+      <p class="p-normal">Here, shock waves form around a pointed shaped UFO flying supersonically.  
       For simplicity, the UFO has no wings nor apparent means of propulsion nor stabilization.  
       It consists of three sections: a forward cone, a middle cylinder, and an aft cone.  
       Oblique shocks form at the forward and aft ends.  The UFO flies at zero angle of attack.</p>
       
-      <p class="p-normal">The Prandtl-Meyer expansion fans that form where the cones 
-      join the cylinder are not rendered.  Also, detached shock waves are not modeled or rendered, nor 
-      is the turbulent wake.  Boundary layer effects are not considered.</p>`;
+      <p class="p-normal">Prandtl-Meyer expansion fans form where the cones 
+      join the cylinder, but are not rendered.  Also not modeled nor rendered are detached shock 
+      waves and the turbulent wake.  Boundary layer effects are not considered.</p>`;
       break;
 
     case 'info-how-to-use': //how to use aerovisualizer
       infoText.innerHTML = `
       <p class="p-normal">Click or tap the buttons labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub>
-      , Mach #, and defl</em>. Manipulate the buttons, menus, and sliders 
-      that appear.  Observe how the shock waves and the displayed data change in response.</p>`;
+      , Mach #, and defl</em>. Manipulate the buttons, menus, and sliders that appear.  Observe 
+      how the shock waves and the displayed data change in response.</p>`;
       break;
 
-    case 'info-how-to-use-rhoTP-btn-gas-menu':
-      infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub></em>.  
-      Use the top menu to specify the gas medium that the UFO flies through.  This establishes the gas constant, <em>R</em>, and the heat capacity ratio, <em>&gamma;</em>.</p>
-      <p class="p-normal">R is larger for lighter gases like hydrogen and smaller for heavier gases like xenon. The speed of sound is 
+    case 'info-how-to-use-rhoTP-btn-gas-menu': //gas medium menu
+      infoText.innerHTML = `<p class="p-normal">After clicking or tapping the button labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub></em>
+      , use the top menu to specify the gas medium that the UFO flies through.  This establishes the <em>gas constant, R</em>, and the <em>heat capacity ratio, &gamma;</em>.</p>
+      <p class="p-normal">R is larger for lighter gases like hydrogen and smaller for heavier gases like xenon. The speed of sound, <em>a</em>, is 
       proportional to &Sqrt;<span STYLE="text-decoration:overline">R</span>.</p>
-      <p class="p-normal">&gamma; is a function of the degrees of freedom of the individual molecules.  It is larger for monatomic molecules 
-      such as helium and smaller for more complex molecules such as propane.  The vibrational degrees of freedom are less 
-      prominent than the translational and rotational ones, but come more into play at higher temperatures.  Rotational  degrees of freedom 
-      predominate more at low temperatures.</p>`;
+      <p class="p-normal">&gamma; is a function of the degrees of freedom of the individual gas molecules.  It is larger for monatomic molecules 
+      such as helium and smaller for more complex ones such as propane.  The vibrational degrees of freedom are less 
+      prominent than the translational and rotational ones, but come more into play at higher temperatures.  Rotational degrees of freedom 
+      are more prominent at low temperatures.</p>`;
       break;
 
-    case 'info-how-to-use-rhoTP-btn-rhotp-menu':
-      infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub></em>
-      .  Use the second menu to specify the way you want to set the ambient density (&rho;<sub>&infin;</sub>), temperature (T<sub>&infin;</sub>), and pressure (P<sub>&infin;</sub>) of 
+    case 'info-how-to-use-rhoTP-btn-rhotp-menu': //rho, T, P menu
+      infoText.innerHTML = `<p class="p-normal">After clicking or tapping the button labeled <em>&gamma;&nbsp;R&nbsp;&rho;<sub>&infin;</sub>&nbsp;T<sub>&infin;</sub>&nbsp;P<sub>&infin;</sub></em>
+      , use the second menu to specify the way you want to set the <em>ambient density (&rho;<sub>&infin;</sub>), temperature (T<sub>&infin;</sub>), and pressure (P<sub>&infin;</sub>)</em> of 
       the gas medium.</p>
-      <p class="p-normal">Use the first option to use data from the 1976 Standard Atmosphere (see www.pdas.com).  Use the first slider to specify the altitude.  This option only applies to dry air.</p>
-      <p class="p-normal">Use the other options to set &rho;<sub>&infin;</sub>, P<sub>&infin;</sub>, and T<sub>&infin;</sub> individually while enforcing the equation P=&rho;RT.  Use the two sliders to 
-      set the values.  <em>Note:</em> Extremely high temperatures are allowed, but since gases become 
-      a plasma at extreme temperatures, the displayed data would obviously be highly inaccurate.</p>`;
+      <p class="p-normal">Use the first menu option to set the altitude.  This uses data from the 1976 Standard Atmosphere (see www.pdas.com).  Use the first slider to specify the altitude.  
+      This option only applies to dry air.</p>
+      <p class="p-normal">Use the other menu options to set two of &rho;<sub>&infin;</sub>, P<sub>&infin;</sub>, and T<sub>&infin;</sub> individually while enforcing the equation <em>P=&rho;RT</em>.  
+      Use the two sliders to set the values.  <em>Important:</em> Extremely high and low temperatures and pressures are allowed by Aerovisualizer.  Since gases can become 
+      a plasma or a liquid or a solid under the right conditions, these conditions should be considered when viewing the displayed data.</p>`;
       break;
 
     case 'info-how-to-use-mach-num-btn': // Mach number
       infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>Mach #</em>
-      to set the Mach number of the UFO flying through the abient gas.  The Mach number (M) is the ratio of the speed of 
-      the local airflow to the local speed of sound (a).  Use the slider to set the Mach number of the UFO (also the Mach number of the airflow for region 1).  
-      The Mach number ranges from 1.1 to 10.</p>
-      
-      <p class="p-normal">Click or tap the button labeled <em>Mach/speed</em> to toggle the display 
-      between Mach number and speed for the 5 regions.</p>
+      to set the Mach number of the UFO as it flies through the abient gas.  The Mach number, <em>(M)</em>, is the ratio of the speed of 
+      the local airflow to the local speed of sound.  Use the slider to set the Mach number of the UFO (the Mach number of the airflow in region 1).  
+      In <em>Aerovisualizer</em>, Mach numbers range from 1.1 to 10.</p>
 
-      <p class="p-normal">Click or tap the button labeled either <em>P&nbsp;&rarr;&nbsp;T</em>, <em>T&nbsp;&rarr;&nbsp;&rho;</em>, or <em>&rho;&nbsp;&rarr;&nbsp;P</em> to 
-      cycle the display. See ...</p>
-
-      <p class="p-normal">The speed of sound equals &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span>.  
-      Shock waves form in supersonic flow (M > 1), and thus they occur at lower airflow rates in heavy gases such as 
-      xenon, gases with complex molecules such as propane, and at low temperatures for all gases.</p>`;
+      <p class="p-normal">The speed of sound equals <em>&Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span></em>.  
+      Shock waves form in <em>supersonic flow (M > 1)</em>, and thus they occur at lower airflow rates in gases with complex molecules such as propane, 
+      in heavy gases such as xenon, and at low temperatures (absolute scales) for all gases.</p>`;
       break;
 
     case 'info-how-to-use-defl-btn': // deflection angle
-      infoText.innerHTML = `<p class="p-normal">Click <em>defl</em> to set the half cone angles of the cones at the forward 
-      and aft ends of the UFO.  This is also sets boundary conditions on the flow, and thus the 
-      deflection angles for both shock waves and both Prandtl-Meyer expansion fans.</p>
+      infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>defl</em> to set the half cone angles 
+      of the cones at the forward and aft ends of the UFO.  This also sets boundary conditions on the flow, and thus the 
+      deflection angles for the two shock waves and two Prandtl-Meyer expansion fans.</p>
       
-      <p class="p-normal">Use the menu to specify whether to modify 
-      the forward cone or the aft cone.  Use the slider to set the value in degrees.  The range is 1&deg; to 30&deg;.</p>`;
+      <p class="p-normal">Use the menu to specify whether to modify the forward cone or the aft cone.  Use the slider 
+      to set the value (from 1&deg; to 30&deg;).</p>`;
+      break;
+
+    case 'info-how-to-use-display-toggle-cycle-btns': // display toggle and cycle buttons
+      infoText.innerHTML = `<p class="p-normal">After clicking or tapping either the button labeled <em>Mach #</em> or <em>defl</em>
+      , click or tap the button labeled <em>Mach/speed</em> to toggle the display between Mach number and speed.  The speed of the 
+      flow in a region equals the local Mach number times the speed of sound for the flow in that region.</p>
+
+      <p class="p-normal">Click or tap the button labeled either <em>P&nbsp;&rarr;&nbsp;T</em>, <em>T&nbsp;&rarr;&nbsp;&rho;</em>, or <em>&rho;&nbsp;&rarr;&nbsp;P</em>. 
+      The displayed data changes to one of three options:</p>
+      
+      <p class="p-normal"><em>1-</em> static pressure (P), stagnation pressure (P<sub>0</sub>), and dynamic pressure (q),</p>
+      <p class="p-normal"><em>2-</em> static temperature (T), stagnation pressure (T<sub>0</sub>), and the speed of sound (a),</p>
+      <p class="p-normal"><em>3-</em> static density (&rho;), stagnation density (&rho;<sub>0</sub>), and the Mach angle (&deg;).</p>
+
+      <p class="p-normal"><em>Note 1:</em> Dynamic pressure, q, for compressed gas does <em>not</em> equal &half;&rho;v<sup>2</sup>.  It is simply P<sub>0</sub> minus P.</p>
+      <p class="p-normal"><em>Note 2:</em> The <em>Mach angle</em> equals sin<sup>-1</sup>(1/M).</p>`;
       break;
 
     case 'info-flow-regions': // flow regions

@@ -1288,7 +1288,7 @@ const handleInfoMenuChoice = function(choice){
     case 'info-how-to-use-mach-num-btn': // Mach number
       infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>Mach #</em>
       to set the Mach number of the UFO as it flies through the abient gas.  The Mach number, <em>M</em>, is the ratio of the speed of 
-      the local airflow to the local speed of sound.  Use the slider to set M for the UFO (same as M for the airflow in region 1).  
+      the local flow to the local speed of sound.  Use the slider to set M for the UFO (same as M for the flow in region 1).  
       In Aerovisualizer, M ranges from 1.1 to 10.</p>`;
       break;
 
@@ -1319,12 +1319,13 @@ const handleInfoMenuChoice = function(choice){
 
     case 'info-flow-regions': // flow regions
       infoText.innerHTML = `<p class="p-normal">
-      <em>There are 5 flow regions:</em></p>
+      <em>There are 5 flow regions about the UFO:</em></p>
       <p class="p-normal"><em>1-</em> before the forward shock,</p>
       <p class="p-normal"><em>2-</em> after the forward shock but before the first expansion fan,</p>
       <p class="p-normal"><em>3-</em> after the first expansion fan but before the second one,</p>
       <p class="p-normal"><em>4-</em> after second expansion fan but before the aft shock, and</p>
       <p class="p-normal"><em>5-</em> after the aft shock.</p><p></p>
+      <p class="p-normal">These 5 flow regions are labeled on the 3D image and are referred to as "N" in the data display.</p><p></p>
       <p class="p-normal"><em>IMPORTANT:</em> In region 1, &rho;&equals;&rho;<sub>&infin;</sub>, T&equals;T<sub>&infin;</sub>, 
       and P&equals;P<sub>&infin;</sub> (the boundary conditions).  <em>These boundary conditions must also apply to region 5!</em> 
       Differences between them are due to possible linear assumptions that are not completely understood by the programmer.  
@@ -1348,12 +1349,20 @@ const handleInfoMenuChoice = function(choice){
 
     case 'info-speed-of-sound':
       infoText.innerHTML = `<p class="p-normal">The <em>speed of sound</em>, <em>a</em>, equals &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span>.  
-      Shock waves form in <em>supersonic flow (M > 1)</em>, and thus they appear at lower airflow rates in gases with complex molecules such as propane, 
+      Shock waves form in <em>supersonic flow (M > 1)</em>, and thus they appear at lower flow rates in gases with complex molecules such as propane, 
       in heavy gases such as xenon, and at low temperatures (absolute scales) for all gases.</p>`;
       break;
       
     case 'info-detached-shock-waves':
-      infoText.innerHTML = `<p class="p-normal">d</p>`;
+      infoText.innerHTML = `<p class="p-normal">The points of the shock cones in Aerovisualizer coincide with the points of the UFO.  The shocks would become rounded and detached from the UFO when the Mach number is set too low or the deflection angles too high.</p>
+      <p class="p-normal">Aerovisualizer does not attempt to model nor render these types of shock waves. <em>That does not mean that they do not occur!</em>  It just means that they are too difficult to implement here.</p>`;
+      break;
+
+    case 'info-wave-drag':
+      infoText.innerHTML = `<p class="p-normal">Wave drag is a component of the pressure drag on objects moving at transonic and supersonic speeds due to the presence of shock waves.  Shock waves create a considerable amount of drag.  Although shock waves are typically associated with supersonic flow, they can form at subsonic aircraft speeds on areas of the body where local airflow accelerates to supersonic speed. The effect is typically seen on aircraft at transonic speeds (about Mach 0.8).</p>
+      <p class="p-normal">Aerovisualizer calculates the <em>wave drag coefficient (C<sub>Dwave</sub>)</em> for a <em>Sears–Haack body</em>. The Sears–Haack body is the shape with the lowest theoretical wave drag in supersonic flow.  It is a slender solid body that assumes a small-disturbance (linearized) supersonic flow, which is governed by the Prandtl–Glauert equation, which does not apply to transonic flow.  The derivation and shape were published independently by two separate researchers: Wolfgang Haack in 1941 and later by William Sears in 1947.</p>
+      <p class="p-normal">The Sears–Haack body is pointed at each end and grows smoothly to a maximum and then decreases smoothly toward the second point.  Aerovisualizer's UFO is not smooth, nor is it slender when large deflection angles are chosen.  Choose low deflection angles for the displayed C<sub>Dwave</sub> to most closely match that of a Sears–Haack body.  Its value equals 9&pi;<sup>2</sup>R<sup>2</sup>&div;(2L<sup>2</sup>), where R is the maximum radius and L is the length.</p>
+      <p class="p-normal">(see en.wikipedia.org/wiki/Wave_drag and en.wikipedia.org/wiki/Sears–Haack_body).</p>`;
       break;
 
     case 'info-prefs-main': //preferences - main

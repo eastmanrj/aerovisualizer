@@ -1328,7 +1328,7 @@ const handleInfoMenuChoice = function(choice){
       <p class="p-normal">These 5 flow regions are labeled on the 3D image and are referred to as "N" in the data display.</p><p></p>
       <p class="p-normal"><em>IMPORTANT:</em> In region 1, &rho;&equals;&rho;<sub>&infin;</sub>, T&equals;T<sub>&infin;</sub>, 
       and P&equals;P<sub>&infin;</sub> (the boundary conditions).  <em>These boundary conditions must also apply to region 5!</em> 
-      Differences between them are due to possible linear assumptions that are not completely understood by the programmer.  
+      Differences between them are due to possible linear assumptions that are not completely understood by us.  
       Aerovisualizer is an open source project, so if you know the solution, please let us know!  
       For now, reduce this error by lowering the Mach number or the deflection angles.</p>`;
       break;
@@ -1359,9 +1359,9 @@ const handleInfoMenuChoice = function(choice){
       break;
 
     case 'info-wave-drag':
-      infoText.innerHTML = `<p class="p-normal">Wave drag is a component of the pressure drag on objects moving at transonic and supersonic speeds due to the presence of shock waves.  Shock waves create a considerable amount of drag.  Although shock waves are typically associated with supersonic flow, they can form at subsonic aircraft speeds on areas of the body where local airflow accelerates to supersonic speed. The effect is typically seen on aircraft at transonic speeds (about Mach 0.8).</p>
-      <p class="p-normal">Aerovisualizer calculates the <em>wave drag coefficient (C<sub>Dwave</sub>)</em> for a <em>Sears–Haack body</em>. The Sears–Haack body is the shape with the lowest theoretical wave drag in supersonic flow.  It is a slender solid body that assumes a small-disturbance (linearized) supersonic flow, which is governed by the Prandtl–Glauert equation, which does not apply to transonic flow.  The derivation and shape were published independently by two separate researchers: Wolfgang Haack in 1941 and later by William Sears in 1947.</p>
-      <p class="p-normal">The Sears–Haack body is pointed at each end and grows smoothly to a maximum and then decreases smoothly toward the second point.  Aerovisualizer's UFO is not smooth, nor is it slender when large deflection angles are chosen.  Choose low deflection angles for the displayed C<sub>Dwave</sub> to most closely match that of a Sears–Haack body.  Its value equals 9&pi;<sup>2</sup>R<sup>2</sup>&div;(2L<sup>2</sup>), where R is the maximum radius and L is the length.</p>
+      infoText.innerHTML = `<p class="p-normal">Wave drag is a component of the pressure drag on objects moving at transonic and supersonic speeds due to the presence of shock waves, which create a lot of drag.  Shock waves form in supersonic flow and at subsonic speeds starting at Mach 0.8 on areas of the body where local airflow accelerates to supersonic speed.</p>
+      <p class="p-normal">Aerovisualizer calculates the <em>wave drag coefficient (C<sub>Dwave</sub>)</em> for a <em>Sears–Haack body</em>, a body with the lowest theoretical wave drag.  It is a slender body that assumes a small-disturbance in flow and is governed by the Prandtl–Glauert equation.  The derivation and shape were published independently by Wolfgang Haack in 1941 and later by William Sears in 1947.</p>
+      <p class="p-normal">The Sears–Haack body is pointed at each end and grows smoothly to a maximum and then decreases smoothly toward the second point.  Aerovisualizer's UFO is not smooth, nor is it slender for large deflection angles.  Choose low deflection angles for the displayed C<sub>Dwave</sub> to most closely match that of a Sears–Haack body.  Its value equals 9&pi;<sup>2</sup>R<sup>2</sup>&div;(2L<sup>2</sup>), where R is the maximum radius and L is the length.</p>
       <p class="p-normal">(see en.wikipedia.org/wiki/Wave_drag and en.wikipedia.org/wiki/Sears–Haack_body).</p>`;
       break;
 

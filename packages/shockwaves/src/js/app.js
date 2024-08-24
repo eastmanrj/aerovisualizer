@@ -1270,13 +1270,7 @@ const handleInfoMenuChoice = function(choice){
 
     case 'info-how-to-use-rhoTP-btn-gas-menu': //gas medium menu
       infoText.innerHTML = `<p class="p-normal">After clicking or tapping the button labeled <em>&gamma;R&rho;<sub>&infin;</sub>T<sub>&infin;</sub>P<sub>&infin;</sub></em>
-      , use the top menu to specify the gas that the UFO flies through.  This establishes the <em>gas constant</em>, <em>R</em>, and the <em>heat capacity ratio</em>, <em>&gamma;</em>.</p>
-      <p class="p-normal">R is larger for lighter gases like hydrogen and smaller for heavier ones like xenon. The speed of sound, <em>a</em>, is 
-      proportional to &Sqrt;<span STYLE="text-decoration:overline">R</span>.</p>
-      <p class="p-normal">&gamma; is a function of the degrees of freedom of the individual gas molecules.  It is larger for monatomic molecules 
-      such as helium and smaller for more complex ones such as propane.  The vibrational degrees of freedom are less 
-      prominent than the translational and rotational ones, but come more into play at higher temperatures.  Rotational degrees of freedom 
-      are more prominent at low temperatures.</p>`;
+      , use the top menu to specify the gas that the UFO flies through.  This establishes the <em>gas constant</em>, <em>R</em>, and the <em>heat capacity ratio</em>, <em>&gamma;</em>.</p>`;
       break;
 
     case 'info-how-to-use-rhoTP-btn-rhotp-menu': //rho, T, P menu
@@ -1295,11 +1289,7 @@ const handleInfoMenuChoice = function(choice){
       infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>Mach #</em>
       to set the Mach number of the UFO as it flies through the abient gas.  The Mach number, <em>M</em>, is the ratio of the speed of 
       the local airflow to the local speed of sound.  Use the slider to set M for the UFO (same as M for the airflow in region 1).  
-      In Aerovisualizer, M ranges from 1.1 to 10.</p>
-
-      <p class="p-normal">The <em>speed of sound</em>, <em>a</em>, equals &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span>.  
-      Shock waves form in <em>supersonic flow (M > 1)</em>, and thus they appear at lower airflow rates in gases with complex molecules such as propane, 
-      in heavy gases such as xenon, and at low temperatures (absolute scales) for all gases.</p>`;
+      In Aerovisualizer, M ranges from 1.1 to 10.</p>`;
       break;
 
     case 'info-how-to-use-defl-btn': // deflection angle
@@ -1342,7 +1332,31 @@ const handleInfoMenuChoice = function(choice){
       For now, reduce this error by lowering the Mach number or the deflection angles.</p>`;
       break;
 
-    case 'info-prefs-main': //preferences
+    case 'info-gas-constant':
+      infoText.innerHTML = `<p class="p-normal">The <em>specific gas constant</em>, R<sub>spec</sub>, for a gas is related to the universal gas constant, R<sub>univ</sub> by the formula, R<sub>spec</sub> = R<sub>univ</sub>&div;M, where M = the mass of a mole of the gas.</p>
+      <p class="p-normal">In Aerovisualizer, R<sub>spec</sub> is referred to by just <em>R</em>.  R is larger for lighter gases like hydrogen and smaller for heavier ones like xenon. The speed of sound, <em>a</em>, is 
+      proportional to &Sqrt;<span STYLE="text-decoration:overline">R</span>.</p>`;
+      break;
+
+    case 'info-heat-capacity-ratio':
+      infoText.innerHTML = `<p class="p-normal">The <em>heat capacity ratio</em> (also known as the adiabatic index, the ratio of specific heats, or Laplace's coefficient), <em>&gamma;</em>, is the ratio of the heat capacity at constant pressure (C<sub>P</sub>) to the heat capacity at constant volume (C<sub>V</sub>).</p>
+      <p class="p-normal">&gamma; is a function of the degrees of freedom of the individual gas molecules.  It is larger for monatomic molecules 
+      such as helium and smaller for more complex ones such as propane.  The vibrational degrees of freedom are less 
+      prominent than the translational and rotational ones, but come more into play at higher temperatures.  Rotational degrees of freedom 
+      are more prominent at low temperatures.</p>`;
+      break;
+
+    case 'info-speed-of-sound':
+      infoText.innerHTML = `<p class="p-normal">The <em>speed of sound</em>, <em>a</em>, equals &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span>.  
+      Shock waves form in <em>supersonic flow (M > 1)</em>, and thus they appear at lower airflow rates in gases with complex molecules such as propane, 
+      in heavy gases such as xenon, and at low temperatures (absolute scales) for all gases.</p>`;
+      break;
+      
+    case 'info-detached-shock-waves':
+      infoText.innerHTML = `<p class="p-normal">d</p>`;
+      break;
+
+    case 'info-prefs-main': //preferences - main
       infoText.innerHTML = `<p class="p-normal">Click <em>pref</em>.  Buttons appear 
       labeled as below:</p>
       <p class="p-normal"><em>transparency</em></p>

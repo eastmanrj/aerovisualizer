@@ -73,6 +73,10 @@
             <option value="info-how-to-use-defl-btn">defl button</option>
             <option value="info-how-to-use-display-toggle-cycle-btns">toggle / cycle display</option>
             <option value="info-flow-regions">flow regions</option>
+            <option value="info-gas-constant">gas constant (R)</option>
+            <option value="info-heat-capacity-ratio">heat capacity ratio (&gamma;)</option>
+            <option value="info-speed-of-sound">speed of sound (a)</option>
+            <option value="info-detached-shock-waves">detached shock waves</option>
             <option value="info-prefs-main">prefs - main</option>
             <option value="info-prefs-transparency">prefs - transparency</option>
             <option value="info-prefs-color">prefs - color</option>
@@ -93,7 +97,8 @@
           <p class="center-grid-item">&nbsp;</p>
         </div>
         <div class="elements" id="transparency-pref-elements">
-          <p class="left-grid-item span3 small-font">UFO&nbsp;<span id="transparency-ufo-display">0</span>&nbsp;&nbsp;</p>
+          <p class="center-grid-item span3">transparency</p>
+          <p class="left-grid-item span3 small-font top-margin">UFO&nbsp;<span id="transparency-ufo-display">0</span>&nbsp;&nbsp;</p>
           <input class="slider span3" type="range" min="0" max="100" value="0" id="transparency-ufo">
           <p class="left-grid-item span3 top-margin small-font">forward shock&nbsp;<span id="transparency-forward-shock-display">0</span>&nbsp;&nbsp;</p>
           <input class="slider span3" type="range" min="0" max="100" value="0" id="transparency-forward-shock">
@@ -103,7 +108,8 @@
           <input class="slider span3" type="range" min="0" max="100" value="0" id="transparency-labels">
         </div>
         <div class="elements" id="color-pref-elements">
-          <p class="center-grid-item span3 small-font">UFO</p>
+          <p class="center-grid-item span3">color</p>
+          <p class="center-grid-item span3 small-font top-margin">UFO</p>
           <select id="ufo-color-menu" class="menu span3 center-grid-item" name="ufo-color-menu">
             <option value="select-a-color">select a color</option>
             <option value="red">red</option>
@@ -181,6 +187,7 @@
             <option value="kilometers-per-hour">km/h</option>
             <option value="miles-per-hour">mph</option>
           </select>
+          <p class="center-grid-item span3 top-margin">&nbsp;</p>
           <div class="grid-item checkbox center-grid-item span3 top-margin small-font">
             <input type="checkbox" id="altitude-feet" name="altitude-feet-checkbox" value="no">
             <p for="altitude-feet">Altitude in feet</p>

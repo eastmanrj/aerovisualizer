@@ -10,7 +10,7 @@ aerospace concepts.
 
  Revision History
  Date    Name                  Description
- 1/19/24 R. Eastman            v0.1 beta
+ 8/24/24 R. Eastman            v0.2 beta
 */
 
 const infoButton = document.getElementById("info-btn");

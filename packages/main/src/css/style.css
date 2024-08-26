@@ -93,7 +93,7 @@ p {
   background-color:blue;
   color: rgb(225, 225, 255);
   font-family: inherit;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 800;
   border-width: 4px;
   border-radius: 3rem;
@@ -116,12 +116,12 @@ p {
     column-gap: 5%;
     grid-auto-flow: row;
     grid-auto-rows: 1fr 1fr 1fr;
-    grid-template-columns: 1fr 1fr 1fr  1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
   }
   
   .complete-row-grid-item {
     grid-column-start: 1;
-    grid-column-end: span 3;
+    grid-column-end: span 4;
   }
 
   .flex {

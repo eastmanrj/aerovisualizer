@@ -1289,7 +1289,9 @@ const handleInfoMenuChoice = function(choice){
       infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>Mach #</em>
       to set the Mach number of the UFO as it flies through the abient gas.  The Mach number, <em>M</em>, is the ratio of the speed of 
       the local flow to the local speed of sound.  Use the slider to set M for the UFO (same as M for the flow in region 1).  
-      In Aerovisualizer, M ranges from 1.1 to 10.</p>`;
+      In Aerovisualizer, M ranges from 1.1 to 10.</p>
+
+      <p class="p-normal">Shock waves can become detached at low mach numbers.  See <em>detached shock waves</em> in this menu for more information.</p>`;
       break;
 
     case 'info-how-to-use-defl-btn': // deflection angle
@@ -1298,7 +1300,9 @@ const handleInfoMenuChoice = function(choice){
       <em>deflection angles</em> for the two shock waves and two Prandtl-Meyer expansion fans.</p>
       
       <p class="p-normal">Use the menu to specify whether to modify the forward cone or the aft cone.  Use the slider 
-      to set the value (from 1&deg; to 30&deg;).</p>`;
+      to set the value (from 1&deg; to 30&deg;).</p>
+
+      <p class="p-normal">Shock waves can become detached at high deflection angles.  See <em>detached shock waves</em> in this menu for more information.</p>`;
       break;
 
     case 'info-how-to-use-display-toggle-cycle-btns': // display toggle and cycle buttons
@@ -1339,17 +1343,17 @@ const handleInfoMenuChoice = function(choice){
       break;
 
     case 'info-heat-capacity-ratio':
-      infoText.innerHTML = `<p class="p-normal">The <em>heat capacity ratio</em> (also known as the adiabatic index, the ratio of specific heats, or Laplace's coefficient), <em>&gamma;</em>, is the ratio of the heat capacity at constant pressure (C<sub>P</sub>) to the heat capacity at constant volume (C<sub>V</sub>).</p>
-      <p class="p-normal">&gamma; is a function of the degrees of freedom of the individual gas molecules.  It is larger for monatomic molecules 
+      infoText.innerHTML = `<p class="p-normal">The <em>heat capacity ratio</em>, <em>&gamma;</em>, (also known as the adiabatic index, the ratio of specific heats, or Laplace's coefficient), is the ratio of the heat capacity at constant pressure (C<sub>P</sub>) to the heat capacity at constant volume (C<sub>V</sub>).</p>
+      <p class="p-normal">The equipartition theorem predicts that &gamma; for an ideal gas is related to the <em>thermally accessible degrees of freedom</em> (<em>f</em>) of a molecule by the relation, <em>&gamma;&nbsp;&equals;&nbsp;1&nbsp;&plus;&nbsp;(2/f)</em>.  &gamma; is larger for monatomic molecules 
       such as helium and smaller for more complex ones such as propane.  The vibrational degrees of freedom are less 
       prominent than the translational and rotational ones, but come more into play at higher temperatures.  Rotational degrees of freedom 
       are more prominent at low temperatures.</p>`;
-      break;
+      break; 
 
     case 'info-speed-of-sound':
-      infoText.innerHTML = `<p class="p-normal">The <em>speed of sound</em>, <em>a</em>, equals &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span>.  
-      Shock waves form in <em>supersonic flow (M > 1)</em>, and thus they appear at lower flow rates in gases with complex molecules such as propane, 
-      in heavy gases such as xenon, and at low temperatures (absolute scales) for all gases.</p>`;
+      infoText.innerHTML = `<p class="p-normal">The <em>speed of sound</em>, <em>a</em>, depends on temperature as well as the medium through which a sound wave is propagating.  Although it has a weak dependence on frequency and pressure, the speed of sound for all pratical purposes is equal to &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span>.  
+      Shock waves form in <em>supersonic flow</em> (<em>M > 1</em>) and in <em>transonic flow</em> (<em>0.8 < M < 1.2</em>) in areas of the body where local airflow accelerates to supersonic speed.  Thus, they appear at lower flow speeds in gases with complex molecules such as propane, 
+      in heavy gases such as xenon, and at low temperatures (absolute scales) for all gases.  Conversely, shock waves appear at high speeds in gases such as hydrogen and in gases at high temperatures.</p>`;
       break;
       
     case 'info-detached-shock-waves':

@@ -93,7 +93,7 @@ p {
   background-color:blue;
   color: rgb(225, 225, 255);
   font-family: inherit;
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 800;
   border-width: 4px;
   border-radius: 3rem;
@@ -105,14 +105,14 @@ p {
 
 @media (orientation: landscape) {
   p {
-    font-size: 1.5rem;
+    font-size: 2rem;
     margin-left:0;
     margin-right:1rem;
     margin-top:1rem;
     margin-bottom:1rem;
   }
 
-  .grid {
+  /* .grid {
     column-gap: 5%;
     grid-auto-flow: row;
     grid-auto-rows: 1fr 1fr 1fr;
@@ -126,7 +126,7 @@ p {
 
   .flex {
     flex-direction: row;
-  }
+  } */
 }
 
 /***************************************
@@ -134,7 +134,7 @@ p {
  ***************************************/
  @media (orientation: portrait) and (max-width: 450px) {
   p {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 300;
     margin-left:2rem;
     margin-right:2rem;
@@ -153,7 +153,7 @@ p {
  ****************************************/
 @media (orientation: landscape) and (max-width: 900px) {
   p {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 300;
     margin-left:1rem;
     margin-right:1rem;

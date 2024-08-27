@@ -1269,33 +1269,30 @@ const handleInfoMenuChoice = function(choice){
       break;
 
     case 'info-how-to-use-rhoTP-btn-gas-menu': //gas medium menu
-      infoText.innerHTML = `<p class="p-normal">After clicking or tapping the button labeled <em>&gamma;R&rho;<sub>&infin;</sub>T<sub>&infin;</sub>P<sub>&infin;</sub></em>
-      , use the top menu to specify the gas that the UFO flies through.  This establishes the <em>gas constant</em>, <em>R</em>, and the <em>heat capacity ratio</em>, <em>&gamma;</em>.</p>`;
+      infoText.innerHTML = `<p class="p-normal">Click or tap the <em>&gamma;R&rho;<sub>&infin;</sub>T<sub>&infin;</sub>P<sub>&infin;</sub></em>
+      button.  Use the top menu to state the gas that the UFO flies in.  This sets the <em>gas constant</em>, <em>R</em>, and the <em>heat capacity ratio</em>, <em>&gamma;</em>.</p>`;
       break;
 
     case 'info-how-to-use-rhoTP-btn-rhotp-menu': //rho, T, P menu
-      infoText.innerHTML = `<p class="p-normal">After clicking or tapping the button labeled <em>&gamma;R&rho;<sub>&infin;</sub>T<sub>&infin;</sub>P<sub>&infin;</sub></em>
-      , use the second menu to specify the way you want to set the <em>ambient density (&rho;<sub>&infin;</sub>)</em>, <em>temperature (T<sub>&infin;</sub>)</em>, and <em>pressure (P<sub>&infin;</sub>)</em> of 
-      the gas.</p>
-      <p class="p-normal">Use the first menu option to set the values by altitude using data from the 1976 Standard Atmosphere (see www.pdas.com).  Use the first slider to specify the altitude.  
-      This option only applies to dry air.</p>
-      <p class="p-normal">Use the other menu options to set two of either &rho;<sub>&infin;</sub>, P<sub>&infin;</sub>, or T<sub>&infin;</sub> individually while enforcing the equation <em>P=&rho;RT</em>.  
-      Use the two sliders to set the values.</p>
+      infoText.innerHTML = `<p class="p-normal">Click or tap the <em>&gamma;R&rho;<sub>&infin;</sub>T<sub>&infin;</sub>P<sub>&infin;</sub></em>
+      button.  Use the second menu to set how to set the <em> density (&rho;<sub>&infin;</sub>)</em>, <em>temperature (T<sub>&infin;</sub>)</em>, and <em>pressure (P<sub>&infin;</sub>)</em> of 
+      the gas. Use the sliders to set the values.</p>
+      <p class="p-normal">You can set &rho;<sub>&infin;</sub>, T<sub>&infin;</sub>, and P<sub>&infin;</sub> using altitude data from the 1976 Standard Atmosphere (dry air only).</p>
+      <p class="p-normal">The other menu options let you set two of either &rho;<sub>&infin;</sub>, P<sub>&infin;</sub>, or T<sub>&infin;</sub> individually while enforcing the equation <em>P=&rho;RT</em>.</p>
       <p class="p-normal"><em>Important:</em> Extremely high and low temperatures and pressures are allowed by Aerovisualizer.  Since gases can become 
       a plasma or a liquid or a solid under the right conditions, these conditions should be considered when viewing and interpreting the data.</p>`;
       break;
 
     case 'info-how-to-use-mach-num-btn': // Mach number
-      infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>Mach #</em>
-      to set the Mach number of the UFO as it flies through the abient gas.  The Mach number, <em>M</em>, is the ratio of the speed of 
-      the local flow to the local speed of sound.  Use the slider to set M for the UFO (same as M for the flow in region 1).  
-      In Aerovisualizer, M ranges from 1.1 to 10.</p>
+      infoText.innerHTML = `<p class="p-normal">Click or tap the <em>Mach #</em> button 
+      to set the <em>Mach number</em>, <em>M</em>, of the UFO as it flies through the abient gas.  M is the ratio of the speed of 
+      the local flow to the local speed of sound.  Use the slider to set the value of M in Region 1 (see <em>flow regions</em> in this menu).  The range is from 1.1 to 10.</p>
 
       <p class="p-normal">Shock waves can become detached at low mach numbers.  See <em>detached shock waves</em> in this menu for more information.</p>`;
       break;
 
     case 'info-how-to-use-defl-btn': // deflection angle
-      infoText.innerHTML = `<p class="p-normal">Click or tap the button labeled <em>defl</em> to set the half cone angles 
+      infoText.innerHTML = `<p class="p-normal">Click or tap the <em>defl</em> button to set the half cone angles 
       of the cones at the forward and aft ends of the UFO.  This sets boundary conditions on the flow, and thus the 
       <em>deflection angles</em> for the two shock waves and two Prandtl-Meyer expansion fans.</p>
       
@@ -1306,11 +1303,11 @@ const handleInfoMenuChoice = function(choice){
       break;
 
     case 'info-how-to-use-display-toggle-cycle-btns': // display toggle and cycle buttons
-      infoText.innerHTML = `<p class="p-normal">After clicking or tapping either the button labeled <em>Mach #</em> or <em>defl</em>
-      , click or tap the button labeled <em>Mach/speed</em> to toggle the display between Mach number and speed.  The speed of the 
-      flow in a region equals the local value of <em>M</em> times <em>a</em>.</p>
+      infoText.innerHTML = `<p class="p-normal">Click or tap either the <em>Mach #</em> or the <em>defl</em> button.  
+      Click or tap the <em>Mach/speed</em> button to toggle the display between Mach number and speed.  The speed of the 
+      flow in a region equals the local Mach number times the local speed of sound.</p>
 
-      <p class="p-normal">Click or tap the button labeled either <em>P&rarr;T</em>, <em>T&rarr;&rho;</em>, or <em>&rho;&rarr;P</em>. 
+      <p class="p-normal">Click or tap either the <em>P&rarr;T</em>, the <em>T&rarr;&rho;</em>, or the <em>&rho;&rarr;P</em> button. 
       The displayed data changes to one of three options:</p>
       
       <p class="p-normal"><em>1-</em> static pressure (P), stagnation pressure (P<sub>0</sub>), and dynamic pressure (q),</p>
@@ -1368,8 +1365,9 @@ const handleInfoMenuChoice = function(choice){
       break;
 
     case 'info-sonic-boom':
-      infoText.innerHTML = `<p class="p-normal">Sonic booms occur when shock waves pass observers who hear them.  The sudden rise in pressure from the first shock wave is followed by a decrease in pressure, and then a sudden return to normal pressure after second shock wave. This "overpressure profile" is known as an N-wave because of its shape.  Sonic booms are often perceived in pairs when the two shock waves are sufficiently separated.</p>
-      <p class="p-normal">A sonic boom does <em>not</em> occur only at the moment an object passes through Mach 1.  It is also <em>not</em> heard in all directions from the supersonic object. Rather, the boom is heard only by observers within the "boom carpet", the intersection of the shock cones with the ground.</p>`;
+      infoText.innerHTML = `<p class="p-normal">Sonic booms occur when shock waves pass observers who hear them.  The sudden rise in pressure from the first shock wave is followed by a decrease in pressure, and then a sudden return to normal pressure after the second shock wave. This "overpressure profile" is known as an N-wave because of its shape.  Sonic booms are often perceived in pairs when the two shock waves are sufficiently separated.</p>
+      <p class="p-normal">A sonic boom does <em>not</em> occur only at the moment an object passes through Mach 1.  It is also <em>not</em> heard in all directions from the supersonic object. Rather, the boom is heard only by observers within the "boom carpet", the intersection of the moving shock cones with the ground.</p>
+      <p class="p-normal">Lastly, the phrase, "breaking the sound barrier" is often used when referring to sonic booms.  This antiquated expression originated in the mid 20th century when it was believed that aircraft were not capable of surpassing Mach 1.  This "sound barrier" is a fiction, and yet the expression somehow lives on.</p>`;
       break;
 
     case 'info-prefs-main': //preferences - main
@@ -1403,13 +1401,15 @@ const handleInfoMenuChoice = function(choice){
       break;
 
     case 'info-references':
-      infoText.innerHTML = `<p class="p-normal">en.wikipedia.org/wiki/Dynamic_pressure&nbsp;&nbsp;&nbsp;&nbsp;en.wikipedia.org/wiki/Wave_drag</p>
-      <p class="p-normal">en.wikipedia.org/wiki/Sears–Haack_body&nbsp;&nbsp;&nbsp;&nbsp;en.wikipedia.org/wiki/Heat_capacity</p>
-      <p class="p-normal">en.wikipedia.org/wiki/Prandtl–Meyer_expansion_fan&nbsp;&nbsp;&nbsp;&nbsp;en.wikipedia.org/wiki/Heat_capacity_ratio</p>
-      <p class="p-normal">www.grc.nasa.gov/www/k-12/airplane/normal&nbsp;&nbsp;&nbsp;&nbsp;www.grc.nasa.gov/www/k-12/airplane/machang</p>
-      <p class="p-normal">en.wikipedia.org/wiki/Normal_shock_tables&nbsp;&nbsp;&nbsp;&nbsp;kyleniemeyer.github.io/gas-dynamics-notes</p>
-      <p class="p-normal">www.pdas.com/atmos&nbsp;&nbsp;&nbsp;&nbsp;arc.aiaa.org/doi/epdf/10.2514/3.46670</p>
-      <p class="p-normal">www.engineeringtoolbox.com&nbsp;&nbsp;&nbsp;&nbsp;en.wikipedia.org/wiki/Gas_constant</p>`;
+      infoText.innerHTML = `<p class="p-normal">en.wikipedia.org/wiki/</p>
+      <p class="p-normal">&nbsp;&nbsp;Gas_constant, Heat_capacity, Heat_capacity_ratio,</p>
+      <p class="p-normal">&nbsp;&nbsp;Normal_shock_tables, Prandtl–Meyer_expansion_fan,</p>
+      <p class="p-normal">&nbsp;&nbsp;Dynamic_pressure, Wave_drag, Sears–Haack_body, Sonic_boom</p>
+      <p class="p-normal">www.grc.nasa.gov/www/k-12/airplane/normal, machang</p>
+      <p class="p-normal">kyleniemeyer.github.io/gas-dynamics-notes</p>
+      <p class="p-normal">www.pdas.com/atmos</p>
+      <p class="p-normal">arc.aiaa.org/doi/epdf/10.2514/3.46670</p>
+      <p class="p-normal">www.engineeringtoolbox.com</p>`;
       break;
       
     case 'info-contact-disclaimer':

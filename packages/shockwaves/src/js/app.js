@@ -1332,7 +1332,7 @@ const handleInfoMenuChoice = function(choice){
       <p class="p-normal">These 5 flow regions are labeled on the 3D image and are referred to as "N" in the data display.</p><p></p>
       <p class="p-normal"><em>IMPORTANT:</em> In region 1, &rho;&equals;&rho;<sub>&infin;</sub>, T&equals;T<sub>&infin;</sub>, 
       and P&equals;P<sub>&infin;</sub>.  <em>These boundary conditions must also apply to region 5!</em> 
-      Differences between them are not completely understood by us.  Aerovisualizer is an open source project, so if you can figure it out, please let us know!  
+      Differences between them are the result of less-than-perfect coding algorithms.  Aerovisualizer is an open source project.  The source code is free, so if you can figure out a better way, please let us know!  
       For now, reduce this error by lowering the Mach # or the deflections.</p>`;
       break;
 
@@ -1365,6 +1365,11 @@ const handleInfoMenuChoice = function(choice){
       infoText.innerHTML = `<p class="p-normal">Wave drag is a component of the pressure drag on objects moving at transonic and supersonic speeds due to the presence of shock waves.  Shock waves form in supersonic flow and at subsonic speeds starting at Mach 0.8 on areas of the body where local airflow accelerates to supersonic speed.</p>
       <p class="p-normal">Aerovisualizer calculates the <em>wave drag coefficient (C<sub>Dwave</sub>)</em> for a <em>Sears–Haack body</em>, a body with the lowest theoretical wave drag.  It is a slender body that assumes a small-disturbance in flow.  The derivation and shape were published independently by Wolfgang Haack in 1941 and later by William Sears in 1947.</p>
       <p class="p-normal">The Sears–Haack body is pointed at each end and grows smoothly to a maximum in the middle.  Aerovisualizer's UFO is not smooth, nor is it slender for large deflection angles.  Choose low deflection angles for C<sub>Dwave</sub> to most closely match that of a Sears–Haack body.  Its value equals 9&pi;<sup>2</sup>R<sup>2</sup>&div;(2L<sup>2</sup>), where R is the maximum radius and L is the length.</p>`;
+      break;
+
+    case 'info-sonic-boom':
+      infoText.innerHTML = `<p class="p-normal">Sonic booms occur when shock waves pass observers who hear them.  The sudden rise in pressure from the first shock wave is followed by a decrease in pressure, and then a sudden return to normal pressure after second shock wave. This "overpressure profile" is known as an N-wave because of its shape.  Sonic booms are often perceived in pairs when the two shock waves are sufficiently separated.</p>
+      <p class="p-normal">A sonic boom does <em>not</em> occur only at the moment an object passes through Mach 1.  It is also <em>not</em> heard in all directions from the supersonic object. Rather, the boom is heard only by observers within the "boom carpet", the intersection of the shock cones with the ground.</p>`;
       break;
 
     case 'info-prefs-main': //preferences - main

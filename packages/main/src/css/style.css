@@ -153,17 +153,17 @@ p {
  ****************************************/
 @media (orientation: landscape) and (max-width: 900px) {
   p {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 300;
     margin-left:1rem;
     margin-right:1rem;
     margin-top:0;
-    margin-bottom:3rem;
+    margin-bottom:2.5rem;
     flex: 0 1 15%;
   }
   
   .container {
-    margin:5%;
+    margin:3%;
   }
 }
 

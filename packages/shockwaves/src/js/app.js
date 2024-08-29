@@ -1263,8 +1263,8 @@ const handleInfoMenuChoice = function(choice){
 
     case 'info-how-to-use': //how to use aerovisualizer
       infoText.innerHTML = `
-      <p class="p-normal">Click or tap the buttons labeled <em>"&gamma;R&rho;<sub>&infin;</sub>T<sub>&infin;</sub>P<sub>&infin;</sub>"
-      , "Mach #", and "defl"</em>. Manipulate the buttons, menus, and sliders that appear.  Observe 
+      <p class="p-normal">Click or tap the buttons labeled <em>&gamma;R&rho;<sub>&infin;</sub>T<sub>&infin;</sub>P<sub>&infin;</sub>
+      , Mach #, and defl</em>. Manipulate the buttons, menus, and sliders that appear.  Observe 
       how the shock waves and data change in response.</p>`;
       break;
 
@@ -1328,9 +1328,9 @@ const handleInfoMenuChoice = function(choice){
       <p class="p-normal"><em>5-</em> after the aft shock.</p><p></p>
       <p class="p-normal">These 5 flow regions are labeled on the 3D image and are referred to as "N" in the data display.</p><p></p>
       <p class="p-normal"><em>IMPORTANT:</em> In region 1, &rho;&equals;&rho;<sub>&infin;</sub>, T&equals;T<sub>&infin;</sub>, 
-      and P&equals;P<sub>&infin;</sub>.  <em>These boundary conditions must also apply to region 5!</em> 
-      Differences between them are the result of less-than-perfect coding algorithms.  Aerovisualizer is an open source project.  The source code is free, so if you can figure out a better way, please let us know!  
-      For now, reduce this error by lowering the Mach # or the deflections.</p>`;
+      and P&equals;P<sub>&infin;</sub>.  <em>These boundary conditions must apply to both region 1 and region 5!</em> 
+      Deltas between &rho;, T, P and the flow speed in regions 1 and 5 result from the software implementation.  Aerovisualizer is open source, so if you know a better way, please let us know!  
+      For now, reduce the &Delta;s by lowering the Mach # or the deflection angles.</p>`;
       break;
 
     case 'info-gas-constant':
@@ -1365,7 +1365,7 @@ const handleInfoMenuChoice = function(choice){
       break;
 
     case 'info-sonic-boom':
-      infoText.innerHTML = `<p class="p-normal">Sonic booms occur when shock waves pass observers who hear them.  The sudden rise in pressure from the first shock wave is followed by a decrease in pressure, and then a sudden return to normal pressure after the second shock wave. This "overpressure profile" is known as an N-wave because of its shape.  Sonic booms are often perceived in pairs when the two shock waves are sufficiently separated.</p>
+      infoText.innerHTML = `<p class="p-normal">Sonic booms occur when shock waves pass observers who hear them.  The sudden rise in pressure from the first shock wave is followed by a decrease in pressure, and then a sudden return to normal pressure after the second shock wave. This "overpressure profile" is known as an N-wave because of its shape.  Sonic booms are often perceived in pairs when the two shock waves are sufficiently separated.  More than two shock waves are possible,  depending on the vehicle (listen for 3 of them in videos of SpaceX booster landings).</p>
       <p class="p-normal">A sonic boom does <em>not</em> occur only at the moment an object passes through Mach 1.  It is also <em>not</em> heard in all directions from the supersonic object. Rather, the boom is heard only by observers within the "boom carpet", the intersection of the moving shock cones with the ground.</p>
       <p class="p-normal">Lastly, the phrase, "breaking the sound barrier" is often used when referring to sonic booms.  This antiquated expression originated in the mid 20th century when it was believed that aircraft were not capable of surpassing Mach 1.  This "sound barrier" is a fiction, and yet the expression somehow lives on.</p>`;
       break;

@@ -1348,9 +1348,9 @@ const handleInfoMenuChoice = function(choice){
       break; 
 
     case 'info-speed-of-sound':
-      infoText.innerHTML = `<p class="p-normal">The <em>speed of sound</em>, <em>a</em>, depends on temperature as well as the medium through which a sound wave is propagating.  Although it has a weak dependence on frequency and pressure, the speed of sound for all pratical purposes is equal to &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span>.  
-      Shock waves form in <em>supersonic flow</em> (<em>M > 1</em>) and in <em>transonic flow</em> (<em>0.8 < M < 1.2</em>) in areas of the body where local airflow accelerates to supersonic speed.  Thus, they appear at lower flow speeds in gases with complex molecules such as propane, 
-      in heavy gases such as xenon, and at low temperatures (absolute scales) for all gases.  Conversely, shock waves appear at high speeds in gases such as hydrogen and in gases at high temperatures.</p>`;
+      infoText.innerHTML = `<p class="p-normal">The <em>speed of sound</em>, <em>a</em>, depends on temperature as well as the medium through which a sound wave is propagating.  Although it has a weak dependence on frequency and pressure, the speed of sound for all pratical purposes is equal to &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span>.</p>
+      <p class="p-normal">The Mach number, M, is the ratio of the speed of the local flow to the local speed of sound.  Shock waves form in <em>supersonic flow</em> (<em>M > 1</em>) and in <em>transonic flow</em> (<em>0.8 < M < 1.2</em>) in areas of the body where local airflow accelerates to supersonic speed.  They appear at lower flow speeds in gases with a lower speed of sound (gases with complex molecules such as propane, 
+      heavy gases such as xenon, and at low temperatures for all gases).  Conversely, shock waves appear at high speeds in gases such as hydrogen and in gases at high temperatures.</p>`;
       break;
       
     case 'info-detached-shock-waves':

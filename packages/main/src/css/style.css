@@ -165,6 +165,13 @@ p {
   .container {
     margin:3%;
   }
+
+  .grid {
+    grid-auto-flow: column;
+    grid-auto-columns: 100px;
+    grid-template-rows: 5rem 3rem 6rem;
+    grid-template-columns: 6rem 6rem 6rem;
+  }
 }
 
 /************************************

@@ -14,7 +14,7 @@ main code for it.
 
  Revision History
  Date    Name                  Description
- 8/10/24 R. Eastman            v0.1 beta
+ 8/31/24 R. Eastman            v0.2 beta
 */
 
 let scene, camera, renderer;
@@ -25,9 +25,6 @@ const cameraRadius = 25;
 let nominalCameraPos = new THREE.Vector3(0, 0, -cameraRadius);
 let cpx, cpy, cpz;// camera position
 const lookAtPoint = [0, 0, 0];
-const maxTransparency = 95;
-// 95 maxTransparency is arbirary and considered close enough to being completely 
-// invisible, this allows for a little slop when using the slider controls
 const piOver180 = Math.PI / 180;
 
 const defaultMachNumber = 2;
@@ -136,7 +133,6 @@ let a2 = defaultSpeedOfSound;
 let a3 = defaultSpeedOfSound;
 let a4 = defaultSpeedOfSound;
 let a5 = defaultSpeedOfSound;
-let p02OverP01;//ratio of stagnation pressure after to before the shock
 
 let gasConstant = defaultR;
 let gamma = defaultGamma;
@@ -310,10 +306,14 @@ const mach3Display3 = document.getElementById("mach3-display3");
 const mach4Display3 = document.getElementById("mach4-display3");
 const mach5Display3 = document.getElementById("mach5-display3");
 
-// each of the temperature arrays has 76 values for a 1 to 1 
+// each of the arrays has 76 values for a one to one 
 // correspondence with the slider values which range from
 // a min value of 0 to a max value of 75.  The slider values
 // act as indices to these arrays
+
+// altitude data are from the 1976 Standard Atmosphere (dry air)
+
+// kilometers
 const altitude =
 [-2.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,
 5.5,6.0,6.5,7.0,7.5,8.0,8.5,9.0,9.5,10.0,10.5,11.0,11.5,12.0,
@@ -322,6 +322,7 @@ const altitude =
 38.0,40.0,42.0,44.0,46.0,48.0,50.0,52.0,54.0,56.0,58.0,60.0,
 62.0,64.0,66.0,68.0,70.0,72.0,74.0,76.0,78.0,80.0,82.0,84.0,86.0];
 
+// Kelvin
 const temperatureForAltitude =
 [301.2,291.4,288.1,284.9,281.7,278.4,275.2,271.9,268.7,265.4,
 262.2,258.9,255.7,252.4,249.2,245.9,242.7,239.5,236.2,233.0,
@@ -332,6 +333,7 @@ const temperatureForAltitude =
 258.0,252.5,247.0,241.5,236.0,230.5,225.1,219.6,214.3,210.3,
 206.4,202.5,198.6,194.7,190.8,186.9];
 
+// Celsius
 const temperatureForUserSelect =
 [-260, -240, -220, -200, -180, -160, -140, -120, -100, -80,
   -60,  -40,  -20,    0,   20,   40,   60,   80,  100, 120,
@@ -342,6 +344,7 @@ const temperatureForUserSelect =
   940,  960,  980, 1000, 1020, 1040, 1060, 1080, 1100,1120,
  1140, 1160, 1180, 1200, 1220, 1240];
 
+// Pascals
 const pressureForAltitude =
 [1.2780E+05,1.07477E+05,1.01325E+05,9.5461E+04,8.9876E+04,8.4559E+04,
 7.9501E+04,7.4691E+04,7.0121E+04,6.5780E+04,6.1660E+04,5.7752E+04,
@@ -357,6 +360,7 @@ const pressureForAltitude =
 7.0510E+00,5.2200E+00,3.8350E+00,2.8000E+00,2.0330E+00,1.4670E+00,
 1.0520E+00,7.49800E-01,5.30800E-01,3.73200E-01];
 
+// Pascals
 const pressureForUserSelect =
 [1.0E-01,2.0E-01,3.0E-01,4.0E-01,5.0E-01,6.0E-01,7.0E-01,8.0E-01,9.0E-01,
 1.0E+00,2.0E+00,3.0E+00,4.0E+00,5.0E+00,6.0E+00,7.0E+00,8.0E+00,9.0E+00,
@@ -368,6 +372,7 @@ const pressureForUserSelect =
 1.0E+06,2.0E+06,3.0E+06,4.0E+06,5.0E+06,6.0E+06,7.0E+06,8.0E+06,9.0E+06,
 1.0E+07,2.0E+07,3.0E+07,4.0E+07];
 
+// kg/m^3
 const densityForAltitude =
 [1.478E+00,1.285E+00,1.225E+00,1.167E+00,1.112E+00,1.058E+00,
 1.007E+00,9.570E-01,9.090E-01,8.630E-01,8.193E-01,7.770E-01,
@@ -383,6 +388,7 @@ const densityForAltitude =
 1.091E-04,8.281E-05,6.236E-05,4.637E-05,3.430E-05,2.523E-05,
 1.845E-05,1.341E-05,9.690E-06,6.955E-06];
 
+// kg/m^3
 const densityForUserSelect =
 [1.0E-06,2.0E-06,3.0E-06,4.0E-06,5.0E-06,6.0E-06,7.0E-06,8.0E-06,9.0E-06,
 1.0E-05,2.0E-05,3.0E-05,4.0E-05,5.0E-05,6.0E-05,7.0E-05,8.0E-05,9.0E-05,
@@ -393,16 +399,6 @@ const densityForUserSelect =
 1.0E+00,2.0E+00,3.0E+00,4.0E+00,5.0E+00,6.0E+00,7.0E+00,8.0E+00,9.0E+00,
 1.0E+01,2.0E+01,3.0E+01,4.0E+01,5.0E+01,6.0E+01,7.0E+01,8.0E+01,9.0E+01,
 1.0E+02,2.0E+02,8.0E+02,4.0E+02];
-
-const speedOfSoundForAltitude =
-[347.9,342.2,340.3,338.4,336.4,334.5,332.5,330.6,328.6,326.6,
-324.6,322.6,320.5,318.5,316.5,314.4,312.3,310.2,308.1,306.0,
-303.8,301.7,299.5,297.4,295.2,295.1,295.1,295.1,295.1,295.1,
-295.1,295.1,295.1,295.1,295.1,295.1,295.1,295.1,295.1,295.1,
-295.1,295.1,295.1,296.4,297.7,299.1,300.4,301.7,303.0,306.5,
-310.1,313.7,317.2,320.7,324.1,327.5,329.8,329.8,328.8,325.4,
-322.0,318.6,315.1,311.5,308.0,304.4,300.7,297.1,293.4,290.7,
-288.0,285.3,282.5,279.7,276.9,274.1];//not used
 
 //gas constants from www.engineeringtoolbox.com
 // units J/Kg K
@@ -441,22 +437,6 @@ const gammaData = {dry_air_MINUS15:1.404, dry_air_0:1.403, dry_air_20:1.400,
   oxygen_200:1.397, oxygen_400:1.394, propane_16:1.130, 
   sulfur_dioxide_15:1.290, water_vapor_20:1.330, water_vapor_100:1.324, 
   water_vapor_200:1.310, xenon_19:1.660};//numbers in name indicate temperature in degrees Celsius
-
-const replaceAerovisualizerData = function(name, value){
-  aerovisualizerData.forEach(o => {
-    if (o.name === name){
-      o.value = value;
-    }});
-}
-
-const saveToLocalStorage = function(){
-  localStorage.setItem('aerovisualizerData3', JSON.stringify(aerovisualizerData));
-}
-
-const getFromLocalStorage = function(){
-  const data = JSON.parse(localStorage.getItem('aerovisualizerData3'));
-  return data;
-}
 
 const handleMainButtons = function(button){
   machButton.disabled = false;
@@ -542,9 +522,6 @@ const setNumericalDisplay = function(cycle = false){
 
   if (currentMainButton !== 'rhoTP'){
     numericalButtonsElements.style.display = 'grid';
-    // numerical1Elements.style.display = 'grid';
-    // numerical2Elements.style.display = 'grid';
-    // numerical3Elements.style.display = 'grid';
   }else{
     numericalButtonsElements.style.display = 'none';
     numerical1Elements.style.display = 'none';
@@ -695,7 +672,7 @@ rhoTPMenu.addEventListener('change', () => {
   saveToLocalStorage();
 });
 
-const temperatureForKelvin = function(temp, fixedOption=2, withLabel=true){
+const temperatureFromKelvin = function(temp, fixedOption=2, withLabel=true){
   //supply a temerature in degrees Kelvin, function
   //returns a string based on temperatureScaleMenuSelection
   let displayedTemp;
@@ -737,7 +714,7 @@ const temperatureForKelvin = function(temp, fixedOption=2, withLabel=true){
   return displayedTemp;
 }
 
-const densityForMetric = function(density, fixedOption=3, withLabel=true){
+const densityFromMetric = function(density, fixedOption=3, withLabel=true){
   //supply a density in kg/m^3, function
   //returns a string based on densityUnitsMenuSelection
   //1 pound/cubic foot = 16.01846337396 kilogram/cubic meter
@@ -777,7 +754,7 @@ const densityForMetric = function(density, fixedOption=3, withLabel=true){
   return displayedDens;
 }
 
-const pressureForPascals = function(pressure, fixedOption=4, withLabel=true){
+const pressureFromPascals = function(pressure, fixedOption=4, withLabel=true){
   //supply a pressure in Pascals (N/m^2), function
   //returns a string based on pressureUnitsMenuSelection
   //1 psi = 6894.76 Pascals
@@ -931,7 +908,6 @@ const speedForMetric = function(speed, fixedOption=1, withLabel=true){
 }
 
 const setRhoTP = function(sliderNumber = 0){
-
   let alt;
   const slider1Index = Number(rhoTP1Slider.value);
   const slider2Index = Number(rhoTP2Slider.value);
@@ -956,12 +932,12 @@ const setRhoTP = function(sliderNumber = 0){
 
       if (sliderNumber === 0 || sliderNumber === 1){
         dens1 = densityForUserSelect[slider1Index];
-        rhoTP1SliderDisplay.innerHTML = `density: ${densityForMetric(dens1)}`;
+        rhoTP1SliderDisplay.innerHTML = `density: ${densityFromMetric(dens1)}`;
       }
 
       if (sliderNumber === 0 || sliderNumber === 2){
         pres1 = pressureForUserSelect[slider2Index];
-        rhoTP2SliderDisplay.innerHTML = `pressure: ${pressureForPascals(pres1)}`;
+        rhoTP2SliderDisplay.innerHTML = `pressure: ${pressureFromPascals(pres1)}`;
       }
       
       temp1 = pres1/dens1/gasConstant;
@@ -972,12 +948,12 @@ const setRhoTP = function(sliderNumber = 0){
 
       if (sliderNumber === 0 || sliderNumber === 1){
         pres1 = pressureForUserSelect[slider1Index];
-        rhoTP1SliderDisplay.innerHTML = `pressure: ${pressureForPascals(pres1)}`;
+        rhoTP1SliderDisplay.innerHTML = `pressure: ${pressureFromPascals(pres1)}`;
       }
 
       if (sliderNumber === 0 || sliderNumber === 2){
-        temp1 = temperatureForUserSelect[slider2Index] + 273.15;
-        rhoTP2SliderDisplay.innerHTML = `temperature: ${temperatureForKelvin(temp1,0)}`;
+        temp1 = temperatureForUserSelect[slider2Index] + 273.15;//convert from Celsius to Kelvin
+        rhoTP2SliderDisplay.innerHTML = `temperature: ${temperatureFromKelvin(temp1,0)}`;
       }
       
       dens1 = pres1/temp1/gasConstant;
@@ -987,13 +963,13 @@ const setRhoTP = function(sliderNumber = 0){
       densitySliderIndex = slider2Index;
 
       if (sliderNumber === 0 || sliderNumber === 1){
-        temp1 = temperatureForUserSelect[slider1Index] + 273.15;
-        rhoTP1SliderDisplay.innerHTML = `temperature: ${temperatureForKelvin(temp1,0)}`;
+        temp1 = temperatureForUserSelect[slider1Index] + 273.15;//convert from Celsius to Kelvin
+        rhoTP1SliderDisplay.innerHTML = `temperature: ${temperatureFromKelvin(temp1,0)}`;
       }
 
       if (sliderNumber === 0 || sliderNumber === 2){
         dens1 = densityForUserSelect[slider2Index];
-        rhoTP2SliderDisplay.innerHTML = `density: ${densityForMetric(dens1)}`;
+        rhoTP2SliderDisplay.innerHTML = `density: ${densityFromMetric(dens1)}`;
       }
       
       pres1 = dens1*gasConstant*temp1;
@@ -1022,8 +998,8 @@ const setRhoTP = function(sliderNumber = 0){
   q1 = stagPres1 - pres1;
 
   a1 = Math.sqrt(gamma*gasConstant*temp1);
-  tempADisplay.innerHTML = `T<sub>&infin;</sub> = ${temperatureForKelvin(temp1)}&nbsp;&nbsp;&nbsp;&nbsp;a = &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span> = ${speedForMetric(a1,2)}`;
-  presDensDisplay.innerHTML = `P<sub>&infin;</sub> = ${pressureForPascals(pres1)}&nbsp;&nbsp;&nbsp;&nbsp;&rho;<sub>&infin;</sub> = ${densityForMetric(dens1)}`;
+  tempADisplay.innerHTML = `T<sub>&infin;</sub> = ${temperatureFromKelvin(temp1)}&nbsp;&nbsp;&nbsp;&nbsp;a = &Sqrt;<span STYLE="text-decoration:overline">&gamma;RT</span> = ${speedForMetric(a1,2)}`;
+  presDensDisplay.innerHTML = `P<sub>&infin;</sub> = ${pressureFromPascals(pres1)}&nbsp;&nbsp;&nbsp;&nbsp;&rho;<sub>&infin;</sub> = ${densityFromMetric(dens1)}`;
   displayRGammaACD();
 }
 
@@ -1102,7 +1078,6 @@ const handleGasMediumOnChange = function(){
 
   setRhoTP();
   computeAllFlow();
-  // displayRGammaACD();
 }
 
 const setTransparency = function(thing, transparency){
@@ -1515,7 +1490,6 @@ speedUnitsMenu.addEventListener('change', () => {
   speedUnitsMenuSelection = speedUnitsMenu.value;
   setRhoTP();
   updateDisplay();
-  // displayMachOrSpeed();
   replaceAerovisualizerData('speed-units-menu-selection',speedUnitsMenuSelection);
   saveToLocalStorage();
 });
@@ -1524,291 +1498,30 @@ prefsReturnButton.addEventListener('click', () => {
   toggleShowPrefs();
 });
 
-const doWindowResizeOrOrientationChange = function(){
-  camera.aspect = 1;
-  camera.updateProjectionMatrix();
-  renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.clear();
-  renderer.render(scene, camera);
-}
-
-window.addEventListener('resize', () => {
-  doWindowResizeOrOrientationChange();
-});
-
-window.addEventListener("orientationchange", () => {
-  doWindowResizeOrOrientationChange();
-});
-
-const loadBackground = function(option='atmosphere'){
-  switch (option){
-    case 'atmosphere':
-      if (background != null){
-        background = null;
-      }
-
-      // let img = document.createElement('img');
-      // img.src = new URL('hero.jpg', import.meta.url);
-      // document.body.appendChild(img);
-
-      let stormydays_ft = new URL('../../static/img/stormydays_ft.jpg', import.meta.url);
-      let stormydays_bk = new URL('../../static/img/stormydays_bk.jpg', import.meta.url);
-      let stormydays_up = new URL('../../static/img/stormydays_up.jpg', import.meta.url);
-      let stormydays_dn = new URL('../../static/img/stormydays_dn.jpg', import.meta.url);
-      let stormydays_rt = new URL('../../static/img/stormydays_rt.jpg', import.meta.url);
-      let stormydays_lf = new URL('../../static/img/stormydays_lf.jpg', import.meta.url);
-
-      background = new THREE.CubeTextureLoader().load([stormydays_ft.pathname,stormydays_bk.pathname,stormydays_up.pathname,stormydays_dn.pathname,stormydays_rt.pathname,stormydays_lf.pathname]);
-      // background = new THREE.CubeTextureLoader().load(['./static/img/stormydays_ft.jpg','./static/img/stormydays_bk.jpg','./static/img/stormydays_up.jpg','./static/img/stormydays_dn.jpg','./static/img/stormydays_rt.jpg','./static/img/stormydays_lf.jpg']);
-
-      scene.background = background;
-  }
-}
-
-const initTHREE = function() {
-  scene = new THREE.Scene();
-  
-  const ambientLight = new THREE.AmbientLight(0x909090);
-  const sunLight = new THREE.SpotLight(0xffffff);
-
-  sunLight.position.set(-20, 20, 20);
-  sunLight.castShadow = false;
-  sunLight.decay = 0;
-  sunLight.intensity = 1;
-  scene.add(ambientLight);
-  scene.add(sunLight);
-
-  renderer = new THREE.WebGLRenderer({
-    devicePixelRatio: window.devicePixelRatio,
-    alpha: true,
-  });
-
-  renderer.setClearColor(0x000000);
-  renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.autoClear = false;
-  camera = new THREE.PerspectiveCamera(45, 1, 0.5, 1000);
-  camera.aspect = 1;
-  camera.position.set(nominalCameraPos.x, nominalCameraPos.y, nominalCameraPos.z);
-  camera.lookAt(lookAtPoint);
-  renderer.shadowMap.enabled = false;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  threeDWorld.appendChild(renderer.domElement);
-  orbitControls = new OrbitControls(camera, renderer.domElement);
-  // orbitControls.enableDamping;
-  orbitControls.enableZoom = false;
-};
-
-const createAndInitialize = function(data, camera){
-  if (data){
-    aerovisualizerData = JSON.parse(JSON.stringify(data));
-
-    for (let o of data) {
-      switch (o.name){
-        case 'mach-number':
-          mach1 = o.value;
-          break;
-        case 'delta-menu-selection':
-          deltaMenuSelection = o.value;
-          break;
-        case 'forward-delta':
-          forwardDelta = o.value;
-          break;
-        case 'aft-delta':
-          aftDelta = o.value;
-          break;
-        case 'temperature-scale-menu-selection':
-          temperatureScaleMenuSelection = o.value;
-          break;
-        case 'density-units-menu-selection':
-          densityUnitsMenuSelection = o.value;
-          break;
-        case 'pressure-units-menu-selection':
-          pressureUnitsMenuSelection = o.value;
-          break;
-        case 'speed-units-menu-selection':
-          speedUnitsMenuSelection = o.value;
-          break;
-        case 'gas-medium-menu-selection':
-          gasMediumMenuSelection = o.value;
-          break;
-        case 'rhoTP-menu-selection':
-          rhoTPMenuSelection = o.value;
-          break;
-        case 'altitude-slider-index':
-          altitudeSliderIndex = o.value;
-          break;
-        case 'density-slider-index':
-          densitySliderIndex = o.value;
-          break;
-        case 'temperature-slider-index':
-          temperatureSliderIndex = o.value;
-          break;
-        case 'pressure-slider-index':
-          pressureSliderIndex = o.value;
-          break;
-        case 'ufo-transparency':
-          ufoTransparency = o.value;
-          break;
-        case 'forward-shock-transparency':
-          forwardShockTransparency = o.value;
-          break;
-        case 'aft-shock-transparency':
-          aftShockTransparency = o.value;
-          break;
-        case 'labels-transparency':
-          labelsTransparency = o.value;
-          break;
-        case 'ufo-color':
-          ufoColor = o.value;
-          break;
-        case 'forward-shock-color':
-          forwardShockColor = o.value;
-          break;
-        case 'aft-shock-color':
-          aftShockColor = o.value;
-          break;
-        case 'labels-color':
-          labelsColor = o.value;
-          break;
-        case 'altitude-is-in-feet':
-          altitudeIsInFeet = o.value;
-          break;
-        case 'mach-speed-state':
-          machSpeedState = o.value;
-          break;
-        case 'current-main-button':
-          currentMainButton = o.value;
-          break;
-      }
-    }
-  }
-
-  if (ufo === null){
-    ufo = new UFO(scene, camera);
-  }
-
-  machSlider.value = mach1;
-  ufoTransparencySlider.value = ufoTransparency;
-  forwardShockTransparencySlider.value = forwardShockTransparency;
-  aftShockTransparencySlider.value = aftShockTransparency;
-  labelsTransparencySlider.value = labelsTransparency;
-  ufoColorMenu.value = ufoColor;
-  forwardShockColorMenu.value = forwardShockColor;
-  aftShockColorMenu.value = aftShockColor;
-  labelsColorMenu.value = labelsColor;
-  altitudeFeetCheckbox.checked = altitudeIsInFeet;
-  temperatureScaleMenu.value = temperatureScaleMenuSelection;
-  densityUnitsMenu.value = densityUnitsMenuSelection;
-  pressureUnitsMenu.value = pressureUnitsMenuSelection;
-  speedUnitsMenu.value = speedUnitsMenuSelection;
-  gasMediumMenu.value = gasMediumMenuSelection;
-  rhoTPMenu.value = rhoTPMenuSelection;
-  deltaMenu.value = deltaMenuSelection;
-
-  switch (deltaMenuSelection){
-    case 'forward':
-      deltaSlider.value = forwardDelta;
-      break;
-    case 'aft':
-      deltaSlider.value = aftDelta;
-      break;
-  }
-
-  handleMainButtons(currentMainButton);
-  handleDeltaOnInput();
-  handleRhoTPMenu();
-  handleGasMediumOnChange();
-  setRhoTP();
-  // computeAllFlow();
-  displayMachOrSpeed();
-  displayDensTempPresLabels();
-  loadBackground();
-}
-
-const completeInitialization = function(continueAnimation = true) {
-  // the reason for this is that the UFO.js file contains
-  // the function _constructLabels() which contains a FontLoader 
-  // object called loader that creates code that runs asynchronously.
-  // Once ufo.constructionComplete is true, we can finish
-  // our initialization
-  if (continueAnimation && !(ufo.constructionComplete)) {
-    requestAnimationFrame(completeInitialization);
-  }
-  
-  if (ufo.constructionComplete){
-    handlePreferencesButtons('none');
-
-    camera.aspect = 1;
-    camera.updateProjectionMatrix();
-
-    cpx = camera.position.x;
-    cpy = camera.position.y;
-    cpz = camera.position.z;
-
-    renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    ufo.addObjectsToScene();
-
-    setTransparency('ufo',ufoTransparency);
-    setTransparency('forward-shock',forwardShockTransparency);
-    setTransparency('aft-shock',aftShockTransparency);
-    setTransparency('labels',labelsTransparency);
-
-    miscPrefButton.style.display = 'none';
-    transparencyPrefButton.style.display = 'none';
-    colorPrefButton.style.display = 'none';
-    prefsReturnButton.style.display = 'none';
-    infoElements.style.display = 'none';
-    infoMenu.value = 'info-intro';
-    handleInfoMenuChoice(infoMenu.value);
-    ufo.setColor('ufo', ufoColor);
-    ufo.setColor('forward-shock', forwardShockColor);
-    ufo.setColor('aft-shock', aftShockColor);
-    ufo.setColor('labels', labelsColor);
-    // handleGasMediumOnChange();//check that it displays 'a' value for temp1, temp1 should be set before here
-    handleDeltaOnInput();
-    // computeAllFlow();
-    ufo.needsRefresh = true;
-  }
-};
-
-const animate = function(continueAnimation = true) {
-  if (continueAnimation) {
-    requestAnimationFrame(animate);
-  }
-  
-  orbitControls.update();
-
-  if (cpx !== camera.position.x && cpy !== camera.position.y && cpz !== camera.position.z){
-    cpx = camera.position.x;
-    cpy = camera.position.y;
-    cpz = camera.position.z;
-    ufo.needsRefresh = true;
-  } 
-
-  renderer.clear();
-  renderer.render(scene, camera);
-  ufo.refresh();
-};
-
+// finds the turning angle when given a Mach number
 const prandtlMeyer = function(m, gamma){
   const gammaThing = (gamma + 1)/(gamma - 1);
   const sqrtGammaThing = Math.sqrt(gammaThing);
   const nu = sqrtGammaThing*Math.atan(Math.sqrt((m*m - 1)/gammaThing))
    - Math.atan(Math.sqrt(m*m - 1));
 
-  return nu;
+  return nu;// nu is in radians
 }
 
+// finds the Mach number when given a turning angle.
+// The algorithm was found here -->
+// ftp.demec.ufpr.br/CFD/bibliografia/propulsao/Hall_1975.pdf
+// and there is another article here -->
+// arc.aiaa.org/doi/epdf/10.2514/3.46670
 const inversePrandtlMeyer = function(nu, gamma){
+  // nu must be in radians
   const lamda = Math.sqrt((gamma - 1)/(gamma + 1));
 
-  //first guess of Mach number
+  // first guess of Mach number
   let m = (1/(lamda*lamda) - 1)/(Math.PI*(1/lamda - 1)/2 - nu);
   let beta = Math.sqrt(m*m - 1);
 
+  // iterate a few times
   m = Math.sqrt(beta*beta + 1);
   let f = Math.tan(lamda*(nu + Math.atan(beta)))/lamda - beta;
   beta = beta + (1 + beta*beta)*f/((1 - lamda*lamda)*beta*beta);
@@ -1823,6 +1536,8 @@ const inversePrandtlMeyer = function(nu, gamma){
   return m;
 }
 
+// computes the stagnation temperature, pressure, and density
+// given the Mach number and the static values
 const computeStagnationDensTempPres = function(m, rho, t, p){
   const t0OverT = 1 + m*m*(gamma - 1)/2;
   const oneOverGammaMinus1 = 1/(gamma - 1);
@@ -1836,6 +1551,8 @@ const computeStagnationDensTempPres = function(m, rho, t, p){
   return [rho0, t0, p0];
 }
 
+// computes the static temperature, pressure, and density ratios
+// given two Mach numbers
 const computeDensTempPresRatios = function(m1, m2){
   if (m2 === NaN){
     return [NaN, NaN, NaN];
@@ -1853,9 +1570,14 @@ const computeDensTempPresRatios = function(m1, m2){
 }
 
 const computeAllFlow = function(){
-  let [forwardShockHalfConeAngle,m2,m0Norm,m1Norm,rho21,t21,p21,p021] = shock(mach1,forwardDelta,gamma);
+  let [forwardShockHalfConeAngle,m2,m0Norm,m1Norm,rho21,t21,p21] = shock(mach1,forwardDelta,gamma);
+  // m0Norm and m1Norm are the normal components of the Mach number before and
+  // after the shock.  They are not displayed at present
 
   if (!m2){
+    // detached shock, function was not able to find a value for sigma.
+    // We do not change the 3D image to indicate this, although we probably 
+    // should in the future using ufo.setShockWaveHalfConeAngles
     updateDisplay(true);
     return;
   }
@@ -1864,10 +1586,14 @@ const computeAllFlow = function(){
   mach2 = m2;
   machAngle2Display.innerHTML = Number(Math.asin(1/mach2)/piOver180).toFixed(1).toString();
 
+  //static values in region 2
   dens2 = dens1*rho21;
   temp2 = temp1*t21;
   pres2 = pres1*p21;
+
   const [dens20, temp20, pres20] = computeStagnationDensTempPres(mach2, dens2, temp2, pres2);
+
+  //stagnation values in region 2
   stagDens2 = dens20;
   stagTemp2 = temp20;
   stagPres2 = pres20;
@@ -1878,6 +1604,10 @@ const computeAllFlow = function(){
   let nu;
 
   if (mach2 != NaN){
+    // determine the Prandtl-Meyer angle in region 2, then
+    // add the forward deflection angle where the cone meets
+    // the cylinder.  Then find the Mach number for this angle
+    // which is for region 3
     nu = prandtlMeyer(mach2,gamma) + forwardDelta*piOver180;
     mach3 = inversePrandtlMeyer(nu, gamma);
     machAngle3Display.innerHTML = Number(Math.asin(1/mach3)/piOver180).toFixed(1).toString();
@@ -1885,11 +1615,14 @@ const computeAllFlow = function(){
 
   let [rho32,t32,p32] = computeDensTempPresRatios(mach2, mach3);
 
+  //static values in region 3
   dens3 = dens2*rho32;
   temp3 = temp2*t32;
   pres3 = pres2*p32;
 
   const [dens30, temp30, pres30] = computeStagnationDensTempPres(mach3, dens3, temp3, pres3);
+
+  //stagnation values in region 3
   stagDens3 = dens30;
   stagTemp3 = temp30;
   stagPres3 = pres30;
@@ -1899,44 +1632,61 @@ const computeAllFlow = function(){
   mach4 = NaN;
 
   if (mach3 != NaN){
+    // determine the Prandtl-Meyer angle in region 3, then
+    // add the aft deflection angle where the cone meets
+    // the cylinder.  Then find the Mach number for this angle
+    // which is for region 4
     nu = prandtlMeyer(mach3,gamma) + aftDelta*piOver180;
     mach4 = inversePrandtlMeyer(nu, gamma);
     machAngle4Display.innerHTML = Number(Math.asin(1/mach4)/piOver180).toFixed(1).toString();
   }
 
   let [rho43,t43,p43] = computeDensTempPresRatios(mach3, mach4);
+
+  //static values in region 4
   dens4 = dens3*rho43;
   temp4 = temp3*t43;
   pres4 = pres3*p43;
 
   const [dens40, temp40, pres40] = computeStagnationDensTempPres(mach4, dens4, temp4, pres4);
+
+  //stagnation values in region 4
   stagDens4 = dens40;
   stagTemp4 = temp40;
   stagPres4 = pres40;
   q4 = stagPres4 - pres4;
   a4 = Math.sqrt(gamma*gasConstant*temp4);
 
-  let [aftShockHalfConeAngle,m5,m3Norm,m4Norm,rho54,t54,p54,p054] = shock(mach4,aftDelta,gamma);
+  let [aftShockHalfConeAngle,m5,m3Norm,m4Norm,rho54,t54,p54] = shock(mach4,aftDelta,gamma);
 
   mach5 = m5;
   machAngle5Display.innerHTML = Number(Math.asin(1/mach5)/piOver180).toFixed(1).toString();
+
+  //static values in region 5
   dens5 = dens4*rho54;
   temp5 = temp4*t54;
   pres5 = pres4*p54;
 
   const [dens50, temp50, pres50] = computeStagnationDensTempPres(mach5, dens5, temp5, pres5);
+  
+  //stagnation values in region 5
   stagDens5 = dens50;
   stagTemp5 = temp50;
   stagPres5 = pres50;
   q5 = stagPres5 - pres5;
   a5 = Math.sqrt(gamma*gasConstant*temp5);
 
-  // set aft HCA here, refresh the display
+  // earlier we found the forward and aft half cone angles for the two shock cones.
+  // Here, we update the values for the ufo object so that it can display
+  // them properly.  We also update the numerical display
   ufo.setShockWaveHalfConeAngles(forwardShockHalfConeAngle,aftShockHalfConeAngle);
   ufo.needsRefresh = true;
   updateDisplay();
 
   if (!m5){
+    // detached aft shock, function was not able to find a value for sigma.
+    // We do not change the 3D image to indicate this, although we probably 
+    // should in the future using ufo.setShockWaveHalfConeAngles
     displayForDetachedShockForRegion5();
     return;
   }
@@ -1945,28 +1695,30 @@ const computeAllFlow = function(){
 const shock = function(m1,deltaDegrees,gamma){
   // m1 is the Mach number before the shock
   // gamma is the heat capacity ratio
-  const delta = deltaDegrees*piOver180;//flow turning angle in radians
+  const delta = deltaDegrees*piOver180;//flow turning angle in radians, 
+  //same as half cone angles of forward and aft cones
   let dsig = 0.1;// a small angle in radians 
-  let sigma = Math.PI/2-dsig;//delta + dsig;//sigma is the angle of the oblique shock wave
-  // to the initial flow direction.  Adding dsig provides a first guess of sigma, 
-  // so sigma could be less than this for hypersonic cases.  We want to avoid this.
+  let sigma = Math.PI/2-dsig;//sigma is the angle of the oblique shock wave
+  // to the initial flow direction.  We set it to slightly less than pi/2
+  // as an initial guess and work down from there
   let tanSigma;// tangent of sigma
   let tanSigmaMinusDelta;// tangent of (sigma - delta)
   let tanRatio;// ratio of tanSigma to tanSigmaMinusDelta
-  let m1n;// normal component of Mach # before the shock
+  let m1n;// normal component to shock of Mach # before the shock
   let m1nSqu;// m1n squared
   let rho2OverRho1;// ratio of density after to before the shock
   let ratio = 2;// this is the ratio of tanRatio to rho2OverRho1.
   // These are two methods of computing rho2/rho1. Set this to 
   // anything greater than 1.  We want this ratio to be 1 in order 
-  // to solve for sigma.  This may not be possible for low Mach 
-  // numbers or high deltas (detached shock wave, probably).
+  // to solve for sigma.  When we can't find sigma, that means that
+  // there is a detached shock wave
   let previousRatio = ratio;
   let m2n;// normal component of Mach # after shock
   let m2;// Mach number after the shock
   let p2OverP1;//ratio of pressure after to before the shock
   let t2OverT1;//ratio of temperature after to before the shock
 
+  //sigma starts at just under pi/2, work down to zero from there 
   while (sigma > 0){
     tanSigma = Math.tan(sigma);
     tanSigmaMinusDelta = Math.tan(sigma - delta);
@@ -1977,8 +1729,11 @@ const shock = function(m1,deltaDegrees,gamma){
     previousRatio = ratio;
     ratio = tanRatio/rho2OverRho1;
 
+    // keep checking the new ratio and the old one.
+    // If it is near 1, adjust dsig down an order of magnitude
     if (previousRatio <= 1 && ratio >= 1){
       if (dsig <= 0.0001){
+        // don't try to solve for sigma less than 1000s place
         break;
       }
 
@@ -1994,22 +1749,14 @@ const shock = function(m1,deltaDegrees,gamma){
     return [NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN];
   }
 
+  // now we have sigma, so compute all of the data based on it
   p2OverP1 = (2*gamma*m1nSqu - (gamma - 1))/(gamma +1);
   m2n = Math.sqrt((m1nSqu*(gamma - 1) + 2)/(2*gamma*m1nSqu - (gamma-1)));
   m2 = m2n/Math.sin(sigma - delta);
   t2OverT1 = (m1nSqu*(gamma - 1) + 2)*(2*gamma*m1nSqu - (gamma 
       - 1))/((gamma + 1)*(gamma + 1)*m1nSqu);
 
-  const a = m1nSqu*(gamma + 1)/2;
-  const b = 1 + m1nSqu*(gamma - 1)/2;
-  const c = m1nSqu*2*gamma/(gamma + 1) - (gamma - 1)/(gamma + 1);
-  const oneOverGammaMinus1 = 1/(gamma - 1);
-  const gammaOverGammaMinus1 = gamma*oneOverGammaMinus1;
-  const d = Math.pow(a/b,gammaOverGammaMinus1);
-  const e = Math.pow(1/c,oneOverGammaMinus1);      
-  p02OverP01 = d*e;
-
-  return [sigma,m2,m1n,m2n,rho2OverRho1,t2OverT1,p2OverP1,p02OverP01];
+  return [sigma,m2,m1n,m2n,rho2OverRho1,t2OverT1,p2OverP1];
 }
 
 const displayDensTempPresLabels = function(){
@@ -2246,41 +1993,41 @@ const updateDisplay = function(detachedShock = false){
     return;
   }
 
-  p1Display.innerHTML = pressureForPascals(pres1,4,false);
-  p2Display.innerHTML = pressureForPascals(pres2,4,false);
-  p3Display.innerHTML = pressureForPascals(pres3,4,false);
-  p4Display.innerHTML = pressureForPascals(pres4,4,false);
-  p5Display.innerHTML = pressureForPascals(pres5,4,false);
-  stagnationPressure1Display.innerHTML = pressureForPascals(stagPres1,4,false);
-  stagnationPressure2Display.innerHTML = pressureForPascals(stagPres2,4,false);
-  stagnationPressure3Display.innerHTML = pressureForPascals(stagPres3,4,false);
-  stagnationPressure4Display.innerHTML = pressureForPascals(stagPres4,4,false);
-  stagnationPressure5Display.innerHTML = pressureForPascals(stagPres5,4,false);
-  dynamicPressure1Display.innerHTML = pressureForPascals(q1,4,false);
-  dynamicPressure2Display.innerHTML = pressureForPascals(q2,4,false);
-  dynamicPressure3Display.innerHTML = pressureForPascals(q3,4,false);
-  dynamicPressure4Display.innerHTML = pressureForPascals(q4,4,false);
-  dynamicPressure5Display.innerHTML = pressureForPascals(q5,4,false);
-  t1Display.innerHTML = temperatureForKelvin(temp1,1,false);
-  t2Display.innerHTML = temperatureForKelvin(temp2,1,false);
-  t3Display.innerHTML = temperatureForKelvin(temp3,1,false);
-  t4Display.innerHTML = temperatureForKelvin(temp4,1,false);
-  t5Display.innerHTML = temperatureForKelvin(temp5,1,false);
-  stagnationTemperature1Display.innerHTML = temperatureForKelvin(stagTemp1,1,false);
-  stagnationTemperature2Display.innerHTML = temperatureForKelvin(stagTemp2,1,false);
-  stagnationTemperature3Display.innerHTML = temperatureForKelvin(stagTemp3,1,false);
-  stagnationTemperature4Display.innerHTML = temperatureForKelvin(stagTemp4,1,false);
-  stagnationTemperature5Display.innerHTML = temperatureForKelvin(stagTemp5,1,false);
-  rho1Display.innerHTML = densityForMetric(dens1,3,false);
-  rho2Display.innerHTML = densityForMetric(dens2,3,false);
-  rho3Display.innerHTML = densityForMetric(dens3,3,false);
-  rho4Display.innerHTML = densityForMetric(dens4,3,false);
-  rho5Display.innerHTML = densityForMetric(dens5,3,false);
-  stagnationDensity1Display.innerHTML = densityForMetric(stagDens1,3,false);
-  stagnationDensity2Display.innerHTML = densityForMetric(stagDens2,3,false);
-  stagnationDensity3Display.innerHTML = densityForMetric(stagDens3,3,false);
-  stagnationDensity4Display.innerHTML = densityForMetric(stagDens4,3,false);
-  stagnationDensity5Display.innerHTML = densityForMetric(stagDens5,3,false);
+  p1Display.innerHTML = pressureFromPascals(pres1,4,false);
+  p2Display.innerHTML = pressureFromPascals(pres2,4,false);
+  p3Display.innerHTML = pressureFromPascals(pres3,4,false);
+  p4Display.innerHTML = pressureFromPascals(pres4,4,false);
+  p5Display.innerHTML = pressureFromPascals(pres5,4,false);
+  stagnationPressure1Display.innerHTML = pressureFromPascals(stagPres1,4,false);
+  stagnationPressure2Display.innerHTML = pressureFromPascals(stagPres2,4,false);
+  stagnationPressure3Display.innerHTML = pressureFromPascals(stagPres3,4,false);
+  stagnationPressure4Display.innerHTML = pressureFromPascals(stagPres4,4,false);
+  stagnationPressure5Display.innerHTML = pressureFromPascals(stagPres5,4,false);
+  dynamicPressure1Display.innerHTML = pressureFromPascals(q1,4,false);
+  dynamicPressure2Display.innerHTML = pressureFromPascals(q2,4,false);
+  dynamicPressure3Display.innerHTML = pressureFromPascals(q3,4,false);
+  dynamicPressure4Display.innerHTML = pressureFromPascals(q4,4,false);
+  dynamicPressure5Display.innerHTML = pressureFromPascals(q5,4,false);
+  t1Display.innerHTML = temperatureFromKelvin(temp1,1,false);
+  t2Display.innerHTML = temperatureFromKelvin(temp2,1,false);
+  t3Display.innerHTML = temperatureFromKelvin(temp3,1,false);
+  t4Display.innerHTML = temperatureFromKelvin(temp4,1,false);
+  t5Display.innerHTML = temperatureFromKelvin(temp5,1,false);
+  stagnationTemperature1Display.innerHTML = temperatureFromKelvin(stagTemp1,1,false);
+  stagnationTemperature2Display.innerHTML = temperatureFromKelvin(stagTemp2,1,false);
+  stagnationTemperature3Display.innerHTML = temperatureFromKelvin(stagTemp3,1,false);
+  stagnationTemperature4Display.innerHTML = temperatureFromKelvin(stagTemp4,1,false);
+  stagnationTemperature5Display.innerHTML = temperatureFromKelvin(stagTemp5,1,false);
+  rho1Display.innerHTML = densityFromMetric(dens1,3,false);
+  rho2Display.innerHTML = densityFromMetric(dens2,3,false);
+  rho3Display.innerHTML = densityFromMetric(dens3,3,false);
+  rho4Display.innerHTML = densityFromMetric(dens4,3,false);
+  rho5Display.innerHTML = densityFromMetric(dens5,3,false);
+  stagnationDensity1Display.innerHTML = densityFromMetric(stagDens1,3,false);
+  stagnationDensity2Display.innerHTML = densityFromMetric(stagDens2,3,false);
+  stagnationDensity3Display.innerHTML = densityFromMetric(stagDens3,3,false);
+  stagnationDensity4Display.innerHTML = densityFromMetric(stagDens4,3,false);
+  stagnationDensity5Display.innerHTML = densityFromMetric(stagDens5,3,false);
   displayMachOrSpeed();
 }
 
@@ -2299,23 +2046,300 @@ const displayForDetachedShockForRegion5 = function(){
   machAngle5Display.innerHTML = "defl angle.";
 }
 
+const doWindowResizeOrOrientationChange = function(){
+  camera.aspect = 1;
+  camera.updateProjectionMatrix();
+  renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.clear();
+  renderer.render(scene, camera);
+}
+
+window.addEventListener('resize', () => {
+  doWindowResizeOrOrientationChange();
+});
+
+window.addEventListener("orientationchange", () => {
+  doWindowResizeOrOrientationChange();
+});
+
+const loadBackground = function(option='atmosphere'){
+  switch (option){
+    case 'atmosphere':
+      if (background != null){
+        background = null;
+      }
+
+      let stormydays_ft = new URL('../../static/img/stormydays_ft.jpg', import.meta.url);
+      let stormydays_bk = new URL('../../static/img/stormydays_bk.jpg', import.meta.url);
+      let stormydays_up = new URL('../../static/img/stormydays_up.jpg', import.meta.url);
+      let stormydays_dn = new URL('../../static/img/stormydays_dn.jpg', import.meta.url);
+      let stormydays_rt = new URL('../../static/img/stormydays_rt.jpg', import.meta.url);
+      let stormydays_lf = new URL('../../static/img/stormydays_lf.jpg', import.meta.url);
+
+      background = new THREE.CubeTextureLoader().load([stormydays_ft.pathname,stormydays_bk.pathname,stormydays_up.pathname,stormydays_dn.pathname,stormydays_rt.pathname,stormydays_lf.pathname]);
+      // background = new THREE.CubeTextureLoader().load(['./static/img/stormydays_ft.jpg','./static/img/stormydays_bk.jpg','./static/img/stormydays_up.jpg','./static/img/stormydays_dn.jpg','./static/img/stormydays_rt.jpg','./static/img/stormydays_lf.jpg']);
+
+      scene.background = background;
+  }
+}
+
+const initTHREE = function() {
+  scene = new THREE.Scene();
+  
+  const ambientLight = new THREE.AmbientLight(0x909090);
+  const sunLight = new THREE.SpotLight(0xffffff);
+
+  sunLight.position.set(-20, 20, 20);
+  sunLight.castShadow = false;
+  sunLight.decay = 0;
+  sunLight.intensity = 1;
+  scene.add(ambientLight);
+  scene.add(sunLight);
+
+  renderer = new THREE.WebGLRenderer({
+    devicePixelRatio: window.devicePixelRatio,
+    alpha: true,
+  });
+
+  renderer.setClearColor(0x000000);
+  renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.autoClear = false;
+  camera = new THREE.PerspectiveCamera(45, 1, 0.5, 1000);
+  camera.aspect = 1;
+  camera.position.set(nominalCameraPos.x, nominalCameraPos.y, nominalCameraPos.z);
+  camera.lookAt(lookAtPoint);
+  renderer.shadowMap.enabled = false;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  threeDWorld.appendChild(renderer.domElement);
+  orbitControls = new OrbitControls(camera, renderer.domElement);
+  // orbitControls.enableDamping;
+  orbitControls.enableZoom = false;
+};
+
+const createAndInitialize = function(data, camera){
+  if (data){
+    aerovisualizerData = JSON.parse(JSON.stringify(data));
+
+    for (let o of data) {
+      switch (o.name){
+        case 'mach-number':
+          mach1 = o.value;
+          break;
+        case 'delta-menu-selection':
+          deltaMenuSelection = o.value;
+          break;
+        case 'forward-delta':
+          forwardDelta = o.value;
+          break;
+        case 'aft-delta':
+          aftDelta = o.value;
+          break;
+        case 'temperature-scale-menu-selection':
+          temperatureScaleMenuSelection = o.value;
+          break;
+        case 'density-units-menu-selection':
+          densityUnitsMenuSelection = o.value;
+          break;
+        case 'pressure-units-menu-selection':
+          pressureUnitsMenuSelection = o.value;
+          break;
+        case 'speed-units-menu-selection':
+          speedUnitsMenuSelection = o.value;
+          break;
+        case 'gas-medium-menu-selection':
+          gasMediumMenuSelection = o.value;
+          break;
+        case 'rhoTP-menu-selection':
+          rhoTPMenuSelection = o.value;
+          break;
+        case 'altitude-slider-index':
+          altitudeSliderIndex = o.value;
+          break;
+        case 'density-slider-index':
+          densitySliderIndex = o.value;
+          break;
+        case 'temperature-slider-index':
+          temperatureSliderIndex = o.value;
+          break;
+        case 'pressure-slider-index':
+          pressureSliderIndex = o.value;
+          break;
+        case 'ufo-transparency':
+          ufoTransparency = o.value;
+          break;
+        case 'forward-shock-transparency':
+          forwardShockTransparency = o.value;
+          break;
+        case 'aft-shock-transparency':
+          aftShockTransparency = o.value;
+          break;
+        case 'labels-transparency':
+          labelsTransparency = o.value;
+          break;
+        case 'ufo-color':
+          ufoColor = o.value;
+          break;
+        case 'forward-shock-color':
+          forwardShockColor = o.value;
+          break;
+        case 'aft-shock-color':
+          aftShockColor = o.value;
+          break;
+        case 'labels-color':
+          labelsColor = o.value;
+          break;
+        case 'altitude-is-in-feet':
+          altitudeIsInFeet = o.value;
+          break;
+        case 'mach-speed-state':
+          machSpeedState = o.value;
+          break;
+        case 'current-main-button':
+          currentMainButton = o.value;
+          break;
+      }
+    }
+  }
+
+  if (ufo === null){
+    ufo = new UFO(scene, camera);
+  }
+
+  machSlider.value = mach1;
+  ufoTransparencySlider.value = ufoTransparency;
+  forwardShockTransparencySlider.value = forwardShockTransparency;
+  aftShockTransparencySlider.value = aftShockTransparency;
+  labelsTransparencySlider.value = labelsTransparency;
+  ufoColorMenu.value = ufoColor;
+  forwardShockColorMenu.value = forwardShockColor;
+  aftShockColorMenu.value = aftShockColor;
+  labelsColorMenu.value = labelsColor;
+  altitudeFeetCheckbox.checked = altitudeIsInFeet;
+  temperatureScaleMenu.value = temperatureScaleMenuSelection;
+  densityUnitsMenu.value = densityUnitsMenuSelection;
+  pressureUnitsMenu.value = pressureUnitsMenuSelection;
+  speedUnitsMenu.value = speedUnitsMenuSelection;
+  gasMediumMenu.value = gasMediumMenuSelection;
+  rhoTPMenu.value = rhoTPMenuSelection;
+  deltaMenu.value = deltaMenuSelection;
+
+  switch (deltaMenuSelection){
+    case 'forward':
+      deltaSlider.value = forwardDelta;
+      break;
+    case 'aft':
+      deltaSlider.value = aftDelta;
+      break;
+  }
+
+  handleMainButtons(currentMainButton);
+  handleDeltaOnInput();
+  handleRhoTPMenu();
+  handleGasMediumOnChange();
+  setRhoTP();
+  displayMachOrSpeed();
+  displayDensTempPresLabels();
+  loadBackground();
+}
+
+const completeInitialization = function(continueAnimation = true) {
+  // the reason for this is that the UFO.js file contains
+  // the function _constructLabels() which contains a FontLoader 
+  // object called loader that creates code that runs asynchronously.
+  // Once ufo.constructionComplete is true, we can finish
+  // our initialization
+  if (continueAnimation && !(ufo.constructionComplete)) {
+    requestAnimationFrame(completeInitialization);
+  }
+  
+  if (ufo.constructionComplete){
+    handlePreferencesButtons('none');
+
+    camera.aspect = 1;
+    camera.updateProjectionMatrix();
+
+    cpx = camera.position.x;
+    cpy = camera.position.y;
+    cpz = camera.position.z;
+
+    renderer.setSize(threeDWorld.clientWidth, threeDWorld.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    ufo.addObjectsToScene();
+
+    setTransparency('ufo',ufoTransparency);
+    setTransparency('forward-shock',forwardShockTransparency);
+    setTransparency('aft-shock',aftShockTransparency);
+    setTransparency('labels',labelsTransparency);
+
+    miscPrefButton.style.display = 'none';
+    transparencyPrefButton.style.display = 'none';
+    colorPrefButton.style.display = 'none';
+    prefsReturnButton.style.display = 'none';
+    infoElements.style.display = 'none';
+    infoMenu.value = 'info-intro';
+    handleInfoMenuChoice(infoMenu.value);
+    ufo.setColor('ufo', ufoColor);
+    ufo.setColor('forward-shock', forwardShockColor);
+    ufo.setColor('aft-shock', aftShockColor);
+    ufo.setColor('labels', labelsColor);
+    //check that it displays 'a' value for temp1, temp1 should be set before here
+    handleDeltaOnInput();
+    ufo.needsRefresh = true;
+  }
+};
+
+const animate = function(continueAnimation = true) {
+  if (continueAnimation) {
+    requestAnimationFrame(animate);
+  }
+  
+  orbitControls.update();
+
+  if (cpx !== camera.position.x && cpy !== camera.position.y && cpz !== camera.position.z){
+    cpx = camera.position.x;
+    cpy = camera.position.y;
+    cpz = camera.position.z;
+    ufo.needsRefresh = true;
+  } 
+
+  renderer.clear();
+  renderer.render(scene, camera);
+  ufo.refresh();
+};
+
+const replaceAerovisualizerData = function(name, value){
+  aerovisualizerData.forEach(o => {
+    if (o.name === name){
+      o.value = value;
+    }});
+}
+
+const saveToLocalStorage = function(){
+  localStorage.setItem('aerovisualizerData3', JSON.stringify(aerovisualizerData));
+}
+
+const getFromLocalStorage = function(){
+  const data = JSON.parse(localStorage.getItem('aerovisualizerData3'));
+  return data;
+}
+
+// uncomment this temporarily to clear the storage after making
+// changes to the aerovisualizerData array
 // localStorage.clear();
 // saveToLocalStorage();
 
 const data = getFromLocalStorage();
 
-// if (!data){
-//   localStorage.clear();
-//   saveToLocalStorage();
-//   location.reload();
-//   data = getFromLocalStorage();
-// }
+if (!data){
+  localStorage.clear();
+  saveToLocalStorage();
+  location.reload();
+  data = getFromLocalStorage();
+}
 
 initTHREE();
 createAndInitialize(data, camera);
 completeInitialization();
 animate();
-/*
-mach waves
-sin mu = 1/M
-*/

@@ -43,9 +43,7 @@ class UFO {
     this._aftShockConeScale.set(this._shockScaleXZ, this._aftShockScaleY, this._shockScaleXZ);
     this._shockConeHeight = 100;
     this._halfShockConeHeight = new THREE.Vector3(this._shockConeHeight/2, 0, 0);
-
     this._origin = new THREE.Vector3(0,0,0);
-    this._bodyFrameOrigin = new THREE.Vector3(0,0,0);
     this._flip180quat = new THREE.Quaternion();
     this._flip180quat.setFromAxisAngle(new THREE.Vector3(0,0,1),Math.PI);
     this._cylinderLength = 4;
@@ -56,7 +54,7 @@ class UFO {
     this._zeroVector = new THREE.Vector3(0,0,0);
     this._q1 = new THREE.Quaternion();
     this._q2 = new THREE.Quaternion();
-    this._qn = new THREE.Quaternion();
+    this._qn = new THREE.Quaternion();//used for making the labels always face forward
     this._v0 = new THREE.Vector3();
     this._v1 = new THREE.Vector3();
     this._v2 = new THREE.Vector3();
@@ -64,14 +62,12 @@ class UFO {
     this._v4 = new THREE.Vector3();
     this._v5 = new THREE.Vector3();
     this._v6 = new THREE.Vector3();
-
     this._cylinderMesh = null;
     this._forwardConeMesh = null;
     this._aftConeMesh = null;
     this._forwardShockMesh = null;
     this._aftShockMesh = null;
     this._ufoQuat = new THREE.Quaternion();
-    
     this._1Label = null;
     this._2Label = null;
     this._3Label = null;
@@ -83,14 +79,15 @@ class UFO {
     this._constructUFO();
     this._constructLabels('helvetiker', 'regular');
     this.needsRefresh = true;
+
+    // make quaternion with zero rotation
     const euler = new THREE.Euler();
     euler.set(0,0,0,'ZYX');
     this._quat.setFromEuler(euler);
   }
 
   _constructUFO(){
-    // const forwardShockMat = new THREE.MeshPhongMaterial({
-    // const aftShockMat = new THREE.MeshBasicMaterial({
+    //alternatives to MeshLambertMaterial are MeshPhongMaterial and MeshBasicMaterial
 
     const ufoMat = new THREE.MeshLambertMaterial({
       color: this._defaultColor,
@@ -101,7 +98,6 @@ class UFO {
       blendEquation: THREE.AddEquation,
       blendSrc: THREE.SrcAlphaFactor,
       blendDst: THREE.OneMinusSrcAlphaFactor,
-      // opacity: 0.2,
       side: THREE.FrontSide
     });
 
@@ -114,7 +110,6 @@ class UFO {
       blendEquation: THREE.AddEquation,
       blendSrc: THREE.SrcAlphaFactor,
       blendDst: THREE.OneMinusSrcAlphaFactor,
-      // opacity: 0.2,
       side: THREE.DoubleSide
     });
 
@@ -127,7 +122,6 @@ class UFO {
       blendEquation: THREE.AddEquation,
       blendSrc: THREE.SrcAlphaFactor,
       blendDst: THREE.OneMinusSrcAlphaFactor,
-      // opacity: 0.2,
       side: THREE.DoubleSide
     });
 
@@ -155,7 +149,7 @@ class UFO {
     this._forwardShockMesh.matrixAutoUpdate = false;
     this._aftShockMesh = new THREE.Mesh(aftShockGeometry, aftShockMat);
     this._aftShockMesh.matrixAutoUpdate = false;
-    this._ufoQuat.set(0, 0, oneOverSqrt2, oneOverSqrt2);
+    this._ufoQuat.set(0, 0, oneOverSqrt2, oneOverSqrt2);// quaternion for 90 deg rotation about z
   }
 
   setHalfConeAngles(forwardHCA, aftHCA){
@@ -207,7 +201,7 @@ class UFO {
     let label3;
     let label4;
     let label5;
-    // below helps to place labels away from the UFO
+    // constants below help to place the labels away from the UFO
     const label1AdjustmentFactor = 1.1;
     const label2AdjustmentFactor = 0.8;
     const label3AdjustmentFactor = 3;
@@ -336,7 +330,6 @@ class UFO {
           blendEquation: THREE.AddEquation,
           blendSrc: THREE.SrcAlphaFactor,
           blendDst: THREE.OneMinusSrcAlphaFactor,
-          // opacity: 0.2,
           side: THREE.FrontSide
         }),// front
         new THREE.MeshLambertMaterial({
@@ -348,7 +341,6 @@ class UFO {
           blendEquation: THREE.AddEquation,
           blendSrc: THREE.SrcAlphaFactor,
           blendDst: THREE.OneMinusSrcAlphaFactor,
-          // opacity: 0.2,
           side: THREE.FrontSide
         }),// side
       ];

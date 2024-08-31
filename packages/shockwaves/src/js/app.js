@@ -2325,7 +2325,7 @@ const saveToLocalStorage = function(){
 // localStorage.clear();
 // saveToLocalStorage();
 
-const data = JSON.parse(localStorage.getItem('aerovisualizerData3'));
+let data = JSON.parse(localStorage.getItem('aerovisualizerData3'));
 
 if (!data){
   localStorage.clear();

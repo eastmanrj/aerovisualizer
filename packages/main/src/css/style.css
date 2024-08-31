@@ -167,10 +167,10 @@ p {
   }
 
   .grid {
-    grid-auto-flow: column;
-    grid-auto-columns: 100px;
-    grid-template-rows: 5rem 3rem 6rem;
-    grid-template-columns: 6rem 6rem 6rem;
+    column-gap: 3%;
+    grid-auto-flow: row;
+    grid-auto-rows: 50px;
+    grid-template-columns: 5rem 3rem 6rem 6rem 6rem 6rem;
   }
 }
 

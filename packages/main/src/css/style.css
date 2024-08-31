@@ -166,12 +166,10 @@ p {
     margin:3%;
   }
 
-  /* .grid {
-    column-gap: 3%;
-    grid-auto-flow: row;
-    grid-auto-rows: 50px;
-    grid-template-columns: 5rem 3rem 6rem 6rem 6rem 6rem;
-  } */
+  .grid {
+    row-gap: 3%;
+    grid-auto-columns: 250px;
+  }
 }
 
 /************************************

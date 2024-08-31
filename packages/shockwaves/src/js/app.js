@@ -516,6 +516,7 @@ deltaButton.addEventListener('click', () => {
 
 preferencesButton.addEventListener('click', () => {
   toggleShowPrefs();
+  handlePreferencesButtons('transparency');
 });
 
 const setNumericalDisplay = function(cycle = false){
@@ -1263,8 +1264,8 @@ const handleInfoMenuChoice = function(choice){
 
     case 'info-how-to-use': //how to use aerovisualizer
       infoText.innerHTML = `
-      <p class="p-normal">Click or tap the buttons labeled <em>&gamma;R&rho;<sub>&infin;</sub>T<sub>&infin;</sub>P<sub>&infin;</sub>
-      , Mach #, and defl</em>. Manipulate the buttons, menus, and sliders that appear.  Observe 
+      <p class="p-normal">Click or tap the buttons labeled <em>&gamma;R&rho;<sub>&infin;</sub>T<sub>&infin;</sub>P<sub>&infin;</sub></em>
+      , <em>Mach #</em>, and <em>defl</em>. Manipulate the buttons, menus, and sliders that appear.  Observe 
       how the shock waves and data change in response.</p>`;
       break;
 
@@ -1311,7 +1312,7 @@ const handleInfoMenuChoice = function(choice){
       The displayed data changes to one of three options:</p>
       
       <p class="p-normal"><em>1-</em> static pressure (P), stagnation pressure (P<sub>0</sub>), and dynamic pressure (q),</p>
-      <p class="p-normal"><em>2-</em> static temperature (T), stagnation pressure (T<sub>0</sub>), and the speed of sound (a),</p>
+      <p class="p-normal"><em>2-</em> static temperature (T), stagnation temperature (T<sub>0</sub>), and the speed of sound (a),</p>
       <p class="p-normal"><em>3-</em> static density (&rho;), stagnation density (&rho;<sub>0</sub>), and the Mach angle in degrees.</p>
 
       <p class="p-normal"><em>Note 1:</em> The <em>dynamic pressure</em>, <em>q</em>, for compressed gas does <em>not</em> equal &half;&rho;v<sup>2</sup>.  It is simply P<sub>0</sub> minus P.</p>

@@ -235,6 +235,10 @@ label {
   border-left: 1px solid #fff;
 }
 
+.right-border{
+  border-right: 1px solid #fff;
+}
+
 .top-border{
   border-top: 1px solid #fff;
 }

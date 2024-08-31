@@ -2320,23 +2320,18 @@ const saveToLocalStorage = function(){
   localStorage.setItem('aerovisualizerData3', JSON.stringify(aerovisualizerData));
 }
 
-const getFromLocalStorage = function(){
-  const data = JSON.parse(localStorage.getItem('aerovisualizerData3'));
-  return data;
-}
-
 // uncomment this temporarily to clear the storage after making
 // changes to the aerovisualizerData array
 // localStorage.clear();
 // saveToLocalStorage();
 
-const data = getFromLocalStorage();
+const data = JSON.parse(localStorage.getItem('aerovisualizerData3'));
 
 if (!data){
   localStorage.clear();
   saveToLocalStorage();
   location.reload();
-  data = getFromLocalStorage();
+  data = JSON.parse(localStorage.getItem('aerovisualizerData3'));
 }
 
 initTHREE();

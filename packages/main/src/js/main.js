@@ -5,12 +5,12 @@ them in interesting and engaging ways.  3D animations are displayed
 to complement the dry equations found in textbooks and online, and 
 controls are also provided to manipulate the displays.
 
-This file contains the code for the main entry point for the various 
-aerospace concepts.
+This file contains the code for the main entry point for the different 
+aerospace apps.
 
  Revision History
  Date    Name                  Description
- 8/24/24 R. Eastman            v0.2 beta
+ 8/24/24 R. Eastman            v0.2.1 beta
 */
 
 const infoButton = document.getElementById("info-btn");

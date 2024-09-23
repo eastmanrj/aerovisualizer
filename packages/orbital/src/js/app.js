@@ -51,8 +51,7 @@ let periapseTooSmall = false;
 const defaultCentralBody = 'Earth';
 const defaultConicSection = 'ellipse';
 // below are roughly the values for a Hohmann transfer orbit
-// to a highly inclined geosynchronous orbit from 160 km above
-// Cape Canaveral
+// to a geosynchronous orbit from 160 km above Cape Canaveral
 const defaultA = 20;// index of aArray corresponding to a = 3.822
 const defaultE = 100;// index of eArray corresponding to e = 0.7318
 const defaultLan = 0;// degrees

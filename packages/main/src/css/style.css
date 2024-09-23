@@ -95,7 +95,7 @@ p {
   flex-direction: row;
   flex-wrap: wrap;
   align-items: stretch;
-  justify-content:space-between;
+  justify-content:space-around;
   align-content:flex-start;
   margin: 0;
 }
@@ -120,7 +120,7 @@ a{
   color: rgb(200, 255, 255);
 }
 
-@media (orientation: landscape) {
+/* @media (orientation: landscape) {
   .container {
     width:100vh;
     height:100vw;
@@ -132,7 +132,7 @@ a{
     width:100vw;
     height:100vh;
   }
-}
+} */
 
 /* @media (orientation: landscape) {
   p {

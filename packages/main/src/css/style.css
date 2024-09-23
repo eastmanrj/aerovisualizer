@@ -18,7 +18,7 @@ body {
 h1 {
   display: block;
   font-family: inherit;
-  font-size: 4rem;
+  font-size: 5rem;
   font-weight: 800;
   color: rgb(225, 225, 255);
   text-align:center;
@@ -27,7 +27,7 @@ h1 {
 h3 {
   display: block;
   font-family: inherit;
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 800;
   color: rgb(225, 225, 255);
   text-align:center;
@@ -61,7 +61,7 @@ p {
   -webkit-user-select: none;
   -ms-user-select: none;
   pointer-events: all;
-  touch-action:manipulation;
+  touch-action:none;
 }
 
 .grid {
@@ -84,7 +84,7 @@ p {
   flex-direction: column;
   align-items: center;
   justify-content:flex-start;
-  flex-wrap: nowrap;
+  /* flex-wrap: nowrap; */
   margin: 0;
 }
 
@@ -100,7 +100,8 @@ p {
   border-color:orange;
   cursor: pointer;
   padding: 0.5rem 2rem;
-  touch-action:manipulation;
+  touch-action:none;
+  margin: 1rem;
 }
 
 a{

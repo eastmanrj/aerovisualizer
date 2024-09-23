@@ -179,6 +179,7 @@ const eArrayEllipse = [
   0.883,0.889,0.895,0.901,0.906,0.912,0.917,0.922,0.927,0.932,
   0.936,0.941,0.945,0.949,0.952,0.956,0.959,0.962,0.965,0.9673,
   0.9697,0.9718,0.9737,0.9754,0.9768,0.9779,0.9788,0.9795,0.9799,0.98];
+
 const eArrayHyperbola = [
   1.02,1.021,1.022,1.025,1.028,1.033,1.039,1.046,1.05,1.06,
   1.07,1.08,1.09,1.11,1.12,1.13,1.15,1.16,1.18,1.20,
@@ -195,6 +196,7 @@ const eArrayHyperbola = [
   4.61,4.63,4.66,4.68,4.70,4.72,4.74,4.77,4.79,4.80,
   4.82,4.84,4.86,4.87,4.89,4.90,4.91,4.93,4.94,4.95,
   4.96,4.97,4.974,4.981,4.987,4.992,4.995,4.998,4.999,5];
+
 let tp = twoPi*Math.pow(a,1.5)/muCanonical;//orbital period
 let e = Number(defaultE);
 let lanDegrees = defaultLan;
@@ -214,26 +216,26 @@ let meanMotion;
 let timeAfterPeriapse;// in canonical time units (CTU)
 let timeAfterPeriapseInSeconds;
 
-let trajArray = [];// array of objects containing the position,
+let orbitArray = [];// array of objects containing the position,
 // velocity, time, and nu of an orbiting body on 
 // either an elliptical or a hyperbolic trajectory.  This array
-// contains 'trajArraySize' number of object elements.  The array
+// contains 'orbitArraySize' number of object elements.  The array
 // is traversed during animation and the state vector of the 
 // orbiting body is computed by interpolating between adjacent 
 // elements
-const trajArraySize = 181;
-  // trajArraySize is the size of trajArray. 181 seems to be a good
+const orbitArraySize = 181;
+  // orbitArraySize is the size of orbitArray. 181 seems to be a good
   // enough size.  Try to use the smallest number that you can 
   // get away with due to computer memory issues. The ellipses and 
   // hyperbolas are approximated as polyhedrons with the number of 
-  // sides equal to trajArraySize MINUS 1.  Lower numbers cause the 
+  // sides equal to orbitArraySize MINUS 1.  Lower numbers cause the 
   // animation to appear segmented and the numbers to be less accurate
-let iTraj0;// this is the index of trajArray that corresponds to 
+let iOrb0;// this is the index of orbitArray that corresponds to 
 // before timeAfterPeriapseInSeconds during animation
-let iTraj1 = iTraj0;// this is the index of trajArray that corresponds to 
+let iOrb1 = iOrb0;// this is the index of orbitArray that corresponds to 
 // after timeAfterPeriapseInSeconds during animation
-let timeAfterPeriapseInSeconds0;// time corresponding to trajArray[iTraj0]
-let timeAfterPeriapseInSeconds1;// time corresponding to trajArray[iTraj1]
+let timeAfterPeriapseInSeconds0;// time corresponding to orbitArray[iOrb0]
+let timeAfterPeriapseInSeconds1;// time corresponding to orbitArray[iOrb1]
 
 // position and velocity lower interpolation values for animation
 let x0;
@@ -254,7 +256,7 @@ let dnudt;
 // true anomaly lower and upper values for interpolation for animation
 let nu0;
 let nu1;
-let needToComputeTrajArray = false;
+let needToComputeOrbitArray = false;
 
 let period = tp;// period is the orbital period for elliptical orbits
 // in canonical units.  For hyperbolic trajectories, it is the time we
@@ -297,7 +299,6 @@ let p = a*(1 - e*e);// parameter (semi-latus rectum)
 let sqrtMuOverP = Math.sqrt(muCanonical/p);//needed for computing velocity
 let delta = defaultDelta;// turning angle for hyperbolic orbits
 let rp = Number(a*(1-e));// r vector magnitude at periapse
-let ra = Number(a*(1+e));// r vector magnitude at apoapse
 let specificEnergy = -muCanonical/(2*a);
 let vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));//v vector magnitude at periapse
 let h = rp*vp;
@@ -1024,7 +1025,7 @@ const doASliderOnInput = function(i){
     periodInSeconds = period*ctu;
   }
 
-  needToComputeTrajArray = true;
+  needToComputeOrbitArray = true;
 
   if (a > 0){
     meanMotion = Math.sqrt(muCanonical/(a*a*a));
@@ -1050,7 +1051,7 @@ const doESliderOnInput = function(i){
   }
   
   eDisplay.innerHTML = `e: ${Number(e).toFixed(3).toString()}`;
-  needToComputeTrajArray = true;
+  needToComputeOrbitArray = true;
   computeP();
   doTwoSunOptionChoice();
 }
@@ -1086,10 +1087,9 @@ const enableDisableTimeScaleOptions = function(){
 
 aSlider.onpointerup = function(){
   rp = a*(1-e);
-  ra = a*(1+e);
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
-  computeTrajArray();
+  computeOrbitArray();
   handlePeriapseCheck();
   doNu(nuDegrees);
   enableDisableTimeScaleOptions();
@@ -1099,10 +1099,9 @@ aSlider.onpointerup = function(){
 
 eSlider.onpointerup = function(){
   rp = a*(1-e);
-  ra = a*(1+e);
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
-  computeTrajArray();
+  computeOrbitArray();
   handlePeriapseCheck();
   doNu(nuDegrees);
   replaceAerovisualizerData('eccentricity',+this.value);
@@ -1303,7 +1302,7 @@ const doNuAndTimeDisplay = function(){
 const doNu = function(value, precise = false){
   haltPlay();
 
-  if (!trajArray){
+  if (!orbitArray){
     return;
   }
 
@@ -1322,16 +1321,16 @@ const doNu = function(value, precise = false){
   timeAfterPeriapse = meanAnomaly/meanMotion;
 
   if (!precise){
-    iTraj0 = trajArray.findIndex((e) => e.t >= timeAfterPeriapse);
+    iOrb0 = orbitArray.findIndex((e) => e.t >= timeAfterPeriapse);
   }else{
-    iTraj0 = trajArray.findIndex((e) => e.t > timeAfterPeriapse - 0.0001 && e.t < timeAfterPeriapse + 0.0001);
+    iOrb0 = orbitArray.findIndex((e) => e.t > timeAfterPeriapse - 0.0001 && e.t < timeAfterPeriapse + 0.0001);
   }
 
-  if (iTraj0 < 0){
-    iTraj0 = Number(0);
+  if (iOrb0 < 0){
+    iOrb0 = Number(0);
   }
 
-  syncTrajState();
+  syncState();
 
   if (trueAnomaly360){
     if (value > 0){
@@ -1368,7 +1367,7 @@ zeroNuButton.addEventListener('click', () => {
   omt.needsRefresh = true;
 });
 
-const computeTrajArray = function(){
+const computeOrbitArray = function(){
   let tn;
   let dtdx;
   let xFirstGuess;
@@ -1383,12 +1382,12 @@ const computeTrajArray = function(){
   let rx;
   let ry;
 
-  if (!needToComputeTrajArray){
+  if (!needToComputeOrbitArray){
     return;
   }
 
-  needToComputeTrajArray = false;
-  // set needToComputeTrajArray to true whenever a or e changes
+  needToComputeOrbitArray = false;
+  // set needToComputeOrbitArray to true whenever a or e changes
   // but don't call this function until pointerup.  Also, call this
   // immediately when switching between conic section types or when 
   // changing the central body
@@ -1415,14 +1414,6 @@ const computeTrajArray = function(){
 
   const sqrtA = Math.sqrt(Math.abs(a));
 
-  // clear the trajArray of any entries that exist
-  while (trajArray.length){
-    trajArray.pop();
-  }
-
-  // trajPoint stores an object to be pushed on to trajArray
-  let trajPoint;
-
   // t is the time in canonical time units.  For elliptical orbits, an 
   // orbital period (tp) equals twoPi canonical time units (TU or CTU)
   // which equals 'period'.  For a hyperbolic flyby, 'period'
@@ -1437,8 +1428,9 @@ const computeTrajArray = function(){
   let cosnu;
   let M;
   const th = Math.PI/10;
+  let k = 0;
 
-  for (let nuDeg=-180; nuDeg<trajArraySize; nuDeg+=2){
+  for (let nuDeg=-180; nuDeg<orbitArraySize; nuDeg+=2){
     // Bate pp. 182-188
     nu = nuDeg*piOver180;
     cosnu = Math.cos(nu);
@@ -1525,56 +1517,54 @@ const computeTrajArray = function(){
     }
 
     // Bate pp. 201-2
-    trajPoint = new Object();
-    trajPoint.t = t;
+    orbitArray[k].t = t;
     f = 1 - x*x*c/r0;
     g = t - x*x*x*s/sqrtMuCanonical;
-    trajPoint.f = f;
-    trajPoint.g = g;
+    orbitArray[k].f = f;
+    orbitArray[k].g = g;
     // below, r is computed under the assumption that r0 and v0 are
     // at the periapse, which is mentioned earlier
     rx = f*rp;
     ry = g*sqrtMuOverP*(e + 1);
     r = Math.sqrt(rx*rx + ry*ry);
-    trajPoint.nu = Math.atan2(ry, rx)/piOver180;
-    trajPoint.fdot = sqrtMuCanonical*x*(z*s - 1)/(r0*r);
-    trajPoint.gdot = 1 - x*x*c/r;
+    orbitArray[k].nu = Math.atan2(ry, rx)/piOver180;
+    orbitArray[k].fdot = sqrtMuCanonical*x*(z*s - 1)/(r0*r);
+    orbitArray[k].gdot = 1 - x*x*c/r;
     
-    trajArray.push(trajPoint);
-    // console.log(f*trajPoint.gdot - g*trajPoint.fdot); // this should be near 1
+    k++;
   }
   
-  if (trajArray[0].nu > 179.999999){
+  if (orbitArray[0].nu > 179.999999){
     // set the first nu to -180 for elliptical orbits.  atan2 sets it to +180
-    trajArray[0].nu = -180;
+    orbitArray[0].nu = -180;
   }
 }
 
-const syncTrajState = function(){
+const syncState = function(){
   // sync everything to correspond to the trajectory state stored
-  // in trajArray[] at the index iTraj0
-  timeAfterPeriapse = trajArray[iTraj0%trajArraySize].t
+  // in orbitArray[] at the index iOrb0
+  timeAfterPeriapse = orbitArray[iOrb0%orbitArraySize].t
   timeAfterPeriapseInSeconds = timeAfterPeriapse*ctu;
   timeAfterPeriapseInSeconds0 = timeAfterPeriapseInSeconds;
-  iTraj1 = (iTraj0 + 1)%trajArraySize;
-  timeAfterPeriapseInSeconds1 = trajArray[iTraj1%trajArraySize].t*ctu;
-  x0 = trajArray[iTraj0%trajArraySize].f*rp;
-  y0 = trajArray[iTraj0%trajArraySize].g*sqrtMuOverP*(e + 1);
-  vx0 = trajArray[iTraj0%trajArraySize].fdot*rp;
-  vy0 = trajArray[iTraj0%trajArraySize].gdot*sqrtMuOverP*(e + 1);
+  iOrb1 = (iOrb0 + 1)%orbitArraySize;
+  timeAfterPeriapseInSeconds1 = orbitArray[iOrb1%orbitArraySize].t*ctu;
+  x0 = orbitArray[iOrb0%orbitArraySize].f*rp;
+  y0 = orbitArray[iOrb0%orbitArraySize].g*sqrtMuOverP*(e + 1);
+  vx0 = orbitArray[iOrb0%orbitArraySize].fdot*rp;
+  vy0 = orbitArray[iOrb0%orbitArraySize].gdot*sqrtMuOverP*(e + 1);
   px = x0;
   py = y0;
   vx = vx0;
   vy = vy0;
 
-  let x1 = trajArray[iTraj1%trajArraySize].f*rp;
-  let y1 = trajArray[iTraj1%trajArraySize].g*sqrtMuOverP*(e + 1);
-  let vx1 = trajArray[iTraj1%trajArraySize].fdot*rp;
-  let vy1 = trajArray[iTraj1%trajArraySize].gdot*sqrtMuOverP*(e + 1);
+  let x1 = orbitArray[iOrb1%orbitArraySize].f*rp;
+  let y1 = orbitArray[iOrb1%orbitArraySize].g*sqrtMuOverP*(e + 1);
+  let vx1 = orbitArray[iOrb1%orbitArraySize].fdot*rp;
+  let vy1 = orbitArray[iOrb1%orbitArraySize].gdot*sqrtMuOverP*(e + 1);
   let deltaTime = timeAfterPeriapseInSeconds1 - timeAfterPeriapseInSeconds0;
 
-  nu0 = trajArray[iTraj0%trajArraySize].nu;
-  nu1 = trajArray[iTraj1%trajArraySize].nu;
+  nu0 = orbitArray[iOrb0%orbitArraySize].nu;
+  nu1 = orbitArray[iOrb1%orbitArraySize].nu;
   nuDegrees = nu0;
   nu = nuDegrees*piOver180;
   dpxdt = (x1 - x0)/deltaTime;
@@ -1676,10 +1666,9 @@ const handlePlanetChange = function(){
   doESliderOnInput(+eSlider.value);
   doASliderOnInput(+aSlider.value);
   rp = Number(a*(1-e));
-  ra = Number(a*(1+e));
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
-  computeTrajArray();
+  computeOrbitArray();
 
   doNu(nuDegrees);
   handlePeriapseCheck();
@@ -1689,7 +1678,7 @@ const handlePlanetChange = function(){
 
 muMenu.addEventListener('change', () => {
   centralBody = muMenu.value;
-  needToComputeTrajArray = true;
+  needToComputeOrbitArray = true;
   handlePlanetChange();
   replaceAerovisualizerData('central-body',centralBody);
   saveToLocalStorage();
@@ -2003,14 +1992,13 @@ toggleConicSectionButton.addEventListener('click', () => {
     toggleConicSectionButton.innerHTML = 'ellipse&nbsp;/&nbsp;HYPERBOLA';
   }
 
-  needToComputeTrajArray = true;
+  needToComputeOrbitArray = true;
   doESliderOnInput(+eSlider.value);
   doASliderOnInput(+aSlider.value);
   rp = Number(a*(1-e));
-  ra = Number(a*(1+e));
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
-  computeTrajArray();
+  computeOrbitArray();
 
   nuDegrees = 0;
   nu = nuDegrees*piOver180;
@@ -2454,7 +2442,7 @@ const initialize = function(data, camera){
 
   muMenu.value = centralBody;
   timeScaleMenu.value = timeScaleMenuChoice;
-  needToComputeTrajArray = true;
+  needToComputeOrbitArray = true;
   haltPlay();
   theCB = centralBodyData.find(x => x.name === centralBody);
   ctu = theCB.CTU;
@@ -2471,15 +2459,26 @@ const initialize = function(data, camera){
   omegaDisplay.innerHTML = `${theCB.om}&deg;`;// longitude of perihelion
   omt.setPlanet(theCB.id);
 
+  // orbitState objects are pushed to the orbitArray array
+  const OrbitState = {nu:0, t:0, f:0, g:0, fdot:0, gdot:0};
+
+  let orbitState;
+
+  // create array of empty objects to later store the orbit in
+  // nuDeg limits are tied to orbitArraySize, so better to not to use 180 here
+  for (let nuDeg=-180; nuDeg<orbitArraySize; nuDeg+=2){    
+    orbitState = Object.create(OrbitState);
+    orbitArray.push(orbitState);
+  }
+
   eSlider.value = +eSl;
   aSlider.value = +aSl;
   doESliderOnInput(+eSl);
   doASliderOnInput(+aSl);
   rp = Number(a*(1-e));
-  ra = Number(a*(1+e));
   vp = Math.sqrt((muCanonical/a)*((1+e)/(1-e)));
   h = rp*vp;
-  computeTrajArray();
+  computeOrbitArray();
   nuDegrees = 0;
   doNu(nuDegrees, true);
   handlePeriapseCheck();
@@ -2566,8 +2565,8 @@ const doPlayPause = function(){
   // icons came from tabler-icons.io
   playing = playing ? false : true;
 
-  if (playing && needToComputeTrajArray){
-    computeTrajArray();
+  if (playing && needToComputeOrbitArray){
+    computeOrbitArray();
     doNu(nuDegrees);
     playing = true;
   }
@@ -2617,21 +2616,21 @@ const tick = function(){
 
   if (timeAfterPeriapseInSeconds >= timeAfterPeriapseInSeconds1){
     while (timeAfterPeriapseInSeconds >= timeAfterPeriapseInSeconds1){
-      iTraj0 = iTraj1;
-      iTraj1 = iTraj0 + 1;
+      iOrb0 = iOrb1;
+      iOrb1 = iOrb0 + 1;
 
       // wrap around at apoapse for elliptical orbits
-      if (iTraj1 >= Number(trajArraySize)){
-        iTraj0 = 0;
-        iTraj1 = 1;
+      if (iOrb1 >= Number(orbitArraySize)){
+        iOrb0 = 0;
+        iOrb1 = 1;
       }
 
-      timeAfterPeriapseInSeconds0 = trajArray[iTraj0%trajArraySize].t*ctu;
-      timeAfterPeriapseInSeconds1 = trajArray[iTraj1%trajArraySize].t*ctu;
+      timeAfterPeriapseInSeconds0 = orbitArray[iOrb0%orbitArraySize].t*ctu;
+      timeAfterPeriapseInSeconds1 = orbitArray[iOrb1%orbitArraySize].t*ctu;
       timeAfterPeriapseInSeconds = timeAfterPeriapseInSeconds0;
     }
 
-    syncTrajState();
+    syncState();
     deltaT = timeScale*clock.getDelta();
     timeAfterPeriapseInSeconds += deltaT;// deltaT for 60 fps is 0.01666
     timeAfterPeriapse = timeAfterPeriapseInSeconds/ctu;
@@ -2639,7 +2638,7 @@ const tick = function(){
 
   // do the linear interpolation between computed points on the ellipse or
   // hyperbola.  The conic sections are approximated as multi-sided
-  // polygons.  To reduce the error, increase the trajArraySize variable but
+  // polygons.  To reduce the error, increase the orbitArraySize variable but
   // at the expense of more computer memory required for the array
   px = x0 + dpxdt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);
   py = y0 + dpydt*(timeAfterPeriapseInSeconds - timeAfterPeriapseInSeconds0);

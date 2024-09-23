@@ -117,6 +117,13 @@ a{
   color: rgb(200, 255, 255);
 }
 
+@media (orientation: landscape) {
+  body {
+    width:100vh;
+    height:100vw;
+  }
+}
+
 /* @media (orientation: landscape) {
   p {
     font-size: 2rem;

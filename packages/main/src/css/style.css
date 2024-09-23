@@ -11,8 +11,8 @@ html {
 body {
   font-family: montserrat, sans-serif;
   background-color: #000;
-  width:100vw;
-  height:100vh;
+  /* width:100vw;
+  height:100vh; */
 }
 
 h1 {
@@ -52,8 +52,10 @@ p {
 }
 
 .container {
-  width:100%;
-  height:100%;
+  /* width:100%;
+  height:100%; */
+  width:100vw;
+  height:100vh;
   margin:5%;
   cursor: pointer;
   user-select: none;
@@ -64,36 +66,37 @@ p {
   touch-action:none;
 }
 
-.grid {
+/* .grid {
   display: grid;
   row-gap: 5%;
   grid-auto-flow: column;
   /* grid-auto-columns: 100px; */
-  /* grid-template-rows: 6rem 6rem; */
+  /* grid-template-rows: 6rem 6rem; * /
   grid-template-rows: repeat(auto-fit, minmax(9rem, 1fr));
   justify-items: center;
   justify-content: center;
-}
+} */
 
-.complete-row-grid-item {
+/* .complete-row-grid-item {
   grid-column-start: 1;
-}
+} */
 
 .flex {
   display: flex;
   flex-direction: column;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content:flex-start;
-  /* flex-wrap: nowrap; */
   margin: 0;
 }
 
 .flex-buttons {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  justify-content:flex-start;
-  /* flex-wrap: nowrap; */
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content:space-between;
+  align-content:flex-start;
   margin: 0;
 }
 
@@ -118,9 +121,16 @@ a{
 }
 
 @media (orientation: landscape) {
-  body {
+  .container {
     width:100vh;
     height:100vw;
+  }
+}
+
+@media (orientation: portrait) {
+  .container {
+    width:100vw;
+    height:100vh;
   }
 }
 

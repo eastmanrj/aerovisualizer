@@ -15,17 +15,17 @@
   <br>
 </p>
 
-The purpose of Aerovisualizer is to assist in the teaching and reinforcement of concepts in aerospace engineering by presenting them in interesting and engaging ways.  3D animations are displayed to complement the dry equations found in textbooks and online, and controls are also provided to manipulate the displays.
+The purpose of Aerovisualizer is to assist in the teaching and reinforcement of concepts in aerospace engineering by presenting them in interesting and engaging ways.  3D renderings are displayed to complement the dry equations found in textbooks and online, and controls are also provided to manipulate the displays.
 
-Aerovisualizer can be opened in a browser on either your phone, tablet, laptop or desktop computer.  You can also add it to your device's home screen.  At present, it requires an internet connection (it's not a "web app" yet).  Also, its code is open source, so anyone can contribute to its future evolution.  The source code is written in HTML, CSS, and Javascript and does not require a software compiler. 
+Aerovisualizer can be opened in a browser either on your phone, tablet, laptop or desktop computer.  You can also add it to your device's home screen.  At present, it requires an internet connection.  Also, its code is open source, so anyone can contribute to its future evolution.  The source code is written in HTML, CSS, and Javascript and does not require a software compiler. 
 
-Aerovisualizer currently contains two areas of focus: 1) the orientation and rotational dynamics of rigid bodies, and 2) orbital mechanics.  It is assumed that users understand these topics or are currently learning them.
+Aerovisualizer currently contains four areas of focus: 1) the orientation and rotational dynamics of rigid bodies, 2) orbital mechanics, 3) orbital delta velocity and position, and 4) oblique shock waves.  It is assumed that users understand these topics or are currently learning them.
 
 Future releases of Aerovisualizer may include the following, depending on interest:
 
 * Aircraft Dynamics
 * 2D Flow (sources, sinks, and vortices)
-* Computational Fluid Dynamics (yes really)
+* Computational Fluid Dynamics
 * Free Molecule Flow
 * Thermodynamics
 * Finite Elements

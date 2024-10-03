@@ -1,0 +1,14 @@
+{
+  "name": "@aerovisualizer/orbitalPert",
+  "version": "1.0.0",
+  "description": "Aerovisualizer delta orbits",
+  "source": "index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build",
+    "startorbit": "export PORT=4321 && npm run start"
+  },
+  "keywords": [],
+  "author": "R Eastman",
+  "license": "ISC"
+}

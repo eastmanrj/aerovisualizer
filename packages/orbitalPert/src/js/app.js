@@ -388,6 +388,8 @@ const deltaVXNumerical = document.getElementById('delta-vx');
 const deltaVYNumerical = document.getElementById('delta-vy');
 const deltaVZNumerical = document.getElementById('delta-vz');
 
+const mainButtonsElements = document.getElementById('main-buttons-elements');
+const subMainButtonsElements = document.getElementById('sub-main-buttons-elements');
 const generalPrefButton = document.getElementById('general-pref-btn');
 const muPrefButton = document.getElementById('mu-pref-btn');
 const inertialVectorsPrefButton = document.getElementById('ijk-pref-btn');
@@ -434,6 +436,7 @@ const orbitingBodyVectorsElements = document.getElementById('orbiting-body-vecto
 const infoElements = document.getElementById('info-elements');
 const infoMenu = document.getElementById('info-menu');
 const infoText = document.getElementById('info-text');
+const infoReturnButton = document.getElementById('info-return-btn');
 
 /*
 name     = name
@@ -627,7 +630,6 @@ const handleMainButtons = function(button){
   numericalButton.disabled = false;
   prefsButton.disabled = false;
   infoButton.disabled = false;
-
   aenuElements.style.display = 'none';
   orientationElements.style.display = 'none';
   deltaVElements.style.display = 'none';
@@ -641,7 +643,7 @@ const handleMainButtons = function(button){
   orbitingBodyVectorsElements.style.display = 'none';
   infoElements.style.display = 'none';
 
-  if (button !== 'prefs'){
+  if (button !== 'prefs' && button !== 'info' & button !== 'no-info'){
     mostPreviousMainButton = button;
   }
 
@@ -671,8 +673,9 @@ const handleMainButtons = function(button){
     case 'prefs':
       prefsElements.style.display = 'grid';
       prefsButton.disabled = true;
-      displayOrbitsAsDifference = false;
-      handleDeltaOrbitsButton();//removes zoom slider
+      // displayOrbitsAsDifference = false;
+      // handleDeltaOrbitsButton();
+      zoomElements.style.display = 'none';
       aenuButton.disabled = true;
       orientationButton.disabled = true;
       deltaVButton.disabled = true;
@@ -685,8 +688,19 @@ const handleMainButtons = function(button){
       handlePrefsButtons('general-prefs');
       break;
     case 'info':
+      mainButtonsElements.style.display = 'none';
+      subMainButtonsElements.style.display = 'none';
+      zoomElements.style.display = 'none';
       infoElements.style.display = 'grid';
       infoButton.disabled = true;
+      break;
+    case 'no-info':
+      mainButtonsElements.style.display = 'flex';
+      subMainButtonsElements.style.display = 'flex';
+
+      if (displayOrbitsAsDifference === true){
+        zoomElements.style.display = 'grid';
+      }
       break;
     case 'none':
       break;
@@ -719,6 +733,11 @@ prefsButton.addEventListener('click', () => {
 
 infoButton.addEventListener('click', () => {
   handleMainButtons('info');
+});
+
+infoReturnButton.addEventListener('click', () => {
+  handleMainButtons('no-info');
+  handleMainButtons(mostPreviousMainButton);
 });
 
 const computeP = function(){
@@ -1946,7 +1965,15 @@ const handlePrefsButtons = function(opt){
       mainReturnButton.disabled = false;
       prefsButton.disabled = false;
       infoButton.disabled = false;
+      
+      if (displayOrbitsAsDifference === true){
+        zoomElements.style.display = 'grid';
+      }
+
       toggleOrbitDiffDisplayButton.disabled = false;
+      mainButtonsElements.style.display = 'flex';
+      subMainButtonsElements.style.display = 'flex';
+      // handleDeltaOrbitsButton();
       break;
   }
 }

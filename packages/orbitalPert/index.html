@@ -22,7 +22,7 @@
     <div class="container">
       <div id="threeD-world"></div>
       <div class="non-3D-world">
-        <div class="btn-group top-margin bottom-margin">
+        <div id="main-buttons-elements" class="btn-group top-margin bottom-margin">
           <button id="a-e-nu-btn" class="btn no-uppercase">a&nbsp;e&nbsp;&nu;</button>
           <button id="orientation-btn" class="btn no-uppercase">&Omega;&nbsp;i&nbsp;&omega;</button>
           <button id="delta-v-btn" class="btn no-uppercase">&Delta;V</button>
@@ -38,7 +38,7 @@
             </svg>
           </button>
         </div>
-        <div class="btn-group bottom-margin">
+        <div id="sub-main-buttons-elements" class="btn-group bottom-margin">
           <button id="preferences-btn" class="btn large-font no-uppercase">preferences</button>
           <button id="info-btn" class="btn large-font center-grid-item">&nbsp;?&nbsp;</button>
           <button id="toggle-orbit-diff-display-btn" class="btn large-font no-uppercase center-grid-item">2&nbsp;ORBITS&nbsp;/&nbsp;&Delta;&nbsp;orbits</button>
@@ -104,7 +104,7 @@
           <p class="span5 center-grid-item">Aerovisualizer - Orbital &Delta;V&nbsp;&Delta;R</p>
           <pre class="left-border"><span>&nbsp;</span></pre><pre class="left-border"><span>Nominal</span></pre>
           <pre class="left-border"><span>Perturbed</span></pre><pre><span>&Delta;</span></pre><pre><span>km,&nbsp;km/s</span></pre>
-          <pre class="left-border top-border"><span>period (D:H:M:S)</span></pre><pre class="left-border top-border"><span id="nom-period">0</span></pre>
+          <pre class="left-border top-border"><span>period</span></pre><pre class="left-border top-border"><span id="nom-period">0</span></pre>
           <pre class="left-border top-border"><span id="pert-period">0</span></pre><pre class="left-border top-border"><span>&Delta;Rx</span></pre><pre class="left-border top-border"><span id="delta-rx">0</span></pre>
           <pre class="left-border"><span>a (km)</span></pre><pre class="left-border"><span id="nom-a">0</span></pre>
           <pre class="left-border"><span id="pert-a">0</span></pre><pre class="left-border"><span>&Delta;Ry</span></pre><pre class="left-border"><span id="delta-ry">0</span></pre>
@@ -117,7 +117,7 @@
           <pre class="left-border"><span>&omega;&nbsp;(&deg;)</span></pre><pre class="left-border"><span id="nom-aop">0</span></pre>
           <pre class="left-border"><span id="pert-aop">0</span></pre><pre class="left-border"><span>&Delta;Vz</span></pre><pre class="left-border"><span id="delta-vz">0</span></pre>
         </div>
-        <div class="elements" id="zoom-elements">
+        <div class="elements top-margin" id="zoom-elements">
           <p class="center-grid-item"><span id="zoom-display">?</span></p>
           <input class="slider span3" type="range" min="0" max="49" value="0" id="zoom-slider">
           <p id="warning-2" class="span4 center-grid-item warning">warning message</p>
@@ -278,7 +278,7 @@
         <div class="elements" id="info-elements">
           <select id="info-menu" class="menu span4" name="info-menu">
             <option value="info-intro">introduction</option>
-            <option value="info-how-to-use">how to use aerovisualizer - &Delta; orbit</option>
+            <option value="info-how-to-use">how to use aerovisualizer - orbital &Delta;</option>
             <option value="info-a-e-nu">orbital elements a and e, and &nu;</option>
             <option value="info-Omega-i-omega">orbital elements &Omega;, i & &omega;</option>
             <option value="info-numerical">numerical display</option>
@@ -291,7 +291,16 @@
             <option value="info-contact-disclaimer">contact, disclaimer</option>
           </select>
           <p class="center-grid-item span4">&nbsp;</p>
-          <p id="info-text" class="p-normal span4">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Maiores, alias rerum quis reiciendis voluptas, autem harum sint vel eos ex neque odit est incidunt ratione tempore quam dolore cum quos laborum numquam! Amet est nisi vel omnis, doloribus obcaecati soluta nesciunt, rerum unde doloremque sunt! Officiis nobis eum officia sit?</p>
+          <p id="info-text" class="p-normal span4">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</p>
+          <button id="info-return-btn" class="btn btn-with-icon span4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" 
+            width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" 
+            stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M9 14l-4 -4l4 -4"></path>
+            <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
+            </svg>
+          </button>
         </div>
       </div>
     </div>

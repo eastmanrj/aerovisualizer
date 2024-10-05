@@ -680,6 +680,9 @@ const handleMainButtons = function(button){
       infoButton.disabled = true;
       toggleOrbitDiffDisplayButton.disabled = true;
       handlePrefsChoice('general-prefs');
+      prefsMenu.value = 'general-prefs';
+      mainButtonsElements.style.display = 'none';
+      subMainButtonsElements.style.display = 'none';
       break;
     case 'info':
       threeDWorld.style.display = 'none';
@@ -699,6 +702,8 @@ const handleMainButtons = function(button){
       }
       break;
     case 'none':
+      mainButtonsElements.style.display = 'flex';
+      subMainButtonsElements.style.display = 'flex';
       break;
   }
 }
@@ -1763,7 +1768,7 @@ const passOrbitPertOrDeltaToOMT = function(){
 }
 
 const computeOrbitPertParams = function(){
-  // do this function at the end of computePertubedOrbit which 
+  // do this function at the end of computePerturbedOrbit which 
   // sets r0PertPQW and v0PertPQW, and computes rPertPeriapse,  
   // kPertPeriapse, and aPert
 
@@ -1928,12 +1933,6 @@ const handlePrefsChoice = function(opt){
       break;
   }
 }
-
-// handlePrefsChoice('general-prefs');
-// handlePrefsChoice('mu-prefs');
-// handlePrefsChoice('inertial-vectors-prefs');
-// handlePrefsChoice('orbit-fixed-vectors-prefs');
-// handlePrefsChoice('orbiting-body-vectors-prefs');
   
 prefsMenu.addEventListener('change', () => {
   const choice = prefsMenu.value;
@@ -2263,92 +2262,98 @@ const handleInfoMenuChoice = function(choice){
       <p class="p-normal"><em>Aerovisualizer - &Delta; Orbit</em> focuses on the difference 
       between two elliptical orbits caused by a &Delta;V or &Delta;R.  Set the values of the 
       orbital elements of the nominal orbit and then set the &Delta;s.  It is assumed that you 
-      have taken or are currently taking a course on this topic.</p>`;
+      have taken or are currently taking a course in orbital mechanics.</p>`;
       break;
 
     case 'info-how-to-use': // how to use aerovisualizer
       infoText.innerHTML = `
       <p class="p-normal">1) Click <em>a&nbsp;e&nbsp;&nu;</em> to set the semi-major axis (a) and the 
-      eccentricity (e) of the nominal orbit.  Also set the true anomaly (&nu;) about that orbit.  &nu; 
-      is the greek letter pronounced "nu".  The time after periapse is also displayed.</p>
+      eccentricity (e) of the nominal orbit.  Also set the true anomaly (&nu;) about that orbit (&nu; is the greek letter pronounced "nu").  
+      The time after periapse is also displayed.</p>
       <p class="p-normal">2) Click <em>&Omega;&nbsp;i&nbsp;&omega;</em> to set the longitude of the 
       ascending node (&Omega;), the orbital inclination (i), and the argument of periapsis (&omega;) 
       of the nominal orbit.</p>
-      <p class="p-normal">4) Click <em>&Delta;V</em> to set the delta velocity imparted to 
-      a second spacecraft.</p>
+      <p class="p-normal">4) Click <em>&Delta;V</em> to set a delta velocity imparted to 
+      the spacecraft or to another one without affecting the first one.</p>
       <p class="p-normal">4) Click <em>&Delta;R</em> to set the difference in position of  
-      a second spacecraft relative to the main one.</p>
-      <p class="p-normal">A perturbed orbit is generated for the second spacecraft.  Click 
-      <em>2 orbits / &Delta; orbits</em> to view the difference between the orbits at equal 
-      times.</p>`;
+      another spacecraft relative to the first one.</p>
+      <p class="p-normal">A perturbed orbit is generated based on &Delta;V, &Delta;R, and the 
+      orbital parameters.  Click <em>2 orbits / &Delta; orbits</em> to toggle between two display 
+      options:</p>
+      <p class="p-normal">The first option shows both the nominal and the perturbed orbit, with 
+      the perturbed orbit being represented by as a series of dots.</p>
+      <p class="p-normal">The second option shows the perturbed orbit minus the nominal one at 
+      equal times.</p>
+      <p class="p-normal">The pertubed orbit extends only out to the time of one complete orbital 
+      period of the nominal orbit.  The dots of the perturbed orbit correspond to points on the 
+      nominal orbit that are equally spaced in true anomaly.</p>`;
       break;
 
     case 'info-a-e-nu':
       infoText.innerHTML = `
       <p class="p-normal">Click <em>a&nbsp;e&nbsp;&nu;</em>.  Use the sliders to set the 
       <em>semi-major axis (a)</em> and the <em>orbital eccentricity (e)</em> of the nominal orbit, 
-      and the <em>true anomaly (&nu;)</em> of the main spacecraft.  The displayed orbit changes in 
-      accordance with the sliders.  If the orbit intersects the central body, the buttons change to 
-      red.  Adjust a and e to prevent this.</p>
+      and the <em>true anomaly (&nu;)</em> of the first spacecraft.  The displayed orbits change in 
+      accordance with the sliders.  If the nominal orbit intersects the central body, the buttons 
+      change to red.  Adjust a and e to prevent this.</p>
       <p class="p-normal">The value of 'a' is displayed in canonical 
-      distance units (CDU).  Its range is 1 to 60.  Canonical distance units are equal to 
-      the radius of the central body (sun, moon, planet).</p>
-      <p class="p-normal">The value of 'e' ranges from 0 to 0.98.</p>
-      <p class="p-normal">The true anomaly is displayed in degrees.  The time since periapse 
-      passage is also displayed.  Use the button to set &nu; to zero.`;
+      distance units (CDU).  Its range is 1 to 60.  CDUs are equal to 
+      the radius of the central body (sun, moon, planet).  The sun also has a second option where the 
+      CDU is one astronomical unit (AU).</p>
+      <p class="p-normal">The value of 'e' ranges from 0 to 0.98.  Only elliptical orbits are considered.</p>
+      <p class="p-normal">The true anomaly is displayed in degrees, and the time since periapse 
+      passage is displayed as D:H:M:S.  Use the button to set &nu; to zero.`;
       break;
 
     case 'info-Omega-i-omega':
       infoText.innerHTML = `
       <p class="p-normal">Click <em>&Omega;&nbsp;i&nbsp;&omega;</em>.  Use the sliders 
       to set the orbital elements of the <em>longitude of the ascending node (&Omega;)</em>, the 
-      <em>orbital inclination (i)</em>, and the <em>argument of periapsis (&omega;)</em>.  Their values are displayed in degrees next to their respective 
-      sliders.  The displayed orbit changes in accordance with the sliders.  Use the 
-      buttons to set the values to zero.</p>
-      `;
+      <em>orbital inclination (i)</em>, and the <em>argument of periapsis (&omega;)</em>.  Their values are 
+      displayed in degrees next to their respective sliders.  The displayed orbits change in accordance with 
+      the sliders.  Use the buttons to set the values to zero.</p>`;
       break;
 
-    case 'info-nu':
-      infoText.innerHTML = `
-      <p class="p-normal">The true anomaly is displayed in 
-      degrees.  The time since periapse passage is also displayed.  The vectors attached 
-      to the orbiting body move in accordance with the slider.  Use the button to set 
-      &nu; to zero.</p>
-      `;
+    case 'info-deltaV-deltaR':
+      infoText.innerHTML = `<p class="p-normal">Click either <em>&Delta;V</em> or <em>&Delta;R</em>.</p>
+      <p class="p-normal">Use the menu to choose which reference frame to use.  Choose 1) PQW (the perifocal 
+      frame), 2) the UVW frame (at the time of the delta event), 3) IJK (the inertial frame), 
+      or 4) along the nominal velocity direction (positive is in the direction that the arrow points).</p>
+      <p class="p-normal">Use the sliders to set the vector components.  The displayed values are in kilometers 
+      for &Delta;R (range +/- 500 km) and kilometers per second for &Delta;V (range +/- 1 km/s).</p>
+      <p class="p-normal">Use the buttons to set the values to zero.</p>`;
       break;
 
     case 'info-numerical':
       infoText.innerHTML = `<p class="p-normal">Click <em>1 2 3</em> to show the following information for  
-      both the nominal trajectory and the perturbed one:</p>
+      both the nominal and the perturbed trajectory:</p>
       <p class="p-normal">orbital period, semi-major axis (a), orbital eccentricity (e), longitude of the 
-      ascending node (&Omega;), inclination (i), and the argument of periapsis (&omega;).  Also displayed 
-      are the &Delta;V imparted to the second spacecraft and relative position of the second spacecraft to 
-      the main one at the time since periapse passage of the main spacecraft.
-      </p>`;
+      ascending node (&Omega;), inclination (i), and the argument of periapsis (&omega;).</p>
+      <p class="p-normal">Also displayed are the &Delta;V and &Delta;R that are described in <em>&Delta;V & &Delta;R</em> above.</p>`;
       break;
       
     case 'info-prefs-main':
       infoText.innerHTML = `<p class="p-normal">Click <em>preferences</em>.  Another menu 
-      appears letting you choose from several preferences categories.</p>`;
+      appears for choosing from several categories.</p>`;
       break;
 
     case 'info-prefs-general':
       infoText.innerHTML = `<p class="p-normal">Under <em>general preferences</em>, use the slider to set the 
       transparency of the sun/moon/planet.  Use the checkbox to specify whether or not to show 
-      the out of plane vectors (W) of the PQW and UVW frames.</p>`;
+      the out of plane vectors (W) of the PQW and UVW frames.  Use the button to reset all preferences to 
+      their default values.</p>`;
       break;
 
     case 'info-mu':
       infoText.innerHTML = `
-      <p class="p-normal">Click <em>&mu;</em>. A menu appears allowing you to choose the central body 
-      and its <em>gravitational parameter &mu;</em> (&mu; = Gm).</p>
-      <p class="p-normal">Choose a central body.  The sun/moon/planet changes to reflect your choice. 
-      Data for the sun/moon/planet appear.  Besides &mu;, the radius and escape velocity from the 
-      surface appear.  The remaining data are the J2000 orbital parameters.</p>
-      <p class="p-normal">The sun has two menu choices.  One sets the canonical distance unit 
-      (CDU) equal to the sun's radius.  The other sets it equal to 1 astronomical unit (AU) to 
-      allow for greater distances from the sun.</p>
-      `;
+      <p class="p-normal">Click <em>central body</em>. A menu appears allowing you to choose the 
+      central body and its <em>gravitational parameter &mu;</em> (Gm).</p>
+      <p class="p-normal">Choose a central body from the menu.  The sun/moon/planet changes to reflect your choice.</p>
+      <p class="p-normal">Displayed are &mu;, the J2000 orbital parameters for the planets, the radius of the central 
+      body, and the escape velocity from its surface.</p>
+      <p class="p-normal">The sun has two menu options.  One sets the canonical distance unit 
+      (CDU) to the sun's radius.  The other sets it equal to 1 astronomical unit (AU) to 
+      allow for greater distances from the sun.</p>`;
       break;
 
     case 'info-prefs-inertial-vectors':
@@ -2383,10 +2388,10 @@ const handleInfoMenuChoice = function(choice){
       Please include the word "Aerovisualizer" in the subject.</p>
 
       <p class="p-normal">We do not take responsibility for missed problems on 
-      quizes, tests, projects, or homework due to software bugs or the 
+      quizes, tests, projects, or homework due to errors in the software or the 
       misinterpretation of displays in Aerovisualizer.  Do not use Aerovisualizer 
       for hardware or software qualification in aerospace or other industries nor 
-      in any other applications.</p>`;
+      in any other non-accademic applications.</p>`;
       break;
   }
 }

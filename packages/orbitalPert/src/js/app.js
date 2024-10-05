@@ -390,11 +390,7 @@ const deltaVZNumerical = document.getElementById('delta-vz');
 
 const mainButtonsElements = document.getElementById('main-buttons-elements');
 const subMainButtonsElements = document.getElementById('sub-main-buttons-elements');
-const generalPrefButton = document.getElementById('general-pref-btn');
-const muPrefButton = document.getElementById('mu-pref-btn');
-const inertialVectorsPrefButton = document.getElementById('ijk-pref-btn');
-const orbitFixedVectorsPrefButton = document.getElementById('pqw-pref-btn');
-const orbitingBodyVectorsPrefButton = document.getElementById('uvw-pref-btn');
+const prefsMenu = document.getElementById('prefs-menu');
 const prefReturnButton = document.getElementById('pref-return-btn');
 
 const centralBodyTransparencySlider = document.getElementById('central-body-transparency-slider');
@@ -673,8 +669,6 @@ const handleMainButtons = function(button){
     case 'prefs':
       prefsElements.style.display = 'grid';
       prefsButton.disabled = true;
-      // displayOrbitsAsDifference = false;
-      // handleDeltaOrbitsButton();
       zoomElements.style.display = 'none';
       aenuButton.disabled = true;
       orientationButton.disabled = true;
@@ -685,9 +679,10 @@ const handleMainButtons = function(button){
       prefsButton.disabled = true;
       infoButton.disabled = true;
       toggleOrbitDiffDisplayButton.disabled = true;
-      handlePrefsButtons('general-prefs');
+      handlePrefsChoice('general-prefs');
       break;
     case 'info':
+      threeDWorld.style.display = 'none';
       mainButtonsElements.style.display = 'none';
       subMainButtonsElements.style.display = 'none';
       zoomElements.style.display = 'none';
@@ -695,6 +690,7 @@ const handleMainButtons = function(button){
       infoButton.disabled = true;
       break;
     case 'no-info':
+      threeDWorld.style.display = 'block';
       mainButtonsElements.style.display = 'flex';
       subMainButtonsElements.style.display = 'flex';
 
@@ -1877,6 +1873,77 @@ vVectorColorMenu.addEventListener('change', () => {
   saveToLocalStorage();
 });
 
+const handlePrefsChoice = function(opt){
+  generalPrefsElements.style.display = 'none';
+  muPrefsElements.style.display = 'none';
+  inertialVectorsElements.style.display = 'none';
+  orbitFixedVectorsElements.style.display = 'none';
+  orbitingBodyVectorsElements.style.display = 'none';
+
+  switch (opt){
+    case 'general-prefs':
+      generalPrefsElements.style.display = 'grid';
+      break;
+
+    case 'mu-prefs':
+      muPrefsElements.style.display = 'grid';
+      break;
+
+    case 'inertial-vectors-prefs':
+      inertialVectorsElements.style.display = 'grid';
+      inertialVectorsMenu.value = inertialVectorsChoice;
+      doInertialVectorsChoice();
+      break;
+
+    case 'orbit-fixed-vectors-prefs':
+      orbitFixedVectorsElements.style.display = 'grid';
+      orbitFixedVectorsMenu.value = orbitFixedVectorsChoice;
+      doOrbitFixedVectorsChoice();
+      break;
+
+    case 'orbiting-body-vectors-prefs':
+      orbitingBodyVectorsElements.style.display = 'grid';
+      orbitingBodyVectorsMenu.value = orbitingBodyVectorsChoice
+      doOrbitingBodyVectorsChoice();
+      break;
+
+    case 'no-prefs':
+      handleMainButtons(mostPreviousMainButton);
+      aenuButton.disabled = false;
+      orientationButton.disabled = false;
+      deltaVButton.disabled = false;
+      deltaRButton.disabled = false;
+      numericalButton.disabled = false;
+      mainReturnButton.disabled = false;
+      prefsButton.disabled = false;
+      infoButton.disabled = false;
+      
+      if (displayOrbitsAsDifference === true){
+        zoomElements.style.display = 'grid';
+      }
+
+      toggleOrbitDiffDisplayButton.disabled = false;
+      mainButtonsElements.style.display = 'flex';
+      subMainButtonsElements.style.display = 'flex';
+      break;
+  }
+}
+
+// handlePrefsChoice('general-prefs');
+// handlePrefsChoice('mu-prefs');
+// handlePrefsChoice('inertial-vectors-prefs');
+// handlePrefsChoice('orbit-fixed-vectors-prefs');
+// handlePrefsChoice('orbiting-body-vectors-prefs');
+  
+prefsMenu.addEventListener('change', () => {
+  const choice = prefsMenu.value;
+  handlePrefsChoice(choice);
+});
+
+prefReturnButton.addEventListener('click', () => {
+  handlePrefsChoice('no-prefs');
+});
+
 const handlePlanetChange = function(){
   theCB = centralBodyData.find(x => x.name === centralBody);
   ctu = theCB.CTU;
@@ -1909,97 +1976,6 @@ muMenu.addEventListener('change', () => {
   handlePlanetChange();
   replaceAerovisualizerData('central-body',centralBody);
   saveToLocalStorage();
-});
-
-const handlePrefsButtons = function(opt){
-  generalPrefButton.disabled = false;
-  muPrefButton.disabled = false;
-  inertialVectorsPrefButton.disabled = false;
-  orbitFixedVectorsPrefButton.disabled = false;
-  orbitingBodyVectorsPrefButton.disabled = false;
-  generalPrefsElements.style.display = 'none';
-  muPrefsElements.style.display = 'none';
-  inertialVectorsElements.style.display = 'none';
-  orbitFixedVectorsElements.style.display = 'none';
-  orbitingBodyVectorsElements.style.display = 'none';
-
-  switch (opt){
-    case 'general-prefs':
-      generalPrefsElements.style.display = 'grid';
-      generalPrefButton.disabled = true;
-      break;
-
-    case 'mu-prefs':
-      muPrefsElements.style.display = 'grid';
-      muPrefButton.disabled = true;
-      break;
-
-    case 'inertial-vectors-prefs':
-      inertialVectorsElements.style.display = 'grid';
-      inertialVectorsPrefButton.disabled = true;
-      inertialVectorsMenu.value = inertialVectorsChoice;
-      doInertialVectorsChoice();
-      break;
-
-    case 'orbit-fixed-vectors-prefs':
-      orbitFixedVectorsElements.style.display = 'grid';
-      orbitFixedVectorsPrefButton.disabled = true;
-      orbitFixedVectorsMenu.value = orbitFixedVectorsChoice;
-      doOrbitFixedVectorsChoice();
-      break;
-
-    case 'orbiting-body-vectors-prefs':
-      orbitingBodyVectorsElements.style.display = 'grid';
-      orbitingBodyVectorsPrefButton.disabled = true;
-      orbitingBodyVectorsMenu.value = orbitingBodyVectorsChoice
-      doOrbitingBodyVectorsChoice();
-      break;
-
-    case 'no-prefs':
-      handleMainButtons(mostPreviousMainButton);
-      aenuButton.disabled = false;
-      orientationButton.disabled = false;
-      deltaVButton.disabled = false;
-      deltaRButton.disabled = false;
-      numericalButton.disabled = false;
-      mainReturnButton.disabled = false;
-      prefsButton.disabled = false;
-      infoButton.disabled = false;
-      
-      if (displayOrbitsAsDifference === true){
-        zoomElements.style.display = 'grid';
-      }
-
-      toggleOrbitDiffDisplayButton.disabled = false;
-      mainButtonsElements.style.display = 'flex';
-      subMainButtonsElements.style.display = 'flex';
-      // handleDeltaOrbitsButton();
-      break;
-  }
-}
-
-generalPrefButton.addEventListener('click', () => {
-  handlePrefsButtons('general-prefs');
-});
-
-muPrefButton.addEventListener('click', () => {
-  handlePrefsButtons('mu-prefs');
-});
-
-inertialVectorsPrefButton.addEventListener('click', () => {
-  handlePrefsButtons('inertial-vectors-prefs');
-});
-
-orbitFixedVectorsPrefButton.addEventListener('click', () => {
-  handlePrefsButtons('orbit-fixed-vectors-prefs');
-});
-
-orbitingBodyVectorsPrefButton.addEventListener('click', () => {
-  handlePrefsButtons('orbiting-body-vectors-prefs');
-});
-
-prefReturnButton.addEventListener('click', () => {
-  handlePrefsButtons('no-prefs');
 });
 
 const doInertialVectorsChoice = function(){
@@ -2232,12 +2208,7 @@ const handlePeriapseCheck = function(){
     infoButton.style.backgroundColor = '#5555ff';
     toggleOrbitDiffDisplayButton.style.backgroundColor = '#5555ff';
     infoMenu.style.backgroundColor = '#5555ff';
-    generalPrefButton.style.backgroundColor = '#5555ff';
-    muPrefButton.style.backgroundColor = '#5555ff';
     muMenu.style.backgroundColor = '#5555ff';
-    inertialVectorsPrefButton.style.backgroundColor = '#5555ff';
-    orbitFixedVectorsPrefButton.style.backgroundColor = '#5555ff';
-    orbitingBodyVectorsPrefButton.style.backgroundColor = '#5555ff';
     prefReturnButton.style.backgroundColor = '#5555ff';
     inertialVectorsMenu.style.backgroundColor = '#5555ff';
     orbitFixedVectorsMenu.style.backgroundColor = '#5555ff';
@@ -2263,12 +2234,7 @@ const handlePeriapseCheck = function(){
     infoButton.style.backgroundColor = 'red';
     toggleOrbitDiffDisplayButton.style.backgroundColor = 'red';
     infoMenu.style.backgroundColor = 'red';
-    generalPrefButton.style.backgroundColor = 'red';
     muMenu.style.backgroundColor = 'red';
-    muPrefButton.style.backgroundColor = 'red';
-    inertialVectorsPrefButton.style.backgroundColor = 'red';
-    orbitFixedVectorsPrefButton.style.backgroundColor = 'red';
-    orbitingBodyVectorsPrefButton.style.backgroundColor = 'red';
     prefReturnButton.style.backgroundColor = 'red';
     inertialVectorsMenu.style.backgroundColor = 'red';
     orbitFixedVectorsMenu.style.backgroundColor = 'red';
@@ -2663,12 +2629,14 @@ const initialize = function(data, camera){
   deltaRXSlider.value = deltaRXSliderValue;
   deltaRYSlider.value = deltaRYSliderValue;
   deltaRZSlider.value = deltaRZSliderValue;
+
   handleDeltaVDisplay('x');
   handleDeltaVDisplay('y');
   handleDeltaVDisplay('z');
   handleDeltaRDisplay('x');
   handleDeltaRDisplay('y');
   handleDeltaRDisplay('z');
+
   dvx = deltaVArray[+deltaVXSlider.value]/cduPerCtu;
   dvy = deltaVArray[+deltaVYSlider.value]/cduPerCtu;
   dvz = deltaVArray[+deltaVZSlider.value]/cduPerCtu;
@@ -2690,7 +2658,7 @@ const initialize = function(data, camera){
   displayNumerical();
   centralBodyTransparencySlider.value = centralBodyTransparency;
   setCentralBodyTransparency(centralBodyTransparency);
-  handlePrefsButtons('general-prefs');
+  handlePrefsChoice('general-prefs');
 }
 
 const completeInitialization = function(continueAnimation = true) {

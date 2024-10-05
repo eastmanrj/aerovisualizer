@@ -123,12 +123,14 @@
           <p id="warning-2" class="span4 center-grid-item warning">warning message</p>
         </div>
         <div class="elements btn-group bottom-margin" id="prefs-elements">
-          <button id="general-pref-btn" class="btn no-uppercase">general</button>
-          <button id="mu-pref-btn" class="btn no-uppercase">&mu;</button>
-          <button id="ijk-pref-btn" class="btn no-uppercase">inertial vectors</button>
-          <button id="pqw-pref-btn" class="btn no-uppercase">orbit-fixed vectors</button>
-          <button id="uvw-pref-btn" class="btn no-uppercase">orbiting body vectors</button>
-          <button id="pref-return-btn" class="btn btn-with-icon">
+          <select id="prefs-menu" class="menu span2" name="prefs-menu">
+            <option value="general-prefs">general preferences</option>
+            <option value="mu-prefs">central body</option>
+            <option value="inertial-vectors-prefs">inertial vectors</option>
+            <option value="orbit-fixed-vectors-prefs">orbit-fixed vectors</option>
+            <option value="orbiting-body-vectors-prefs">orbiting body vectors</option>
+          </select>
+          <button id="pref-return-btn" class="btn btn-with-icon span2">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" 
             width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" 
             stroke-linejoin="round">
@@ -137,13 +139,6 @@
             <path d="M5 10h11a4 4 0 1 1 0 8h-1"></path>
             </svg>
           </button>
-          <!-- <select id="main-prefs-menu" class="menu span4" name="main-prefs-menu">
-            <option value="general-preferences">general preferences</option>
-            <option value="mu-preferences">central body</option>
-            <option value="inertial-vectors">inertial vectors</option>
-            <option value="orbit-fixed-vectors">orbit-fixed vectors</option>
-            <option value="orbiting-body-vectors">orbiting body vectors</option>
-          </select> -->
         </div>
         <div class="elements" id="general-prefs-elements">
           <p class="span4">&nbsp;</p>

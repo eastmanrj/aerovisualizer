@@ -16,7 +16,7 @@ main code for it.
 
  Revision History
  Date    Name                  Description
- 1/19/24 R. Eastman            v0.1 beta
+ 10/7/24 R. Eastman            v0.2.3 beta
 */
 
 let scene, camera, renderer;

@@ -19,8 +19,7 @@ main code for it.
 
  Revision History
  Date    Name                  Description
- 1/19/24 R. Eastman            v0.1 beta
- 1/21/24 R. Eastman            v0.1.1 beta, cosmetic changes
+ 10/7/24 R. Eastman            v0.2.3 beta
 */
 
 const piOver180 = Math.PI/180;

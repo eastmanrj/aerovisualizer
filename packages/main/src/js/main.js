@@ -10,7 +10,7 @@ aerospace apps.
 
  Revision History
  Date    Name                  Description
- 8/24/24 R. Eastman            v0.2.1 beta
+ 10/7/24 R. Eastman            v0.2.3 beta
 */
 
 const infoButton = document.getElementById("info-btn");

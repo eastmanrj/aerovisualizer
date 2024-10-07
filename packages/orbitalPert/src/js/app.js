@@ -9,7 +9,7 @@ them in interesting and engaging ways.  3D animations are displayed
 to complement the dry equations found in textbooks and online, and 
 controls are also provided to manipulate the displays.
 
-One of the concepts is orbital mechanics, and this file contains the 
+One of the concepts is orbital delta velocities and positions, and this file contains the 
 main code for it.
 
  References
@@ -19,7 +19,7 @@ main code for it.
 
  Revision History
  Date    Name                  Description
- 9/2/24 R. Eastman             v2.0 beta
+ 10/7/24 R. Eastman            v0.2.3 beta
 */
 
 const piOver180 = Math.PI/180;
@@ -947,24 +947,24 @@ const handleLanIncAopOnPointerUp = function(){
 
 lanSlider.onpointerup = function(){
   handleLanIncAopOnPointerUp();
-  computeOrbitPertParams();//temporary need to do this for numerical menu
-  displayNumerical();//temporary
+  computeOrbitPertParams();
+  displayNumerical();
   replaceAerovisualizerData('longitude-of-ascending-node',this.value);
   saveToLocalStorage();
 }
 
 incSlider.onpointerup = function(){
   handleLanIncAopOnPointerUp();
-  computeOrbitPertParams();//temporary need to do this for numerical menu
-  displayNumerical();//temporary
+  computeOrbitPertParams();
+  displayNumerical();
   replaceAerovisualizerData('inclination',this.value);
   saveToLocalStorage();
 }
 
 aopSlider.onpointerup = function(){
   handleLanIncAopOnPointerUp();
-  computeOrbitPertParams();//temporary need to do this for numerical menu
-  displayNumerical();//temporary
+  computeOrbitPertParams();
+  displayNumerical();
   replaceAerovisualizerData('argument-of-periapsis',this.value);
   saveToLocalStorage();
 }
@@ -973,7 +973,9 @@ zeroLanButton.addEventListener('click', () => {
   lanSlider.value = 0;
   handleLanIncAopOnInput('lan');
   handleLanIncAopOnPointerUp();
-  replaceAerovisualizerData('longitude-of-ascending-node',0);
+  computeOrbitPertParams();
+  displayNumerical();
+  replaceAerovisualizerData('longitude-of-ascending-node',lanSlider.value);
   saveToLocalStorage();
 });
 
@@ -981,7 +983,9 @@ zeroIncButton.addEventListener('click', () => {
   incSlider.value = 0;
   handleLanIncAopOnInput('inc');
   handleLanIncAopOnPointerUp();
-  replaceAerovisualizerData('inclination',0);
+  computeOrbitPertParams();
+  displayNumerical();
+  replaceAerovisualizerData('inclination',incSlider.value);
   saveToLocalStorage();
 });
 
@@ -989,7 +993,9 @@ zeroAopButton.addEventListener('click', () => {
   aopSlider.value = 0;
   handleLanIncAopOnInput('aop');
   handleLanIncAopOnPointerUp();
-  replaceAerovisualizerData('argument-of-periapsis',0);
+  computeOrbitPertParams();
+  displayNumerical();
+  replaceAerovisualizerData('argument-of-periapsis',aopSlider.value);
   saveToLocalStorage();
 });
 

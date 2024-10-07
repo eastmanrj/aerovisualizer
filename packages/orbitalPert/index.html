@@ -66,7 +66,7 @@
           <input class="slider span2" type="range" min="-180" max="180" value="0" id="aop-slider">
           <button id="zero-aop-btn" class="btn center-grid-item">zero</button>
         </div>
-        <div class="elements" id="delta-v-elements">
+        <div class="elements" id="delta-v-elements-group1">
           <select id="delta-v-pref-menu" class="menu span4" name="delta-v-pref-menu">
             <option value="pqw">PQW frame</option>
             <option value="uvw">UVW frame at &Delta;V</option>
@@ -76,6 +76,8 @@
           <p class="center-grid-item"><span id="delta-v-x-display">0</span></p>
           <input class="slider span2" type="range" min="0" max="31" value="16" id="delta-v-x-slider">
           <button id="zero-delta-v-x-btn" class="btn center-grid-item">zero</button>
+        </div>
+        <div class="elements" id="delta-v-elements-group2">
           <p class="center-grid-item"><span id="delta-v-y-display">0</span></p>
           <input class="slider span2" type="range" min="0" max="31" value="16" id="delta-v-y-slider">
           <button id="zero-delta-v-y-btn" class="btn center-grid-item">zero</button>
@@ -88,7 +90,6 @@
             <option value="pqw">PQW frame</option>
             <option value="uvw">UVW frame at &Delta;R</option>
             <option value="ijk">IJK frame</option>
-            <option value="vel">along nominal vel</option>
           </select>
           <p class="center-grid-item"><span id="delta-r-x-display">0</span></p>
           <input class="slider span2" type="range" min="0" max="40" value="20" id="delta-r-x-slider">

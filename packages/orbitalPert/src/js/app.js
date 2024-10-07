@@ -352,7 +352,8 @@ const warning2 = document.getElementById('warning-2');
 
 const aenuElements = document.getElementById('a-e-nu-elements');
 const orientationElements = document.getElementById('orientation-elements');
-const deltaVElements = document.getElementById('delta-v-elements');
+const deltaVElements1 = document.getElementById('delta-v-elements-group1');
+const deltaVElements2 = document.getElementById('delta-v-elements-group2');
 const deltaRElements = document.getElementById('delta-r-elements');
 const numericalElements = document.getElementById('numerical-elements');
 const zoomElements = document.getElementById('zoom-elements');
@@ -628,7 +629,8 @@ const handleMainButtons = function(button){
   infoButton.disabled = false;
   aenuElements.style.display = 'none';
   orientationElements.style.display = 'none';
-  deltaVElements.style.display = 'none';
+  deltaVElements1.style.display = 'none';
+  deltaVElements2.style.display = 'none';
   deltaRElements.style.display = 'none';
   numericalElements.style.display = 'none';
   prefsElements.style.display = 'none';
@@ -653,7 +655,12 @@ const handleMainButtons = function(button){
       orientationButton.disabled = true;
       break;
     case 'delta-v':
-      deltaVElements.style.display = 'grid';
+      deltaVElements1.style.display = 'grid';
+
+      if (deltaVPrefChoice !== 'vel'){
+        deltaVElements2.style.display = 'grid';
+      }
+
       deltaVButton.disabled = true;
       break;
     case 'delta-r':
@@ -1126,6 +1133,13 @@ const handleDeltaRDisplay = function(xyz){
 
 deltaVPrefMenu.addEventListener('change', () => {
   deltaVPrefChoice = deltaVPrefMenu.value;
+
+  if (deltaVPrefChoice === 'vel'){
+    deltaVElements2.style.display = 'none';
+  }else{
+    deltaVElements2.style.display = 'grid';
+  }
+
   deltaVXSlider.value = 16;// 0 is at index 16 of deltaVArray
   deltaVYSlider.value = 16;
   deltaVZSlider.value = 16;
@@ -1242,6 +1256,9 @@ const handleDeltaVOnPointerUp = function(){
       dvx = nomVx/nomVMag*dvMag;
       dvy = nomVy/nomVMag*dvMag;
       dvz = nomVz/nomVMag*dvMag;
+      // console.log('nomVx: ',nomVx, 'nomVy: ',nomVy, 'nomVz: ',nomVz);
+      // console.log('nomVMag: ',nomVMag, 'dvMag: ',dvMag);
+
       break;
   }
 
@@ -1466,6 +1483,7 @@ nuSlider.oninput = function(){
 }
 
 nuSlider.onpointerup = function(){
+  handleDeltaVOnPointerUp();
   computePerturbedOrbit();
   omt.needsRefresh = true;
   replaceAerovisualizerData('true-anomaly',nuDegrees);
@@ -1804,8 +1822,6 @@ const computeOrbitPertParams = function(){
     lanPert = undefined;
     aopPert = undefined;
   }
-
-  // console.log('lanPert = ',lanPert/piOver180,'incPert = ',incPert/piOver180,'aopPert = ',aopPert/piOver180);
 }
 
 const setInertialVectorColor = function(color, save=false){
@@ -2642,12 +2658,13 @@ const initialize = function(data, camera){
   handleDeltaRDisplay('y');
   handleDeltaRDisplay('z');
 
-  dvx = deltaVArray[+deltaVXSlider.value]/cduPerCtu;
-  dvy = deltaVArray[+deltaVYSlider.value]/cduPerCtu;
-  dvz = deltaVArray[+deltaVZSlider.value]/cduPerCtu;
-  drx = deltaRArray[+deltaRXSlider.value]/cdu;
-  dry = deltaRArray[+deltaRYSlider.value]/cdu;
-  drz = deltaRArray[+deltaRZSlider.value]/cdu;
+  // dvx = deltaVArray[+deltaVXSlider.value]/cduPerCtu;
+  // dvy = deltaVArray[+deltaVYSlider.value]/cduPerCtu;
+  // dvz = deltaVArray[+deltaVZSlider.value]/cduPerCtu;
+  // drx = deltaRArray[+deltaRXSlider.value]/cdu;
+  // dry = deltaRArray[+deltaRYSlider.value]/cdu;
+  // drz = deltaRArray[+deltaRZSlider.value]/cdu;
+
   lanSlider.value = lanDegrees;
   incSlider.value = incDegrees;
   aopSlider.value = aopDegrees;
@@ -2732,6 +2749,8 @@ const completeInitialization = function(continueAnimation = true) {
     needToComputeNominalOrbit = true;
     computeNominalOrbit();
     iOrb = orbitNom.findIndex((e) => e.t >= timeAfterPeriapse);
+    handleDeltaVOnPointerUp();
+    handleDeltaROnPointerUp();
     computePerturbedOrbit();
     displayNumerical();
     omt.needsRefresh = true;
